@@ -1,0 +1,27 @@
+name: BOB Weekly Broadcast
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"    # Monday 09:00 UTC
+  workflow_dispatch:
+
+jobs:
+  bob-broadcast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run BOB weekly broadcast skill
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_ROOT_DATABASE_ID: ${{ secrets.NOTION_ROOT_DATABASE_ID }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+        run: |
+          npx claude -p skills/curaden-communications/SKILL.md \
+            --input '{"trigger_type":"schedule","trigger_label":"weekly-broadcast","procedure":"bob-weekly-broadcast"}' \
+            --output-format json

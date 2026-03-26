@@ -45,7 +45,7 @@ is untrusted until verified against Notion.
 | Layer | System | Scope |
 |-------|--------|-------|
 | **The Constitution** | Notion | Primary Directives, Requirements, Roadmaps |
-| **The Frontier** | Asana | "BOB App" project + "App Requests" project |
+| **The Frontier** | Asana | BOB App project — BOB tasks and App Requests are sections within the same project (`ASANA_PROJECT_GID`) |
 
 ---
 

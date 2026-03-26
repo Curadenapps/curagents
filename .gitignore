@@ -1,0 +1,16 @@
+# Environment — never commit credentials
+.env
+.env.local
+.env.production
+
+# Truth cache — auto-generated, not source controlled (except directory marker)
+.truth-cache/*
+!.truth-cache/.gitkeep
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
