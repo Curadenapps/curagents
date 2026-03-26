@@ -18,13 +18,23 @@ The Truth Catcher agent uses this document to evaluate and flag Asana requests a
 
 ---
 
+## In Scope — v1 (Extended — Active)
+
+Additional capabilities active with the extended agent roster:
+
+- **Figma Library Monitoring** — `figma` agent polls BOB design system for component/token changes every 2 hours
+- **Design Diff Detection** — Automated alerts when Figma library tokens or components change (previously v2-deferred; now active via `figma` agent)
+- **Webflow Publishing Gate** — `webflow` agent validates brand compliance and clinical claims before any asset or content goes live on the website
+- **GitHub Code Alignment** — `github` agent links PRs and commits to Jira issues and Asana tasks across the Curadenapps org
+- **Release Coordination** — `release` agent compiles release notes, creates Notion changelog, tags GitHub releases (manual trigger only)
+- **Notion Cache Sync** — `notion-sync` agent owns `.truth-cache/`, running before every truth-catcher scan
+
 ## In Scope — v2 (Deferred)
 
 Any immediate Asana requests for these items are premature scope creep — flag and reject.
 
 - **Bulk Localization** — Safe bulk-creation tooling for localization variants (e.g. App Store screenshots in 15+ languages)
 - **GTM Automation** — Email drafts, web kit packaging, channel notifications
-- **Design Diff Detection** — Automated alerts when Figma library tokens/components change
 
 ---
 

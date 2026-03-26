@@ -41,6 +41,34 @@ trigger:
       - agent: brand-asset
         inputs:
           trigger: section_transition
+  - type: schedule
+    label: pre-scan-notion-sync
+    cron: "50 * * * *"
+    dispatch:
+      - agent: notion-sync
+  - type: schedule
+    label: figma-diff-check
+    cron: "0 */2 * * *"
+    dispatch:
+      - agent: figma
+  - type: webhook
+    event: github.pull_request.opened
+    dispatch:
+      - agent: github
+        inputs:
+          trigger: pr_opened
+  - type: webhook
+    event: github.pull_request.merged
+    dispatch:
+      - agent: github
+        inputs:
+          trigger: pr_merged
+  - type: webhook
+    event: github.push
+    dispatch:
+      - agent: github
+        inputs:
+          trigger: push
 memory:
   read:
     - .truth-cache/requirements.json
@@ -75,6 +103,15 @@ On any invocation, determine trigger type:
 | `user:check alignment` / `scan asana` | User phrase | Truth Catcher |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
 | `user:what needs attention` | User phrase | Run Truth Catcher + Brand Asset in sequence |
+| `schedule:"50 * * * *"` | CRON | notion-sync (always before truth-catcher) |
+| `schedule:"0 */2 * * *"` | CRON | figma (library diff check) |
+| `webhook:github.pull_request.*` | GitHub webhook | github agent |
+| `webhook:github.push` | GitHub webhook | github agent |
+| `user:sync notion` / `refresh requirements` | User phrase | notion-sync |
+| `user:check figma` / `figma diff` | User phrase | figma agent |
+| `user:publish to webflow` / `sync assets to webflow` | User phrase | webflow agent |
+| `user:github status` / `check prs` | User phrase | github agent |
+| `user:cut release` / `release * v*` | User phrase | release coordinator |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 

@@ -14,16 +14,28 @@ Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own 
 
 ## Agents
 
-When running agents from this repo, load the relevant agent file for context:
+All agents share a common YAML frontmatter schema (trigger, memory,
+idempotency_key, dry_run, output schema). Load the relevant file for context:
 
-- [`agents/truth-catcher.md`](agents/truth-catcher.md) — Asana alignment enforcement
-- [`agents/brand-asset.md`](agents/brand-asset.md) — Brand asset governance
-- [`agents/asana-maintenance.md`](agents/asana-maintenance.md) — Kanban routing and update snippets
+**Orchestration**
+- [`agents/orchestrator.md`](agents/orchestrator.md) — Master router; entry point for all activity
+
+**Core governance**
+- [`agents/truth-catcher.md`](agents/truth-catcher.md) — Notion vs Asana alignment enforcement
+- [`agents/brand-asset.md`](agents/brand-asset.md) — Brand asset governance and RACI approval gates
+- [`agents/asana-maintenance.md`](agents/asana-maintenance.md) — Kanban routing, update snippets, audit trail writes
+
+**Data & integrations**
+- [`agents/notion-sync.md`](agents/notion-sync.md) — Owns .truth-cache/; fetches Notion on schedule
+- [`agents/figma.md`](agents/figma.md) — Figma library monitor, export validator, design diff detection
+- [`agents/webflow.md`](agents/webflow.md) — Webflow publishing gate and asset sync
+- [`agents/github.md`](agents/github.md) — PR/commit linkage to Jira and Asana (Curadenapps org)
+- [`agents/release.md`](agents/release.md) — Release coordinator (BOB + RevolveNote); manual trigger only
 
 ## Scope
 
 Before taking any action, check [`SCOPE.md`](SCOPE.md) for hard boundaries.
-Never modify `.truth-cache/` directly — it is auto-synced from Notion.
+Never modify `.truth-cache/` directly — it is written only by `notion-sync`.
 
 ## MCP Tools Available
 
@@ -32,7 +44,9 @@ Never modify `.truth-cache/` directly — it is auto-synced from Notion.
 | `mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__` | Jira / Atlassian |
 | `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__` | Notion |
 | `mcp__607b64a3-ac1e-4636-a7dd-98ed14f34e34__` | Asana |
+| `mcp__github__*` | GitHub (Curadenapps org) |
 
-## Project State
+## Notion Workspace
 
-GSD planning docs are in `.planning/`. Run `/gsd:progress` to check current phase.
+Root database ID: `86b68fc172dd43ff8ee3219a3a5435f6` (workspace: seandunne)
+notion-sync discovers all child page IDs on first run and caches them.

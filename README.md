@@ -48,13 +48,33 @@ Config details for each procedure: [`skills/curaden-communications/references/`]
 
 ## Agent Roster
 
-Agents run autonomously on schedule or by explicit invocation. Each has a strictly fenced domain.
+Agents share a common YAML frontmatter schema (trigger, memory, idempotency_key,
+dry_run, output schema) and are invokable by the orchestrator, GitHub Actions,
+or Ruflo background workers. Each has a strictly fenced domain.
+
+### Orchestration
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Alignment enforcer — scans Asana, cross-references Notion, posts 🛑 or ✅ verdicts | Hourly CRON via `.github/workflows/02-scan-frontier.yml` |
-| Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | Brand asset governance — taxonomy, approvals, export checklists, weekly status | On demand |
-| Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive processing | Webhook or polling |
+| Orchestrator | [`agents/orchestrator.md`](agents/orchestrator.md) | Master router — classifies every trigger and dispatches to the right agent | All schedules, webhooks, manual |
+
+### Core Governance
+
+| Agent | File | Role | Trigger |
+|-------|------|------|---------|
+| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Hourly CRON |
+| Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
+| Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
+
+### Data & Integrations
+
+| Agent | File | Role | Trigger |
+|-------|------|------|---------|
+| Notion Sync | [`agents/notion-sync.md`](agents/notion-sync.md) | Owns `.truth-cache/` — fetches Notion requirements, roadmap, brand guidelines | Hourly CRON (50 min) |
+| Figma | [`agents/figma.md`](agents/figma.md) | Library monitor, export validator, design diff detection | Every 2h CRON + Figma webhook |
+| Webflow | [`agents/webflow.md`](agents/webflow.md) | Publishing gate, brand compliance, clinical claims check, asset sync | brand-asset approval event + manual |
+| GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
+| Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
 
 ---
 
@@ -94,12 +114,17 @@ cp .env.example .env   # populate credentials
 
 Required environment variables:
 
-| Variable | Purpose |
-|----------|---------|
-| `ANTHROPIC_API_KEY` | Claude (Truth Catcher, skills) |
-| `NOTION_API_KEY` | Constitution sync + BOB broadcast |
-| `NOTION_REQUIREMENTS_DB_ID` | Notion requirements database |
-| `ASANA_ACCESS_TOKEN` | Frontier scan + Kanban routing |
-| `ASANA_PROJECT_GID` | BOB App Asana project |
+| Variable | Purpose | Agent |
+|----------|---------|-------|
+| `ANTHROPIC_API_KEY` | Claude model access | All |
+| `NOTION_API_KEY` | Notion REST API (`secret_...` internal token) | notion-sync |
+| `NOTION_ROOT_DATABASE_ID` | `86b68fc172dd43ff8ee3219a3a5435f6` | notion-sync |
+| `ASANA_ACCESS_TOKEN` | Asana API | truth-catcher, brand-asset, asana-maintenance |
+| `ASANA_PROJECT_GID` | BOB App Asana project GID | truth-catcher, asana-maintenance |
+| `ASANA_WEBHOOK_SECRET` | HMAC secret for webhook verification | asana-maintenance |
+| `FIGMA_API_TOKEN` | Figma REST API token | figma |
+| `FIGMA_FILE_KEY` | BOB design system Figma file key | figma |
+| `WEBFLOW_API_TOKEN` | Webflow REST API v2 token | webflow |
+| `WEBFLOW_SITE_ID` | Curaden Webflow site ID | webflow |
 
 For model-specific setup: see [`CLAUDE.md`](CLAUDE.md) or [`GEMINI.md`](GEMINI.md).
