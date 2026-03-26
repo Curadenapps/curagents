@@ -29,8 +29,8 @@ jobs:
           ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID }}
           DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
           CLAUDE_CODE_USE_BEDROCK: "0"
+          DISABLE_AUTOUPDATER: "1"
         run: |
           claude --print \
-            --bare \
             "$(cat agents/figma.md)" \
             "Trigger: schedule — figma-diff-check. Run the full execution workflow defined in this agent spec."
