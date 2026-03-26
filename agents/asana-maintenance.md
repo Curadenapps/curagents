@@ -28,6 +28,7 @@ trigger:
       - "asana hygiene"
 memory:
   read:
+    - dream.md
     - .truth-cache/directives.json
   write:
     - .truth-cache/directives.json

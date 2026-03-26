@@ -21,6 +21,7 @@ trigger:
       - "truth catcher"
 memory:
   read:
+    - dream.md
     - .truth-cache/requirements.json
     - .truth-cache/verdicts.json
   write:

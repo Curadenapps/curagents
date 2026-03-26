@@ -22,6 +22,8 @@ trigger:
       - "refresh cache"
       - "update truth cache"
 memory:
+  read:
+    - dream.md
   write:
     - .truth-cache/requirements.json
     - .truth-cache/roadmap.json

@@ -21,6 +21,7 @@ trigger:
       - "push to website"
 memory:
   read:
+    - dream.md
     - .truth-cache/approvals.json
     - .truth-cache/brand-guidelines.json
     - .truth-cache/webflow-publish-log.json

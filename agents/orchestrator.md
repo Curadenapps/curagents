@@ -71,11 +71,15 @@ trigger:
           trigger: push
 memory:
   read:
+    - dream.md
     - .truth-cache/requirements.json
     - .truth-cache/verdicts.json
     - .truth-cache/approvals.json
     - .truth-cache/directives.json
+    - .truth-cache/dispatch-log.json
+    - .truth-cache/notion-sync-meta.json
   write:
+    - dream.md
     - .truth-cache/dispatch-log.json
 ---
 
@@ -121,11 +125,14 @@ When the trigger is ambiguous, ask one clarifying question before routing.
 
 Before dispatching any agent:
 
-1. **Read `.truth-cache/requirements.json`** — confirm it is not stale (>24h old).
-   - If stale: run `sync-truth` first (fetches Notion requirements → updates cache).
-   - If file missing: create `.truth-cache/` directory and run `sync-truth`.
+1. **Read `dream.md`** — load the shared mental model (§2), cross-agent contracts (§3),
+   and active context (§4). This replaces the need to load sibling agent specs.
 
-2. **Check dry-run flag** — read `.truth-cache/dispatch-log.json` for `dry_run: true`.
+2. **Read `.truth-cache/requirements.json`** — confirm it is not stale (>24h old).
+   - If stale: run `notion-sync` first (fetches Notion requirements → updates cache).
+   - If file missing: create `.truth-cache/` directory and run `notion-sync`.
+
+3. **Check dry-run flag** — read `DRY_RUN` env var or `.truth-cache/dispatch-log.json`.
    - If set, all dispatched agents run in dry-run mode (log actions but do not write to Asana/Notion).
 
 ---
@@ -164,7 +171,11 @@ Agents return a structured result:
 After all dispatched agents complete:
 
 1. Append each result to `.truth-cache/dispatch-log.json` with timestamp.
-2. Produce a consolidated summary in this format:
+2. **Update `dream.md` §4 (Active Context)** with current timestamps, open
+   escalation count, and pending approval count. This is the only section
+   of `dream.md` the orchestrator edits autonomously. Never edit §1–3 or §5
+   without a deliberate decision recorded in §5.
+3. Produce a consolidated summary in this format:
 
 ```
 Orchestrator Run — {DATE} {TIME} UTC

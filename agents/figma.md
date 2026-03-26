@@ -25,6 +25,7 @@ trigger:
       - "what changed in figma"
 memory:
   read:
+    - dream.md
     - .truth-cache/brand-guidelines.json
     - .truth-cache/figma-state.json
   write:

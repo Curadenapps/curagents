@@ -21,10 +21,12 @@ trigger:
       - product: "BOB | RevolveNote | both"
 memory:
   read:
+    - dream.md
     - .truth-cache/app-hub.json
     - .truth-cache/releases.json
     - .truth-cache/notion-sync-meta.json
   write:
+    - dream.md
     - .truth-cache/releases.json
     - .truth-cache/app-hub.json
 ---

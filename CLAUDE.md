@@ -2,7 +2,9 @@
 
 ## System Context
 
-Read [`README.md`](README.md) for the full system architecture before taking any action in this repo.
+Read [`dream.md`](dream.md) FIRST — it is the shared ambient context for all agents and
+replaces the need to load sibling agent specs. Then read [`README.md`](README.md) for the
+full system architecture.
 
 ## Skills
 

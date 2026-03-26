@@ -29,6 +29,7 @@ trigger:
       - "link prs"
 memory:
   read:
+    - dream.md
     - .truth-cache/requirements.json
     - .truth-cache/github-state.json
   write:

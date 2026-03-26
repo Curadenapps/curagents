@@ -24,6 +24,7 @@ trigger:
       - "brand asset status"
 memory:
   read:
+    - dream.md
     - .truth-cache/requirements.json
     - .truth-cache/approvals.json
   write:
