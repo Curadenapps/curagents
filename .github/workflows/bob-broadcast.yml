@@ -29,6 +29,4 @@ jobs:
           CLAUDE_CODE_USE_BEDROCK: "0"
           DISABLE_AUTOUPDATER: "1"
         run: |
-          claude --print \
-            "$(cat skills/curaden-communications/SKILL.md)" \
-            "Trigger: schedule — weekly-broadcast. Run the BOB Weekly Broadcast procedure defined in this skill."
+          cat skills/curaden-communications/SKILL.md | claude -p "Trigger: schedule — weekly-broadcast. Run the BOB Weekly Broadcast procedure defined in this skill."

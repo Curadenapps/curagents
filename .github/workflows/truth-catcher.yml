@@ -31,6 +31,4 @@ jobs:
           CLAUDE_CODE_USE_BEDROCK: "0"
           DISABLE_AUTOUPDATER: "1"
         run: |
-          claude --print \
-            "$(cat agents/truth-catcher.md)" \
-            "Trigger: schedule — hourly-scan. Mode: batch. Limit: 50. Run the full execution workflow defined in this agent spec."
+          cat agents/truth-catcher.md | claude -p "Trigger: schedule — hourly-scan. Mode: batch. Limit: 50. Run the full execution workflow defined in this agent spec."
