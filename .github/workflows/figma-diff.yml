@@ -2,7 +2,7 @@ name: Figma — Design Diff Check
 
 on:
   schedule:
-    - cron: "0 */2 * * *"  # every 2 hours
+    - cron: "0 */2 * * *"
   workflow_dispatch:
 
 jobs:
@@ -13,6 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
       - name: Run figma agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -21,7 +28,9 @@ jobs:
           ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
           ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID }}
           DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+          CLAUDE_CODE_USE_BEDROCK: "0"
         run: |
-          npx claude -p agents/figma.md \
-            --input '{"trigger_type":"schedule","trigger_label":"figma-diff-check"}' \
-            --output-format json
+          claude --print \
+            --no-update-notifier \
+            "$(cat agents/figma.md)" \
+            "Trigger: schedule — figma-diff-check. Run the full execution workflow defined in this agent spec."

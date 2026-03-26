@@ -2,8 +2,8 @@ name: Notion Sync — Truth Cache
 
 on:
   schedule:
-    - cron: "50 * * * *"   # runs at :50 every hour, 10 min before truth-catcher
-  workflow_dispatch:        # manual trigger from GitHub Actions UI
+    - cron: "50 * * * *"
+  workflow_dispatch:
 
 jobs:
   notion-sync:
@@ -13,13 +13,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
       - name: Run notion-sync agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_ROOT_DATABASE_ID: ${{ secrets.NOTION_ROOT_DATABASE_ID }}
           DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+          CLAUDE_CODE_USE_BEDROCK: "0"
         run: |
-          npx claude -p agents/notion-sync.md \
-            --input '{"trigger_type":"schedule","trigger_label":"pre-scan-notion-sync"}' \
-            --output-format json
+          claude --print \
+            --no-update-notifier \
+            "$(cat agents/notion-sync.md)" \
+            "Trigger: schedule — pre-scan-notion-sync. Run the full execution workflow defined in this agent spec."
