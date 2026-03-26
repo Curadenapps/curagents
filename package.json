@@ -1,0 +1,30 @@
+{
+  "name": "curagents",
+  "version": "0.1.0",
+  "description": "Autonomous agent system for Curaden — bridges Notion, Asana, Figma, Webflow, Jira, and GitHub",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "notion-sync": "npx claude -p agents/notion-sync.md",
+    "truth-catcher": "npx claude -p agents/truth-catcher.md",
+    "figma": "npx claude -p agents/figma.md",
+    "brand-asset": "npx claude -p agents/brand-asset.md",
+    "asana-maintenance": "npx claude -p agents/asana-maintenance.md",
+    "webflow": "npx claude -p agents/webflow.md",
+    "github": "npx claude -p agents/github.md",
+    "release": "npx claude -p agents/release.md",
+    "orchestrate": "npx claude -p agents/orchestrator.md",
+    "broadcast": "npx claude -p skills/curaden-communications/SKILL.md"
+  },
+  "dependencies": {
+    "ruflo": "latest"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
