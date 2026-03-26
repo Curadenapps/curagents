@@ -118,7 +118,7 @@ Prevents agents from re-litigating resolved decisions in new sessions.
 | Figma file key not yet set | Figma agent runs in config-error state | Phase 3 (credentials) |
 | Webflow site ID not yet set | Webflow agent runs in config-error state | Phase 3 (credentials) |
 | Asana webhook not yet registered | asana-maintenance falls back to 5-min polling | Phase 3 (credentials) |
-| `WEBEX_BOT_TOKEN` + `WEBEX_ROOM_ID` not yet set | Webex delivery step skipped (dry-run output only) | Phase 3 (credentials) |
+| `WEBEX_BOT_TOKEN` not yet set | Webex delivery step skipped (dry-run output only) | Phase 3 (credentials) |
 | `DRY_RUN=true` across all agents | No live writes to any system | Phase 4 (dry-run verified) |
 
 ---

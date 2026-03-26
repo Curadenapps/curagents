@@ -7,9 +7,21 @@ Details for the Webex delivery step of Procedure 3 (`bob-weekly-broadcast`) in `
 | Variable | Description |
 |----------|-------------|
 | `WEBEX_BOT_TOKEN` | Bearer token for the Webex bot (from developer.webex.com) |
-| `WEBEX_ROOM_ID` | ID of the target Webex space/room for BOB broadcasts |
 
-If either variable is unset or empty, skip Webex delivery and log a warning to the user.
+If `WEBEX_BOT_TOKEN` is unset or empty, skip Webex delivery and log a warning to the user.
+
+**No room ID needed** — add the bot to the target Webex space and the room is discovered automatically (see below).
+
+## Room Discovery
+
+Once the bot has been added to the target Webex space, list all rooms it has access to and pick the right one:
+
+```bash
+curl -s https://webexapis.com/v1/rooms \
+  -H "Authorization: Bearer $WEBEX_BOT_TOKEN"
+```
+
+The response returns an array of rooms. Use the `id` of the space where the broadcast should be posted. If the bot is only in one space, use that. If in multiple, match by `title` (e.g. "BOB Weekly Update" or similar).
 
 ## API Endpoint
 
@@ -53,7 +65,7 @@ Always append the Notion page URL at the bottom so readers can navigate to the f
 curl -s -X POST https://webexapis.com/v1/messages \
   -H "Authorization: Bearer $WEBEX_BOT_TOKEN" \
   -H "Content-Type: application/json" \
-  -d "{\"roomId\":\"$WEBEX_ROOM_ID\",\"markdown\":\"$WEBEX_MESSAGE\"}"
+  -d "{\"roomId\":\"$DISCOVERED_ROOM_ID\",\"markdown\":\"$WEBEX_MESSAGE\"}"
 ```
 
 Capture the response JSON. On success (HTTP 200), the response contains an `id` field and a `webLink` field — return the `webLink` to the user.
@@ -64,7 +76,7 @@ If `DRY_RUN=true` (the default), do **not** call the API. Instead, print the ful
 
 ```
 [DRY RUN] Webex delivery skipped. Payload that would be sent:
-  roomId: $WEBEX_ROOM_ID
+  roomId: {discovered room ID}
   markdown: ...
 ```
 
