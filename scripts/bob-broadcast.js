@@ -185,7 +185,7 @@ async function main() {
   
   // Technical - Jira (In Progress)
   if (jiraInProgress.length > 0) {
-    blocks.push(paragraphBlock([richText('🔧 Technical · Jira', { bold: true })]));
+    blocks.push(heading2Block('🔧 Technical · Jira'));
     jiraInProgress.forEach(issue => {
       const key = issue.key;
       const summary = issue.fields.summary;
@@ -195,14 +195,16 @@ async function main() {
         richText(status, {})
       ]));
     });
+    blocks.push(dividerBlock());
   }
   
   // Business - Asana
   if (asanaTasks.length > 0) {
-    blocks.push(paragraphBlock([richText('📋 Business · Asana', { bold: true })]));
+    blocks.push(heading2Block('📋 Business · Asana'));
     
     // Delayed
     if (asanaDelayed.length > 0) {
+      blocks.push(paragraphBlock([richText('Overdue:', { italic: true })]));
       asanaDelayed.forEach(task => {
         const due = formatDate(new Date(task.due_on));
         blocks.push(paragraphBlock([
@@ -210,10 +212,12 @@ async function main() {
           underlineText(`(due ${due})`)
         ]));
       });
+      blocks.push(paragraphBlock([richText('')]));
     }
     
     // Next week
     if (asanaNextWeek.length > 0) {
+      blocks.push(paragraphBlock([richText('Next Week:', { italic: true })]));
       asanaNextWeek.forEach(task => {
         const due = formatDate(new Date(task.due_on));
         blocks.push(paragraphBlock([
@@ -221,16 +225,19 @@ async function main() {
           richText(`(due ${due})`, {})
         ]));
       });
+      blocks.push(paragraphBlock([richText('')]));
     }
     
     // Future/No due date
     if (asanaDone.length > 0) {
+      blocks.push(paragraphBlock([richText('Upcoming:', { italic: true })]));
       asanaDone.forEach(task => {
         blocks.push(paragraphBlock([
           richText(`• ${task.name}`, { bold: true })
         ]));
       });
     }
+    blocks.push(dividerBlock());
   }
   
   blocks.push(paragraphBlock([richText('━━━━━━━━━━━━━━━━━━', {})]));
