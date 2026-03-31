@@ -7,12 +7,12 @@ const JIRA_TOKEN = process.env.JIRA_API_TOKEN;
 const JIRA_BASE_URL = process.env.JIRA_BASE_URL || "https://curaden.atlassian.net/rest/api/3";
 const JIRA_PROJECT_KEY = process.env.JIRA_PROJECT_KEY || "BOB";
 const ASANA_TOKEN = process.env.ASANA_ACCESS_TOKEN;
-const ASANA_PROJECT_GID = process.env.ASANA_PROJECT_GID;
+const ASANA_PROJECT_GID = process.env.ASANA_PROJECT_GID || "1204489225205419";
 
 const today = new Date().toISOString().split('T')[0];
 
 async function queryJira(jql) {
-  const url = `${JIRA_BASE_URL}/search?jql=${encodeURIComponent(jql)}&maxResults=50&fields=key,summary,status,priority,assignee`;
+  const url = `${JIRA_BASE_URL}/search/jql?jql=${encodeURIComponent(jql)}&maxResults=50&fields=key,summary,status,priority,assignee`;
   console.log(`Jira API URL: ${url}`);
   const response = await fetch(url, {
     headers: {
