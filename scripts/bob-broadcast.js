@@ -149,6 +149,8 @@ async function main() {
   
   // Fetch Asana data if configured
   if (ASANA_TOKEN && ASANA_PROJECT_GID) {
+    console.log(`Asana token: ${ASANA_TOKEN ? "set" : "MISSING"}`);
+    console.log(`Asana project GID: ${ASANA_PROJECT_GID}`);
     try {
       const allTasks = await queryAsana();
       const completedTasks = allTasks.filter(t => t.completed);
@@ -165,6 +167,10 @@ async function main() {
     } catch (e) {
       console.log(`Asana error: ${e.message}`);
     }
+  } else {
+    console.log("Asana: Skipping (token or project GID missing)");
+    console.log(`  ASANA_TOKEN: ${ASANA_TOKEN ? "set" : "MISSING"}`);
+    console.log(`  ASANA_PROJECT_GID: ${ASANA_PROJECT_GID || "MISSING"}`);
   }
   
   console.log(`Total - Done: ${doneIssues.length}, In Progress: ${inProgressIssues.length}, Blockers: ${blockers.length}`);
