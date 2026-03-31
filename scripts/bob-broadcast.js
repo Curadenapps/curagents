@@ -37,6 +37,7 @@ async function queryJira(jql) {
   if (data.errorMessages) {
     console.log(`Jira error: ${JSON.stringify(data.errorMessages)}`);
   }
+  console.log(`Jira result: total=${data.total}, issues=${data.issues?.length || 0}`);
   return data.issues || [];
 }
 
@@ -127,6 +128,12 @@ async function main() {
     console.log(`Jira: email=${JIRA_EMAIL}, project=${JIRA_PROJECT_KEY}`);
     try {
       console.log(`Jira: Fetching...`);
+      // Debug: fetch all BA issues
+      const debugAll = await queryJira(`project = ${JIRA_PROJECT_KEY} ORDER BY updated DESC`);
+      console.log(`Debug - All BA issues: ${debugAll.length}`);
+      if (debugAll.length > 0) {
+        console.log(`Sample keys: ${debugAll.slice(0,5).map(i => i.key).join(', ')}`);
+      }
       const [done, inProgress, blockers] = await Promise.all([
         queryJira(`project = ${JIRA_PROJECT_KEY} AND statusCategory = Done AND updated >= "${sevenDaysAgo}" ORDER BY updated DESC`),
         queryJira(`project = ${JIRA_PROJECT_KEY} AND statusCategory != Done ORDER BY updated DESC`),
