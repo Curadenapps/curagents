@@ -47,13 +47,34 @@ async function createNotionPage(title, children) {
   return await response.json();
 }
 
+function heading2Block(text) {
+  return {
+    type: "heading_2",
+    heading_2: {
+      rich_text: [{ type: "text", text: { content: text } }]
+    }
+  };
+}
+
+function paragraphBlock(text) {
+  return {
+    type: "paragraph",
+    paragraph: {
+      rich_text: [{ type: "text", text: { content: text } }]
+    }
+  };
+}
+
+function dividerBlock() {
+  return { type: "divider", divider: {} };
+}
+
 function formatIssue(issue) {
   const key = issue.key;
   const summary = issue.fields.summary;
-  const status = issue.fields.status?.name || "Unknown";
   const priority = issue.fields.priority?.name || "";
   const assignee = issue.fields.assignee?.displayName || "Unassigned";
-  return { key, summary, status, priority, assignee };
+  return { key, summary, priority, assignee };
 }
 
 async function main() {
@@ -81,43 +102,51 @@ async function main() {
   
   console.log(`Done: ${doneIssues.length}, In Progress: ${inProgressIssues.length}, Blockers: ${blockers.length}`);
   
-  const formatSection = (title, issues) => {
-    const blocks = [
-      { object: "heading_2", heading_2: { rich_text: [{ text: { content: title } }] } }
-    ];
-    
-    if (issues.length === 0) {
-      blocks.push({ object: "paragraph", paragraph: { rich_text: [{ text: { content: "None this week." }, annotations: { italic: true } }] } });
-    } else {
-      issues.forEach(issue => {
-        const { key, summary, priority, assignee } = formatIssue(issue);
-        let text = `**${key}** — ${summary}`;
-        if (title.includes("Progress")) text += ` _( ${assignee}_ )`;
-        if (title.includes("Blockers")) text += ` ⚠️ ${priority}`;
-        blocks.push({ object: "paragraph", paragraph: { rich_text: [{ text: { content: text } }] } });
-      });
-    }
-    
-    blocks.push({ object: "divider", divider: {} });
-    return blocks;
-  };
-  
-  const children = [
-    { object: "paragraph", paragraph: { rich_text: [{ text: { content: `**Generated:** ${today}` } }] } },
-    { object: "divider", divider: {} },
-    ...formatSection("Done This Week", doneIssues),
-    ...formatSection("In Progress", inProgressIssues),
-    ...formatSection("Blockers / Watch", blockers)
+  const blocks = [
+    paragraphBlock(`Generated: ${today}`),
+    dividerBlock()
   ];
+  
+  blocks.push(heading2Block("Done This Week"));
+  if (doneIssues.length === 0) {
+    blocks.push(paragraphBlock("None this week."));
+  } else {
+    doneIssues.forEach(issue => {
+      const { key, summary } = formatIssue(issue);
+      blocks.push(paragraphBlock(`${key} — ${summary}`));
+    });
+  }
+  blocks.push(dividerBlock());
+  
+  blocks.push(heading2Block("In Progress"));
+  if (inProgressIssues.length === 0) {
+    blocks.push(paragraphBlock("None this week."));
+  } else {
+    inProgressIssues.forEach(issue => {
+      const { key, summary, assignee } = formatIssue(issue);
+      blocks.push(paragraphBlock(`${key} — ${summary} (${assignee})`));
+    });
+  }
+  blocks.push(dividerBlock());
+  
+  blocks.push(heading2Block("Blockers / Watch"));
+  if (blockers.length === 0) {
+    blocks.push(paragraphBlock("None this week."));
+  } else {
+    blockers.forEach(issue => {
+      const { key, summary, priority } = formatIssue(issue);
+      blocks.push(paragraphBlock(`${key} — ${summary} ⚠️ ${priority}`));
+    });
+  }
+  blocks.push(dividerBlock());
   
   const title = `BOB Weekly Broadcast — ${today}`;
   console.log(`Creating Notion page: ${title}...`);
   
-  const page = await createNotionPage(title, children);
-  const pageUrl = page.url || `https://www.notion.so/${page.id?.replace(/-/g, '')}`;
+  const page = await createNotionPage(title, blocks);
   
   console.log("\n✅ Broadcast created successfully!");
-  console.log(`📄 Page URL: ${pageUrl}`);
+  console.log(`📄 Page URL: ${page.url}`);
   console.log(`\nSummary: ${doneIssues.length} done, ${inProgressIssues.length} in progress, ${blockers.length} blockers`);
 }
 
