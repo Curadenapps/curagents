@@ -4,16 +4,11 @@ Details for Procedure 3 of `curaden-communications`.
 
 ## Notion Target
 
-The broadcast page should be created as a child of the BOB project space in Notion.
+**Parent Page ID:** `3347e8aabbb480908aa2dfc2fd478ff9`
 
-To find the parent page on first run:
-```
-Use mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-search with query "BOB Weekly Broadcast"
-```
+**Parent Page URL:** https://www.notion.so/seandunne/BOB-Weekly-Broadcast-3347e8aabbb480908aa2dfc2fd478ff9
 
-Look for a page or space named "BOB Weekly Broadcast" or "BOB Updates". Use its `id` as the `parent_id` when creating new broadcast pages.
-
-If no parent page exists, create one first and note its ID here for future runs.
+The broadcast page should be created as a child of this page in Notion.
 
 ## Page Title Format
 
