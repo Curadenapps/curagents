@@ -125,9 +125,12 @@ async function main() {
   if (JIRA_TOKEN && JIRA_EMAIL) {
     try {
       console.log(`Jira: Fetching...`);
-      // Debug: fetch all BA issues
-      const debugAll = await queryJira(`project = ${JIRA_PROJECT_KEY} ORDER BY updated DESC`);
-      console.log(`Debug - All issues: ${debugAll.length}`);
+      // Debug: fetch ALL issues (no project filter) to see what we have access to
+      const debugAll = await queryJira(`ORDER BY updated DESC`);
+      console.log(`Debug - All accessible issues: ${debugAll.length}`);
+      if (debugAll.length > 0) {
+        console.log(`Sample keys: ${debugAll.slice(0,5).map(i => i.key).join(', ')}`);
+      }
       const [done, inProgress, blockers] = await Promise.all([
         queryJira(`project = ${JIRA_PROJECT_KEY} AND statusCategory = Done AND updated >= "${sevenDaysAgo}" ORDER BY updated DESC`),
         queryJira(`project = ${JIRA_PROJECT_KEY} AND statusCategory != Done ORDER BY updated DESC`),
