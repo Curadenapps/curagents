@@ -25,13 +25,18 @@ function getWeekBounds() {
 
 async function queryJira(jql) {
   const url = `${JIRA_BASE_URL}/search/jql?jql=${encodeURIComponent(jql)}&maxResults=50&fields=key,summary,status,priority,assignee`;
+  console.log(`Jira URL: ${url.replace(JIRA_TOKEN, '***TOKEN***')}`);
   const response = await fetch(url, {
     headers: {
       "Authorization": `Basic ${Buffer.from(JIRA_EMAIL + ":" + JIRA_TOKEN).toString('base64')}`,
       "Accept": "application/json"
     }
   });
+  console.log(`Jira response status: ${response.status}`);
   const data = await response.json();
+  if (data.errorMessages) {
+    console.log(`Jira error: ${JSON.stringify(data.errorMessages)}`);
+  }
   return data.issues || [];
 }
 
