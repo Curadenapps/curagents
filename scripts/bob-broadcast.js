@@ -16,6 +16,13 @@ function formatDate(date) {
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 }
 
+function getWeekBounds() {
+  const now = new Date();
+  const nextWeek = new Date(now);
+  nextWeek.setDate(now.getDate() + 7);
+  return { now, nextWeek };
+}
+
 async function queryJira(jql) {
   const url = `${JIRA_BASE_URL}/search/jql?jql=${encodeURIComponent(jql)}&maxResults=50&fields=key,summary,status,priority,assignee`;
   const response = await fetch(url, {
@@ -67,30 +74,34 @@ async function createNotionPage(title, blocks) {
   return await response.json();
 }
 
-function textBlock(content, bold = false) {
+function richText(content, annotations = {}) {
   return {
-    type: "paragraph",
-    paragraph: {
-      rich_text: [{
-        type: "text",
-        text: { content },
-        ...(bold ? { annotations: { bold: true } } : {})
-      }]
-    }
+    type: "text",
+    text: { content },
+    annotations
   };
 }
 
-function emojiLine(emoji, text) {
+function paragraphBlock(richTextArray) {
   return {
     type: "paragraph",
-    paragraph: {
-      rich_text: [{ type: "text", text: { content: `${emoji} ${text}` } }]
-    }
+    paragraph: { rich_text: richTextArray }
   };
 }
 
-function dividerLine() {
+function heading2Block(content) {
+  return {
+    type: "heading_2",
+    heading_2: { rich_text: [richText(content, { bold: true })] }
+  };
+}
+
+function dividerBlock() {
   return { type: "divider", divider: {} };
+}
+
+function underlineText(content) {
+  return richText(content, { underline: true });
 }
 
 async function main() {
@@ -102,9 +113,10 @@ async function main() {
   }
   
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const { nextWeek } = getWeekBounds();
   
   let jiraDone = [], jiraInProgress = [], jiraBlockers = [];
-  let asanaInProgress = [];
+  let asanaTasks = [];
   
   // Fetch Jira
   if (JIRA_TOKEN && JIRA_EMAIL) {
@@ -126,70 +138,102 @@ async function main() {
   // Fetch Asana
   if (ASANA_TOKEN && ASANA_PROJECT_GID) {
     try {
-      const allTasks = await queryAsana();
-      asanaInProgress = allTasks.filter(t => !t.completed);
-      console.log(`Asana - In Progress: ${asanaInProgress.length}`);
+      asanaTasks = await queryAsana();
+      asanaTasks = asanaTasks.filter(t => !t.completed);
+      console.log(`Asana - Tasks: ${asanaTasks.length}`);
     } catch (e) {
       console.log(`Asana error: ${e.message}`);
     }
   }
   
+  // Categorize Asana tasks
+  const asanaDone = [];
+  const asanaNextWeek = [];
+  const asanaDelayed = [];
+  
+  asanaTasks.forEach(task => {
+    if (task.due_on) {
+      const dueDate = new Date(task.due_on);
+      if (dueDate < today) {
+        asanaDelayed.push(task);
+      } else if (dueDate <= nextWeek) {
+        asanaNextWeek.push(task);
+      } else {
+        asanaDone.push(task);
+      }
+    } else {
+      asanaDone.push(task);
+    }
+  });
+  
+  // Sort by due date
+  const sortByDue = (a, b) => {
+    if (!a.due_on) return 1;
+    if (!b.due_on) return -1;
+    return new Date(a.due_on) - new Date(b.due_on);
+  };
+  asanaDelayed.sort(sortByDue);
+  asanaNextWeek.sort(sortByDue);
+  asanaDone.sort(sortByDue);
+  
   // Build Notion page blocks
   const blocks = [];
   
   // Header
-  blocks.push(emojiLine("📅", `BOB Weekly Update - ${dateStr}`));
-  blocks.push(dividerLine());
+  blocks.push(paragraphBlock([richText(`📅 BOB Weekly Update - ${dateStr}`, { bold: true })]));
+  blocks.push(paragraphBlock([richText('━━━━━━━━━━━━━━━━━━', {})]));
   
-  // Technical - Jira
+  // Technical - Jira (In Progress)
   if (jiraInProgress.length > 0) {
-    blocks.push(emojiLine("🔧", `Technical · Jira`));
+    blocks.push(paragraphBlock([richText('🔧 Technical · Jira', { bold: true })]));
     jiraInProgress.forEach(issue => {
       const key = issue.key;
       const summary = issue.fields.summary;
-      blocks.push(textBlock(`• ${key} - ${summary}`));
+      const status = issue.fields.status?.name || 'In Progress';
+      blocks.push(paragraphBlock([
+        richText(`• ${key} - ${summary} | `, { bold: true }),
+        richText(status, {})
+      ]));
     });
-    blocks.push(dividerLine());
   }
   
   // Business - Asana
-  if (asanaInProgress.length > 0) {
-    blocks.push(emojiLine("📋", `Business · Asana`));
-    // Sort by due date
-    asanaInProgress.sort((a, b) => {
-      if (!a.due_on) return 1;
-      if (!b.due_on) return -1;
-      return new Date(a.due_on) - new Date(b.due_on);
-    });
-    asanaInProgress.forEach(task => {
-      const name = task.name;
-      const due = task.due_on ? ` (due ${formatDate(new Date(task.due_on))})` : '';
-      blocks.push(textBlock(`• ${name}${due}`));
-    });
-    blocks.push(dividerLine());
+  if (asanaTasks.length > 0) {
+    blocks.push(paragraphBlock([richText('📋 Business · Asana', { bold: true })]));
+    
+    // Delayed
+    if (asanaDelayed.length > 0) {
+      asanaDelayed.forEach(task => {
+        const due = formatDate(new Date(task.due_on));
+        blocks.push(paragraphBlock([
+          richText(`• ${task.name} | `, { bold: true }),
+          underlineText(`(due ${due})`)
+        ]));
+      });
+    }
+    
+    // Next week
+    if (asanaNextWeek.length > 0) {
+      asanaNextWeek.forEach(task => {
+        const due = formatDate(new Date(task.due_on));
+        blocks.push(paragraphBlock([
+          richText(`• ${task.name} | `, { bold: true }),
+          richText(`(due ${due})`, {})
+        ]));
+      });
+    }
+    
+    // Future/No due date
+    if (asanaDone.length > 0) {
+      asanaDone.forEach(task => {
+        blocks.push(paragraphBlock([
+          richText(`• ${task.name}`, { bold: true })
+        ]));
+      });
+    }
   }
   
-  // Blockers
-  if (jiraBlockers.length > 0) {
-    blocks.push(emojiLine("⚠️", `Blockers`));
-    jiraBlockers.forEach(issue => {
-      const key = issue.key;
-      const summary = issue.fields.summary;
-      const priority = issue.fields.priority?.name || '';
-      blocks.push(textBlock(`• ${key} - ${summary} ${priority ? `(${priority})` : ''}`));
-    });
-    blocks.push(dividerLine());
-  }
-  
-  // Done this week
-  if (jiraDone.length > 0) {
-    blocks.push(emojiLine("✅", `Completed This Week`));
-    jiraDone.forEach(issue => {
-      const key = issue.key;
-      const summary = issue.fields.summary;
-      blocks.push(textBlock(`• ${key} - ${summary}`));
-    });
-  }
+  blocks.push(paragraphBlock([richText('━━━━━━━━━━━━━━━━━━', {})]));
   
   const title = `BOB Weekly Update - ${dateStr}`;
   console.log(`Creating Notion page: ${title}...`);
@@ -199,7 +243,7 @@ async function main() {
   console.log("\n✅ Broadcast created successfully!");
   console.log(`📄 Page URL: ${page.url}`);
   console.log(`\nJira: ${jiraDone.length} done, ${jiraInProgress.length} in progress`);
-  console.log(`Asana: ${asanaInProgress.length} tasks`);
+  console.log(`Asana: ${asanaDelayed.length} delayed, ${asanaNextWeek.length} next week, ${asanaDone.length} future`);
 }
 
 main().catch(err => {
