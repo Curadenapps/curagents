@@ -50,6 +50,10 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Roadmap Evolution
+
+- Phase 6 added: iTOP Agent and Curaden Academy skill — clinical protocol delivery, content templating, Academy routing, clinical guardrails (2026-04-01)
+
 ### Blockers/Concerns
 
 None yet.
