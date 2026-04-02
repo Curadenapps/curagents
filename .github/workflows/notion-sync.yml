@@ -9,33 +9,26 @@ jobs:
   notion-sync:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run notion-sync agent via Anthropic API
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run notion-sync agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_ROOT_DATABASE_ID: ${{ secrets.NOTION_ROOT_DATABASE_ID }}
           DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+          CLAUDE_CODE_USE_BEDROCK: "0"
+          DISABLE_AUTOUPDATER: "1"
         run: |
-          AGENT_SPEC=$(cat agents/notion-sync.md)
-          DREAM=$(cat dream.md)
-
-          RESPONSE=$(curl -s -f https://api.anthropic.com/v1/messages \
-            -H "x-api-key: $ANTHROPIC_API_KEY" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "content-type: application/json" \
-            -d "{
-              \"model\": \"claude-sonnet-4-6\",
-              \"max_tokens\": 4096,
-              \"system\": $(echo "$DREAM\n\n---\n\n$AGENT_SPEC" | jq -Rs .),
-              \"messages\": [{
-                \"role\": \"user\",
-                \"content\": \"Trigger: schedule — pre-scan-notion-sync. DRY_RUN=$DRY_RUN. NOTION_ROOT_DATABASE_ID=$NOTION_ROOT_DATABASE_ID. Run your full execution workflow now and output a structured JSON result.\"
-              }]
-            }")
-
-          echo "$RESPONSE" | jq -r '.content[0].text'
-          echo "$RESPONSE" | jq -e '.content[0].text' > /dev/null
+          claude -p "Run the notion-sync agent: read agents/notion-sync.md and execute its workflow. Trigger: schedule — pre-scan-notion-sync."

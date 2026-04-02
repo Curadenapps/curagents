@@ -9,11 +9,20 @@ jobs:
   figma-diff:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run figma agent via Anthropic API
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run figma agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           FIGMA_API_TOKEN: ${{ secrets.FIGMA_API_TOKEN }}
@@ -21,23 +30,7 @@ jobs:
           ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
           ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID }}
           DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+          CLAUDE_CODE_USE_BEDROCK: "0"
+          DISABLE_AUTOUPDATER: "1"
         run: |
-          AGENT_SPEC=$(cat agents/figma.md)
-          DREAM=$(cat dream.md)
-
-          RESPONSE=$(curl -s -f https://api.anthropic.com/v1/messages \
-            -H "x-api-key: $ANTHROPIC_API_KEY" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "content-type: application/json" \
-            -d "{
-              \"model\": \"claude-sonnet-4-6\",
-              \"max_tokens\": 4096,
-              \"system\": $(printf '%s\n\n---\n\n%s' "$DREAM" "$AGENT_SPEC" | jq -Rs .),
-              \"messages\": [{
-                \"role\": \"user\",
-                \"content\": \"Trigger: schedule — figma-diff-check. DRY_RUN=$DRY_RUN. FIGMA_FILE_KEY=$FIGMA_FILE_KEY. Run your full execution workflow now.\"
-              }]
-            }")
-
-          echo "$RESPONSE" | jq -r '.content[0].text'
-          echo "$RESPONSE" | jq -e '.content[0].text' > /dev/null
+          claude -p "Run the figma-diff agent: read agents/figma.md and execute its workflow. Trigger: schedule — figma-diff-check."

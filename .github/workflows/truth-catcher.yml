@@ -9,34 +9,28 @@ jobs:
   truth-catcher:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run truth-catcher agent via Anthropic API
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run truth-catcher agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_ROOT_DATABASE_ID: ${{ secrets.NOTION_ROOT_DATABASE_ID }}
           ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
           ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID }}
           DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+          CLAUDE_CODE_USE_BEDROCK: "0"
+          DISABLE_AUTOUPDATER: "1"
         run: |
-          AGENT_SPEC=$(cat agents/truth-catcher.md)
-          DREAM=$(cat dream.md)
-
-          RESPONSE=$(curl -s -f https://api.anthropic.com/v1/messages \
-            -H "x-api-key: $ANTHROPIC_API_KEY" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "content-type: application/json" \
-            -d "{
-              \"model\": \"claude-sonnet-4-6\",
-              \"max_tokens\": 4096,
-              \"system\": $(printf '%s\n\n---\n\n%s' "$DREAM" "$AGENT_SPEC" | jq -Rs .),
-              \"messages\": [{
-                \"role\": \"user\",
-                \"content\": \"Trigger: schedule — hourly-scan. Mode: batch. Limit: 50. DRY_RUN=$DRY_RUN. ASANA_PROJECT_GID=$ASANA_PROJECT_GID. Run your full execution workflow now.\"
-              }]
-            }")
-
-          echo "$RESPONSE" | jq -r '.content[0].text'
-          echo "$RESPONSE" | jq -e '.content[0].text' > /dev/null
+          claude -p "Run the truth-catcher agent: read agents/truth-catcher.md and execute its workflow. Trigger: schedule — hourly-scan. Mode: batch. Limit: 50."
