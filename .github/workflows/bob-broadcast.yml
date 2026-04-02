@@ -13,22 +13,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
-
-      - name: Run BOB weekly broadcast
+      - name: Run BOB broadcast via Anthropic API
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_ROOT_DATABASE_ID: ${{ secrets.NOTION_ROOT_DATABASE_ID }}
           DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
-          CLAUDE_CODE_USE_BEDROCK: "0"
         run: |
-          claude --print \
-            --no-update-notifier \
-            "$(cat skills/curaden-communications/SKILL.md)" \
-            "Trigger: schedule — weekly-broadcast. Run the BOB Weekly Broadcast procedure defined in this skill."
+          SKILL=$(cat skills/curaden-communications/SKILL.md)
+          REFS=$(cat skills/curaden-communications/references/bob-weekly-broadcast.md)
+          DREAM=$(cat dream.md)
+
+          RESPONSE=$(curl -s -f https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d "{
+              \"model\": \"claude-sonnet-4-6\",
+              \"max_tokens\": 4096,
+              \"system\": $(printf '%s\n\n---\n\n%s\n\n---\n\n%s' "$DREAM" "$SKILL" "$REFS" | jq -Rs .),
+              \"messages\": [{
+                \"role\": \"user\",
+                \"content\": \"Trigger: schedule — weekly-broadcast. DRY_RUN=$DRY_RUN. Run the BOB Weekly Broadcast procedure now.\"
+              }]
+            }")
+
+          echo "$RESPONSE" | jq -r '.content[0].text'
+          echo "$RESPONSE" | jq -e '.content[0].text' > /dev/null
