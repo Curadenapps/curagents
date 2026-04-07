@@ -33,7 +33,7 @@ idempotency_key, dry_run, output schema). Load the relevant file for context:
 - [`agents/webflow.md`](agents/webflow.md) — Webflow publishing gate and asset sync
 - [`agents/github.md`](agents/github.md) — PR/commit linkage to Jira and Asana (Curadenapps org)
 - [`agents/release.md`](agents/release.md) — Release coordinator (BOB + RevolveNote); manual trigger only
-- [`agents/meeting-bot.md`](agents/meeting-bot.md) — Fireflies transcript → human approval → Asana task creation
+- [`agents/meeting-bot.md`](agents/meeting-bot.md) — Fireflies transcript → Asana task creation (auto, no approval gate)
 
 ## Scope
 

@@ -19,8 +19,8 @@ trigger:
       mode: poll
       max_events: 100
   - type: agent_call
-    from: ["bob-brand-asset", "curaden-orchestrator"]
-    actions: ["post_audit_comment", "move_task", "post_update_snippet"]
+    from: ["bob-brand-asset", "curaden-orchestrator", "curaden-meeting-bot"]
+    actions: ["post_audit_comment", "move_task", "post_update_snippet", "create_task"]
   - type: manual
     phrases:
       - "route task"
@@ -95,6 +95,7 @@ Only process comments from:
 | `CMD: ready_for_review` / `ready for review` | `ready_review` | Review / QA |
 | `CMD: done` / `completed` | `mark_complete` | Completed |
 | _(from brand-asset agent)_ `post_audit_comment` | `audit_trail` | — (comment only) |
+| _(from meeting-bot agent)_ `create_task` | `task_creation` | — (creates new task) |
 
 If no directive is matched: **do not act**. Log `no_directive_found` and exit.
 Never infer directives from narrative text outside a `CMD:` line.
@@ -128,6 +129,20 @@ Run ID: {event_id} — {ISO timestamp}
 Asset type: {asset_type}. Domain: {domain}.
 Exported to: {asset_link}. Run ID: {ISO timestamp}]
 ```
+
+**For `create_task` action** (called by meeting-bot agent):
+
+Create a new task using `POST /projects/{project_gid}/tasks`:
+- `name`: `inputs.title`
+- `assignee`: resolved from `inputs.assignee_name` (match against workspace members by full name)
+- `due_on`: `inputs.due_on` (nullable)
+- `notes`: `inputs.notes`
+
+If `assignee_name` does not match any workspace member: assign to the project
+default assignee and append to the task notes:
+`⚠️ Owner "{assignee_name}" not matched — please reassign.`
+
+Return the created task URL to the calling agent.
 
 ### Step 5 — Route Task
 
