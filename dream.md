@@ -13,6 +13,7 @@ read_by:
   - agents/webflow.md
   - agents/github.md
   - agents/release.md
+  - agents/meeting-bot.md
 format: "load dream.md FIRST, before own agent file. It replaces the need to
   load sibling agent specs — only load another agent's file if you are about
   to call it directly."
@@ -55,6 +56,7 @@ Every agent must agree on these facts:
 | Approval gate owner | `brand-asset` — only it records approvals |
 | Release authority | Human only — `release` agent is manual trigger, never autonomous |
 | Clinical claims rule | ANY efficacy/medical language requires `legal_approved: true` before publish, no exceptions |
+| Meeting task proxy | `meeting-bot` — reads Notion pending tasks, delegates to asana-maintenance; never writes to Asana directly |
 | Dry run default | `DRY_RUN=true` until explicitly disabled per-agent |
 | Idempotency pattern | `{resource_id}:{event_id}` — one action per event, always |
 
@@ -71,6 +73,8 @@ These are binding agreements between agents. Violating them creates inconsistenc
 | `webflow` → `brand-asset` | Webflow reads approvals from `.truth-cache/approvals.json` written by brand-asset. Never calls brand-asset at runtime. |
 | `github` → `asana-maintenance` | GitHub agent never updates Asana tasks directly. Delegates routing to asana-maintenance. |
 | `release` → `all` | Release coordinator calls notion-sync, curaden-communications, github, and webflow in sequence. It is the only agent that chains multiple agents. |
+| `meeting-bot` → `asana-maintenance` | meeting-bot never writes to Asana directly. Delegates all task creation via `agent_call` to asana-maintenance. |
+| `meeting-pipeline` → `meeting-bot` | The Cloudflare Worker (DunneWorks/meeting-pipeline) owns Fireflies webhook handling and Notion writes. meeting-bot reads from Notion only — never calls Fireflies API directly. |
 | `truth-catcher` → `notion-sync` | Truth-catcher reads from cache only. If cache is stale, it requests notion-sync via orchestrator — does not fetch Notion itself. |
 | Orchestrator → all | Orchestrator never performs domain actions. Classify, dispatch, collect, report only. |
 

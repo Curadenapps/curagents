@@ -69,6 +69,19 @@ trigger:
       - agent: github
         inputs:
           trigger: push
+  - type: manual
+    phrases:
+      - "review meeting tasks"
+      - "meeting tasks"
+      - "process meeting"
+      - "what came out of the meeting"
+      - "meeting follow-up"
+  - type: webhook
+    event: fireflies.meeting.completed
+    dispatch:
+      - agent: meeting-bot
+        inputs:
+          trigger: webhook_meeting_completed
 memory:
   read:
     - dream.md
@@ -116,6 +129,8 @@ On any invocation, determine trigger type:
 | `user:publish to webflow` / `sync assets to webflow` | User phrase | webflow agent |
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
+| `user:review meeting tasks` / `meeting tasks` / `process meeting` | User phrase | meeting-bot |
+| `webhook:fireflies.meeting.completed` | Fireflies webhook | meeting-bot |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 
