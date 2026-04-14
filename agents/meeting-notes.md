@@ -1,9 +1,10 @@
 ---
 name: meeting-notes
 description: >
-  Fetches meeting summaries from Fireflies.ai (or accepts pasted transcripts)
-  and creates structured entries in the Notion Meeting Notes database. Supports
-  German and multilingual meetings. Manual trigger only — no autonomous scheduling.
+  Fetches AI-generated meeting summaries from Fireflies.ai, which connects to
+  Webex and transcribes meetings including German. Creates structured entries in
+  the Notion Meeting Notes database: Summary, Key Takeaways, and Next Steps with
+  owner and due date parsed from action items. Manual trigger only.
 model: claude-sonnet-4-6
 tools: Read, NotionAPI, FirefliesAPI
 trigger:

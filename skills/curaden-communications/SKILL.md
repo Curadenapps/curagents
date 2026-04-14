@@ -117,105 +117,55 @@ Generates a structured weekly status summary from Jira and posts it as a new Not
 
 ## 4. Meeting Notes
 
-Pulls a meeting summary from **Fireflies.ai** (or accepts a pasted transcript)
-and creates a structured entry in the Notion **Meeting Notes database**. Fireflies
-handles multilingual transcription (including German); Claude formats the output
-and posts it to Notion.
+Pulls the AI summary from **Fireflies.ai** — which connects to Webex and handles
+multilingual transcription including German — and creates a structured entry in
+the Notion **Meeting Notes database**.
+
+Read `references/meeting-notes.md` for: Webex→Fireflies setup, GraphQL queries,
+field mappings, action item parsing rules, Notion database schema, and the full
+page body template.
 
 ### Two modes
 
 | Mode | When to use |
 |------|-------------|
-| **Fireflies** (default) | Fireflies.ai has already transcribed the meeting — fetch the summary directly via API |
-| **Paste** | You have a transcript from any other source — paste it and Claude condenses it |
+| **Fireflies** (default) | Fireflies has transcribed the Webex meeting — fetch the summary via API |
+| **Paste** | You have a transcript from any source — paste it and Claude condenses it |
 
 ---
 
-### Mode A — Fireflies (fetch latest or by ID)
+### Steps — Fireflies mode
 
-**What you need:** `FIREFLIES_API_KEY` set in your environment.
-
-**Steps:**
-
-1. If the user gave a Fireflies transcript ID, fetch it directly. If not, fetch the most recent transcript.
-
-   ```graphql
-   # Fetch by ID
-   query { transcript(id: "{TRANSCRIPT_ID}") { ...fields } }
-
-   # Fetch latest
-   query { transcripts(limit: 1) { ...fields } }
-   ```
-
-   Fields to request:
-   ```graphql
-   id title date duration participants
-   summary { overview bullet_gist action_items }
-   ```
-
-   Endpoint: `https://api.fireflies.ai/graphql`
-   Header: `Authorization: Bearer {FIREFLIES_API_KEY}`
-
-2. Map the Fireflies summary to the Notion format:
-   - `summary.overview` → executive summary callout
-   - `summary.bullet_gist` → take the first 3 bullets as Key Points
-   - `summary.action_items` → take the first 3 items as Next Steps (parse owner from text if present)
-   - `participants` → Attendees
-   - `duration` → Duration (seconds → minutes)
-
-3. Create a new entry in the Notion Meeting Notes database (step 5 below).
-
-**If Fireflies returns no summary yet:** tell the user "Fireflies is still processing — check back in a few minutes, or paste the transcript manually."
+1. Read `references/meeting-notes.md` §2 for the GraphQL query and §3 for field mappings.
+2. Check `FIREFLIES_API_KEY` is set. If not, tell the user and stop.
+3. Call the Fireflies GraphQL API:
+   - If a transcript ID was given → fetch that transcript
+   - Otherwise → fetch the most recent transcript (`limit: 1`)
+4. If `summary` is null or empty → tell the user: "Fireflies is still processing this meeting. Try again in a few minutes, or paste the transcript."
+5. Run the idempotency check from `references/meeting-notes.md` §7. If the Fireflies ID already exists in Notion → return the existing page URL and stop.
+6. Map fields to Notion using the table in `references/meeting-notes.md` §3.
+7. Parse `summary.action_items` into owner + action + due using the rules in §4.
+8. Post to Notion (step below).
 
 ---
 
-### Mode B — Paste transcript
+### Steps — Paste mode
 
-**Steps:**
-
-1. Ask the user for: meeting title, date (defaults to today), and the transcript text.
-2. Scan the transcript for speaker names (lines formatted `Name: text`) and collect as attendees.
-3. Condense into **exactly 3 key points** — decisions, outcomes, or insights only. Max 25 words each.
-4. Extract **exactly 3 next steps** — action verb + object + owner (if named) + due date (if stated).
+1. Ask the user for: meeting title, date (defaults to today), and transcript text.
+2. Scan for speaker labels (`Name: text` lines) to build the attendees list.
+3. Write a 2–3 sentence **Summary** covering the meeting outcome.
+4. Extract **Key Takeaways** — each distinct decision, insight, or outcome. No filler.
+5. Extract **Next Steps** — one row per action item, with owner (from transcript) and due date (if stated).
+6. Set `Source = Manual`, `Fireflies ID = —`.
+7. Post to Notion (step below).
 
 ---
 
-### Step 5 — Post to Notion database (both modes)
+### Post to Notion (both modes)
 
-1. Get the Meeting Notes database ID from env var `NOTION_MEETING_NOTES_DB_ID`.
-   - If the var is not set, search for a Notion database titled "Meeting Notes" using
-     `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-search`, query `"Meeting Notes"`.
-   - If still not found, tell the user: "Create a 'Meeting Notes' database in Notion and add its ID as `NOTION_MEETING_NOTES_DB_ID` in your .env."
-
-2. Create a new database page using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages`:
-
-   **Database properties to set:**
-   | Property | Type | Value |
-   |----------|------|-------|
-   | `Name` | title | `📅 {Meeting Title} — {YYYY-MM-DD}` |
-   | `Date` | date | meeting date |
-   | `Attendees` | rich_text | comma-separated participant names |
-   | `Source` | select | `Fireflies` or `Manual` |
-   | `Duration` | number | duration in minutes |
-
-   **Page body:**
-   ```
-   > {executive summary — 1–2 sentences}
-
-   ## Key Points
-   1. {key point 1}
-   2. {key point 2}
-   3. {key point 3}
-
-   ## Next Steps
-   | Action | Owner | Due |
-   |--------|-------|-----|
-   | {action 1} | {owner or TBD} | {date or —} |
-   | {action 2} | {owner or TBD} | {date or —} |
-   | {action 3} | {owner or TBD} | {date or —} |
-   ```
-
-3. Return the Notion page URL to the user.
+1. Get the database ID from `NOTION_MEETING_NOTES_DB_ID`. If not set, search Notion for "Meeting Notes" database. If not found, tell the user to create it (see `references/meeting-notes.md` §5).
+2. Create a new database entry using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` with properties and body from `references/meeting-notes.md` §5 and §6.
+3. Return the Notion page URL.
 
 ---
 
@@ -232,3 +182,4 @@ and posts it to Notion.
 | Fireflies GraphQL API | `https://api.fireflies.ai/graphql` |
 | Fireflies env var | `FIREFLIES_API_KEY` |
 | Meeting Notes DB env var | `NOTION_MEETING_NOTES_DB_ID` |
+| Meeting Notes detail | See `references/meeting-notes.md` |
