@@ -1,0 +1,47 @@
+name: Meeting Notes — Webex Transcript
+
+on:
+  # Triggered manually or via repository_dispatch from a Webex webhook relay
+  workflow_dispatch:
+    inputs:
+      meeting_id:
+        description: "Webex Meeting ID (leave blank to use paste mode)"
+        required: false
+        default: ""
+      meeting_title:
+        description: "Meeting title (used as Notion page title)"
+        required: false
+        default: ""
+  repository_dispatch:
+    types: [webex-transcription-ready]
+
+jobs:
+  meeting-notes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run meeting-notes agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_ROOT_DATABASE_ID: ${{ secrets.NOTION_ROOT_DATABASE_ID }}
+          WEBEX_ACCESS_TOKEN: ${{ secrets.WEBEX_ACCESS_TOKEN }}
+          MEETING_ID: ${{ github.event.inputs.meeting_id || github.event.client_payload.meetingId }}
+          MEETING_TITLE: ${{ github.event.inputs.meeting_title || github.event.client_payload.topic }}
+          DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+          CLAUDE_CODE_USE_BEDROCK: "0"
+          DISABLE_AUTOUPDATER: "1"
+        run: |
+          claude -p "Run the meeting-notes agent: read agents/meeting-notes.md and execute its workflow. Trigger: schedule — webex-transcription-ready. Meeting ID: ${MEETING_ID:-none}. Meeting title: ${MEETING_TITLE:-none}. If no meeting ID is provided, ask the user to paste the transcript or run this manually."

@@ -13,6 +13,7 @@ read_by:
   - agents/webflow.md
   - agents/github.md
   - agents/release.md
+  - agents/meeting-notes.md
 format: "load dream.md FIRST, before own agent file. It replaces the need to
   load sibling agent specs — only load another agent's file if you are about
   to call it directly."
@@ -71,6 +72,7 @@ These are binding agreements between agents. Violating them creates inconsistenc
 | `webflow` → `brand-asset` | Webflow reads approvals from `.truth-cache/approvals.json` written by brand-asset. Never calls brand-asset at runtime. |
 | `github` → `asana-maintenance` | GitHub agent never updates Asana tasks directly. Delegates routing to asana-maintenance. |
 | `release` → `all` | Release coordinator calls notion-sync, curaden-communications, github, and webflow in sequence. It is the only agent that chains multiple agents. |
+| `meeting-notes` → `curaden-communications` | meeting-notes delegates all condensing + Notion page creation to the curaden-communications skill (Procedure 4). Never creates Notion pages directly. |
 | `truth-catcher` → `notion-sync` | Truth-catcher reads from cache only. If cache is stale, it requests notion-sync via orchestrator — does not fetch Notion itself. |
 | Orchestrator → all | Orchestrator never performs domain actions. Classify, dispatch, collect, report only. |
 
@@ -119,6 +121,8 @@ Prevents agents from re-litigating resolved decisions in new sessions.
 | Webflow site ID not yet set | Webflow agent runs in config-error state | Phase 3 (credentials) |
 | Asana webhook not yet registered | asana-maintenance falls back to 5-min polling | Phase 3 (credentials) |
 | `DRY_RUN=true` across all agents | No live writes to any system | Phase 4 (dry-run verified) |
+| `WEBEX_ACCESS_TOKEN` not yet set | meeting-notes Webex mode unavailable; paste mode works now | Phase 3 (credentials) |
+| Webex webhook not yet registered | meeting-notes runs manually only; no auto-trigger on recording ready | Phase 3 (credentials) |
 
 ---
 
