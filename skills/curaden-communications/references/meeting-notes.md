@@ -130,27 +130,24 @@ month", "bis Freitag"). If none stated, leave `—`. Do not infer due dates.
 
 ---
 
-## 5. Notion Database Schema
+## 5. Notion Database
 
-Create a database in Notion titled **"Meeting Notes"** with these properties:
+**Database ID:** `33c7e8aabbb4800cb557d588985cec3b`
+Set this as `NOTION_MEETING_NOTES_DB_ID` in your `.env` and GitHub secrets.
+
+This is the existing Notion database at `seandunne/33c7e8aabbb4800cb557d588985cec3b`.
+The agent will create a new row in this database for every meeting.
+
+Ensure the following properties exist (add any that are missing — existing properties with different names can be renamed):
 
 | Property name | Notion type | Purpose |
 |--------------|-------------|---------|
 | `Name` | Title | Auto-set to `📅 {title} — {YYYY-MM-DD}` |
 | `Date` | Date | Meeting date |
 | `Attendees` | Rich text | Participant display names, comma-separated |
-| `Duration` | Number (format: number) | Meeting length in minutes |
+| `Duration` | Number | Meeting length in minutes |
 | `Source` | Select | `Fireflies` or `Manual` |
 | `Fireflies ID` | Rich text | Transcript ID; used for duplicate prevention |
-
-Copy the database ID from the Notion URL (32-character hex string after
-`notion.so/`) and set it as `NOTION_MEETING_NOTES_DB_ID` in your `.env`.
-
-> ⚠️ **MCP tool check required on first run:** `notion-create-pages` must
-> create the entry with `parent.type = "database_id"`, not `"page_id"`.
-> If the first run produces a floating page instead of a database row, verify
-> that the MCP tool's `parent` parameter accepts a database ID and adjust the
-> call accordingly.
 
 ---
 
