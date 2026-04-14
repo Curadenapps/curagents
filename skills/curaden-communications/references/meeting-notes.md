@@ -14,14 +14,13 @@ Supports German and other languages — Webex's own transcription does not.
 
 ### Alternative: Add the Bot Manually
 
-If you don't want calendar access, invite `notetaker@fireflies.ai` to any Webex
-meeting. The bot joins, records, and uploads automatically.
+Invite `notetaker@fireflies.ai` to any Webex meeting. The bot joins, records,
+and uploads automatically — no calendar access required.
 
 ### Alternative: Upload a Recording
 
 Download the Webex recording (`.mp4`) and upload at **app.fireflies.ai → Upload**.
-Fireflies transcribes and summarises it — useful for past meetings or meetings
-the bot couldn't join.
+Useful for past meetings or meetings the bot couldn't join.
 
 ---
 
@@ -47,7 +46,7 @@ query {
     }
     summary {
       overview
-      bullet_gist
+      outline
       action_items
       keywords
     }
@@ -71,7 +70,7 @@ query Transcript($id: String!) {
     }
     summary {
       overview
-      bullet_gist
+      outline
       action_items
       keywords
     }
@@ -79,10 +78,13 @@ query Transcript($id: String!) {
 }
 ```
 
+**Note:** `bullet_gist` is intentionally excluded — it duplicates information
+already in `overview`. Using both creates redundancy in the Notion page.
+
 ### Check if summary is ready
 
-If `summary` is `null` or `summary.overview` is empty, the transcript is still
-being processed. Tell the user to try again in a few minutes.
+If `summary` is `null` or `summary.overview` is empty, Fireflies is still
+processing. Tell the user to try again in a few minutes.
 
 ---
 
@@ -93,55 +95,61 @@ being processed. Tell the user to try again in a few minutes.
 | `title` | Page `Name` property | Prefix with `📅` + date suffix |
 | `date` | `Date` property | ISO 8601 string |
 | `duration` | `Duration` property | Fireflies returns **seconds** — divide by 60 |
-| `meeting_attendees[].displayName` | `Attendees` property | Comma-separated; fall back to `organizer_email` if empty |
-| `id` | `Fireflies ID` property | Store for idempotency — skip if this ID already exists in DB |
-| `summary.overview` | **Summary** body section | Verbatim from Fireflies |
-| `summary.bullet_gist` | **Key Takeaways** body section | Each bullet becomes a list item; keep all (typically 3–7) |
-| `summary.action_items` | **Next Steps** table | Parse owner + action from each item (see §4) |
-| `summary.keywords` | Footer tags line | Comma-separated, prefixed with `🏷` |
+| `meeting_attendees[].displayName` | `Attendees` property | Comma-separated; fall back to `organizer_email` if list is empty |
+| `id` | `Fireflies ID` property | Stored for idempotency — see §7 |
+| `summary.overview` | **Summary** body section | Verbatim from Fireflies; 2–4 sentences |
+| `summary.outline` | **Topics Covered** body section | Structured list of what was actually discussed |
+| `summary.action_items` | **Next Steps** table | Owner assigned by Claude judgment — see §4 |
+| `summary.keywords` | Footer `🏷` line | Comma-separated |
 
 ---
 
-## 4. Parsing Action Items → Owner + Action + Due
+## 4. Assigning Owners to Action Items
 
-Fireflies formats `action_items` in one of these patterns:
+Do **not** use regex or pattern-matching rules to extract owners from action item
+text. Fireflies produces too many formats (including multilingual passive
+constructions) for fixed rules to be reliable.
 
-| Fireflies format | Owner | Action |
-|-----------------|-------|--------|
-| `"Sean: Update the Figma tokens"` | Sean | Update the Figma tokens |
-| `"Update the Figma tokens (Sean)"` | Sean | Update the Figma tokens |
-| `"Update the Figma tokens by Friday"` | TBD | Update the Figma tokens |
-| `"Update the Figma tokens"` | TBD | Update the Figma tokens |
+Instead: read the full `summary.action_items` list alongside `meeting_attendees`
+and use judgment to assign the most plausible owner for each item based on
+context — who was speaking about it, whose name appears near it, or whose role
+it matches. If it is genuinely ambiguous after reading the context, mark the
+owner as `TBD`.
 
-**Parsing rules:**
-1. If the text starts with `Word Word?:` (1–3 words before a colon) → treat everything before `:` as the owner
-2. If the text ends with `(Name)` → extract as owner
-3. Otherwise → owner = `TBD`
-4. Due date: extract temporal phrases like "by Friday", "end of week", "by {date}". If none → leave `—`
+Examples of how to apply judgment:
+
+| Action item text | Likely owner | Reasoning |
+|-----------------|-------------|-----------|
+| `"The design team needs to review the new components by Q2"` | Design Lead (from attendee list) or TBD | No individual named — assign team lead if present, otherwise TBD |
+| `"Sean and Anna: coordinate on localization"` | Sean / Anna | Two owners — list both, separated by ` & ` |
+| `"Follow up with the client about the proposal"` | Meeting organiser or TBD | Typically the organiser's responsibility if no one else named |
+| `"Bis Freitag sollen die Tokens aktualisiert werden"` (German) | TBD | Passive voice, no owner stated — flag as TBD |
+| `"I'll send the updated brief by Monday"` | Whoever said "I" — cross-reference sentence speaker | Use `sentences` field if needed for high-value items |
+
+For **due dates**: extract temporal phrases naturally ("by Friday", "end of
+month", "bis Freitag"). If none stated, leave `—`. Do not infer due dates.
 
 ---
 
 ## 5. Notion Database Schema
 
-Create a database in Notion titled **"Meeting Notes"** with these exact properties:
+Create a database in Notion titled **"Meeting Notes"** with these properties:
 
-| Property name | Notion type | Required | Purpose |
-|--------------|-------------|----------|---------|
-| `Name` | Title | Yes | Auto-set to `📅 {title} — {YYYY-MM-DD}` |
-| `Date` | Date | Yes | Meeting date |
-| `Attendees` | Rich text | Yes | Participant display names, comma-separated |
-| `Duration` | Number (format: minutes) | Yes | Meeting length in minutes |
-| `Source` | Select | Yes | `Fireflies` or `Manual` |
-| `Fireflies ID` | Rich text | Yes | Transcript ID from Fireflies API; used to prevent duplicates |
+| Property name | Notion type | Purpose |
+|--------------|-------------|---------|
+| `Name` | Title | Auto-set to `📅 {title} — {YYYY-MM-DD}` |
+| `Date` | Date | Meeting date |
+| `Attendees` | Rich text | Participant display names, comma-separated |
+| `Duration` | Number (format: number) | Meeting length in minutes |
+| `Source` | Select | `Fireflies` or `Manual` |
+| `Fireflies ID` | Rich text | Transcript ID; used for duplicate prevention |
 
-Copy the database ID from the Notion URL (the 32-character hex string) and set
-it as `NOTION_MEETING_NOTES_DB_ID` in your `.env` file.
+Copy the database ID from the Notion URL (32-character hex string after
+`notion.so/`) and set it as `NOTION_MEETING_NOTES_DB_ID` in your `.env`.
 
 ---
 
 ## 6. Notion Page Body Template
-
-Every meeting notes page uses this exact structure:
 
 ```
 ## Summary
@@ -149,8 +157,8 @@ Every meeting notes page uses this exact structure:
 
 ---
 
-## Key Takeaways
-{Each bullet_gist item on its own line, prefixed with •}
+## Topics Covered
+{summary.outline — each topic on its own line as a bullet}
 
 ---
 
@@ -158,29 +166,41 @@ Every meeting notes page uses this exact structure:
 
 | Action | Owner | Due |
 |--------|-------|-----|
-| {parsed action} | {parsed owner or TBD} | {parsed due or —} |
-| ... | ... | ... |
+| {action item} | {owner from judgment or TBD} | {due date or —} |
 
 ---
 
-**Attendees:** {displayName list or "Not recorded"}
+**Attendees:** {displayName list, or "Not recorded"}
 **Duration:** {N} min
 **Date:** {YYYY-MM-DD}
-**Source:** {Fireflies transcript {id} | Manual paste}
+**Source:** {Fireflies — {id} | Manual}
 🏷 {keywords, comma-separated}
 ```
+
+### Language rule
+
+Output the Notion page **in the same language as the meeting** unless the user
+explicitly asks for a translation. Do not silently translate a German meeting
+into English — if the team speaks German, the notes should be in German.
 
 ---
 
 ## 7. Idempotency Check
 
-Before creating a Notion page, search for an existing entry with the same
-Fireflies ID:
+Before creating a Notion page, query the Meeting Notes database for an existing
+entry with a matching `Fireflies ID` property using an exact-match filter:
 
 ```
-mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-search
-query: "{fireflies_transcript_id}"
+mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-query-database
+database_id: {NOTION_MEETING_NOTES_DB_ID}
+filter: {
+  "property": "Fireflies ID",
+  "rich_text": { "equals": "{fireflies_transcript_id}" }
+}
 ```
 
-If a page is found → skip and return the existing URL with message
-"Already logged: {URL}".
+If a result is returned → skip creation and return the existing page URL:
+"Already logged: {URL}"
+
+Do not use Notion search (`notion-search`) for this check — full-text search
+is fuzzy and will produce false positives.

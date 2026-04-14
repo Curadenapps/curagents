@@ -122,50 +122,48 @@ multilingual transcription including German — and creates a structured entry i
 the Notion **Meeting Notes database**.
 
 Read `references/meeting-notes.md` for: Webex→Fireflies setup, GraphQL queries,
-field mappings, action item parsing rules, Notion database schema, and the full
+field mappings, owner-assignment guidance, Notion database schema, and the full
 page body template.
 
-### Two modes
+---
 
-| Mode | When to use |
-|------|-------------|
-| **Fireflies** (default) | Fireflies has transcribed the Webex meeting — fetch the summary via API |
-| **Paste** | You have a transcript from any source — paste it and Claude condenses it |
+### Step 1 — Determine mode
+
+- If `FIREFLIES_API_KEY` is set → use **Fireflies mode** (default). Do not ask the user.
+- If the key is missing → tell the user: "Set `FIREFLIES_API_KEY` in your `.env` to pull from Fireflies, or paste a transcript and I'll condense it manually."
 
 ---
 
-### Steps — Fireflies mode
+### Fireflies mode
 
-1. Read `references/meeting-notes.md` §2 for the GraphQL query and §3 for field mappings.
-2. Check `FIREFLIES_API_KEY` is set. If not, tell the user and stop.
-3. Call the Fireflies GraphQL API:
-   - If a transcript ID was given → fetch that transcript
-   - Otherwise → fetch the most recent transcript (`limit: 1`)
-4. If `summary` is null or empty → tell the user: "Fireflies is still processing this meeting. Try again in a few minutes, or paste the transcript."
-5. Run the idempotency check from `references/meeting-notes.md` §7. If the Fireflies ID already exists in Notion → return the existing page URL and stop.
-6. Map fields to Notion using the table in `references/meeting-notes.md` §3.
-7. Parse `summary.action_items` into owner + action + due using the rules in §4.
-8. Post to Notion (step below).
+1. Call the Fireflies GraphQL API (query from `references/meeting-notes.md` §2):
+   - If the user gave a transcript ID → fetch that specific transcript
+   - Otherwise → fetch the most recent (`limit: 1`) and confirm with the user: *"Found: {title}, {date}, {N} min — is this the right meeting?"*
+2. If `summary` is null or `overview` is empty → stop and tell the user: "Fireflies is still processing. Try again in a few minutes."
+3. Run the idempotency check from §7 of the reference. If the Fireflies ID already has a Notion page → return the existing URL and stop.
+4. Map fields using §3 of the reference.
+5. Assign owners to action items using **judgment**, not pattern-matching. Read `references/meeting-notes.md` §4 for guidance. Cross-reference `meeting_attendees` to match names. Mark genuinely ambiguous items `TBD`.
+6. Post to Notion — see below.
 
 ---
 
-### Steps — Paste mode
+### Paste mode (fallback)
 
-1. Ask the user for: meeting title, date (defaults to today), and transcript text.
+1. Ask the user for: meeting title, date (defaults to today), and the transcript text.
 2. Scan for speaker labels (`Name: text` lines) to build the attendees list.
-3. Write a 2–3 sentence **Summary** covering the meeting outcome.
-4. Extract **Key Takeaways** — each distinct decision, insight, or outcome. No filler.
-5. Extract **Next Steps** — one row per action item, with owner (from transcript) and due date (if stated).
+3. Write a 2–3 sentence **Summary** from the transcript content.
+4. Extract **Topics Covered** — bullet list of what was actually discussed.
+5. Extract **Next Steps** — one per action item. Assign owner by judgment from transcript context; if unclear, mark `TBD`.
 6. Set `Source = Manual`, `Fireflies ID = —`.
-7. Post to Notion (step below).
+7. Post to Notion — see below.
 
 ---
 
 ### Post to Notion (both modes)
 
-1. Get the database ID from `NOTION_MEETING_NOTES_DB_ID`. If not set, search Notion for "Meeting Notes" database. If not found, tell the user to create it (see `references/meeting-notes.md` §5).
-2. Create a new database entry using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` with properties and body from `references/meeting-notes.md` §5 and §6.
-3. Return the Notion page URL.
+1. Get the database ID from `NOTION_MEETING_NOTES_DB_ID`. If not set, tell the user to create the database and set the env var (see `references/meeting-notes.md` §5).
+2. Create the database entry using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` with the properties and body from `references/meeting-notes.md` §5 and §6.
+3. Return the Notion page URL to the user.
 
 ---
 
