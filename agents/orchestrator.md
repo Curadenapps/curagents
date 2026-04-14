@@ -69,12 +69,6 @@ trigger:
       - agent: github
         inputs:
           trigger: push
-  - type: webhook
-    event: webex.meeting.transcription_ready
-    dispatch:
-      - agent: meeting-notes
-        inputs:
-          trigger: webex_transcription_ready
   - type: manual
     phrases:
       - "process meeting notes"
@@ -82,11 +76,9 @@ trigger:
       - "create meeting notes"
       - "log meeting"
       - "post meeting recap"
-      - "add meeting notes"
       - "meeting summary"
-      - "take meeting notes"
-      - "fetch webex meeting"
-      - "import from webex"
+      - "fetch from fireflies"
+      - "get fireflies transcript"
     dispatch:
       - skill: curaden-communications
         procedure: meeting-notes
@@ -137,8 +129,7 @@ On any invocation, determine trigger type:
 | `user:publish to webflow` / `sync assets to webflow` | User phrase | webflow agent |
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
-| `user:process meeting notes` / `summarise meeting` / `log meeting` | User phrase | curaden-communications › meeting-notes |
-| `webhook:webex.meeting.transcription_ready` | Webex webhook payload | meeting-notes agent |
+| `user:process meeting notes` / `summarise meeting` / `fetch from fireflies` | User phrase | curaden-communications › meeting-notes |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 
