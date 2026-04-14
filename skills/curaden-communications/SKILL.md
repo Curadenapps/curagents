@@ -138,7 +138,7 @@ page body template.
 
 1. Call the Fireflies GraphQL API (query from `references/meeting-notes.md` §2):
    - If the user gave a transcript ID → fetch that specific transcript
-   - Otherwise → fetch the most recent (`limit: 1`) and confirm with the user: *"Found: {title}, {date}, {N} min — is this the right meeting?"*
+   - Otherwise → fetch the most recent (`limit: 1`) and proceed directly — no confirmation required
 2. If `summary` is null or `overview` is empty → stop and tell the user: "Fireflies is still processing. Try again in a few minutes."
 3. Run the idempotency check from §7 of the reference. If the Fireflies ID already has a Notion page → return the existing URL and stop.
 4. Map fields using §3 of the reference.

@@ -47,8 +47,8 @@ logic.** Do not re-implement steps here.
 
 | Condition | Action |
 |-----------|--------|
-| `FIREFLIES_API_KEY` is set | Go straight to Fireflies mode — do not ask the user |
-| User provides a Fireflies transcript ID | Fetch that specific transcript |
+| `FIREFLIES_API_KEY` is set | Fetch latest transcript, run idempotency check, post to Notion — no confirmation, no questions |
+| User provides a Fireflies transcript ID | Fetch that specific transcript and proceed |
 | No key, no ID | Offer paste mode as fallback |
 
 ---

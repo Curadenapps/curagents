@@ -124,7 +124,6 @@ Examples of how to apply judgment:
 | `"Sean and Anna: coordinate on localization"` | Sean / Anna | Two owners — list both, separated by ` & ` |
 | `"Follow up with the client about the proposal"` | Meeting organiser or TBD | Typically the organiser's responsibility if no one else named |
 | `"Bis Freitag sollen die Tokens aktualisiert werden"` (German) | TBD | Passive voice, no owner stated — flag as TBD |
-| `"I'll send the updated brief by Monday"` | Whoever said "I" — cross-reference sentence speaker | Use `sentences` field if needed for high-value items |
 
 For **due dates**: extract temporal phrases naturally ("by Friday", "end of
 month", "bis Freitag"). If none stated, leave `—`. Do not infer due dates.
@@ -146,6 +145,12 @@ Create a database in Notion titled **"Meeting Notes"** with these properties:
 
 Copy the database ID from the Notion URL (32-character hex string after
 `notion.so/`) and set it as `NOTION_MEETING_NOTES_DB_ID` in your `.env`.
+
+> ⚠️ **MCP tool check required on first run:** `notion-create-pages` must
+> create the entry with `parent.type = "database_id"`, not `"page_id"`.
+> If the first run produces a floating page instead of a database row, verify
+> that the MCP tool's `parent` parameter accepts a database ID and adjust the
+> call accordingly.
 
 ---
 
