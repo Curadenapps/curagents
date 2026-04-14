@@ -87,3 +87,22 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 3. Jira-Notion BOB Sync | 0/? | Not started | - |
 | 4. BOB Weekly Broadcast | 0/? | Not started | - |
 | 5. Package and Ship | 0/? | Not started | - |
+
+### Phase 6: iTOP Agent and Curaden Academy skill
+
+**Goal:** Any Claude or Gemini session can look up iTOP protocols, generate a clinical session template pre-populated with BOB measurement data, and route to Curaden Academy content — all with enforced clinical guardrails that prevent autonomous efficacy claims, diagnosis language, or off-catalogue product recommendations
+**Depends on:** Phase 5
+**Requirements**: ITOP-01 through ITOP-08 (TBD — run `/gsd:plan-phase 6`)
+**Success Criteria** (what must be TRUE):
+  1. `agents/itop.md` exists with valid frontmatter, 3 procedures, guardrail rules, and BOB threshold mapping
+  2. `skills/itop-academy/SKILL.md` exists with trigger phrases and procedure entry points
+  3. `skills/itop-academy/references/` contains 4 reference files: protocols, BOB thresholds, content guardrails, academy catalogue
+  4. Saying "look up Modified Bass technique" returns verbatim protocol text with a guardrail check
+  5. Saying "generate session template" with a BOB result produces a populated template with all patient sections marked `[CLINICIAN REVIEW REQUIRED]`
+  6. Saying "find academy course for [topic]" returns ranked Academy recommendations
+  7. All outputs include a `GUARDRAIL CHECK` block — no efficacy claims pass without flagging
+  8. Agent and skill are committed and pushed to `github.com/Curadenapps/Agents`
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 6 to break down)

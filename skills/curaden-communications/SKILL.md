@@ -90,20 +90,31 @@ Queries all open BOB project issues from Jira and creates or updates correspondi
 
 ## 3. BOB Weekly Broadcast
 
-Generates a structured weekly status summary from Jira and posts it as a new Notion page in the BOB broadcast space.
+Generates a structured weekly status summary and posts it as a new Notion page in the BOB broadcast space.
 
 ### Steps
 
 1. Read `references/bob-weekly-broadcast.md` for the Notion target page ID, broadcast template, and JQL variants.
-2. Run three Jira queries using `mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__searchJiraIssuesUsingJql`:
-   - **Done this week**: issues resolved/closed in the last 7 days (JQL from reference)
-   - **In Progress**: issues currently active (JQL from reference)
-   - **Blockers**: issues flagged as blocked or high-priority and open (JQL from reference)
-3. Format the results using the broadcast template from the reference file. Sections:
+2. Query Jira for the three sections using curl with the Jira API:
+   - **Done this week**: issues resolved/closed in the last 7 days
+   - **In Progress**: issues currently active
+   - **Blockers**: blocked or high-priority open issues
+3. Format the results using the broadcast template. Sections:
    - `## Done This Week` — issue key + summary for each resolved issue
    - `## In Progress` — issue key + summary + assignee for each active issue
    - `## Blockers / Watch` — issue key + summary + reason flagged
-4. Create a new Notion page using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` under the target page from the reference file. Title format: `BOB Weekly Broadcast — {YYYY-MM-DD}`.
+4. Create a new Notion page using the Notion API:
+   ```
+   curl -X POST "https://api.notion.com/v1/pages" \
+     -H "Authorization: Bearer $NOTION_API_KEY" \
+     -H "Notion-Version: 2022-06-28" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "parent": {"page_id": "PARENT_PAGE_ID"},
+       "properties": {"title": {"title": [{"text": {"content": "BOB Weekly Broadcast — DATE"}}]}},
+       "children": [...]
+     }'
+   ```
 5. Return the URL of the created Notion page to the user.
 
 ### Output
