@@ -71,17 +71,17 @@ trigger:
           trigger: push
   - type: manual
     phrases:
-      - "review meeting tasks"
-      - "meeting tasks"
-      - "process meeting"
-      - "what came out of the meeting"
-      - "meeting follow-up"
-  - type: webhook
-    event: fireflies.meeting.completed
+      - "process meeting notes"
+      - "summarise meeting"
+      - "create meeting notes"
+      - "log meeting"
+      - "post meeting recap"
+      - "meeting summary"
+      - "fetch from fireflies"
+      - "get fireflies transcript"
     dispatch:
-      - agent: meeting-bot
-        inputs:
-          trigger: webhook_meeting_completed
+      - skill: curaden-communications
+        procedure: meeting-notes
 memory:
   read:
     - dream.md
@@ -129,8 +129,7 @@ On any invocation, determine trigger type:
 | `user:publish to webflow` / `sync assets to webflow` | User phrase | webflow agent |
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
-| `user:review meeting tasks` / `meeting tasks` / `process meeting` | User phrase | meeting-bot |
-| `webhook:fireflies.meeting.completed` | Fireflies webhook | meeting-bot |
+| `user:process meeting notes` / `summarise meeting` / `fetch from fireflies` | User phrase | curaden-communications › meeting-notes |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 

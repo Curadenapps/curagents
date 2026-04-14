@@ -10,7 +10,7 @@ full system architecture.
 
 The following skills are available and will auto-load based on trigger phrases:
 
-- **`skills/curaden-communications/SKILL.md`** — RevolveNote sync, Jira-Notion BOB sync, BOB weekly broadcast
+- **`skills/curaden-communications/SKILL.md`** — RevolveNote sync, Jira-Notion BOB sync, BOB weekly broadcast, Meeting Notes (Webex → Notion)
 
 Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own reference files as needed.
 
@@ -33,7 +33,7 @@ idempotency_key, dry_run, output schema). Load the relevant file for context:
 - [`agents/webflow.md`](agents/webflow.md) — Webflow publishing gate and asset sync
 - [`agents/github.md`](agents/github.md) — PR/commit linkage to Jira and Asana (Curadenapps org)
 - [`agents/release.md`](agents/release.md) — Release coordinator (BOB + RevolveNote); manual trigger only
-- [`agents/meeting-bot.md`](agents/meeting-bot.md) — Fireflies transcript → Asana task creation (auto, no approval gate)
+- [`agents/meeting-notes.md`](agents/meeting-notes.md) — Webex transcript → 3 key points + 3 next steps → Notion page
 
 ## Scope
 
