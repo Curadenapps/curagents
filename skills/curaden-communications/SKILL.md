@@ -90,36 +90,24 @@ Queries all open BOB project issues from Jira and creates or updates correspondi
 
 ## 3. BOB Weekly Broadcast
 
-Generates a structured weekly status summary and posts it as a new Notion page in the BOB broadcast space.
+Generates a weekly status summary from Jira, posts it as a Notion page, and broadcasts a condensed version to the Webex team space.
 
 ### Steps
 
-1. Read `references/bob-weekly-broadcast.md` for the Notion target page ID, broadcast template, and JQL variants.
-2. Query Jira for the three sections using curl with the Jira API:
-   - **Done this week**: issues resolved/closed in the last 7 days
-   - **In Progress**: issues currently active
+1. Read `references/bob-weekly-broadcast.md` for the Notion target page ID, broadcast template, JQL queries, and Webex message format.
+2. Query Jira for the three sections using `mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__searchJiraIssuesUsingJql`:
+   - **Done this week**: issues resolved in the last 7 days
+   - **In Progress**: currently active issues
    - **Blockers**: blocked or high-priority open issues
-3. Format the results using the broadcast template. Sections:
-   - `## Done This Week` — issue key + summary for each resolved issue
-   - `## In Progress` — issue key + summary + assignee for each active issue
-   - `## Blockers / Watch` — issue key + summary + reason flagged
-4. Create a new Notion page using the Notion API:
-   ```
-   curl -X POST "https://api.notion.com/v1/pages" \
-     -H "Authorization: Bearer $NOTION_API_KEY" \
-     -H "Notion-Version: 2022-06-28" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "parent": {"page_id": "PARENT_PAGE_ID"},
-       "properties": {"title": {"title": [{"text": {"content": "BOB Weekly Broadcast — DATE"}}]}},
-       "children": [...]
-     }'
-   ```
-5. Return the URL of the created Notion page to the user.
+3. Format using the broadcast template in the reference file.
+4. Create a Notion page using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` under parent `3347e8aabbb480908aa2dfc2fd478ff9`.
+5. Post the condensed Webex message to `WEBEX_BROADCAST_SPACE_ID` using `WEBEX_BOT_TOKEN` — format and API call in `references/bob-weekly-broadcast.md` Delivery §2. Skip silently if either var is unset.
+6. Return the Notion page URL and confirm Webex delivery.
 
 ### Output
 
-- URL of the newly created Notion broadcast page
+- Notion page URL
+- Webex delivery status
 - Summary: N done, N in progress, N blockers
 
 ---
