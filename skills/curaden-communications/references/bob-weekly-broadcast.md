@@ -79,7 +79,7 @@ _Example:_
 
 ---
 
-_BOB is part of the iTOP (Individually Trained Oral Prophylaxis) program by Curaden._
+_BOB is the Curaden app for oral prophylaxis tracking._
 ```
 
 ---
@@ -103,10 +103,49 @@ query: project = BOB AND sprint in openSprints()
 
 Extract `sprint` field from the first result. If unavailable, omit the sprint line from the header.
 
+---
+
 ## Delivery
 
-Currently: Notion page only.
+### 1. Notion page
 
-Future (v2): Slack channel delivery (channel TBD by Curaden team).
+Create under parent page `3347e8aabbb480908aa2dfc2fd478ff9` using the full broadcast template above.
+Return the Notion page URL to the user.
 
-After creating the page, always return the Notion page URL to the user so they can share it directly.
+### 2. Webex space broadcast
+
+After the Notion page is created, post a condensed summary to the Webex broadcast space.
+
+**Space ID:** set via `WEBEX_BROADCAST_SPACE_ID` env var (space ID ends in `WY3NA`)
+**Bot token:** `WEBEX_BOT_TOKEN`
+
+```
+POST https://webexapis.com/v1/messages
+Authorization: Bearer {WEBEX_BOT_TOKEN}
+Content-Type: application/json
+
+{
+  "roomId": "{WEBEX_BROADCAST_SPACE_ID}",
+  "markdown": "{message below}"
+}
+```
+
+**Webex message format** (markdown, keep under 7000 chars):
+
+```markdown
+## 📊 BOB Weekly Broadcast — {DATE}
+**Sprint:** {sprint name or omit}
+
+**✅ Done this week**
+{- **KEY** — Summary (one per line, max 10)}
+
+**🔄 In Progress**
+{- **KEY** — Summary _(Assignee)_ (one per line, max 10)}
+
+**⚠️ Blockers / Watch**
+{- **KEY** — Summary ⚠️ reason (one per line)}
+
+🔗 [Full report in Notion]({notion_page_url})
+```
+
+If `WEBEX_BOT_TOKEN` or `WEBEX_BROADCAST_SPACE_ID` is not set, skip the Webex step silently and note it in the output: "Webex broadcast skipped — token/space not configured."

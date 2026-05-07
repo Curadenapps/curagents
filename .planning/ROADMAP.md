@@ -88,9 +88,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 4. BOB Weekly Broadcast | 0/? | Not started | - |
 | 5. Package and Ship | 0/? | Not started | - |
 
-### Phase 6: iTOP Agent and Curaden Academy skill
 
-**Goal:** Any Claude or Gemini session can look up iTOP protocols, generate a clinical session template pre-populated with BOB measurement data, and route to Curaden Academy content — all with enforced clinical guardrails that prevent autonomous efficacy claims, diagnosis language, or off-catalogue product recommendations
 **Depends on:** Phase 5
 **Requirements**: ITOP-01 through ITOP-08 (TBD — run `/gsd:plan-phase 6`)
 **Success Criteria** (what must be TRUE):
