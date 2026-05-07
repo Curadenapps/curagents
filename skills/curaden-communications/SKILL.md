@@ -9,7 +9,7 @@ description: This skill should be used when the user wants to "run the weekly sy
   "add meeting notes", "meeting summary", "take meeting notes",
   "capture meeting", "get fireflies transcript", "fetch from fireflies",
   or "import from fireflies". Use this skill when working across
-  Curaden's tech stack (RevolveNote, BOB, Jira, Notion, GitHub, Webex, Fireflies).
+  Curaden's tech stack (RevolveNote, BOB/iTOP, Jira, Notion, GitHub, Fireflies).
   Covers four sub-procedures: revolve-note-weekly-sync,
   jira-notion-bob-sync, bob-weekly-broadcast, and meeting-notes.
 ---
