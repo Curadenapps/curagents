@@ -7,7 +7,7 @@
 .truth-cache/*
 !.truth-cache/.gitkeep
 
-# Feedback QA store — user feedback stays local, never in Git
+# Feedback QA — generated report HTML/PDF, never in Git
 .feedback/
 
 # Node

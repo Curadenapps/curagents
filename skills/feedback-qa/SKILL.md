@@ -3,179 +3,140 @@ name: feedback-qa
 description: >
   Use this skill when the user wants to "triage feedback", "QA feedback",
   "process feedback", "review user comments", "what should we build next",
-  "is this feedback useful", "check this report", "feedback report",
-  or "promote {cluster id}". Collects user feedback from UAT reports, documents,
-  and comments, stores it in a local feedback folder (never in Git), checks each
-  item against the current BOB build and a verified change timeline, scores its
-  usefulness, and recommends what is worth building next and what is not for BOB.
+  "send QA report", "is this feedback useful", or "promote {item}". Reads new
+  feedback notes from the Notion inbox, checks them against the current BOB build
+  and a sourced change timeline, sorts them into must-have / should-have / quick
+  wins / nice-to-have, and — once there is enough to be worth people's attention —
+  sends a PDF report to the Webex QA channel. A full UAT is also published to
+  Confluence with the same content.
 ---
 
 # Feedback QA
 
-Turns scattered user feedback into a short, evidence-backed list of what to
-build next for BOB, and says clearly what is noise, what is already done, and
-what does not belong in BOB.
+```
+You drop notes in Notion ──► agent picks up what's new and is feedback
+                              │
+                              ├─ checks: already fixed? matches current build? right for BOB? useful?
+                              │
+                              ├─ not enough yet ──► holds it for the next report
+                              │
+                              └─ worth reporting ─► PDF report ──► Webex QA channel
+                                                     │
+                                                     ├─ full UAT ──► same content published to Confluence
+                                                     └─ "promote" ─► Asana (rare, through asana-maintenance)
+```
 
 Read before every run:
-- `references/rubric.md`: scoring, verdicts, BOB-fit gate, guardrails
-- `references/ledger.md`: how the change timeline is built and cited
-- `dream.md` §2 and `SCOPE.md`: what BOB is and is not
+- `references/rubric.md`: checks, report sections, when a report is worth sending, guardrails
+- `references/ledger.md`: how "already addressed" is proven
+- `references/report-template.html`: the report layout (PDF and Confluence use the same content)
 
 ---
 
-## Storage (local only, never committed)
+## Inbox (Notion)
 
-All feedback lives under `FEEDBACK_ROOT` (default `.feedback/`, gitignored).
-Point `FEEDBACK_ROOT` at a OneDrive or Google Drive synced folder if the team
-needs to share it. Nothing in this folder is ever pushed to Git, Webex or any
-public channel.
+Database **Tasks & Notes** (under Inbox):
+`collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db`
 
-```
-{FEEDBACK_ROOT}/
-├── inbox/                  ← drop raw files here (PDF, DOCX, XLSX, CSV, TXT, MD, screenshots)
-│   └── _processed/         ← raw files moved here after intake
-├── items/
-│   ├── build/              ← recommended for the next development step
-│   ├── backlog/            ← valid, but not now
-│   ├── needs-info/         ← cannot judge without more detail
-│   ├── already-addressed/  ← matched to a verified change in the ledger
-│   ├── not-for-bob/        ← out of scope, other app, or conflicts with requirements
-│   ├── escalate/           ← clinical, legal or data-protection issues
-│   └── noise/              ← not actionable
-├── clusters.json           ← groups of items describing the same issue
-├── index.json              ← dedupe index: id, content hash, source ref, verdict
-├── ledger/changes.json     ← verified change timeline (see references/ledger.md)
-└── reports/YYYY-MM-DD-feedback-qa.md
-```
+This database is shared with the Webex/meeting task pipeline. Its `Status`
+column (new → task → approved → pushed) belongs to that pipeline. This skill
+tracks its own progress in the **QA** column instead:
 
-On the first run, create any missing folders and empty JSON files.
+| QA value | Set by | Meaning |
+|----------|--------|---------|
+| *(empty)* | — | Not looked at yet |
+| `uat` | Sean | Notes from a full UAT. Always reported, and published to Confluence |
+| `feedback` | agent | Feedback, waiting to go into the next report |
+| `reported` | agent | Included in a sent report |
+| `not-qa` | agent | A task, plan or admin note, not feedback |
+
+How to drop feedback: add a row, put the feedback in `Notes` or in the page
+body (paste as much raw text as you like), and set `Source`. For a full UAT,
+also set **QA = uat** and put the build or version in the title.
+
+Status rule: when the agent claims a row whose `Status` is `new` as feedback,
+it sets `Status = reference` so the task pipeline does not push it to Asana.
+It never changes any other `Status` value.
 
 ---
 
-## Procedure 1: Triage run
+## Procedure 1: QA run
 
 Trigger: "triage feedback", "QA feedback", "what should we build next"
 
-1. **Refresh the ledger.** Follow `references/ledger.md` §3. Only add entries
-   that have a source URL. Record the current released BOB version per platform.
-2. **Collect new feedback** from every configured source (§ Sources below).
-   Skip anything whose content hash or source ref is already in `index.json`.
-3. **Normalise** each item into one file (format in § Item file). Quote the
-   feedback verbatim, with personal data redacted (rubric §6).
-4. **Cluster.** Attach each item to an existing cluster in `clusters.json` if it
-   describes the same problem, or create a new cluster. Frequency counts unique
-   reporters, not repeated messages.
-5. **Check against reality**, in this order (rubric §2):
-   a. Ledger: was this already changed after the version the reporter used?
-   b. Current build: does the behaviour described match what the current
-      release shows, per the latest UAT report and store listing?
-   c. BOB fit: `SCOPE.md`, Notion requirements (`.truth-cache/requirements.json`),
-      and which app the feedback is really about.
-6. **Score and assign a verdict** using the rubric. Move the item file into the
-   matching `items/` subfolder.
-7. **Write the report** to `reports/` (format in § Report) and show the user
-   the summary and the top 5 BUILD candidates.
+1. **Pick up new rows.** Query rows where QA is empty or `uat`. Read `Notes`, and
+   fetch the page body when `Notes` is empty, cut short, or the row is `uat`.
+2. **Classify each row.** Feedback means a person's comment about how an app
+   behaves or should behave: bug reports, UAT results, customer issues, feature
+   requests, praise with detail. Tasks, plans, scheduling and admin notes are
+   `not-qa`. One row can hold several feedback points; split them.
+   Write QA = `feedback` or `not-qa` on each row as you go (keep `uat` as is).
+3. **Refresh the ledger** for the areas the feedback touches (`references/ledger.md`).
+4. **Check each feedback point** with the gates in `references/rubric.md` §2,
+   then score what passes (§3). Count repeats across people, including rows
+   marked `reported` in the last 90 days, so recurring issues get noticed.
+5. **Decide whether to report** (`references/rubric.md` §5).
+   - No: tell the user what is waiting and why it is not reported yet. Stop.
+   - Yes: continue.
+6. **Build the report.** Fill `references/report-template.html` and save it as
+   `.feedback/reports/{YYYY-MM-DD}-{app}-qa.html`. Then render the PDF:
+   ```
+   node scripts/qa-report.mjs pdf .feedback/reports/{file}.html
+   ```
+7. **Send it to Webex.** Write the short summary (format below) to
+   `.feedback/reports/{file}.md`, then run:
+   ```
+   node scripts/qa-report.mjs webex .feedback/reports/{file}.pdf .feedback/reports/{file}.md
+   ```
+8. **Full UAT only** (any included row has QA = `uat`): create a Confluence page
+   under **BOB App UAT** (page `1933795`, space APPS) titled
+   `{App} {build}: UAT Feedback Summary ({D Month YYYY})`, using the same
+   content as the PDF. Then add the Confluence link to the matching entry in
+   `skills/uat/references/uat-log.md` and set its Outcome.
+9. **Close the loop.** Set QA = `reported` on every row the report used, and
+   tell the user: what was sent, where, and the Confluence link if there is one.
 
-Do not create tasks, tickets or messages during a triage run. The run only
-recommends.
+`DRY_RUN=true` stops at step 6: the PDF is built, nothing is sent, published or
+written back to Notion.
 
-## Procedure 2: Promote
+## Procedure 2: Send now
 
-Trigger: "promote CL-007", "build CL-007"
+Trigger: "send QA report"
 
-1. Load the cluster and its items. Refuse if the verdict is not BUILD or
-   BACKLOG, and say why.
-2. Re-run the ledger check for that cluster only (something may have shipped
-   since the report).
-3. Hand an `agent_call` to `asana-maintenance`: create a task in the BOB
-   project Backlog section (IDs in `skills/uat/references/apps.md`) with the
-   cluster summary, redacted quotes, report count, proposed acceptance
-   criteria, and the report path. Respect `DRY_RUN`.
-4. Record the Asana link in the cluster and add `promoted_at` to it.
+Run Procedure 1 but skip the threshold in step 5.
 
-## Procedure 3: Single check
+## Procedure 3: Promote to Asana
 
-Trigger: "is this feedback useful", "check this report" (with pasted text or a file)
+Trigger: "promote {item}"
 
-Run steps 3 to 6 of Procedure 1 for that one input, file it, and answer in
-under 10 lines: verdict, score, why, and what would change the verdict.
+Normally not needed for QA. When asked, hand an `agent_call` to
+`asana-maintenance` to create a task in the BOB project Backlog section (IDs in
+`skills/uat/references/apps.md`) with the item, who raised it, the proposed
+acceptance criteria, and a link to the report. Respect `DRY_RUN`.
+
+## Procedure 4: Single check
+
+Trigger: "is this feedback useful" (with pasted text)
+
+Run the gates and score for that one input and answer in under 10 lines: where
+it lands, why, and what would change that. Do not write anything.
 
 ---
 
-## Sources
+## Webex summary format
 
-| Source | How | Notes |
-|--------|-----|-------|
-| Inbox folder | Read files in `inbox/`, then move them to `inbox/_processed/` | Primary channel for documents, exports, email dumps |
-| Confluence UAT reports | Pages listed in `skills/uat/references/uat-log.md`; read the Key Issues, Recommendations and Feature Assessment rows marked Issues Found or Broken | Tester is `internal-tester` |
-| Asana | Tasks and comments in the BOB project App Requests section, via the Asana MCP | Read only |
-| Notion comments | Only pages the user names | Read only |
-| Pasted text | Procedure 3 | Source `manual` |
-
-A source that fails is reported in the run summary and skipped. It never
-blocks the run.
-
-## Item file
-
-`items/{verdict}/{YYYY-MM-DD}_{source}_{slug}.md`
+Keep it short. The PDF carries the detail.
 
 ```markdown
----
-id: FB-2026-09-0012
-received: 2026-09-28          # date the reporter gave the feedback, not the run date
-collected: 2026-09-29
-source: confluence-uat         # inbox | confluence-uat | asana | notion | manual
-source_ref: <url or inbox/_processed/filename>
-reporter_role: clinician       # clinician | patient | internal-tester | unknown
-app: BOB App                   # the app the feedback is actually about
-app_version: 2.3.1             # "unknown" if not stated; never guess
-platform: ios                  # ios | android | both | unknown
-area: results-screen
-cluster: CL-007
-verdict: build
-score: 11/15
-ledger_check: "No matching change after 2.3.1 (ledger checked 2026-09-29)"
-reality_check: "Matches UAT 2026-05-07 iOS observation §2"
-fit_check: "Fits Notion requirement: PBE results display"
----
+**{App}: Feedback QA Report ({D Mon YYYY})**
+{UAT {build} | Feedback round} · {n} notes from {names} · {date range}
 
-## Feedback (verbatim, redacted)
-> …
+**Must-have**
+- {item} ({raised by})
 
-## Assessment
-One paragraph: what the problem is, who it hits, and why this verdict.
+**Blocker / needs attention**
+- {item or "None"}
 
-## If built (BUILD and BACKLOG only)
-- Acceptance criteria 1
-- Acceptance criteria 2
-```
-
-## Report
-
-```markdown
-# BOB Feedback QA — {YYYY-MM-DD}
-
-Window: {last run date} → today · Current release: iOS {v} ({date}), Android {v} ({date})
-Intake: {n} new items from {sources} · {n} duplicates skipped · {n} sources failed
-
-## Build next (ranked)
-| # | Cluster | Problem | Reporters | Score | Evidence | Why now |
-
-## Already addressed
-| Cluster | Fixed in | Ledger source |
-
-## Needs info
-| Cluster | Question to ask the reporter |
-
-## Not for BOB
-| Cluster | Reason | Where it belongs, if anywhere |
-
-## Escalations
-| Cluster | Issue | Who needs to see it |
-
-## Noise
-{count} items. One line each with the reason.
-
-## Ledger changes this run
-{new entries, each with source}
+{n} should-have · {n} quick wins · {n} nice-to-have · {n} already addressed · {n} not for BOB
+Full report attached.{ Confluence: {link}}
 ```

@@ -56,7 +56,7 @@ Every agent must agree on these facts:
 | Asana write proxy | `asana-maintenance` — all Asana writes route through it |
 | Approval gate owner | `brand-asset` — only it records approvals |
 | Release authority | Human only — `release` agent is manual trigger, never autonomous |
-| Feedback store | `feedback-qa` only — local `FEEDBACK_ROOT` (default `.feedback/`), gitignored, never committed |
+| Feedback QA flow | Inbox: Notion Tasks & Notes (`QA` column). Reports: PDF to the Webex QA space only. Full UAT (QA = `uat`): same content to Confluence under BOB App UAT. Asana only on "promote". |
 | Clinical claims rule | ANY efficacy/medical language requires `legal_approved: true` before publish, no exceptions |
 | Dry run default | `DRY_RUN=true` until explicitly disabled per-agent |
 | Idempotency pattern | `{resource_id}:{event_id}` — one action per event, always |

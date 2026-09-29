@@ -87,8 +87,9 @@ trigger:
       - "triage feedback"
       - "qa feedback"
       - "what should we build next"
+      - "send qa report"
       - "is this feedback useful"
-      - "promote cluster"
+      - "promote"
     dispatch:
       - agent: feedback-qa
 memory:
@@ -138,7 +139,7 @@ On any invocation, determine trigger type:
 | `user:publish to webflow` / `sync assets to webflow` | User phrase | webflow agent |
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
-| `user:triage feedback` / `what should we build next` / `promote cluster *` | User phrase | feedback-qa |
+| `user:triage feedback` / `what should we build next` / `send qa report` / `promote *` | User phrase | feedback-qa |
 | `user:process meeting notes` / `summarise meeting` / `fetch from fireflies` | User phrase | curaden-communications › meeting-notes |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
