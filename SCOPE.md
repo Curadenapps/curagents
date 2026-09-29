@@ -29,6 +29,7 @@ Additional capabilities active with the extended agent roster:
 - **Release Coordination** — `release` agent compiles release notes, creates Notion changelog, tags GitHub releases (manual trigger only)
 - **Notion Cache Sync** — `notion-sync` agent owns `.truth-cache/`, running before every truth-catcher scan
 - **Meeting Notes** — `meeting-notes` agent processes Webex transcripts (or pasted text) into structured Notion pages; 3 key points + 3 next steps per meeting
+- **Feedback QA** — `feedback-qa` agent collects user feedback into a local folder (not Git), checks it against a sourced change timeline, and recommends BUILD / BACKLOG / NOT-FOR-BOB. Advisory only; promotion to Asana needs a human
 
 ## In Scope — v2 (Deferred)
 

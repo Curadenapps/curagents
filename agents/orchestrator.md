@@ -82,6 +82,15 @@ trigger:
     dispatch:
       - skill: curaden-communications
         procedure: meeting-notes
+  - type: manual
+    phrases:
+      - "triage feedback"
+      - "qa feedback"
+      - "what should we build next"
+      - "is this feedback useful"
+      - "promote cluster"
+    dispatch:
+      - agent: feedback-qa
 memory:
   read:
     - dream.md
@@ -129,6 +138,7 @@ On any invocation, determine trigger type:
 | `user:publish to webflow` / `sync assets to webflow` | User phrase | webflow agent |
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
+| `user:triage feedback` / `what should we build next` / `promote cluster *` | User phrase | feedback-qa |
 | `user:process meeting notes` / `summarise meeting` / `fetch from fireflies` | User phrase | curaden-communications › meeting-notes |
 
 When the trigger is ambiguous, ask one clarifying question before routing.

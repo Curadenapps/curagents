@@ -7,6 +7,9 @@
 .truth-cache/*
 !.truth-cache/.gitkeep
 
+# Feedback QA store — user feedback stays local, never in Git
+.feedback/
+
 # Node
 node_modules/
 dist/

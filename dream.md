@@ -14,6 +14,7 @@ read_by:
   - agents/github.md
   - agents/release.md
   - agents/meeting-notes.md
+  - agents/feedback-qa.md
 format: "load dream.md FIRST, before own agent file. It replaces the need to
   load sibling agent specs — only load another agent's file if you are about
   to call it directly."
@@ -55,6 +56,7 @@ Every agent must agree on these facts:
 | Asana write proxy | `asana-maintenance` — all Asana writes route through it |
 | Approval gate owner | `brand-asset` — only it records approvals |
 | Release authority | Human only — `release` agent is manual trigger, never autonomous |
+| Feedback store | `feedback-qa` only — local `FEEDBACK_ROOT` (default `.feedback/`), gitignored, never committed |
 | Clinical claims rule | ANY efficacy/medical language requires `legal_approved: true` before publish, no exceptions |
 | Dry run default | `DRY_RUN=true` until explicitly disabled per-agent |
 | Idempotency pattern | `{resource_id}:{event_id}` — one action per event, always |
@@ -71,6 +73,7 @@ These are binding agreements between agents. Violating them creates inconsistenc
 | `figma` → `asana-maintenance` | Figma agent never moves Asana tasks directly. Passes directive to asana-maintenance. |
 | `webflow` → `brand-asset` | Webflow reads approvals from `.truth-cache/approvals.json` written by brand-asset. Never calls brand-asset at runtime. |
 | `github` → `asana-maintenance` | GitHub agent never updates Asana tasks directly. Delegates routing to asana-maintenance. |
+| `feedback-qa` → `asana-maintenance` | feedback-qa only recommends. A cluster reaches Asana only when a human says "promote", and the write goes through asana-maintenance. |
 | `release` → `all` | Release coordinator calls notion-sync, curaden-communications, github, and webflow in sequence. It is the only agent that chains multiple agents. |
 | `meeting-notes` → `curaden-communications` | meeting-notes delegates all Fireflies fetching, condensing, and Notion page creation to the curaden-communications skill (Procedure 4). Never calls Fireflies or Notion APIs directly. |
 | `truth-catcher` → `notion-sync` | Truth-catcher reads from cache only. If cache is stale, it requests notion-sync via orchestrator — does not fetch Notion itself. |
