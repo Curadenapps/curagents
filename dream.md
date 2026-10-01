@@ -106,7 +106,7 @@ Prevents agents from re-litigating resolved decisions in new sessions.
 
 | # | Date | Decision | Rationale |
 |---|------|----------|-----------|
-| 1 | 2026-10-01 | BOB roadmap reorganised around launch milestones (Soft Launch 17 Oct, Web Nov, Hard Launch mid-Dec, V2 P1 Apr-27, Rollout Apr–Aug-27); Curated Treatment Plan split to its own roadmap; `roadmap-watch` added | Notion docs were 3–4 months stale; one roadmap of record plus a weekly drift report keeps it current |
+| 1 | 2026-10-01 | BOB roadmap reorganised around launch milestones (Soft Launch 17 Oct tablet build, Web 9 Nov, Mobile + Hard Launch 14 Dec, V2 P1 Apr-27, Rollout Apr–Aug-27); Curated Treatment Plan split to its own roadmap; `roadmap-watch` added | Notion docs were 3–4 months stale; one roadmap of record plus a weekly drift report keeps it current |
 | 2 | 2026-03-26 | Design Diff Detection moved from v2 → v1 active | Ruflo background workers + figma agent make it feasible without extra infra |
 | 3 | 2026-03-26 | Asana-maintenance is the sole Asana write proxy | Prevents duplicate writes and conflicting comments from multiple agents hitting the API simultaneously |
 | 4 | 2026-03-26 | `.truth-cache/` is atomic-write only | Prevents partial reads by sibling agents during notion-sync updates |
