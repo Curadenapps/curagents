@@ -14,6 +14,7 @@ read_by:
   - agents/github.md
   - agents/release.md
   - agents/meeting-notes.md
+  - agents/roadmap-watch.md
 format: "load dream.md FIRST, before own agent file. It replaces the need to
   load sibling agent specs — only load another agent's file if you are about
   to call it directly."
@@ -51,7 +52,8 @@ Every agent must agree on these facts:
 | Fact | Value |
 |------|-------|
 | Notion root database | `86b68fc172dd43ff8ee3219a3a5435f6` (workspace: seandunne) |
-| Truth cache owner | `notion-sync` — only it writes `.truth-cache/` |
+| Truth cache owner | `notion-sync` — only it writes `.truth-cache/` (exception: `roadmap-watch` owns `.truth-cache/roadmap-watch/`) |
+| Roadmap of record | Notion BOB Roadmap `751b6071283e43e8b1a91054319e0db6` + Curated Treatment Plan Roadmap `4eeb7d12c3fa4bdcb069334b80a8c333` |
 | Asana write proxy | `asana-maintenance` — all Asana writes route through it |
 | Approval gate owner | `brand-asset` — only it records approvals |
 | Release authority | Human only — `release` agent is manual trigger, never autonomous |
@@ -74,6 +76,7 @@ These are binding agreements between agents. Violating them creates inconsistenc
 | `release` → `all` | Release coordinator calls notion-sync, curaden-communications, github, and webflow in sequence. It is the only agent that chains multiple agents. |
 | `meeting-notes` → `curaden-communications` | meeting-notes delegates all Fireflies fetching, condensing, and Notion page creation to the curaden-communications skill (Procedure 4). Never calls Fireflies or Notion APIs directly. |
 | `truth-catcher` → `notion-sync` | Truth-catcher reads from cache only. If cache is stale, it requests notion-sync via orchestrator — does not fetch Notion itself. |
+| `roadmap-watch` → all | Read-only on Notion rows, Asana and Jira. Its only writes are its weekly report page under Notion "Roadmap Reports" and its own snapshot in `.truth-cache/roadmap-watch/`. |
 | Orchestrator → all | Orchestrator never performs domain actions. Classify, dispatch, collect, report only. |
 
 ---
@@ -103,11 +106,11 @@ Prevents agents from re-litigating resolved decisions in new sessions.
 
 | # | Date | Decision | Rationale |
 |---|------|----------|-----------|
-| 1 | 2026-03-26 | Design Diff Detection moved from v2 → v1 active | Ruflo background workers + figma agent make it feasible without extra infra |
-| 2 | 2026-03-26 | Asana-maintenance is the sole Asana write proxy | Prevents duplicate writes and conflicting comments from multiple agents hitting the API simultaneously |
-| 3 | 2026-03-26 | `.truth-cache/` is atomic-write only | Prevents partial reads by sibling agents during notion-sync updates |
-| 4 | 2026-03-26 | Release agent is manual-trigger only | Releases are intentional human decisions; no autonomous release ever |
-| 5 | 2026-03-26 | Notion root DB `86b68fc172dd43ff8ee3219a3a5435f6` is the discovery anchor | All child page IDs discovered dynamically by notion-sync on first run; no hardcoded sub-IDs |
+| 1 | 2026-10-01 | BOB roadmap reorganised around launch milestones (Soft Launch 17 Oct, Web Nov, Hard Launch mid-Dec, V2 P1 Apr-27, Rollout Apr–Aug-27); Curated Treatment Plan split to its own roadmap; `roadmap-watch` added | Notion docs were 3–4 months stale; one roadmap of record plus a weekly drift report keeps it current |
+| 2 | 2026-03-26 | Design Diff Detection moved from v2 → v1 active | Ruflo background workers + figma agent make it feasible without extra infra |
+| 3 | 2026-03-26 | Asana-maintenance is the sole Asana write proxy | Prevents duplicate writes and conflicting comments from multiple agents hitting the API simultaneously |
+| 4 | 2026-03-26 | `.truth-cache/` is atomic-write only | Prevents partial reads by sibling agents during notion-sync updates |
+| 5 | 2026-03-26 | Release agent is manual-trigger only | Releases are intentional human decisions; no autonomous release ever |
 
 ---
 

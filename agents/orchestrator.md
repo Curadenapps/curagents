@@ -42,6 +42,20 @@ trigger:
         inputs:
           trigger: section_transition
   - type: schedule
+    label: weekly-roadmap-watch
+    cron: "0 8 * * 1"
+    dispatch:
+      - agent: roadmap-watch
+        inputs:
+          mode: weekly
+  - type: manual
+    phrases:
+      - "roadmap watch"
+      - "check the roadmap"
+      - "roadmap drift"
+    dispatch:
+      - agent: roadmap-watch
+  - type: schedule
     label: pre-scan-notion-sync
     cron: "50 * * * *"
     dispatch:
@@ -130,6 +144,8 @@ On any invocation, determine trigger type:
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
 | `user:process meeting notes` / `summarise meeting` / `fetch from fireflies` | User phrase | curaden-communications › meeting-notes |
+| `schedule:"0 8 * * 1"` | CRON (Monday 08:00) | roadmap-watch (weekly roadmap drift report) |
+| `user:roadmap watch` / `check the roadmap` / `roadmap drift` | User phrase | roadmap-watch |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 
