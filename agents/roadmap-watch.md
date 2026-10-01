@@ -91,8 +91,10 @@ Build one normalised record per item:
 }
 ```
 
-- **Notion:** every row of both roadmap DBs (Name, Status, Release, Track,
-  Priority, Date, Milestone, Entry Type, Asana Link, Jira Key, Depends on).
+- **Notion:** every row of both roadmap DBs. BOB Roadmap fields: Name, Level
+  (Milestone / Feature / Task), Epic, Status, Release, Priority, Difficulty,
+  Date, Track, Asana Link, Jira Key, Depends on / Blocks, CTP link, Notes.
+  `Time Horizon` is a formula and is not snapshotted.
 - **Asana:** tasks in BOB App that are milestones, subtasks of BOB V2 and of the
   Milan task, plus any task referenced by a roadmap row (name, completed,
   due_on, section, modified_at).
@@ -118,6 +120,8 @@ Otherwise classify each change:
 | CTP MVP slips past the BOB "Show Curated Treatment Plan in BOB" date | At-risk milestones |
 | New Asana BOB V2 subtask or BA issue with no roadmap row linking it | New untracked work |
 | Roadmap row with no Asana Link and no Jira Key, Release not Future/Parked | Unlinked roadmap rows |
+| Open Feature (Status not Done/Cut) with empty Priority, Difficulty, Release or Epic | Missing info |
+| Notes still contain "DRAFT by Claude" (priority/difficulty not yet confirmed) | Missing info (count only) |
 
 ### Step 4 — Write the report
 
@@ -144,6 +148,10 @@ Summary: {n} changes · {n} drift · {n} at-risk milestones · {n} untracked
 
 ## Unlinked roadmap rows
 - {row} — add Asana Link or Jira Key
+
+## Missing info
+- {feature} — missing {Priority|Difficulty|Release|Epic}
+- {n} rows still marked "DRAFT by Claude" — review in the "Review drafts" view
 ```
 
 Each "suggested fix" is a sentence for a human, never an action taken.
