@@ -34,6 +34,7 @@ idempotency_key, dry_run, output schema). Load the relevant file for context:
 - [`agents/github.md`](agents/github.md) — PR/commit linkage to Jira and Asana (Curadenapps org)
 - [`agents/release.md`](agents/release.md) — Release coordinator (BOB + RevolveNote); manual trigger only
 - [`agents/meeting-notes.md`](agents/meeting-notes.md) — Webex transcript → 3 key points + 3 next steps → Notion page
+- [`agents/roadmap-watch.md`](agents/roadmap-watch.md) — Weekly roadmap drift report (Notion roadmaps vs Asana/Jira); read-only
 
 ## Scope
 

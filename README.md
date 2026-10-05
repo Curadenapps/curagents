@@ -20,6 +20,7 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 │
 ├── agents/        ← Automated agents — run on schedule or triggered
 │   ├── truth-catcher.md        ← Alignment enforcer (Notion vs Asana)
+│   ├── roadmap-watch.md        ← Weekly roadmap drift report
 │   ├── brand-asset.md          ← Brand asset governance and delivery
 │   └── asana-maintenance.md    ← Asana hygiene, Kanban routing, update snippets
 │
@@ -75,6 +76,7 @@ or Ruflo background workers. Each has a strictly fenced domain.
 | Webflow | [`agents/webflow.md`](agents/webflow.md) | Publishing gate, brand compliance, clinical claims check, asset sync | brand-asset approval event + manual |
 | GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
+| Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | Weekly CRON (Mon 08:00) + manual "roadmap watch" |
 
 ---
 
