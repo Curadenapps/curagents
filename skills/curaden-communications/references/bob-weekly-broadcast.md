@@ -35,6 +35,10 @@ project = BOB AND status in ("In Progress", "In Review") ORDER BY priority DESC,
 project = BOB AND statusCategory != Done AND (labels = "blocked" OR priority in (Highest, High)) ORDER BY priority DESC
 ```
 
+Also add every open GitHub issue labelled `truth-catcher-escalation` in
+`Curadenapps/curagents` (Truth Catcher questions with no reply after 3 working
+days). Write each as `- {task} — waiting on {person}: {question} 🔺`.
+
 ## Broadcast Template
 
 Use this structure when creating the Notion page content. Adapt based on actual data — if a section is empty, include it with "None this week."

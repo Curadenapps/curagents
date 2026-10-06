@@ -23,11 +23,26 @@ export type VerdictType =
   | "pr_missing_link"
   | "publish_confirmed";
 
-/** Post a comment (story) to an Asana task */
+/** Escape text for Asana rich text (html_text) */
+export function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** Asana rich-text @mention of a user — notifies them */
+export function mention(userGid: string): string {
+  return `<a data-asana-gid="${userGid}"/>`;
+}
+
+/**
+ * Post a comment (story) to an Asana task.
+ * Pass `html` (Asana rich text, without the <body> wrapper) to use @mentions;
+ * `text` is then only used for logging.
+ */
 export async function postComment(
   taskGid: string,
   text: string,
-  dryRun = false
+  dryRun = false,
+  html?: string
 ): Promise<{ gid: string } | null> {
   if (dryRun) {
     console.log(`[DRY RUN] Would post to task ${taskGid}:\n${text}`);
@@ -37,7 +52,7 @@ export async function postComment(
   const res = await fetch(`${ASANA_API}/tasks/${taskGid}/stories`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ data: { text } }),
+    body: JSON.stringify({ data: html ? { html_text: `<body>${html}</body>` } : { text } }),
   });
 
   const data = await res.json() as any;

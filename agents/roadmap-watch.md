@@ -149,6 +149,9 @@ Summary: {n} changes · {n} drift · {n} at-risk milestones · {n} untracked
 ## Unlinked roadmap rows
 - {row} — add Asana Link or Jira Key
 
+## Truth Catcher escalations
+- {task} — waiting on {person} since {date}: {question}   (open GitHub issues labelled `truth-catcher-escalation`)
+
 ## Missing info
 - {feature} — missing {Priority|Difficulty|Release|Epic}
 - {n} rows still marked "DRAFT by Claude" — review in the "Review drafts" view

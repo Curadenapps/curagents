@@ -92,7 +92,7 @@ Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md)
 
 | Workflow | Schedule (UTC) | Change check (no LLM) | Claude run |
 |----------|----------------|-----------------------|------------|
-| `sync-and-scan.yml` | Weekdays 06/10/14/18 | Notion edits since last sync → Asana events since last token | notion-sync (Haiku) → truth-catcher (Sonnet) |
+| `sync-and-scan.yml` | Weekdays 06/10/14/18 | Notion edits since last sync → Asana events since last token | notion-sync (Haiku) → truth-catcher: `scripts/truth-scan.ts` does the checks and posting, Sonnet only judges unlinked tasks |
 | `figma-diff.yml` | Weekdays 07:00 | Figma file `lastModified` | figma (Haiku) |
 | `bob-broadcast.yml` | Mon 09:00 | — | broadcast (Sonnet) |
 
@@ -161,6 +161,6 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | Figma file key / Webflow site ID not set | figma and webflow agents run in config-error state |
 | Asana webhook not registered | asana-maintenance and brand-asset webhooks don't fire; scheduled scan uses the Asana events gate |
 | `DRY_RUN=true` everywhere | No live writes to any system |
-| No Jira credentials in CI | bob-broadcast and roadmap-watch only have Jira access in interactive sessions (Atlassian MCP) |
+| Jira secrets exist in CI (`JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEY`) but no workflow passes them yet | bob-broadcast reads Jira only in interactive sessions |
 | roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
 | `FIREFLIES_API_KEY` / `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes uses paste mode / searches for the DB by name |

@@ -91,23 +91,20 @@ consistent structure.
 ```
 
 #### `roadmap.json` schema
+
+Written by `syncRoadmap()` in `src/truth-cache/sync.ts` (no LLM) from the BOB Roadmap
+DB `751b6071283e43e8b1a91054319e0db6`. truth-catcher's scan script calls it before
+every scan. Don't rewrite this file from the agent.
+
 ```json
 {
   "synced_at": "ISO-8601",
-  "notion_page_id": "...",
-  "milestones": [
-    {
-      "id": "v1",
-      "label": "Current Milestone",
-      "status": "active",
-      "items": ["REQ-BA-01", "REQ-BA-02"]
-    },
-    {
-      "id": "v2",
-      "label": "Deferred",
-      "status": "deferred",
-      "items": ["REQ-BA-20", "REQ-BA-21", "REQ-BA-22"]
-    }
+  "notion_database_id": "751b6071283e43e8b1a91054319e0db6",
+  "rows": [
+    { "id": "...", "url": "...", "name": "...", "level": "Feature", "epic": "...",
+      "release": "Web Nov-26", "status": "In Progress", "priority": "P1",
+      "date_start": "YYYY-MM-DD", "date_end": null, "asana_gids": ["..."],
+      "jira_key": "BA-8", "last_edited_time": "ISO-8601" }
   ]
 }
 ```

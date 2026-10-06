@@ -58,13 +58,22 @@ jobs:
 
   scan:
     needs: sync
+    # Run even if notion-sync failed: the scan syncs the roadmap itself
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write   # escalation issues
     env:
+      # Truth Catcher has its own live switches (repo variables), independent of the global DRY_RUN
+      DRY_RUN: ${{ vars.TRUTH_CATCHER_LIVE == 'true' && 'false' || 'true' }}
+      DELAY_DRY_RUN: ${{ vars.TRUTH_CATCHER_DELAY_LIVE == 'true' && 'false' || 'true' }}
+      GITHUB_TOKEN: ${{ github.token }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
-      ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
-      ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID }}
+      ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_CURAGENT_TOKEN || secrets.ASANA_ACCESS_TOKEN }}
+      ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID || '1204489225205419' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -80,13 +89,22 @@ jobs:
         id: gate
         run: npx -y tsx scripts/gate.ts asana
 
-      - name: Install Claude Code
+      - name: Prepare scan (roadmap sync + Asana fetch + rule checks, no LLM)
+        id: prepare
         if: steps.gate.outputs.changed == 'true' || inputs.force
+        run: npx -y tsx scripts/truth-scan.ts prepare
+
+      - name: Install Claude Code
+        if: steps.prepare.outputs.needs_judgement == 'true'
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Run truth-catcher (Sonnet)
-        if: steps.gate.outputs.changed == 'true' || inputs.force
+      - name: Judge unlinked tasks (Sonnet)
+        if: steps.prepare.outputs.needs_judgement == 'true'
         run: >
-          scripts/run-agent.sh claude-sonnet-5-5 25
-          "Read,Write,Edit,Glob,Grep,Bash(curl:*)"
-          "Run the truth-catcher agent: read dream.md §2–3 and agents/truth-catcher.md, then execute its workflow. Trigger: schedule — scan. Mode: batch. Limit: 50. Read requirements from .truth-cache/ only."
+          scripts/run-agent.sh claude-sonnet-5-5 12
+          "Read,Write"
+          "Run the truth-catcher agent: read agents/truth-catcher.md and do Step 2 only — judge the unlinked tasks and delay candidates in .truth-cache/scan-input.json and write .truth-cache/scan-decisions.json."
+
+      - name: Post comments (dry run unless DRY_RUN=false)
+        if: steps.gate.outputs.changed == 'true' || inputs.force
+        run: npx -y tsx scripts/truth-scan.ts post
