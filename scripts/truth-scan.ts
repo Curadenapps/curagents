@@ -19,6 +19,8 @@ const ASANA_API = "https://app.asana.com/api/1.0";
 const PROJECT_GID = process.env.ASANA_PROJECT_GID || "1204489225205419"; // BOB App
 const BOB_V2_MILESTONE_GID = "1217949875186079";
 const DRY_RUN = process.env.DRY_RUN !== "false";
+/** Comments post from the token owner's account; the signature says who they are posted for */
+const ON_BEHALF_OF = process.env.TRUTH_CATCHER_ON_BEHALF_OF || "Sean Dunne";
 
 /** Releases that are not being built now — active work on them is "too early" */
 const LATER_RELEASES = ["V2 P1 Apr-27", "Rollout Apr–Aug-27", "Future", "Parked", "Unscheduled"];
@@ -227,7 +229,7 @@ function commentText(task: Task, row: RoadmapRow | null, findings: FindingType[]
   const critical = findings.includes("roadmap_cut_asana_open");
   const lines = findings.map((f) => LINES[f](task, row));
   return [
-    `${critical ? "🔴" : "⚠️"} [Truth Catcher] Not aligned with the BOB Roadmap`,
+    `🔎 Truth Catcher: ${critical ? "🔴 cut from" : "⚠️ not aligned with"} the BOB Roadmap`,
     "",
     ...lines.map(([what]) => `• ${what}`),
     ...(reason ? [`  ${reason}`] : []),
@@ -235,7 +237,7 @@ function commentText(task: Task, row: RoadmapRow | null, findings: FindingType[]
     `Roadmap: ${row?.url ?? "https://www.notion.so/751b6071283e43e8b1a91054319e0db6"}`,
     `Suggested fix: ${lines.map(([, fix]) => fix).join(" ")}`,
     "",
-    `Run: ${runId}`,
+    `— Truth Catcher, on behalf of ${ON_BEHALF_OF} · run ${runId}`,
   ].join("\n");
 }
 

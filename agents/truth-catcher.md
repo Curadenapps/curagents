@@ -26,7 +26,7 @@ idempotency_key: "{task_gid}:{fingerprint}"
 dry_run: true
 ---
 
-# The Truth Catcher: Asana vs BOB Roadmap
+# Truth Catcher: Asana vs BOB Roadmap
 
 ## Purpose
 
@@ -47,6 +47,7 @@ These rules apply to every session and every run. Change them only through
 | Join key | A roadmap row's `Asana Link` contains the task gid (or the parent task's gid) |
 | Scope per run | Tasks changed since the last scan. The first run is a baseline over all open tasks. |
 | Comment policy | Comment on misaligned tasks only, once. No "verified" comments. Comment again only when the task's section or completion, or the row's Release, Status or Priority, changes. No @mentions. |
+| Identity | Named **Truth Catcher**. It posts from Sean's Asana account (`ASANA_ACCESS_TOKEN` is Sean's personal access token) and signs every comment "— Truth Catcher, on behalf of Sean Dunne" (`TRUTH_CATCHER_ON_BEHALF_OF`). There is no separate Asana user. |
 | Rollout | Dry run until Sean approves the preview, then set `DRY_RUN=false` |
 
 ### What counts as "not aligned"
@@ -112,17 +113,17 @@ comments yourself, and don't call Asana or Notion.
 ## Comment format
 
 ```
-⚠️ [Truth Catcher] Not aligned with the BOB Roadmap
+🔎 Truth Catcher: ⚠️ not aligned with the BOB Roadmap
 
 • Too early: this task is in "Implementation", but roadmap row "Clinic reports" is planned for V2 P1 Apr-27.
 
 Roadmap: {row URL}
 Suggested fix: Move the roadmap row into a current release (Soft Launch Oct-26, Web Nov-26, Hard Launch Dec-26), or pause this task.
 
-Run: {ISO timestamp}
+— Truth Catcher, on behalf of Sean Dunne · run {ISO timestamp}
 ```
 
-A Cut row uses 🔴. Several findings on one task go into the same comment.
+A Cut row reads "🔴 cut from the BOB Roadmap". Several findings on one task go into the same comment.
 
 ## Output Schema
 
