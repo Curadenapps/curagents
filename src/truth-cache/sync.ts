@@ -89,3 +89,74 @@ export async function syncNotionCache(): Promise<void> {
 
   console.log("notion-sync: cache updated", meta);
 }
+
+/** BOB Roadmap database — roadmap of record (dream.md §2) */
+const BOB_ROADMAP_DB_ID = "751b6071283e43e8b1a91054319e0db6";
+
+export interface RoadmapRow {
+  id: string;
+  url: string;
+  name: string;
+  level: string | null;
+  epic: string | null;
+  release: string | null;
+  status: string | null;
+  priority: string | null;
+  date_start: string | null;
+  date_end: string | null;
+  asana_gids: string[];
+  jira_key: string | null;
+  last_edited_time: string;
+}
+
+const select = (p: any): string | null => p?.select?.name ?? null;
+const text = (p: any): string | null =>
+  (p?.rich_text ?? p?.title ?? []).map((t: any) => t.plain_text).join("") || null;
+
+/** Every long numeric id in an Asana URL — covers /0/{project}/{task} and /task/{gid} forms */
+function asanaGids(url: string | null): string[] {
+  return url ? [...url.matchAll(/\d{10,}/g)].map((m) => m[0]) : [];
+}
+
+/** Fetch all BOB Roadmap rows and write .truth-cache/roadmap.json (no LLM) */
+export async function syncRoadmap(): Promise<number> {
+  const rows: RoadmapRow[] = [];
+  let cursor: string | undefined;
+  do {
+    const res = await fetch(`${NOTION_API}/databases/${BOB_ROADMAP_DB_ID}/query`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ page_size: 100, start_cursor: cursor }),
+    });
+    if (!res.ok) throw new Error(`Notion roadmap query ${res.status}: ${await res.text()}`);
+    const data = (await res.json()) as any;
+    for (const page of data.results) {
+      const p = page.properties;
+      const asanaLink = p["Asana Link"]?.url ?? null;
+      rows.push({
+        id: page.id,
+        url: page.url,
+        name: text(p["Name"]) ?? "(untitled)",
+        level: select(p["Level"]),
+        epic: select(p["Epic"]),
+        release: select(p["Release"]),
+        status: select(p["Status"]),
+        priority: select(p["Priority"]),
+        date_start: p["Date"]?.date?.start ?? null,
+        date_end: p["Date"]?.date?.end ?? null,
+        // Asana URLs also contain the project gid; matching only ever looks up task gids
+        asana_gids: asanaGids(asanaLink),
+        jira_key: text(p["Jira Key"]),
+        last_edited_time: page.last_edited_time,
+      });
+    }
+    cursor = data.has_more ? data.next_cursor : undefined;
+  } while (cursor);
+
+  atomicWrite("roadmap.json", {
+    synced_at: new Date().toISOString(),
+    notion_database_id: BOB_ROADMAP_DB_ID,
+    rows,
+  });
+  return rows.length;
+}
