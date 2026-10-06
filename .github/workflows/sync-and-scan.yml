@@ -62,7 +62,14 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write   # escalation issues
     env:
+      # Truth Catcher has its own live switches (repo variables), independent of the global DRY_RUN
+      DRY_RUN: ${{ vars.TRUTH_CATCHER_LIVE == 'true' && 'false' || 'true' }}
+      DELAY_DRY_RUN: ${{ vars.TRUTH_CATCHER_DELAY_LIVE == 'true' && 'false' || 'true' }}
+      GITHUB_TOKEN: ${{ github.token }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
       ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_CURAGENT_TOKEN || secrets.ASANA_ACCESS_TOKEN }}
@@ -94,9 +101,9 @@ jobs:
       - name: Judge unlinked tasks (Sonnet)
         if: steps.prepare.outputs.needs_judgement == 'true'
         run: >
-          scripts/run-agent.sh claude-sonnet-5-5 10
+          scripts/run-agent.sh claude-sonnet-5-5 12
           "Read,Write"
-          "Run the truth-catcher agent: read agents/truth-catcher.md and do Step 2 only — judge the unlinked tasks in .truth-cache/scan-input.json and write .truth-cache/scan-decisions.json."
+          "Run the truth-catcher agent: read agents/truth-catcher.md and do Step 2 only — judge the unlinked tasks and delay candidates in .truth-cache/scan-input.json and write .truth-cache/scan-decisions.json."
 
       - name: Post comments (dry run unless DRY_RUN=false)
         if: steps.gate.outputs.changed == 'true' || inputs.force
