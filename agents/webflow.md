@@ -5,7 +5,7 @@ description: >
   brand standards and clinical claim rules before publish. Syncs approved
   brand assets from .truth-cache/approvals.json to Webflow collections.
   Posts publication events back to linked Asana tasks.
-model: claude-sonnet-4-6
+model: claude-sonnet-5-5
 tools: Read, Write, AsanaAPI, Bash
 trigger:
   - type: agent_call

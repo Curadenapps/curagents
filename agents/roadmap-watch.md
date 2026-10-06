@@ -5,7 +5,7 @@ description: >
   Plan Roadmap in Notion, the BOB App milestones in Asana and the BOB project in
   Jira, diffs against last week, and writes one "Roadmap Watch" report page to
   Notion. Read-only on every system except the report page.
-model: claude-sonnet-4-6
+model: claude-sonnet-5-5
 tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI
 trigger:
   - type: schedule

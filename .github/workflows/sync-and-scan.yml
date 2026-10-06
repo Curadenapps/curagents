@@ -1,0 +1,92 @@
+name: Sync and Scan — notion-sync → truth-catcher
+
+# Weekdays 06/10/14/18 UTC. Each job runs a cheap API check first and only calls
+# Claude when the source changed (or when dispatched with force=true).
+on:
+  schedule:
+    - cron: "0 6-18/4 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Skip the change checks and run Claude anyway"
+        type: boolean
+        default: false
+
+concurrency:
+  group: truth-cache
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  CLAUDE_CODE_USE_BEDROCK: "0"
+  DISABLE_AUTOUPDATER: "1"
+  DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+      NOTION_ROOT_DATABASE_ID: ${{ secrets.NOTION_ROOT_DATABASE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/cache@v4
+        with:
+          path: .truth-cache
+          key: truth-cache-${{ github.run_id }}-sync
+          restore-keys: truth-cache-
+
+      - name: Check Notion for changes
+        id: gate
+        run: npx -y tsx scripts/gate.ts notion
+
+      - name: Install Claude Code
+        if: steps.gate.outputs.changed == 'true' || inputs.force
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run notion-sync (Haiku)
+        if: steps.gate.outputs.changed == 'true' || inputs.force
+        run: >
+          scripts/run-agent.sh claude-haiku-4-5-20251001 15
+          "Read,Write,Edit,Glob,Grep,mcp__notion"
+          "Run the notion-sync agent: read dream.md §2–3 and agents/notion-sync.md, then execute its workflow. Trigger: schedule — sync."
+
+  scan:
+    needs: sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+      ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
+      ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/cache@v4
+        with:
+          path: .truth-cache
+          key: truth-cache-${{ github.run_id }}-scan
+          restore-keys: truth-cache-
+
+      - name: Check Asana for changes
+        id: gate
+        run: npx -y tsx scripts/gate.ts asana
+
+      - name: Install Claude Code
+        if: steps.gate.outputs.changed == 'true' || inputs.force
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run truth-catcher (Sonnet)
+        if: steps.gate.outputs.changed == 'true' || inputs.force
+        run: >
+          scripts/run-agent.sh claude-sonnet-5-5 25
+          "Read,Write,Edit,Glob,Grep,Bash(curl:*)"
+          "Run the truth-catcher agent: read dream.md §2–3 and agents/truth-catcher.md, then execute its workflow. Trigger: schedule — scan. Mode: batch. Limit: 50. Read requirements from .truth-cache/ only."

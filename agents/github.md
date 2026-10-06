@@ -5,7 +5,7 @@ description: >
   and commits to Jira issues and Asana tasks. Posts alignment verdicts on
   PRs. Notifies Asana when PRs merge. Flags PRs with no linked issue.
   Read-only on GitHub — never merges, deletes, or force-pushes.
-model: claude-sonnet-4-6
+model: claude-haiku-4-5-20251001
 tools: Read, Write, AsanaAPI, JiraAPI, Bash
 trigger:
   - type: webhook

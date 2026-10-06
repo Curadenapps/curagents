@@ -17,7 +17,10 @@ Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own 
 ## Agents
 
 All agents share a common YAML frontmatter schema (trigger, memory,
-idempotency_key, dry_run, output schema). Load the relevant file for context:
+idempotency_key, dry_run, output schema). Each spec's `model:` field sets its tier
+(Haiku 4.5 / Sonnet 5.5 / Opus 5.5). The same agents are registered as Claude Code
+subagents in `.claude/agents/`. Use those to fan out in parallel, following the swarm
+rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 
 **Orchestration**
 - [`agents/orchestrator.md`](agents/orchestrator.md) — Master router; entry point for all activity

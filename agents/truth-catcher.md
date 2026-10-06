@@ -4,12 +4,12 @@ description: >
   Alignment and compliance agent. Autonomously scans Asana tasks and comments
   against Notion requirements. Posts structured verdicts. Never takes
   destructive Asana actions.
-model: claude-sonnet-4-6
+model: claude-sonnet-5-5
 tools: Read, Write, AsanaAPI, NotionAPI
 trigger:
   - type: schedule
-    cron: "0 * * * *"
-    label: hourly-scan
+    cron: "0 6-18/4 * * 1-5"
+    label: scan
     inputs:
       mode: batch
       limit: 50

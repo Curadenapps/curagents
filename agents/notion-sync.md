@@ -5,13 +5,13 @@ description: >
   brand guidelines, and BOB App Hub from the Curaden Notion workspace and
   writes structured JSON to .truth-cache/. All other agents read from this
   cache — never fetch Notion directly. Runs before every truth-catcher scan.
-model: claude-sonnet-4-6
+model: claude-haiku-4-5-20251001
 tools: Read, Write, NotionAPI
 trigger:
   - type: schedule
     label: pre-scan-sync
-    cron: "50 * * * *"
-    note: "Runs 10 min before truth-catcher's hourly scan"
+    cron: "0 6-18/4 * * 1-5"
+    note: "sync job of .github/workflows/sync-and-scan.yml — gated; runs before truth-catcher"
   - type: agent_call
     from: ["curaden-orchestrator", "bob-truth-catcher", "bob-brand-asset"]
     condition: ".truth-cache/requirements.json missing or older than 24h"

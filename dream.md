@@ -3,29 +3,16 @@ type: shared-context
 scope: system-wide
 updated_by: curaden-orchestrator
 update_trigger: "after every dispatch cycle; manually on major decisions"
-read_by:
-  - agents/orchestrator.md
-  - agents/truth-catcher.md
-  - agents/brand-asset.md
-  - agents/asana-maintenance.md
-  - agents/notion-sync.md
-  - agents/figma.md
-  - agents/webflow.md
-  - agents/github.md
-  - agents/release.md
-  - agents/meeting-notes.md
-  - agents/roadmap-watch.md
-format: "load dream.md FIRST, before own agent file. It replaces the need to
-  load sibling agent specs — only load another agent's file if you are about
-  to call it directly."
+format: "Load §2–3 before your own agent file. Only load a sibling agent's spec
+  if you are about to call it directly."
 ---
 
 # Dream
 
 > The ambient context document. Every agent loads this before their own spec.
 > It holds the shared mental model, current system state, active cross-agent
-> contracts, and rolling decision log. Keep it concise — it must fit in ~600
-> tokens so it never crowds out working context.
+> contracts, and rolling decision log. Keep it under ~1,000 tokens. Known gaps
+> and how-to notes live in README.md, not here.
 
 ---
 
@@ -106,39 +93,8 @@ Prevents agents from re-litigating resolved decisions in new sessions.
 
 | # | Date | Decision | Rationale |
 |---|------|----------|-----------|
-| 1 | 2026-10-01 | BOB roadmap reorganised around launch milestones (Soft Launch 17 Oct tablet build, Web 9 Nov, Mobile + Hard Launch 14 Dec, V2 P1 Apr-27, Rollout Apr–Aug-27); Curated Treatment Plan split to its own roadmap; `roadmap-watch` added | Notion docs were 3–4 months stale; one roadmap of record plus a weekly drift report keeps it current |
-| 2 | 2026-03-26 | Design Diff Detection moved from v2 → v1 active | Ruflo background workers + figma agent make it feasible without extra infra |
-| 3 | 2026-03-26 | Asana-maintenance is the sole Asana write proxy | Prevents duplicate writes and conflicting comments from multiple agents hitting the API simultaneously |
-| 4 | 2026-03-26 | `.truth-cache/` is atomic-write only | Prevents partial reads by sibling agents during notion-sync updates |
-| 5 | 2026-03-26 | Release agent is manual-trigger only | Releases are intentional human decisions; no autonomous release ever |
-
----
-
-## 6. Known Gaps (honest accounting — remove when resolved)
-
-| Gap | Blocking | Owner |
-|-----|---------|-------|
-| `.github/workflows/` not yet created | Agents run manually only; no autonomous CRON | Phase 2 |
-| `src/` TypeScript implementations missing | API calls are prompt-described, not code-backed | Phase 2 |
-| Figma file key not yet set | Figma agent runs in config-error state | Phase 3 (credentials) |
-| Webflow site ID not yet set | Webflow agent runs in config-error state | Phase 3 (credentials) |
-| Asana webhook not yet registered | asana-maintenance falls back to 5-min polling | Phase 3 (credentials) |
-| `DRY_RUN=true` across all agents | No live writes to any system | Phase 4 (dry-run verified) |
-| `FIREFLIES_API_KEY` not yet set | meeting-notes Fireflies mode unavailable; paste mode works now | Phase 3 (credentials) |
-| `NOTION_MEETING_NOTES_DB_ID` not yet set | meeting-notes will search for the DB by name as a fallback | Phase 3 (setup) |
-
----
-
-## 7. How to Use This File
-
-**Agents:** Load `dream.md` before your own spec. Use §2 for facts you'd
-otherwise repeat. Use §3 for your contract obligations. Check §4 for current
-system state before deciding to fetch live data. Add to §5 after any major
-decision by updating via the orchestrator.
-
-**Orchestrator:** After every dispatch cycle, update §4 (Active Context) with
-the latest timestamps and counts from `.truth-cache/dispatch-log.json`.
-When a significant decision is made, prepend it to §5 and drop the oldest entry.
-
-**Humans:** §6 is your checklist. §5 is your audit trail. §4 is the current
-system heartbeat.
+| 1 | 2026-10-06 | Model tiering (Haiku 4.5 for sync/poll/route, Sonnet 5.5 for judgement, Opus 5.5 for brand-asset + release); scheduled runs moved to weekday 4h/daily cadence behind `scripts/gate.ts` change checks; ruflo removed | ~60 ungated Sonnet runs/day were spending tokens on unchanged data; CI runs had no MCP, tool allowlist or saved cache |
+| 2 | 2026-10-01 | BOB roadmap reorganised around launch milestones (Soft Launch 17 Oct tablet build, Web 9 Nov, Mobile + Hard Launch 14 Dec, V2 P1 Apr-27, Rollout Apr–Aug-27); Curated Treatment Plan split to its own roadmap; `roadmap-watch` added | Notion docs were 3–4 months stale; one roadmap of record plus a weekly drift report keeps it current |
+| 3 | 2026-03-26 | Design Diff Detection moved from v2 → v1 active | Scheduled figma agent makes it feasible without extra infra |
+| 4 | 2026-03-26 | Asana-maintenance is the sole Asana write proxy | Prevents duplicate writes and conflicting comments from multiple agents hitting the API simultaneously |
+| 5 | 2026-03-26 | `.truth-cache/` is atomic-write only | Prevents partial reads by sibling agents during notion-sync updates |

@@ -6,7 +6,7 @@ description: >
   GitHub release tag, triggers RevolveNote sync, and optionally updates
   the Webflow "What's New" page. Manual trigger only — releases are
   intentional human acts.
-model: claude-sonnet-4-6
+model: claude-opus-5-5
 tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI, Bash
 trigger:
   - type: manual

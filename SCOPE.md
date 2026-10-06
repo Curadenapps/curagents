@@ -22,7 +22,7 @@ The Truth Catcher agent uses this document to evaluate and flag Asana requests a
 
 Additional capabilities active with the extended agent roster:
 
-- **Figma Library Monitoring** — `figma` agent polls BOB design system for component/token changes every 2 hours
+- **Figma Library Monitoring** — `figma` agent polls BOB design system for component/token changes once per weekday (gated on file version change)
 - **Design Diff Detection** — Automated alerts when Figma library tokens or components change (previously v2-deferred; now active via `figma` agent)
 - **Webflow Publishing Gate** — `webflow` agent validates brand compliance and clinical claims before any asset or content goes live on the website
 - **GitHub Code Alignment** — `github` agent links PRs and commits to Jira issues and Asana tasks across the Curadenapps org

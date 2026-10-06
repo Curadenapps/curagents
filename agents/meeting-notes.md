@@ -6,7 +6,7 @@ description: >
   the Notion Meeting Notes database with three sections: Summary (what was
   decided), Topics Covered (what was discussed), and Next Steps (action items
   with owner assigned by judgment, not pattern rules). Manual trigger only.
-model: claude-sonnet-4-6
+model: claude-sonnet-5-5
 tools: Read, NotionAPI, FirefliesAPI
 trigger:
   - type: manual
