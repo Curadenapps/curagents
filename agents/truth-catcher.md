@@ -47,7 +47,7 @@ These rules apply to every session and every run. Change them only through
 | Join key | A roadmap row's `Asana Link` contains the task gid (or the parent task's gid) |
 | Scope per run | Tasks changed since the last scan. The first run is a baseline over all open tasks. |
 | Comment policy | Comment on misaligned tasks only, once. No "verified" comments. Comment again only when the task's section or completion, or the row's Release, Status or Priority, changes. No @mentions. |
-| Identity | Named **Truth Catcher**. It posts from Sean's Asana account (`ASANA_ACCESS_TOKEN` is Sean's personal access token) and signs every comment "— Truth Catcher, on behalf of Sean Dunne" (`TRUTH_CATCHER_ON_BEHALF_OF`). There is no separate Asana user. |
+| Identity | Named **Truth Catcher**. It posts from Sean's Asana account (GitHub secret `ASANA_CURAGENT_TOKEN`, Sean's personal access token, exposed to scripts as `ASANA_ACCESS_TOKEN`) and signs every comment "— Truth Catcher, on behalf of Sean Dunne" (`TRUTH_CATCHER_ON_BEHALF_OF`). There is no separate Asana user. |
 | Rollout | Dry run until Sean approves the preview, then set `DRY_RUN=false` |
 
 ### What counts as "not aligned"
