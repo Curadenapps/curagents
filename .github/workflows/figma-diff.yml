@@ -1,9 +1,19 @@
 name: Figma — Design Diff Check
 
+# Weekdays 07:00 UTC. Claude only runs when the Figma file's lastModified changed.
 on:
   schedule:
-    - cron: "0 */2 * * *"
+    - cron: "0 7 * * 1-5"
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Skip the change check and run Claude anyway"
+        type: boolean
+        default: false
+
+concurrency:
+  group: truth-cache
+  cancel-in-progress: false
 
 jobs:
   figma-diff:
@@ -11,26 +21,38 @@ jobs:
     timeout-minutes: 10
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      CLAUDE_CODE_USE_BEDROCK: "0"
+      DISABLE_AUTOUPDATER: "1"
+      DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+      FIGMA_API_TOKEN: ${{ secrets.FIGMA_API_TOKEN }}
+      FIGMA_FILE_KEY: ${{ secrets.FIGMA_FILE_KEY }}
+      ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
+      ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID }}
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - uses: actions/cache@v4
+        with:
+          path: .truth-cache
+          key: truth-cache-${{ github.run_id }}-figma
+          restore-keys: truth-cache-
+
+      - name: Check Figma for changes
+        id: gate
+        run: npx -y tsx scripts/gate.ts figma
 
       - name: Install Claude Code
+        if: steps.gate.outputs.changed == 'true' || inputs.force
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Run figma agent
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FIGMA_API_TOKEN: ${{ secrets.FIGMA_API_TOKEN }}
-          FIGMA_FILE_KEY: ${{ secrets.FIGMA_FILE_KEY }}
-          ASANA_ACCESS_TOKEN: ${{ secrets.ASANA_ACCESS_TOKEN }}
-          ASANA_PROJECT_GID: ${{ secrets.ASANA_PROJECT_GID }}
-          DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
-          CLAUDE_CODE_USE_BEDROCK: "0"
-          DISABLE_AUTOUPDATER: "1"
-        run: |
-          claude -p "Run the figma-diff agent: read agents/figma.md and execute its workflow. Trigger: schedule — figma-diff-check."
+      - name: Run figma agent (Haiku)
+        if: steps.gate.outputs.changed == 'true' || inputs.force
+        run: >
+          scripts/run-agent.sh claude-haiku-4-5-20251001 15
+          "Read,Write,Edit,Glob,Grep,Bash(curl:*)"
+          "Run the figma agent: read dream.md §2–3 and agents/figma.md, then execute its workflow. Trigger: schedule — figma-diff-check."

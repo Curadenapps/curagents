@@ -1,7 +1,7 @@
 # Curadenapps Agents
 
 Automated agents and invokable skills for Curaden's BOB App and cross-tool workflows.
-Works with Claude Code, Gemini CLI, and any model that reads markdown agent definitions.
+Works with Claude Code and any model that reads markdown agent definitions.
 
 ---
 
@@ -10,7 +10,6 @@ Works with Claude Code, Gemini CLI, and any model that reads markdown agent defi
 ```
 README.md          ← You are here. System overview and entry point.
 CLAUDE.md          ← Claude Code instructions (auto-loaded by Claude)
-GEMINI.md          ← Gemini CLI instructions (auto-loaded by Gemini)
 SCOPE.md           ← Hard boundaries: what this system can and cannot do
 │
 ├── skills/        ← SKILL & SCOPE — invokable on demand by any session
@@ -18,14 +17,12 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 │       ├── SKILL.md            ← Main entry point (3 procedures)
 │       └── references/         ← Procedure-level config (JQL, templates, repo details)
 │
-├── agents/        ← Automated agents — run on schedule or triggered
-│   ├── truth-catcher.md        ← Alignment enforcer (Notion vs Asana)
-│   ├── roadmap-watch.md        ← Weekly roadmap drift report
-│   ├── brand-asset.md          ← Brand asset governance and delivery
-│   └── asana-maintenance.md    ← Asana hygiene, Kanban routing, update snippets
+├── agents/        ← Agent specs (single source of truth, incl. model tier)
+├── .claude/agents/← Thin Claude Code subagent wrappers → agents/*.md (for parallel swarming)
 │
-├── src/           ← API integrations (Notion sync, Asana read/write)
-├── .github/       ← GitHub Actions (CRON: constitution sync, frontier scan)
+├── src/           ← API integrations (Notion sync, Asana read/write, Figma poll)
+├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner)
+├── .github/       ← GitHub Actions: sync-and-scan, figma-diff, bob-broadcast
 └── .planning/     ← GSD project planning docs (roadmap, requirements, state)
 ```
 
@@ -33,7 +30,7 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 
 ## Skill & Scope
 
-Skills are invokable by any Claude or Gemini session. Trigger by phrase — no manual setup.
+Skills are invokable by any Claude session. Trigger by phrase — no manual setup.
 
 ### `curaden-communications` → [`skills/curaden-communications/SKILL.md`](skills/curaden-communications/SKILL.md)
 
@@ -51,7 +48,7 @@ Config details for each procedure: [`skills/curaden-communications/references/`]
 
 Agents share a common YAML frontmatter schema (trigger, memory, idempotency_key,
 dry_run, output schema) and are invokable by the orchestrator, GitHub Actions,
-or Ruflo background workers. Each has a strictly fenced domain.
+or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 
 ### Orchestration
 
@@ -63,7 +60,7 @@ or Ruflo background workers. Each has a strictly fenced domain.
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Hourly CRON |
+| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Weekdays every 4h (gated on Asana events) |
 | Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
 | Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
 
@@ -71,12 +68,36 @@ or Ruflo background workers. Each has a strictly fenced domain.
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Notion Sync | [`agents/notion-sync.md`](agents/notion-sync.md) | Owns `.truth-cache/` — fetches Notion requirements, roadmap, brand guidelines | Hourly CRON (50 min) |
-| Figma | [`agents/figma.md`](agents/figma.md) | Library monitor, export validator, design diff detection | Every 2h CRON + Figma webhook |
+| Notion Sync | [`agents/notion-sync.md`](agents/notion-sync.md) | Owns `.truth-cache/` — fetches Notion requirements, roadmap, brand guidelines | Weekdays every 4h, before truth-catcher (gated on Notion edits) |
+| Figma | [`agents/figma.md`](agents/figma.md) | Library monitor, export validator, design diff detection | Weekday CRON (gated) + Figma webhook |
 | Webflow | [`agents/webflow.md`](agents/webflow.md) | Publishing gate, brand compliance, clinical claims check, asset sync | brand-asset approval event + manual |
 | GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
 | Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | Weekly CRON (Mon 08:00) + manual "roadmap watch" |
+
+### Model tiers and swarming
+
+Each agent's `model:` frontmatter is the single source for its tier. Workflows, `package.json`
+scripts and `.claude/agents/` wrappers all use the same tier.
+
+| Tier | Agents | Why |
+|------|--------|-----|
+| Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
+| Sonnet 5.5 | orchestrator, truth-catcher, roadmap-watch, webflow, meeting-notes, broadcast | Judgement on structured data |
+| Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
+
+Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.
+
+### Scheduled runs and token budget
+
+| Workflow | Schedule (UTC) | Change check (no LLM) | Claude run |
+|----------|----------------|-----------------------|------------|
+| `sync-and-scan.yml` | Weekdays 06/10/14/18 | Notion edits since last sync → Asana events since last token | notion-sync (Haiku) → truth-catcher (Sonnet) |
+| `figma-diff.yml` | Weekdays 07:00 | Figma file `lastModified` | figma (Haiku) |
+| `bob-broadcast.yml` | Mon 09:00 | — | broadcast (Sonnet) |
+
+`.truth-cache/` is saved between runs with `actions/cache`. Every run writes model, turns
+and cost to the job summary. Dispatch with `force: true` to skip the change checks.
 
 ---
 
@@ -129,4 +150,17 @@ Required environment variables:
 | `WEBFLOW_API_TOKEN` | Webflow REST API v2 token | webflow |
 | `WEBFLOW_SITE_ID` | Curaden Webflow site ID | webflow |
 
-For model-specific setup: see [`CLAUDE.md`](CLAUDE.md) or [`GEMINI.md`](GEMINI.md).
+For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
+
+---
+
+## Known Gaps
+
+| Gap | Impact |
+|-----|--------|
+| Figma file key / Webflow site ID not set | figma and webflow agents run in config-error state |
+| Asana webhook not registered | asana-maintenance and brand-asset webhooks don't fire; scheduled scan uses the Asana events gate |
+| `DRY_RUN=true` everywhere | No live writes to any system |
+| No Jira credentials in CI | bob-broadcast and roadmap-watch only have Jira access in interactive sessions (Atlassian MCP) |
+| roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
+| `FIREFLIES_API_KEY` / `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes uses paste mode / searches for the DB by name |

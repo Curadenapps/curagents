@@ -5,7 +5,7 @@ description: >
   polling), parses directives from task comments, posts standardised update
   snippets, and moves tasks to the correct workflow section. Also handles
   audit trail comment requests from other agents.
-model: claude-sonnet-4-6
+model: claude-haiku-4-5-20251001
 tools: Read, Write, AsanaAPI
 trigger:
   - type: webhook
@@ -19,7 +19,7 @@ trigger:
       mode: poll
       max_events: 100
   - type: agent_call
-    from: ["bob-brand-asset", "curaden-orchestrator", "curaden-meeting-bot"]
+    from: ["bob-brand-asset", "curaden-orchestrator"]
     actions: ["post_audit_comment", "move_task", "post_update_snippet", "create_task"]
   - type: manual
     phrases:
@@ -95,7 +95,7 @@ Only process comments from:
 | `CMD: ready_for_review` / `ready for review` | `ready_review` | Review / QA |
 | `CMD: done` / `completed` | `mark_complete` | Completed |
 | _(from brand-asset agent)_ `post_audit_comment` | `audit_trail` | — (comment only) |
-| _(from meeting-bot agent)_ `create_task` | `task_creation` | — (creates new task) |
+| _(reserved — no active caller since meeting-bot retired)_ `create_task` | `task_creation` | — (creates new task) |
 
 If no directive is matched: **do not act**. Log `no_directive_found` and exit.
 Never infer directives from narrative text outside a `CMD:` line.
@@ -130,7 +130,7 @@ Asset type: {asset_type}. Domain: {domain}.
 Exported to: {asset_link}. Run ID: {ISO timestamp}]
 ```
 
-**For `create_task` action** (called by meeting-bot agent):
+**For `create_task` action** (reserved; meeting-bot retired — no active caller):
 
 Create a new task using `POST /projects/{project_gid}/tasks`:
 - `name`: `inputs.title`

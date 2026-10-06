@@ -22,7 +22,7 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Run BOB weekly broadcast
+      - name: Run BOB weekly broadcast (Sonnet)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
@@ -30,5 +30,7 @@ jobs:
           DRY_RUN: ${{ secrets.DRY_RUN || 'true' }}
           CLAUDE_CODE_USE_BEDROCK: "0"
           DISABLE_AUTOUPDATER: "1"
-        run: |
-          claude -p "Run the BOB weekly broadcast: read skills/curaden-communications/SKILL.md and execute the BOB Weekly Broadcast procedure. Trigger: schedule — weekly-broadcast."
+        run: >
+          scripts/run-agent.sh claude-sonnet-5-5 30
+          "Read,Write,Edit,Glob,Grep,mcp__notion,Bash(curl:*)"
+          "Run the BOB weekly broadcast: read skills/curaden-communications/SKILL.md and execute the BOB Weekly Broadcast procedure. Trigger: schedule — weekly-broadcast."

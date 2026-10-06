@@ -4,7 +4,7 @@ description: >
   Brand asset governance agent. Enforces RACI approval gates, validates asset
   taxonomy, and posts audit trail comments when tasks transition to Done.
   Triggered autonomously on Asana section changes and on demand.
-model: claude-sonnet-4-6
+model: claude-opus-5-5
 tools: Read, Write, AsanaAPI, NotionAPI
 trigger:
   - type: webhook

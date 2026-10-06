@@ -5,16 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Any Claude session can run Curaden's 3 cross-tool sync/broadcast workflows with a single trigger phrase, with no manual context-switching between tools
-**Current focus:** Phase 1 - Skill Scaffold
+**Current focus:** Orchestration refresh shipped (2026-10-06) — model tiering, gated CI cadence, subagent swarming
 
 ## Current Position
 
-Phase: 1 of 5 (Skill Scaffold)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-03-25 — Roadmap created (5 phases, 23 requirements mapped)
+Phase: 5 of 5 (Package and Ship) — complete; skill lives in skills/curaden-communications/
+Status: Skill shipped (3 procedures + meeting-notes). Agent system extended beyond this roadmap
+  (truth-catcher, brand-asset, figma, webflow, github, release, roadmap-watch).
+Last activity: 2026-10-06 — Orchestration refresh: model tiers in agent frontmatter, ruflo removed,
+  CI moved to gated weekday cadence (scripts/gate.ts), .claude/agents/ subagent wrappers added.
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100% (original roadmap)
 
 ## Performance Metrics
 
@@ -59,6 +60,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-25
-Stopped at: Roadmap created — ready to plan Phase 1 (Skill Scaffold)
+Last session: 2026-10-06
+Stopped at: Orchestration refresh committed; first CI dispatch with force=true pending
 Resume file: None
