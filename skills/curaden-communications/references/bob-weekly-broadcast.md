@@ -22,17 +22,17 @@ Example: `BOB Weekly Broadcast — 2026-03-25`
 
 ### Done This Week (issues resolved in last 7 days):
 ```
-project = BOB AND statusCategory = Done AND updated >= -7d ORDER BY updated DESC
+project = BA AND statusCategory = Done AND updated >= -7d ORDER BY updated DESC
 ```
 
 ### In Progress (currently active):
 ```
-project = BOB AND status in ("In Progress", "In Review") ORDER BY priority DESC, updated DESC
+project = BA AND status in ("In Progress", "In Review") ORDER BY priority DESC, updated DESC
 ```
 
 ### Blockers / Watch (blocked or high-priority open issues):
 ```
-project = BOB AND statusCategory != Done AND (labels = "blocked" OR priority in (Highest, High)) ORDER BY priority DESC
+project = BA AND statusCategory != Done AND (labels = "blocked" OR priority in (Highest, High)) ORDER BY priority DESC
 ```
 
 Also add every open GitHub issue labelled `truth-catcher-escalation` in
@@ -102,7 +102,7 @@ _BOB is the Curaden app for oral prophylaxis tracking._
 To get the current sprint name, use:
 ```
 mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__searchJiraIssuesUsingJql
-query: project = BOB AND sprint in openSprints()
+query: project = BA AND sprint in openSprints()
 ```
 
 Extract `sprint` field from the first result. If unavailable, omit the sprint line from the header.

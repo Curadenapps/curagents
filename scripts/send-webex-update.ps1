@@ -1,4 +1,5 @@
-$token = "ZjM1OTRlM2UtM2NiOC00ZGU2LThkNDgtZWMyNDBhODkxYjY0MTVkODc4ZGEtYmFk_PE93_ee60334c-b2ad-49a5-8553-9824f0039e88"
+$token = $env:WEBEX_BOT_TOKEN
+if (-not $token) { Write-Error "Set WEBEX_BOT_TOKEN first, e.g. `$env:WEBEX_BOT_TOKEN = '...'"; exit 1 }
 $roomIds = @(
     "Y2lzY29zcGFyazovL3VzL1JPT00vNjdiMGNiNTAtZWU4Ny0xMWVmLTljOTMtNWIwMjE3MGI1ODY5",  # App Team
     "Y2lzY29zcGFyazovL3VzL1JPT00vMjc3ZTYwNDAtMGVkMi0xMWYwLTgzN2EtYmYxZmMwNjAwM2Nk"   # App Team - Markets

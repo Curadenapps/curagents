@@ -10,6 +10,7 @@ full system architecture.
 
 The following skills are available and will auto-load based on trigger phrases:
 
+- **`skills/feedback-qa/SKILL.md`** — Feedback QA: Notion inbox → checks → PDF report to the Webex QA space (+ Confluence for full UATs)
 - **`skills/curaden-communications/SKILL.md`** — RevolveNote sync, Jira-Notion BOB sync, BOB weekly broadcast, Meeting Notes (Webex → Notion)
 
 Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own reference files as needed.
@@ -38,6 +39,7 @@ rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 - [`agents/release.md`](agents/release.md) — Release coordinator (BOB + RevolveNote); manual trigger only
 - [`agents/meeting-notes.md`](agents/meeting-notes.md) — Webex transcript → 3 key points + 3 next steps → Notion page
 - [`agents/roadmap-watch.md`](agents/roadmap-watch.md) — Weekly roadmap drift report (Notion roadmaps vs Asana/Jira); read-only
+- [`agents/feedback-qa.md`](agents/feedback-qa.md) — Feedback QA: reads the Notion inbox, reports to Webex; Confluence for full UATs
 
 ## Scope
 
