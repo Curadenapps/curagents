@@ -7,6 +7,9 @@
 .truth-cache/*
 !.truth-cache/.gitkeep
 
+# Feedback QA — generated report HTML/PDF, never in Git
+.feedback/
+
 # Node
 node_modules/
 dist/
@@ -14,3 +17,6 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Personal Claude Code settings
+.claude/settings.local.json

@@ -1,4 +1,4 @@
-﻿---
+---
 name: uat
 description: >
   Full UAT (User Acceptance Testing) workflow for Curaden/Curaprox apps and major features.
@@ -273,6 +273,15 @@ Notion: [link or N/A]
 
 UAT log updated in references/uat-log.md
 ```
+
+---
+
+## Closing a UAT
+
+When testing is done, add the testers' notes to the Notion inbox (Tasks & Notes) with
+**QA = uat** and the build in the title. The `feedback-qa` skill turns them into the
+PDF report for the Webex QA space, publishes the same content to Confluence under
+BOB App UAT, and updates the Outcome in `references/uat-log.md`.
 
 ---
 

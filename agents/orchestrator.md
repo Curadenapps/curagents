@@ -64,6 +64,7 @@ On any invocation, determine trigger type:
 | `user:process meeting notes` / `summarise meeting` / `fetch from fireflies` | User phrase | curaden-communications › meeting-notes |
 | `schedule:"0 8 * * 1"` | CRON (Monday 08:00) — no CI workflow yet | roadmap-watch (weekly roadmap drift report) |
 | `user:roadmap watch` / `check the roadmap` / `roadmap drift` | User phrase | roadmap-watch |
+| `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 
@@ -120,7 +121,7 @@ pinned to its model tier. Dispatch them with the Agent tool.
 | Tier | Agents |
 |------|--------|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance (mechanical: poll, diff, link, route) |
-| Sonnet 5.5 | truth-catcher, roadmap-watch, webflow, meeting-notes (judgement on structured data) |
+| Sonnet 5.5 | truth-catcher, roadmap-watch, webflow, meeting-notes, feedback-qa (judgement on structured data) |
 | Opus 5.5 | brand-asset, release (approval gates, clinical claims, releases) |
 
 - **Run in parallel** only agents that are independent and read-only for the current

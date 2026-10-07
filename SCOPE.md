@@ -30,6 +30,7 @@ Additional capabilities active with the extended agent roster:
 - **Notion Cache Sync** — `notion-sync` agent owns `.truth-cache/`, running before every truth-catcher scan
 - **Roadmap Watch** — `roadmap-watch` agent compares the Notion BOB and Curated Treatment Plan roadmaps with Asana and Jira every Monday and writes a drift report to Notion (read-only on all systems)
 - **Meeting Notes** — `meeting-notes` agent processes Webex transcripts (or pasted text) into structured Notion pages; 3 key points + 3 next steps per meeting
+- **Feedback QA** — `feedback-qa` agent reads new feedback from the Notion inbox, checks it against a sourced change timeline and BOB scope, and sends a PDF report to the Webex QA space when there is enough to report. Full UATs are also published to Confluence. Asana only when a human promotes an item
 
 ## In Scope — v2 (Deferred)
 
