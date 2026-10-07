@@ -27,7 +27,7 @@ memory:
     - .truth-cache/roadmap-watch/last-snapshot.json
     - .truth-cache/roadmap-watch/history/{YYYY-MM-DD}.json
 idempotency_key: "roadmap-watch:{iso_week}"
-dry_run: true
+dry_run: false  # live: only writes the weekly report page + its own snapshot
 ---
 
 # Roadmap Watch: Weekly BOB Roadmap Drift Report
