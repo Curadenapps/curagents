@@ -83,7 +83,10 @@ already been said, so nothing is repeated.
    (Name, Level, Status, Release, Priority, Epic, Asana Link, Date). Join on the task gid,
    or the parent's gid, appearing in `Asana Link`.
 2. **Tasks**: from BOB App `1204489225205419` and subtasks of BOB V2 `1217949875186079`,
-   take the tasks modified in the last 7 days, including ones completed in that window.
+   take the tasks modified in the last 7 days, including ones completed in that window,
+   **plus every open task that is overdue**, however long ago it last changed. A task
+   that has gone quiet is exactly what Truth Catcher must catch. (2026-10-08: "Common
+   issues and troubleshooting" sat overdue and untouched since 30 Sep and was missed.)
 3. **History**: read each task's stories in one batched call (comments, section, due-date
    and completion changes).
 4. **Judge** each task with the "not aligned" table and Steps 2a and 2b below. Skip
