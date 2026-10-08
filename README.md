@@ -60,7 +60,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Weekdays every 4h (gated on Asana events) |
+| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Claude Routine, weekdays 07:58 + 13:58 Zurich |
 | Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
 | Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
 
@@ -92,7 +92,7 @@ Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md)
 
 | Workflow | Schedule (UTC) | Change check (no LLM) | Claude run |
 |----------|----------------|-----------------------|------------|
-| `sync-and-scan.yml` | Weekdays 06/10/14/18 | Notion edits since last sync → Asana events since last token | notion-sync (Haiku) → truth-catcher: `scripts/truth-scan.ts` does the checks and posting, Sonnet only judges unlinked tasks |
+| `sync-and-scan.yml` | Manual (scheduled scan moved to the Claude Routine) | Notion edits since last sync → Asana events since last token | notion-sync (Haiku) → truth-catcher: `scripts/truth-scan.ts` does the checks and posting, Sonnet only judges unlinked tasks |
 | `figma-diff.yml` | Weekdays 07:00 | Figma file `lastModified` | figma (Haiku) |
 | `bob-broadcast.yml` | Mon 09:00 | — | broadcast (Sonnet) |
 

@@ -6,5 +6,6 @@ model: claude-sonnet-5-5
 ---
 
 Read `agents/truth-catcher.md` and follow its "Agreed rules" and workflow.
-Interactive runs: run `npx -y tsx scripts/truth-scan.ts prepare`, do Step 2, then `npx -y tsx scripts/truth-scan.ts post`.
-`DRY_RUN` stays true unless Sean says to go live. Return only the result JSON from the spec.
+Default: follow "Routine run" in the spec, using the Asana, Notion and GitHub connectors (live, no dry run).
+With API tokens in the environment you can use the script instead: `npx -y tsx scripts/truth-scan.ts prepare`, do Step 2, then `npx -y tsx scripts/truth-scan.ts post`.
+Return only the result JSON from the spec.
