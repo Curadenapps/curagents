@@ -58,7 +58,7 @@ These rules apply to every session and every run. Change them only through
 | Escalation | No reply from anyone other than Sean within 3 working days: Truth Catcher posts a follow-up "escalated" comment and opens a GitHub issue labelled `truth-catcher-escalation`. Weekly reports list these issues. |
 | Identity | Named **Truth Catcher**. It posts from Sean's Asana account (GitHub secret `ASANA_CURAGENT_TOKEN`, Sean's personal access token, exposed to scripts as `ASANA_ACCESS_TOKEN`) and signs every comment "— Truth Catcher, on behalf of Sean Dunne" (`TRUTH_CATCHER_ON_BEHALF_OF`). There is no separate Asana user. The Routine posts through Sean's Asana connector, which is the same account. |
 | Rollout | Fully live: roadmap comments (approved 2026-10-06), delay questions and escalations (approved 2026-10-08). There is no dry run. |
-| Runtime | A Claude Routine "Truth Catcher scan" (weekdays 07:58 and 13:58 Europe/Zurich) runs on Sean's Claude plan with the Asana, Notion and GitHub connectors. See "Routine run" below. The GitHub Action `sync-and-scan.yml` is manual only (it needs `ANTHROPIC_API_KEY` credits). (2026-10-08) |
+| Runtime | A Claude Routine "Truth Catcher scan" (weekdays 07:58 and 13:58 Europe/Zurich) runs on Sean's Claude plan with the Asana, Notion and GitHub connectors. It fires into one long-lived Claude Code session (trigger `trig_01BxmV4KaG4CPbZMU4GmMHa7`), so it uses that session's connectors; don't archive that session. See "Routine run" below. The GitHub Action `sync-and-scan.yml` is manual only (it needs `ANTHROPIC_API_KEY` credits). (2026-10-08) |
 
 ### What counts as "not aligned"
 
