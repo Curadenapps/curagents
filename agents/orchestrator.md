@@ -51,6 +51,9 @@ On any invocation, determine trigger type:
 | `user:sync BOB` / `sync jira` | User phrase | curaden-communications › jira-notion-bob-sync |
 | `user:broadcast` / `run BOB broadcast` | User phrase | announcements (weekly; the BOB weekly is part of the team update) |
 | `user:check alignment` / `scan asana` | User phrase | Truth Catcher |
+| `schedule:"45 8 * * 1-5"` (Zurich) | Boom Boom Derek Routine (not yet created) | boom-boom-derek (Monday rundown, Tue–Fri nudges; draft only until live) |
+| `user:boom boom derek` / `check derek` / `derek rundown` / `what does derek owe` | User phrase | boom-boom-derek |
+| `user:ping derek` | User phrase | boom-boom-derek Step 7 (posts the waiting draft to Webex "Curaden / Phinamic" via Claude in Chrome) |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
 | `user:what needs attention` | User phrase | Swarm (§3a): truth-catcher + brand-asset (check only) + roadmap-watch in parallel |
 | `schedule:"0 7 * * 1-5"` | `figma-diff.yml` (gated) | figma (library diff check) |
@@ -125,7 +128,7 @@ pinned to its model tier. Dispatch them with the Agent tool.
 | Tier | Agents |
 |------|--------|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance (mechanical: poll, diff, link, route) |
-| Sonnet 5.5 | truth-catcher, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements (judgement on structured data) |
+| Sonnet 5.5 | truth-catcher, boom-boom-derek, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements (judgement on structured data) |
 | Opus 5.5 | brand-asset, release (approval gates, clinical claims, releases) |
 
 - **Run in parallel** only agents that are independent and read-only for the current

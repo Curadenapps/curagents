@@ -41,6 +41,7 @@ rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 - [`agents/roadmap-watch.md`](agents/roadmap-watch.md) — Weekly roadmap drift report (Notion roadmaps vs Asana/Jira); read-only
 - [`agents/feedback-qa.md`](agents/feedback-qa.md) — Feedback QA: reads the Notion inbox, reports to Webex; Confluence for full UATs
 - [`agents/announcements.md`](agents/announcements.md) — Team update: week / two weeks / month across every tool → Notion draft → Webex after approval
+- [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) — Boom Boom Derek: Truth Catcher for Derek La (Phinamic); pings him in Webex "Curaden / Phinamic" when something is due or forgotten
 
 ## Scope
 
