@@ -44,7 +44,7 @@ Every agent must agree on these facts:
 | Asana write proxy | `asana-maintenance` — all Asana writes route through it (exception: truth-catcher's own comments, posted by its Claude Routine or `scripts/truth-scan.ts`) |
 | Approval gate owner | `brand-asset` — only it records approvals |
 | Release authority | Human only — `release` agent is manual trigger, never autonomous |
-| Team update | `announcements` drafts the weekly/monthly update in Notion (Team Updates) from every source; it reaches Webex (App Team, + Markets monthly) only after Sean says "post it" |
+| Team update | `announcements` drafts the weekly/monthly update in Notion (Team Updates) from every source; it reaches Webex (App Team; a Markets edition monthly from Dec 2026) through Webex web in Sean's Chrome, only after Sean says "post it" |
 | Feedback QA flow | Inbox: Notion Tasks & Notes (`QA` column). PDF report to the Webex QA space only. Full UAT (QA = `uat`): same content to Confluence under BOB App UAT. Asana only on "promote" |
 | Clinical claims rule | ANY efficacy/medical language requires `legal_approved: true` before publish, no exceptions |
 | Dry run default | `DRY_RUN=true` until explicitly disabled per-agent |
@@ -67,7 +67,7 @@ These are binding agreements between agents. Violating them creates inconsistenc
 | `truth-catcher` → Product Roadmap | Checks Asana BOB App tasks against the Notion Product Roadmap only (all Products). Runs as a Claude Routine reading Notion and Asana live (the manual script refreshes `.truth-cache/roadmap.json` itself); it comments on misaligned tasks and never edits tasks or rows. Rules: `agents/truth-catcher.md` "Agreed rules". |
 | `feedback-qa` → `asana-maintenance` | feedback-qa only reports. A point reaches Asana only when a human says "promote", through asana-maintenance. It never changes the inbox `Status` column except `new` → `reference` on rows it claims as feedback. |
 | `roadmap-watch` → all | Read-only on Notion rows, Asana and Jira. Its only writes are its weekly report page under Notion "Roadmap Reports" and its own snapshot in `.truth-cache/roadmap-watch/`. |
-| `announcements` → all | Read-only on every system. Its only writes are its own Team Updates pages in Notion and, after Sean approves a draft, one Webex post via `scripts/webex-post.ps1`. It consumes other agents' outputs (roadmap-watch reports, truth-catcher escalations, release changelogs, meeting recaps); it never re-runs them. |
+| `announcements` → all | Read-only on every system. Its only writes are its own Team Updates pages in Notion and, after Sean approves a draft, one Webex post through Webex web (`scripts/webex-compose.js`). It consumes other agents' outputs (roadmap-watch reports, truth-catcher escalations, release changelogs, meeting recaps); it never re-runs them. |
 | Orchestrator → all | Orchestrator never performs domain actions. Classify, dispatch, collect, report only. |
 
 ---

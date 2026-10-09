@@ -39,7 +39,7 @@ memory:
     - "notion: Team Updates (earlier updates — this agent's memory)"
   write:
     - "notion: one child page per update under Team Updates"
-    - "webex: App Team + App Team - Markets, via scripts/webex-post.ps1, only after Sean approves"
+    - "webex: App Team (+ App Team - Markets from Dec 2026) via Webex web (scripts/webex-compose.js), only after Sean approves; test space Curaden / Phinamic"
 idempotency_key: "announcements:{period}:{window_end}"
 dry_run: false  # live since 2026-10-09: writes its Notion drafts; Webex still only on Sean's "post it"
 output:
@@ -71,10 +71,19 @@ pages. Nothing reaches Webex until Sean has read the draft and said so.
 |--------|--------|------|------------------|
 | `weekly` | Since the last weekly update, max 7 days | Every Thursday | App Team |
 | `fortnightly` | 14 days | On request ("two-week update") | App Team |
-| `monthly` | Since the last monthly update, max 31 days | Last Thursday of the month (replaces that week's weekly) | App Team + App Team - Markets |
+| `monthly` | Since the last monthly update, max 31 days | Last Thursday of the month (replaces that week's weekly) | App Team |
+| `markets` | Since the last Markets update, max 31 days | Monthly from December 2026, before the monthly Markets meeting | App Team - Markets |
 | `adhoc` | Whatever was asked ("since the Portugal workshop", "last 10 days") | "what happened …" | none: answer in chat, write nothing |
 
 `period: auto` picks `monthly` on the last Thursday of the month, else `weekly`.
+
+**Markets edition.** Written for the country teams, so it leaves out internal
+commercial and partner detail (commission models, build-vs-buy decisions,
+Phinamic deliverables, team matters). It keeps what a market can act on:
+launch dates, what's live or coming in BOB and the Curaprox / Curaden apps,
+training and GTM material (GTM is iTOP instructors and lecturers for 2026), and
+what we need from markets. Same PDF template; the Markets Webex message doubles
+as the agenda for the monthly Markets meeting.
 The window starts where the previous update of the same period ended, so
 nothing falls between two updates and nothing is announced twice.
 
@@ -87,7 +96,7 @@ it `unavailable`, carry on, and say so at the top of the draft.
 
 | Source | What to read | How |
 |--------|--------------|-----|
-| **Meetings (Webex)** | Recaps and decisions dated in the window | Notion "Decision Log & Meeting Recaps" `3f27e8aabbb481baa16ce7cb9e7514dd` and its child pages; meeting-notes agent pages (`NOTION_MEETING_NOTES_DB_ID` if set); Fireflies transcripts when the Fireflies connector has the meeting. Local runs only: also Webex in the browser (below). Notion AI meeting notes need a Notion Business plan, so they are skipped |
+| **Meetings (Webex)** | Recaps and decisions dated in the window | Notion "Decision Log & Meeting Recaps" `3f27e8aabbb481baa16ce7cb9e7514dd` and its child pages; meeting-notes agent pages (`NOTION_MEETING_NOTES_DB_ID` if set). On Sean's machine: Webex's own meeting summary and next steps (below). Notion AI meeting notes need a Notion Business plan, so they are skipped |
 | **Asana** | Tasks completed, created, or moved section in the window; project status updates | `search_tasks` with `completed_on_after` / `modified_on_after` over the app projects below; also tasks where Sean is assignee or follower in other projects, product work only |
 | **Notion** | Pages edited in the window under the Curaden App Hub only | `notion-search` with `page_url` = App Hub `86b68fc172dd43ff8ee3219a3a5435f6`; keep results whose `timestamp` is in the window. Always fetch the scope page `3f27e8aabbb481c49609dd919ce400a0`, Education Hub `3447e8aabbb481ef9ceaf36c73067120` and the Tasks & Notes inbox `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db` |
 | **Roadmap** | What moved on the roadmap | The Roadmap Watch report(s) in the window under Roadmap Reports `3ec7e8aabbb481c09e57c7926468235c`. Don't re-diff the roadmap; roadmap-watch already did |
@@ -107,20 +116,24 @@ it `unavailable`, carry on, and say so at the top of the draft.
 | iTOP system | `1206702874467920` |
 | App Content Delivery Process | `1207125563837114` |
 
-### Webex in the browser (local runs, optional)
+### Webex meeting summaries (Sean's machine)
 
-The Webex desktop app is unreliable for this, so use the web app
-(`web.webex.com`, Sean's own sign-in, through Claude in Chrome or the built-in
-browser). Only for meetings in the window that have **both** a recording and a
-transcript, and no recap page yet:
+Webex's AI Assistant writes a summary and next steps for recorded meetings.
+Those are the meeting source; Fireflies isn't used. The desktop app is
+unreliable, so read them in Webex web through Claude in Chrome, on Sean's own
+sign-in to the Curaden Webex site (`curaden.webex.com`, Recordings). If it asks
+for a sign-in, stop and ask Sean; never type credentials.
 
-1. Meetings → Recordings, open the meeting, read the transcript and Webex's AI
-   summary. Read only; never download, share or delete a recording.
-2. Use it the same way as a recap: decisions and actions only, nothing personal.
-3. List the meeting under Sources as "Webex recording, {title}, {date}".
+1. List the meetings in the window that have a recording with a summary
+   (`web.webex.com/meetings` shows the past ones by date).
+2. Take only the summary and the next steps (with owners). Don't read the full
+   transcript unless a next step is unclear. Read only; never download, share or
+   delete a recording.
+3. Skip meetings that already have a recap page, and meetings with no summary.
+4. List each under Sources as "Webex summary, {title}, {date}".
 
-Meetings without a transcript are skipped. A Routine has no browser, so
-scheduled runs rely on the recap pages.
+The Routine has no browser, so its draft relies on the recap pages. The "post
+it" session runs this check first and adds anything missing (Step 6).
 
 ### Never include
 
@@ -206,7 +219,8 @@ inside the current BOB indexing workflow.
 - {item}
 ```
 
-**Monthly** (App Team + Markets, the shape of the April post in
+**Monthly** (App Team; the Markets edition uses the same shape without
+Internals, and from December 2026; based on the April post in
 `scripts/send-webex-update.ps1`):
 
 ```markdown
@@ -221,8 +235,8 @@ inside the current BOB indexing workflow.
 - {one line each}
 ```
 
-Both end with `Full update and sources: {Notion page link}`. The post script
-splits on `##`/`###` above 5,000 characters.
+Both end with `Full update and sources: {Notion page link}`. Above 5,000
+characters, split at a `##`/`###` heading into "Part 1 of N" … "Part N of N".
 
 **Fortnightly** uses the weekly shape over 14 days. **Adhoc** answers in chat in
 the weekly shape and writes nothing.
@@ -256,24 +270,29 @@ and keep the line out of the Webex message until Legal has approved it
 
 ### Step 6 — Post (only on Sean's "post it")
 
-1. Re-read the Notion draft; Sean may have edited it. Post what's there now.
-2. Save the message to `.announcements/{period}-{window_end}.md` and render the
+1. Check Webex meeting summaries for the window (above). If a meeting adds
+   something, update the Notion draft and tell Sean what changed before posting.
+2. Re-read the Notion draft; Sean may have edited it. Post what's there now.
+3. Save the message to `.announcements/{period}-{window_end}.md` and render the
    PDF (Step 4). Both stay local (`.announcements/` is gitignored).
-3. Post with the PDF attached:
-   `powershell -File scripts/webex-post.ps1 <file.md> app-team -Attach <file.pdf>`
-   (monthly: `app-team markets`). The script only knows those spaces and needs
-   `WEBEX_BOT_TOKEN`; `DRY_RUN=true` prints instead of posting.
-   Without a token, post from Sean's account in Webex web through Claude in
-   Chrome: open `web.webex.com`, search "App Team", pick the space named exactly
-   "App Team" (not "App Team - Markets"), find the compose box by ref, type each
-   line with `shift+Enter` between lines (never a newline inside a `type`
-   action; plain Enter sends), attach the PDF, screenshot to check, then send.
-   Check the space header name before sending; if it isn't the target space,
-   stop. If Chrome isn't connected, hand Sean the message and PDF to post.
-4. Update the page status line with the message ids.
+4. Post from Sean's account in Webex web through Claude in Chrome (light DOM; no
+   bot token, since those get culled):
+   - Open `web.webex.com`, search the space by name and open the one named
+     exactly: "App Team" (weekly, monthly), "App Team - Markets" (Markets
+     edition) or "Curaden / Phinamic" (tests).
+   - Run `scripts/webex-compose.js` with `javascript_tool` as
+     `(<function>)(message, "<space name>")`. It checks the open space, pastes the
+     whole message in one step and returns the character count. If it refuses,
+     stop.
+   - Attach the PDF with `file_upload` on the "File attachment" input (find it
+     by ref; never click it, that opens a native dialog).
+   - Screenshot and check the space name, the text and the PDF chip, then click
+     "Send message" by ref. Screenshot again to confirm it posted.
+   - If Chrome isn't connected, hand Sean the message and PDF to post.
+5. Update the page status line: `Posted {date} to {space}`.
 
 The Claude Routine "Team update draft" (`trig_01Pi2NPoRWRP6MStWHVzzkDm`, Thursday
-14:00 Zurich, connectors: Notion, Asana, Atlassian, Fireflies) stops at Step 5
+14:00 Zurich, connectors: Notion, Asana, Atlassian) stops at Step 5
 and its run summary links the draft. Posting happens on Sean's machine.
 
 ---

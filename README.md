@@ -22,7 +22,7 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 │
 ├── src/           ← API integrations (Notion sync, Asana read/write, Figma poll)
 ├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner),
-│                    render-pdf.ps1 + webex-post.ps1 (team update PDF and Webex post)
+│                    render-pdf.ps1 + webex-compose.js (team update PDF; Webex post via the browser)
 ├── templates/     ← team-update.html: Curaprox-styled PDF report for the announcements agent
 ├── .github/       ← GitHub Actions: sync-and-scan, figma-diff
 └── .planning/     ← GSD project planning docs (roadmap, requirements, state)
@@ -166,4 +166,5 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
 | `FIREFLIES_API_KEY` / `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes uses paste mode / searches for the DB by name |
 | Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |
-| No `WEBEX_BOT_TOKEN` on Sean's machine | announcements posts are done by hand in Webex (message + PDF) until a bot token is set |
+| Webex bot tokens get culled after a few days | announcements posts through Webex web in Sean's Chrome (Claude in Chrome); the post needs his machine |
+| Webex meeting summaries need Sean signed in to curaden.webex.com in Chrome | the Thursday Routine can't read them; the "post it" session adds them |
