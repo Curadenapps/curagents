@@ -251,6 +251,15 @@ Corporate Blue, uppercase Futura headings, Info Display Pro copy, one accent
 family (BOB-led = Chartreuse, Curaprox app-led = Cerise, Curaden app-led =
 Cornflower). A Routine can't render the PDF; the local "post it" session does.
 
+**Detail pages** (Sean, 9 Oct: the report goes into more depth than the Webex
+message). Whenever the window has them, add the template's two detail pages:
+*Scope & phasing* (the loop, products, phasing with gates, not doing) and
+*Decisions & roadmap* (WBS or other client decisions, what changed on the
+roadmap in Notion, open points before the next phase, Markets: Japan, US,
+rollout countries). Read the scope page, the WBS sheet and the roadmap review
+pages for them, and credit the people who did the work (for example Fabian on
+the WBS). The Webex message points to them in one line.
+
 ### Step 5 — File the draft in Notion
 
 Create a child page under Team Updates titled
