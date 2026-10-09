@@ -90,7 +90,7 @@ Queries all open BOB project issues from Jira and creates or updates correspondi
 
 ## 3. BOB Weekly Broadcast
 
-Generates a weekly status summary from Jira, posts it as a Notion page, and broadcasts a condensed version to the Webex team space.
+Generates a weekly status summary from Jira and posts it as a Notion page. The Webex post now comes from the consolidated team update (`agents/announcements.md`), which reads this page.
 
 ### Steps
 
@@ -101,13 +101,12 @@ Generates a weekly status summary from Jira, posts it as a Notion page, and broa
    - **Blockers**: blocked or high-priority open issues
 3. Format using the broadcast template in the reference file.
 4. Create a Notion page using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` under parent `3347e8aabbb480908aa2dfc2fd478ff9`.
-5. Post the condensed Webex message to `WEBEX_BROADCAST_SPACE_ID` using `WEBEX_BOT_TOKEN` — format and API call in `references/bob-weekly-broadcast.md` Delivery §2. Skip silently if either var is unset.
-6. Return the Notion page URL and confirm Webex delivery.
+5. Don't post to Webex. The `announcements` agent folds this page into the Thursday team update, so the team gets one post a week instead of two.
+6. Return the Notion page URL.
 
 ### Output
 
 - Notion page URL
-- Webex delivery status
 - Summary: N done, N in progress, N blockers
 
 ---

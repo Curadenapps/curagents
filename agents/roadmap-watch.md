@@ -162,10 +162,10 @@ Each "suggested fix" is a sentence for a human, never an action taken.
 Then write `.truth-cache/roadmap-watch/last-snapshot.json` and a dated copy in
 `history/`, both via temp-file-then-rename (atomic write, per `dream.md` §5).
 
-### Step 5 — Optional broadcast
+### Step 5 — Team update
 
-If `inputs.broadcast: true`, hand the Summary line and the At-risk section to
-the `curaden-communications` skill for a Webex post. Off by default.
+No Webex post of its own. The `announcements` agent reads this report and puts
+the Summary line and at-risk milestones into the weekly team update.
 
 ---
 

@@ -10,6 +10,9 @@
 # Feedback QA — generated report HTML/PDF, never in Git
 .feedback/
 
+# Announcements — Webex message files, never in Git
+.announcements/
+
 # Node
 node_modules/
 dist/

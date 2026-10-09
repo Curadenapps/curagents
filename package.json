@@ -15,6 +15,7 @@
     "brand-asset": "claude -p \"Run the brand-asset agent: read dream.md §2–3 and agents/brand-asset.md, then execute its workflow.\" --model claude-opus-5-5",
     "release": "claude -p \"Run the release agent: read dream.md §2–3 and agents/release.md, then execute its workflow.\" --model claude-opus-5-5",
     "orchestrate": "claude -p \"Run the orchestrator agent: read dream.md §2–3 and agents/orchestrator.md, then execute its workflow.\" --model claude-sonnet-5-5",
+    "announcements": "claude -p \"Run the announcements agent: read dream.md §2–3 and agents/announcements.md, then execute its workflow with period auto and deliver draft.\" --model claude-sonnet-5-5",
     "broadcast": "claude -p \"Run the BOB weekly broadcast: read skills/curaden-communications/SKILL.md and execute the BOB Weekly Broadcast procedure.\" --model claude-sonnet-5-5",
     "gate:notion": "tsx scripts/gate.ts notion",
     "gate:asana": "tsx scripts/gate.ts asana",

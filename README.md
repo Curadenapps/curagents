@@ -21,7 +21,9 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 ├── .claude/agents/← Thin Claude Code subagent wrappers → agents/*.md (for parallel swarming)
 │
 ├── src/           ← API integrations (Notion sync, Asana read/write, Figma poll)
-├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner)
+├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner),
+│                    render-pdf.ps1 + webex-post.ps1 (team update PDF and Webex post)
+├── templates/     ← team-update.html: Curaprox-styled PDF report for the announcements agent
 ├── .github/       ← GitHub Actions: sync-and-scan, figma-diff, bob-broadcast
 └── .planning/     ← GSD project planning docs (roadmap, requirements, state)
 ```
@@ -74,6 +76,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
 | Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | Weekly CRON (Mon 08:00) + manual "roadmap watch" |
+| Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
 
 ### Model tiers and swarming
 
@@ -83,7 +86,7 @@ scripts and `.claude/agents/` wrappers all use the same tier.
 | Tier | Agents | Why |
 |------|--------|-----|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
-| Sonnet 5.5 | orchestrator, truth-catcher, roadmap-watch, webflow, meeting-notes, broadcast | Judgement on structured data |
+| Sonnet 5.5 | orchestrator, truth-catcher, roadmap-watch, webflow, meeting-notes, broadcast, announcements | Judgement on structured data |
 | Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
 
 Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.
@@ -164,3 +167,5 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | Jira secrets exist in CI (`JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEY`) but no workflow passes them yet | bob-broadcast reads Jira only in interactive sessions |
 | roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
 | `FIREFLIES_API_KEY` / `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes uses paste mode / searches for the DB by name |
+| Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |
+| No `WEBEX_BOT_TOKEN` on Sean's machine | announcements posts are done by hand in Webex (message + PDF) until a bot token is set |

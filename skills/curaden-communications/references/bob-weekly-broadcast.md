@@ -116,9 +116,11 @@ Extract `sprint` field from the first result. If unavailable, omit the sprint li
 Create under parent page `3347e8aabbb480908aa2dfc2fd478ff9` using the full broadcast template above.
 Return the Notion page URL to the user.
 
-### 2. Webex space broadcast
+### 2. Webex space broadcast (retired 2026-10-09)
 
-After the Notion page is created, post a condensed summary to the Webex broadcast space.
+Not used by the weekly run any more: the `announcements` agent posts one
+consolidated team update that includes this page. Kept for a one-off manual post
+when Sean asks for a Jira-only broadcast.
 
 **Space ID:** set via `WEBEX_BROADCAST_SPACE_ID` env var (space ID ends in `WY3NA`)
 **Bot token:** `WEBEX_BOT_TOKEN`
