@@ -153,7 +153,7 @@ One source failing never stops the run: mark it `unavailable` and carry on.
       mention list. If he isn't offered, skip the mention and start with "Derek,".
    3. Run `scripts/webex-compose.js` with `javascript_tool` as
       `(<function>)(message, "Curaden / Phinamic", { prefix: "Derek La" })` (no third
-      argument without the mention). It checks the space and pastes the message.
+      argument without the mention). It checks the space and puts the message in after the mention through the editor API.
       If it refuses, stop.
    4. Screenshot: check the space name, the mention and the text. Click "Send
       message" by ref. Screenshot again to confirm it posted.

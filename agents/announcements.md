@@ -281,12 +281,14 @@ and keep the line out of the Webex message until Legal has approved it
      exactly: "App Team" (weekly, monthly), "App Team - Markets" (Markets
      edition) or "Curaden / Phinamic" (tests).
    - Run `scripts/webex-compose.js` with `javascript_tool` as
-     `(<function>)(message, "<space name>")`. It checks the open space, pastes the
-     whole message in one step and returns the character count. If it refuses,
+     `(<function>)(message, "<space name>")`. It checks the open space, sets the
+     whole message through the editor in one step and returns Webex's own character
+     counter (a synthetic paste is ignored by Webex). If it refuses,
      stop.
    - Attach the PDF with `file_upload` on the "File attachment" input (find it
      by ref; never click it, that opens a native dialog).
-   - Screenshot and check the space name, the text and the PDF chip, then click
+   - Check the space name, the counter and the PDF chip ("Remove attachment
+     {file}") with `find`, then click
      "Send message" by ref. Screenshot again to confirm it posted.
    - If Chrome isn't connected, hand Sean the message and PDF to post.
 5. Update the page status line: `Posted {date} to {space}`.
