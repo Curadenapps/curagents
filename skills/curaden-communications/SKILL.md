@@ -10,8 +10,9 @@ description: This skill should be used when the user wants to "run the weekly sy
   "capture meeting", "get fireflies transcript", "fetch from fireflies",
   or "import from fireflies". Use this skill when working across
   Curaden's tech stack (RevolveNote, BOB/iTOP, Jira, Notion, GitHub, Fireflies).
-  Covers four sub-procedures: revolve-note-weekly-sync,
-  jira-notion-bob-sync, bob-weekly-broadcast, and meeting-notes.
+  Covers three sub-procedures: revolve-note-weekly-sync,
+  jira-notion-bob-sync and meeting-notes (the BOB weekly broadcast now runs
+  through the announcements agent).
 ---
 
 # Curaden Communications
@@ -24,12 +25,11 @@ This skill packages four recurring Curaden communication workflows so any Claude
 |-----------------|-----------|
 | "sync revolvenote", "push revolvenote to GitHub", "run revolvenote sync" | [1. RevolveNote Weekly Sync](#1-revolvenote-weekly-sync) |
 | "sync BOB to Notion", "run jira notion sync", "sync BOB issues" | [2. Jira-Notion BOB Sync](#2-jira-notion-bob-sync) |
-| "run BOB broadcast", "send weekly BOB update", "post BOB status" | [3. BOB Weekly Broadcast](#3-bob-weekly-broadcast) |
+| "run BOB broadcast", "send weekly BOB update", "post BOB status" | [3. Moved to announcements](#3-bob-weekly-broadcast-moved-to-the-announcements-agent) |
 | "process meeting notes", "summarise meeting", "create meeting notes", "log meeting", "meeting summary", "get fireflies transcript", "fetch from fireflies" | [4. Meeting Notes](#4-meeting-notes) |
 
 Read `references/revolvenote-sync.md` for repo details and excluded files.
 Read `references/jira-notion-bob-sync.md` for JQL patterns and Notion field mapping.
-Read `references/bob-weekly-broadcast.md` for the broadcast template and target page.
 
 ---
 
@@ -88,29 +88,16 @@ Queries all open BOB project issues from Jira and creates or updates correspondi
 
 ---
 
-## 3. BOB Weekly Broadcast
+## 3. BOB Weekly Broadcast (moved to the announcements agent)
 
-Generates a weekly status summary from Jira, posts it as a Notion page, and broadcasts a condensed version to the Webex team space.
+The BOB weekly is now part of the consolidated team update in
+`agents/announcements.md`: same Jira view (Done this week / In progress /
+Blockers), plus Asana, meeting recaps, Notion and GitHub, drafted every Thursday
+in Notion Team Updates and posted to the App Team space after Sean reads it.
 
-### Steps
-
-1. Read `references/bob-weekly-broadcast.md` for the Notion target page ID, broadcast template, JQL queries, and Webex message format.
-2. Query Jira for the three sections using `mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__searchJiraIssuesUsingJql`:
-   - **Done this week**: issues resolved in the last 7 days
-   - **In Progress**: currently active issues
-   - **Blockers**: blocked or high-priority open issues
-3. Format using the broadcast template in the reference file.
-4. Create a Notion page using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` under parent `3347e8aabbb480908aa2dfc2fd478ff9`.
-5. Post the condensed Webex message to `WEBEX_BROADCAST_SPACE_ID` using `WEBEX_BOT_TOKEN` — format and API call in `references/bob-weekly-broadcast.md` Delivery §2. Skip silently if either var is unset.
-6. Return the Notion page URL and confirm Webex delivery.
-
-### Output
-
-- Notion page URL
-- Webex delivery status
-- Summary: N done, N in progress, N blockers
-
----
+"run BOB broadcast", "send weekly BOB update" and "post BOB status" run the
+announcements agent with period `weekly`. Don't create pages under the old
+"BOB Weekly Broadcast" parent any more.
 
 ---
 
@@ -174,7 +161,6 @@ page body template.
 | Notion MCP prefix | `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__` |
 | RevolveNote GitHub org | `github.com/Curadenapps` |
 | Jira project key | See `references/jira-notion-bob-sync.md` |
-| Notion broadcast space | See `references/bob-weekly-broadcast.md` |
 | Repo path details | See `references/revolvenote-sync.md` |
 | Fireflies GraphQL API | `https://api.fireflies.ai/graphql` |
 | Fireflies env var | `FIREFLIES_API_KEY` |

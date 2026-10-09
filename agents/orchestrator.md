@@ -44,12 +44,12 @@ On any invocation, determine trigger type:
 | Trigger | Signals | Route to |
 |---------|---------|----------|
 | `schedule:"0 6-18/4 * * 1-5"` | `sync-and-scan.yml` (gated) | notion-sync → truth-catcher (batch scan), in that order |
-| `schedule:weekly` | CRON event on Monday 09:00 UTC | BOB Weekly Broadcast skill |
+| `schedule:"0 14 * * 4"` | Claude Routine "Team update draft" (Thursday 14:00 Zurich) | announcements (weekly; monthly on the last Thursday) — draft only |
 | `webhook:asana.task.commented` | Asana webhook payload | Asana Maintenance |
 | `webhook:asana.task.section_changed` | Asana webhook payload | Brand Asset |
 | `user:sync revolvenote` / `push revolvenote` | User phrase | curaden-communications › revolvenote-sync |
 | `user:sync BOB` / `sync jira` | User phrase | curaden-communications › jira-notion-bob-sync |
-| `user:broadcast` / `weekly update` | User phrase | curaden-communications › bob-weekly-broadcast |
+| `user:broadcast` / `run BOB broadcast` | User phrase | announcements (weekly; the BOB weekly is part of the team update) |
 | `user:check alignment` / `scan asana` | User phrase | Truth Catcher |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
 | `user:what needs attention` | User phrase | Swarm (§3a): truth-catcher + brand-asset (check only) + roadmap-watch in parallel |
@@ -65,6 +65,9 @@ On any invocation, determine trigger type:
 | `schedule:"0 8 * * 1"` | CRON (Monday 08:00) — no CI workflow yet | roadmap-watch (weekly roadmap drift report) |
 | `user:roadmap watch` / `check the roadmap` / `roadmap drift` | User phrase | roadmap-watch |
 | `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
+| `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
+| `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |
+| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex post via `scripts/webex-post.ps1`) |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 
@@ -121,7 +124,7 @@ pinned to its model tier. Dispatch them with the Agent tool.
 | Tier | Agents |
 |------|--------|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance (mechanical: poll, diff, link, route) |
-| Sonnet 5.5 | truth-catcher, roadmap-watch, webflow, meeting-notes, feedback-qa (judgement on structured data) |
+| Sonnet 5.5 | truth-catcher, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements (judgement on structured data) |
 | Opus 5.5 | brand-asset, release (approval gates, clinical claims, releases) |
 
 - **Run in parallel** only agents that are independent and read-only for the current
@@ -162,7 +165,10 @@ Dispatch log updated: .truth-cache/dispatch-log.json
 Next scheduled run: {next CRON time}
 ```
 
-3. If any agent returned `status: error`, surface the error details and halt further
+4. Keep each result's `summary` specific (what changed, with ids). The
+   `announcements` agent reads `dispatch-log.json` when it runs locally, so a
+   vague summary means a thin team update.
+5. If any agent returned `status: error`, surface the error details and halt further
    dependent dispatches (e.g., do not run Brand Asset if truth-cache sync failed).
 
 ---
