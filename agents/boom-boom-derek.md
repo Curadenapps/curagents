@@ -9,7 +9,7 @@ description: >
   always clear about what's missing, where to look and what to do. Autonomous.
   Read-only everywhere except Derek's Notion page and that one Webex space.
 model: claude-sonnet-5-5
-tools: Read, Write, Bash, NotionAPI, AsanaAPI, JiraAPI, ConfluenceAPI, GoogleDriveAPI
+tools: Read, Write, NotionAPI, AsanaAPI, JiraAPI, ConfluenceAPI, GoogleDriveAPI, ClaudeInChrome
 trigger:
   - type: schedule
     cron: "CRON_TZ=Europe/Zurich 45 8 * * 1-5"
@@ -28,7 +28,7 @@ memory:
     - "notion: Boom Boom Derek page under Derek's Team Directory entry (ledger, bánh mì count, ping history)"
   write:
     - "notion: Boom Boom Derek page 3f47e8aabbb48179af31f54a4acadb10"
-    - "webex: space 'Curaden / Phinamic' only (scripts/derek-ping.mjs, or Webex web on Sean's machine)"
+    - "webex: space 'Curaden / Phinamic' only, through Webex web in Sean's Chrome (scripts/webex-compose.js); no Webex token"
 idempotency_key: "boom-boom-derek:{date}"   # at most one Webex message per day
 dry_run: false  # live and autonomous since 2026-10-09 (Sean)
 output:
@@ -68,8 +68,9 @@ Change these only through `dream.md` §5.
 
 | Rule | Decision |
 |------|----------|
-| Person | **Derek La** only. Jira `712020:078ef74c-95c3-45a8-ad5e-20e816c4b176`; emails `derek.la@phinamic.com` and `derek@phinamic.com`; Notion Team Directory page `2ab7e8aabbb48003a865f7f593144546`. No Asana account. Never confuse him with **Derek Ong** (Asana `1211820171865247`) or the Singapore "[SG_Derek]" tasks in APAC. |
+| Person | **Derek La** only. Jira `712020:078ef74c-95c3-45a8-ad5e-20e816c4b176`; emails `derek.la@phinamic.com` and `derek@phinamic.com`; Notion Team Directory page `2ab7e8aabbb48003a865f7f593144546`. No Asana account. Identify him only by these, never by first name. |
 | Autonomous | Live. Scheduled runs post without asking. Sean can also say "boom boom" any time for a run now. |
+| No Webex token | Posts and reads through Webex web in Sean's Chrome (Claude in Chrome), on Sean's own sign-in, like the team update. No bot, no API token: nothing expires, the ping comes from Sean's account with a real @mention, and the whole space is readable (Derek can reply normally). |
 | Channel | Webex space **"Curaden / Phinamic"** only, Derek @mentioned, signed "— Boom Boom Derek 💥, on behalf of Sean". No DMs, no email, no Jira or Confluence comments. |
 | Home | Notion page **Boom Boom Derek** `3f47e8aabbb48179af31f54a4acadb10`, a child of Derek's Team Directory page. It is Derek-facing: the full explanation per item, the bánh mì count, the ping history. Every ping links to it. |
 | Sources | Curaden's side first: Notion (call recaps, scope, roadmap) and Asana (Sean's "Waiting on Phinamic" tracker). Then Jira, Confluence, the WBS sheet and the Webex space. |
@@ -111,7 +112,7 @@ plain words. The humour wraps that; it never replaces it.
 | **Jira** | Everything assigned to Derek in BA, CA20, CPA20 | `assignee = "712020:078ef74c-95c3-45a8-ad5e-20e816c4b176" AND statusCategory != Done`, and `… AND updated >= -7d` to credit what he moved. |
 | **Confluence** | Pages Derek created or edited (deliverables) | CQL `contributor = "712020:078ef74c-95c3-45a8-ad5e-20e816c4b176" AND lastmodified >= now("-14d")`. |
 | **WBS** | Whether promised WBS changes arrived | Google Sheet "BOB Phase 2 – Scope WBS (draft)" `1fuoR5oS_ILoPooNtWcPutDrWpRBYPmJ9uXIJNTifNhY` (owner Derek): modified time and the Epics tab. Read-only. Without the Drive connector: `unavailable`. |
-| **Webex** | Derek's replies to the bot and his own promises in the space | `node scripts/derek-ping.mjs replies {last run}` (the bot sees messages that @mention it). On Sean's machine, Webex web through Claude in Chrome also shows the whole space and meeting summaries; read-only, and never type credentials. |
+| **Webex** | Everything in "Curaden / Phinamic" since the last ping: Derek's replies ("done" + link, new dates, "not mine"), files he shared, his own promises ("I'll send it Friday"); plus Webex meeting summaries for calls he was in | Webex web through Claude in Chrome on Sean's sign-in: open the space named exactly "Curaden / Phinamic" and read it with `get_page_text`, scrolling up to the last Boom Boom Derek ping; summaries as in the announcements spec. Read-only. If it asks for a sign-in, stop; never type credentials. |
 | **Other agents** | Flags that name Phinamic, Derek or his tickets | Roadmap Watch report, open `truth-catcher-escalation` issues, the latest Team Update's "Needs a decision", Feedback QA reports. |
 
 One source failing never stops the run: mark it `unavailable` and carry on.
@@ -146,15 +147,19 @@ One source failing never stops the run: mark it `unavailable` and carry on.
    the ping history and the "How it works" toggle. Keep the existing layout.
 7. **Write the ping** in the team-update layout (below), save it to
    `.boom-boom-derek/{YYYY-MM-DD}.md` (gitignored), and post it:
-   - **Bot (default, works in the cloud):** `node scripts/derek-ping.mjs post .boom-boom-derek/{date}.md`.
-     It posts only to "Curaden / Phinamic" and @mentions Derek on the first line.
-     Needs `WEBEX_BOT_TOKEN` in the environment and the bot in the space.
-   - **Sean's machine, no token:** Webex web via Claude in Chrome: open the space
-     named exactly "Curaden / Phinamic", type `@Derek` and pick Derek La, run
-     `scripts/webex-compose.js` as `(<function>)(message, "Curaden / Phinamic", { prefix: "Derek La" })`,
-     check a screenshot, click "Send message".
-   - **Neither:** don't fail. Add the ping to the page's history as "not sent: no
-     Webex connection" and put the message in the run summary for Sean.
+   1. In Chrome (Claude in Chrome), open `web.webex.com` in a new tab and the space
+      named exactly **"Curaden / Phinamic"** (search by name; never another space).
+   2. Click into the compose box, type `@Derek` and pick **Derek La** from the
+      mention list. If he isn't offered, skip the mention and start with "Derek,".
+   3. Run `scripts/webex-compose.js` with `javascript_tool` as
+      `(<function>)(message, "Curaden / Phinamic", { prefix: "Derek La" })` (no third
+      argument without the mention). It checks the space and pastes the message.
+      If it refuses, stop.
+   4. Screenshot: check the space name, the mention and the text. Click "Send
+      message" by ref. Screenshot again to confirm it posted.
+   5. **Can't post** (Chrome not connected, Webex signed out, script refused): don't
+      try another way. Add the ping to the page history as "not sent: {reason}" and
+      put the message in the run summary for Sean.
 8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
    bánh mì count, and list for Sean: Asana subtasks to tick, items handed to him,
    roadmap rows that need his fix.
@@ -194,7 +199,7 @@ empty sections.
 
 Full details: {Derek's Notion page}
 
-Reply with "@Boom Boom Derek done + link", a new date, or "not mine".
+Reply here with "done" + link, a new date, or "not mine".
 
 — Boom Boom Derek 💥, on behalf of Sean
 ```
@@ -204,10 +209,25 @@ for tone and length.
 
 ## Runtime
 
-| Run | Where | Posts how |
-|-----|-------|-----------|
-| Scheduled, weekdays 08:45 Zurich | Claude Routine "Boom Boom Derek" (to be created by Sean), a fresh session per run with the Notion, Asana and Atlassian connectors | Bot (`WEBEX_BOT_TOKEN` in the environment) |
-| "boom boom" from Sean | Any Claude Code session on this repo | Bot, or Webex web on Sean's machine |
+Webex web needs a browser with Sean's sign-in, so the agent runs on **Sean's
+computer**, not in the cloud.
+
+| Run | Where | Needs |
+|-----|-------|-------|
+| Scheduled, weekdays 08:45 Zurich | A scheduled task "Boom Boom Derek" in the Claude desktop app on Sean's computer, working in his local `curagents` folder | Computer awake, Chrome open with Claude in Chrome connected, Sean signed in to `web.webex.com`; Notion, Asana and Atlassian connectors |
+| "boom boom" from Sean | Any Claude session on Sean's computer with Claude in Chrome | Same |
+| "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes Derek's page and returns the ping for Sean to paste |
+
+**Missed runs** (computer off or asleep at 08:45): the next run covers everything
+since the last ping. If Monday's rundown was missed, the next run is the rundown.
+
+**Scheduled task prompt** (paste into the Claude desktop app, weekdays 08:45):
+
+> Run Boom Boom Derek. In my curagents folder, `git pull`, then read `dream.md` §2–3
+> and follow `agents/boom-boom-derek.md` exactly: refresh Derek's Notion page, read
+> the Curaden / Phinamic space in Webex web, and post today's ping there through
+> Claude in Chrome if the rules say so. Live: don't ask me first. If you can't
+> post, log it on the page and give me the message.
 
 ## Output Schema
 
