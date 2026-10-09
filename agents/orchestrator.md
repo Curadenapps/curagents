@@ -51,9 +51,8 @@ On any invocation, determine trigger type:
 | `user:sync BOB` / `sync jira` | User phrase | curaden-communications › jira-notion-bob-sync |
 | `user:broadcast` / `run BOB broadcast` | User phrase | announcements (weekly; the BOB weekly is part of the team update) |
 | `user:check alignment` / `scan asana` | User phrase | Truth Catcher |
-| `schedule:"45 8 * * 1-5"` (Zurich) | Boom Boom Derek Routine (not yet created) | boom-boom-derek (Monday rundown, Tue–Fri nudges; draft only until live) |
-| `user:boom boom derek` / `check derek` / `derek rundown` / `what does derek owe` | User phrase | boom-boom-derek |
-| `user:ping derek` | User phrase | boom-boom-derek Step 7 (posts the waiting draft to Webex "Curaden / Phinamic" via Claude in Chrome) |
+| `schedule:"45 8 * * 1-5"` (Zurich) | Claude Routine "Boom Boom Derek" (to be created) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
+| `user:boom boom` / `boom boom derek` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
 | `user:what needs attention` | User phrase | Swarm (§3a): truth-catcher + brand-asset (check only) + roadmap-watch in parallel |
 | `schedule:"0 7 * * 1-5"` | `figma-diff.yml` (gated) | figma (library diff check) |

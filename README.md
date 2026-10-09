@@ -22,7 +22,8 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 │
 ├── src/           ← API integrations (Notion sync, Asana read/write, Figma poll)
 ├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner),
-│                    render-pdf.ps1 + webex-compose.js (team update PDF; Webex post via the browser)
+│                    render-pdf.ps1 + webex-compose.js (team update PDF; Webex post via the browser),
+│                    derek-ping.mjs (Boom Boom Derek Webex bot)
 ├── templates/     ← team-update.html: Curaprox-styled PDF report for the announcements agent
 ├── .github/       ← GitHub Actions: sync-and-scan, figma-diff
 └── .planning/     ← GSD project planning docs (roadmap, requirements, state)
@@ -63,7 +64,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
 | Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Claude Routine, weekdays 07:58 + 13:58 Zurich |
-| Boom Boom Derek | [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) | Truth Catcher for one person, Derek La (Phinamic): ledger of what he owes across Webex, Jira, Confluence, recaps and Asana, checked against the roadmap; pings him in Webex "Curaden / Phinamic" | Weekdays 08:45 Zurich (Mon rundown, Tue–Fri nudges) + manual "ping Derek"; dry run until Sean says go live |
+| Boom Boom Derek | [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) | Truth Catcher for one person, Derek La (Phinamic): ledger of what he owes across Webex, Jira, Confluence, recaps and Asana, checked against the roadmap; pings him in Webex "Curaden / Phinamic" | Claude Routine weekdays 08:45 Zurich (Mon rundown, Tue–Fri nudges) + manual "boom boom"; live, posts via the Webex bot (`scripts/derek-ping.mjs`) |
 | Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
 | Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
 
@@ -147,6 +148,7 @@ Required environment variables:
 | `NOTION_ROOT_DATABASE_ID` | `86b68fc172dd43ff8ee3219a3a5435f6` | notion-sync |
 | `ASANA_ACCESS_TOKEN` | Asana API | truth-catcher, brand-asset, asana-maintenance |
 | `ASANA_PROJECT_GID` | BOB App project GID — App Requests is a section within this project | truth-catcher, asana-maintenance |
+| `WEBEX_BOT_TOKEN` | Webex bot, member of "Curaden / Phinamic" (and the QA space) | boom-boom-derek, feedback-qa |
 | `ASANA_WEBHOOK_SECRET` | HMAC secret for webhook verification | asana-maintenance |
 | `FIGMA_API_TOKEN` | Figma REST API token | figma |
 | `FIGMA_FILE_KEY` | BOB design system Figma file key | figma |
@@ -169,4 +171,5 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |
 | Webex bot tokens get culled after a few days | announcements posts through Webex web in Sean's Chrome (Claude in Chrome); the post needs his machine |
 | Webex meeting summaries need Sean signed in to curaden.webex.com in Chrome | the Thursday Routine can't read them; the "post it" session adds them |
-| Boom Boom Derek has no scheduled run that can post | its Routine (not yet created) only drafts; Sean sends with "ping Derek" from his machine |
+| Boom Boom Derek Routine not created yet | runs only when Sean says "boom boom" |
+| `WEBEX_BOT_TOKEN` not in the cloud environment | Boom Boom Derek updates Derek's Notion page but can't post; the ping lands in the run summary for Sean |
