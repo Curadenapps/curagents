@@ -145,7 +145,7 @@ One source failing never stops the run: mark it `unavailable` and carry on.
    updated, then one section per finding type, each item with From / Due / What we
    can see / Where / Done when, the Jira table, "Nice work" credits, "On Curaden",
    the ping history and the "How it works" toggle. Keep the existing layout.
-7. **Write the ping** in the team-update layout (below), save it to
+7. **Write the ping** as a quick sum-up with the page link (below), save it to
    `.boom-boom-derek/{YYYY-MM-DD}.md` (gitignored), and post it:
    1. In Chrome (Claude in Chrome), open `web.webex.com` in a new tab and the space
       named exactly **"Curaden / Phinamic"** (search by name; never another space).
@@ -164,48 +164,44 @@ One source failing never stops the run: mark it `unavailable` and carry on.
    bánh mì count, and list for Sean: Asana subtasks to tick, items handed to him,
    roadmap rows that need his fix.
 
-## The ping (team-update layout)
+## The ping (quick sum-up + link)
 
-Webex markdown. A blank line after the title, before and after each section title,
-and between bullets. Under 5,000 characters; the page carries the detail. Drop
-empty sections.
+The Webex message is the short version: one line per finding type, then the link
+to Derek's Notion page, which carries the detail (Sean, 9 Oct). Webex markdown, a
+blank line after the title, before and after each section title, and between
+bullets. Aim for about 1,000 characters; never over 5,000. Drop empty lines.
 
 ```markdown
 ## 💥 Boom Boom Derek: {Weekday d Mon}
 
 {Opener at the current level, plus credit for what he closed since the last ping.}
 
-**🥖 Bánh mì owed: {n}** ({why, in a few words})
+**Quick sum-up**
 
-**🔴 Overdue**
+- 🔴 **Overdue:** {deliverables, a few words each}
 
-- **{Deliverable}** ({where it came from}, due {d Mon}). {What's missing}. {What to do}.
+- 🟠 **Today:** {…}
 
-**🟠 Due today**
+- 🗓️ **{Weekday d Mon}:** {what's due next}
 
-**🗓️ Coming up**
+- 🟡 **Jira:** {n} tickets {why} ({keys})
 
-**🟡 Jira to update**
+- 🔵 **Roadmap check:** {one line}
 
-- {KEY} {short summary}: {status}, quiet since {d Mon}. {Ask}
+- 🧭 **Good to know:** {one line}
 
-**🔵 Check against the roadmap**
+- ⏳ **On Curaden, not you:** {items}
 
-**🧭 Good to know**
+**🥖 Bánh mì owed: {n}.** {Closing line at the current level, e.g. the fruit basket warning.}
 
-**⏳ On Curaden, not you:** {items}
-
-{Closing line at the current level, e.g. the fruit basket warning.}
-
-Full details: {Derek's Notion page}
+Everything in detail, with where to look and what "done" means: {Derek's Notion page}
 
 Reply here with "done" + link, a new date, or "not mine".
 
 — Boom Boom Derek 💥, on behalf of Sean
 ```
 
-The first trial (9 Oct 2026) is in the page history; its message is the reference
-for tone and length.
+The first trial (9 Oct 2026) is the reference for tone and length.
 
 ## Runtime
 
