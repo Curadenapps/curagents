@@ -1,6 +1,6 @@
 /**
  * scripts/truth-scan.ts
- * Deterministic half of Truth Catcher: Asana BOB App tasks vs the Notion BOB Roadmap.
+ * Deterministic half of Truth Catcher: Asana BOB App tasks vs the Notion Product Roadmap (BOB + Curaprox app).
  * Claude only judges what needs judgement (see agents/truth-catcher.md):
  *   - unlinked tasks: matched / non_product / not_on_roadmap
  *   - roadmap tasks showing delay signals: ok (rationale or Sean's call) / question
@@ -296,7 +296,7 @@ async function prepare(): Promise<void> {
 
   const roadmapFeatures = rows
     .filter((r) => r.level !== "Task" && r.status !== "Cut")
-    .map((r) => ({ id: r.id, name: r.name, level: r.level, epic: r.epic, release: r.release, status: r.status }));
+    .map((r) => ({ id: r.id, name: r.name, product: r.product, level: r.level, epic: r.epic, release: r.release, status: r.status }));
 
   atomicWrite("scan-input.json", {
     scan_started_at: scanStartedAt,
@@ -345,8 +345,8 @@ const LINES: Record<FindingType, (task: Task, row: RoadmapRow | null) => [string
     "Stop work and close this task, or restore the row in Notion if the decision changed.",
   ],
   not_on_roadmap: () => [
-    "Not on roadmap: no BOB Roadmap row links to this task.",
-    "Add a BOB Roadmap row (or put this task's link in an existing row's Asana Link) before work continues.",
+    "Not on roadmap: no Product Roadmap row links to this task.",
+    "Add a Product Roadmap row (or put this task's link in an existing row's Asana Link) before work continues.",
   ],
 };
 
@@ -356,7 +356,7 @@ function findingComment(task: Task, row: RoadmapRow | null, findings: FindingTyp
   const critical = findings.includes("roadmap_cut_asana_open");
   const lines = findings.map((f) => LINES[f](task, row));
   return [
-    `🔎 Truth Catcher: ${critical ? "🔴 cut from" : "⚠️ not aligned with"} the BOB Roadmap`,
+    `🔎 Truth Catcher: ${critical ? "🔴 cut from" : "⚠️ not aligned with"} the Product Roadmap`,
     "",
     ...lines.map(([what]) => `• ${what}`),
     ...(reason ? [`  ${reason}`] : []),

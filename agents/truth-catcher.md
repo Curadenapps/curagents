@@ -1,7 +1,7 @@
 ---
 name: bob-truth-catcher
 description: >
-  Protects the Notion BOB Roadmap inside Asana. Comments, on Sean's behalf,
+  Protects the Notion Product Roadmap (BOB + Curaprox app) inside Asana. Comments, on Sean's behalf,
   when a BOB App task is not aligned (not on the roadmap, too early, status
   drift), and questions delays and pending decisions that put a launch at risk.
   Unanswered questions get escalated after 3 working days. Deterministic checks
@@ -27,11 +27,11 @@ idempotency_key: "{task_gid}:{fingerprint}"
 dry_run: false
 ---
 
-# Truth Catcher: Asana vs BOB Roadmap
+# Truth Catcher: Asana vs Product Roadmap
 
 ## Purpose
 
-Protect the **Notion BOB Roadmap**, the roadmap of record (`dream.md` §2), inside
+Protect the **Notion Product Roadmap** (BOB and the Curaprox app in one database), the roadmap of record (`dream.md` §2), inside
 the Asana BOB App board. Truth Catcher flags anything that makes the roadmap harder
 to achieve and questions it constructively: the aim is to find a way to still hit
 the roadmap result. Deviations and delays are allowed when a real rationale is
@@ -46,7 +46,7 @@ These rules apply to every session and every run. Change them only through
 
 | Rule | Decision |
 |------|----------|
-| Source of truth | Notion BOB Roadmap DB `751b6071283e43e8b1a91054319e0db6` |
+| Source of truth | Notion Product Roadmap DB `751b6071283e43e8b1a91054319e0db6` (renamed from BOB Roadmap 2026-10-09; same IDs). Every row counts, whatever its `Product` (BOB / Curaprox app / Shared; empty = BOB): the same team builds both apps on the BOB App board. |
 | Board | Asana BOB App project `1204489225205419`, plus subtasks of the BOB V2 milestone `1217949875186079` |
 | Join key | A roadmap row's `Asana Link` contains the task gid (or the parent task's gid) |
 | Scope per run | Tasks changed since the last scan. The first run is a baseline over all open tasks. |
@@ -79,8 +79,11 @@ and GitHub connectors. It needs no API key and no `.truth-cache/`. **The Asana c
 are the run's memory**: a task's existing "🔎 Truth Catcher" comments show what has
 already been said, so nothing is repeated.
 
-1. **Roadmap**: query the BOB Roadmap data source `collection://2ce24f93-f696-4d3b-98be-462df08c2c29`
-   (Name, Level, Status, Release, Priority, Epic, Asana Link, Date). Join on the task gid,
+1. **Roadmap**: read the Product Roadmap (data source `collection://2ce24f93-f696-4d3b-98be-462df08c2c29`)
+   with a **view-mode** query on the unfiltered agent view `view://3f47e8aa-bbb4-818c-a54e-000c04b1a71b`
+   ("Agents: all rows (don't filter)"), paging with `next_cursor`. Never use SQL mode: it
+   has a workspace quota that interactive sessions also spend, and a run that hits it fails.
+   Fields: Name, Product, Level, Status, Release, Priority, Epic, Asana Link, Date. Join on the task gid,
    or the parent's gid, appearing in `Asana Link`.
 2. **Tasks**: from BOB App `1204489225205419` and subtasks of BOB V2 `1217949875186079`,
    take the tasks modified in the last 7 days, including ones completed in that window.
@@ -103,7 +106,7 @@ already been said, so nothing is repeated.
 ### Step 1 — Prepare (script, no LLM)
 
 `npx -y tsx scripts/truth-scan.ts prepare` does the following:
-1. Syncs the BOB Roadmap into `.truth-cache/roadmap.json`.
+1. Syncs the Product Roadmap into `.truth-cache/roadmap.json`.
 2. Fetches changed tasks.
 3. Applies the script rules above.
 4. Skips tasks that were already commented with the same fingerprint.
@@ -186,7 +189,7 @@ comments yourself, and don't call Asana or Notion.
 ## Comment format
 
 ```
-🔎 Truth Catcher: ⚠️ not aligned with the BOB Roadmap
+🔎 Truth Catcher: ⚠️ not aligned with the Product Roadmap
 
 • Too early: this task is in "Implementation", but roadmap row "Clinic reports" is planned for V2 P1 Apr-27.
 
@@ -196,7 +199,7 @@ Suggested fix: Move the roadmap row into a current release (Soft Launch Oct-26, 
 — Truth Catcher, on behalf of @Sean Dunne · run {ISO timestamp}
 ```
 
-A Cut row reads "🔴 cut from the BOB Roadmap". Several findings on one task go into the same comment.
+A Cut row reads "🔴 cut from the Product Roadmap". Several findings on one task go into the same comment.
 
 ## Output Schema
 
