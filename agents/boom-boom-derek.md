@@ -101,6 +101,20 @@ plain words. The humour wraps that; it never replaces it.
 - Jokes are about the overdue task, never about Derek as a person. No swearing or
   insults in any language: it posts from Sean's account in a shared partner space.
 
+**Reference tone** (Sean approved and sent this one, 9 Oct; automate exactly this):
+
+> @Derek 🚨 Shooby alert: Fabian's been left on read. From the 7 Oct call you owe him
+> the check on routing in-app help requests to the Asana board, and an answer on live
+> vs test metrics after his Reporting page feedback. Both due Wed 14 Oct. A quick
+> reply today, even "got it, coming Wednesday", keeps the bánh mì count at 4. More
+> silence and we're straight into fruit basket territory 🧺.
+>
+> — Boom Boom Derek 💥, on behalf of Sean
+
+What makes it work: the joke names the problem (left on read), then the exact
+deliverables with their source and due date, then the smallest acceptable action
+("a quick reply today"), then the consequence in bánh mì / fruit basket terms.
+
 ## Where Derek's work lives
 
 | Source | What to read | How |
@@ -127,6 +141,7 @@ One source failing never stops the run: mark it `unavailable` and carry on.
 | 🟡 **Jira to update** | Row Done or Cut (or "Derek's to close") but ticket open; a recap asked him to update tickets and they haven't moved; a ticket In Progress, In Code Review or QA Validation with no update in 14 days; or the roadmap says work started but the ticket is still To Do. Jira Done but row not Done is a roadmap fix for Sean, not Derek. |
 | 🔵 **Check against the roadmap** | Open tickets that no roadmap row or WBS phase covers any more, or that sit on a row moved to a later release. Ask him to keep, re-date or close. |
 | 🧭 **Good to know** | Something changed that his work depends on and he may have missed: a decision, a scope change, a reference project (the Tuft case), another agent's flag. Once per item. |
+| 📭 **Left on read** | A Curaden teammate is waiting on a reply from Derek about something he owes them (Fabian on the 7 Oct items, for example). Only from what's shared with Sean: his deliverables to that person, the shared space, or the teammate telling Sean. Never read private chats between other people. Lead with it, in the reference tone. |
 | ⏳ **On Curaden, not you** | What Derek is waiting on from Curaden. |
 
 ## Workflow
@@ -189,6 +204,8 @@ bullets. Aim for about 1,000 characters; never over 5,000. Drop empty lines.
 - 🔵 **Roadmap check:** {one line}
 
 - 🧭 **Good to know:** {one line}
+
+- 📭 **{Teammate} is waiting on you:** {what, due when}
 
 - ⏳ **On Curaden, not you:** {items}
 
