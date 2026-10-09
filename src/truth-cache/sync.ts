@@ -90,13 +90,15 @@ export async function syncNotionCache(): Promise<void> {
   console.log("notion-sync: cache updated", meta);
 }
 
-/** BOB Roadmap database — roadmap of record (dream.md §2) */
+/** Product Roadmap database (BOB + Curaprox app) — roadmap of record (dream.md §2) */
 const BOB_ROADMAP_DB_ID = "751b6071283e43e8b1a91054319e0db6";
 
 export interface RoadmapRow {
   id: string;
   url: string;
   name: string;
+  /** "BOB" | "Curaprox app" | "Shared"; an empty Product field means BOB */
+  product: string;
   level: string | null;
   epic: string | null;
   release: string | null;
@@ -118,7 +120,7 @@ function asanaGids(url: string | null): string[] {
   return url ? [...url.matchAll(/\d{10,}/g)].map((m) => m[0]) : [];
 }
 
-/** Fetch all BOB Roadmap rows and write .truth-cache/roadmap.json (no LLM) */
+/** Fetch all Product Roadmap rows and write .truth-cache/roadmap.json (no LLM) */
 export async function syncRoadmap(): Promise<number> {
   const rows: RoadmapRow[] = [];
   let cursor: string | undefined;
@@ -137,6 +139,7 @@ export async function syncRoadmap(): Promise<number> {
         id: page.id,
         url: page.url,
         name: text(p["Name"]) ?? "(untitled)",
+        product: select(p["Product"]) ?? "BOB",
         level: select(p["Level"]),
         epic: select(p["Epic"]),
         release: select(p["Release"]),
