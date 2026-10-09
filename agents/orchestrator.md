@@ -67,7 +67,8 @@ On any invocation, determine trigger type:
 | `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
 | `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
 | `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |
-| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex post via `scripts/webex-post.ps1`) |
+| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web via Claude in Chrome, `scripts/webex-compose.js`) |
+| `user:markets update` / `markets monthly` | User phrase | announcements, period `markets` (from Dec 2026) |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 
