@@ -28,6 +28,9 @@ trigger:
       - "what did we do this month"
       - "post the update"
       - "post it"
+      - "run BOB broadcast"
+      - "send weekly BOB update"
+      - "post BOB status"
 memory:
   read:
     - dream.md
@@ -38,7 +41,7 @@ memory:
     - "notion: one child page per update under Team Updates"
     - "webex: App Team + App Team - Markets, via scripts/webex-post.ps1, only after Sean approves"
 idempotency_key: "announcements:{period}:{window_end}"
-dry_run: true   # draft-only until Sean approves the first live post
+dry_run: false  # live since 2026-10-09: writes its Notion drafts; Webex still only on Sean's "post it"
 output:
   schema:
     period: "weekly|fortnightly|monthly|adhoc"
@@ -88,7 +91,7 @@ it `unavailable`, carry on, and say so at the top of the draft.
 | **Asana** | Tasks completed, created, or moved section in the window; project status updates | `search_tasks` with `completed_on_after` / `modified_on_after` over the app projects below; also tasks where Sean is assignee or follower in other projects, product work only |
 | **Notion** | Pages edited in the window under the Curaden App Hub only | `notion-search` with `page_url` = App Hub `86b68fc172dd43ff8ee3219a3a5435f6`; keep results whose `timestamp` is in the window. Always fetch the scope page `3f27e8aabbb481c49609dd919ce400a0`, Education Hub `3447e8aabbb481ef9ceaf36c73067120` and the Tasks & Notes inbox `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db` |
 | **Roadmap** | What moved on the roadmap | The Roadmap Watch report(s) in the window under Roadmap Reports `3ec7e8aabbb481c09e57c7926468235c`. Don't re-diff the roadmap; roadmap-watch already did |
-| **Jira** | BA issues resolved; versions released | `project = BA AND statusCategory = Done AND resolved >= {start}`; released fixVersions in the window |
+| **Jira** (the old BOB weekly) | Done, In progress, Blockers in BA; versions released | Done: `project = BA AND statusCategory = Done AND resolved >= {start}`. In progress: `project = BA AND status in ("In Progress", "In Review")`. Blockers: `project = BA AND statusCategory != Done AND (labels = "blocked" OR priority in (Highest, High))`. Released fixVersions in the window. Ignore Xray test issue types |
 | **GitHub** | PRs merged in the Curadenapps org | Merged in the window; title + repo only |
 | **Other agents** | Truth Catcher escalations, Feedback QA reports, releases | Open `truth-catcher-escalation` issues in `Curadenapps/curagents`; release changelog pages; `.truth-cache/dispatch-log.json` when run locally |
 | **Previous update** | Its "What's next" list | Latest page under Team Updates. Each item: done, still going, or dropped (say which) |
@@ -176,6 +179,15 @@ hype, outcomes first, no internal tool names unless the reader needs them.
 **Keep it lean.** One line per workstream, at most about eight in Done. The
 Webex message is the short version; detail goes in the PDF and the Notion page.
 
+**Webex layout** (Sean's rule): a blank line after the title, before and after
+each section title, and between bullets, so each point stands on its own.
+Webex caps a message at 5,000 characters; longer updates go as "Part 1 of N"
+… "Part N of N".
+
+**Standing context** (don't contradict without a newer source): GTM is scoped to
+iTOP instructors and lecturers for 2026; Prescription Mode is a lighter function
+inside the current BOB indexing workflow.
+
 **Weekly** (App Team, ~300 words):
 
 ```markdown
@@ -209,8 +221,8 @@ Webex message is the short version; detail goes in the PDF and the Notion page.
 - {one line each}
 ```
 
-Both end with `Full update and sources: {Notion page link}`. Keep each Webex
-message under 7,000 characters; the post script splits on `##`/`###` if needed.
+Both end with `Full update and sources: {Notion page link}`. The post script
+splits on `##`/`###` above 5,000 characters.
 
 **Fortnightly** uses the weekly shape over 14 days. **Adhoc** answers in chat in
 the weekly shape and writes nothing.
@@ -250,8 +262,14 @@ and keep the line out of the Webex message until Legal has approved it
 3. Post with the PDF attached:
    `powershell -File scripts/webex-post.ps1 <file.md> app-team -Attach <file.pdf>`
    (monthly: `app-team markets`). The script only knows those spaces and needs
-   `WEBEX_BOT_TOKEN`; `DRY_RUN=true` prints instead of posting. Without a token,
-   Sean posts the message and PDF himself in Webex.
+   `WEBEX_BOT_TOKEN`; `DRY_RUN=true` prints instead of posting.
+   Without a token, post from Sean's account in Webex web through Claude in
+   Chrome: open `web.webex.com`, search "App Team", pick the space named exactly
+   "App Team" (not "App Team - Markets"), find the compose box by ref, type each
+   line with `shift+Enter` between lines (never a newline inside a `type`
+   action; plain Enter sends), attach the PDF, screenshot to check, then send.
+   Check the space header name before sending; if it isn't the target space,
+   stop. If Chrome isn't connected, hand Sean the message and PDF to post.
 4. Update the page status line with the message ids.
 
 The Claude Routine "Team update draft" (`trig_01Pi2NPoRWRP6MStWHVzzkDm`, Thursday

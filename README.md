@@ -24,7 +24,7 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 ├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner),
 │                    render-pdf.ps1 + webex-post.ps1 (team update PDF and Webex post)
 ├── templates/     ← team-update.html: Curaprox-styled PDF report for the announcements agent
-├── .github/       ← GitHub Actions: sync-and-scan, figma-diff, bob-broadcast
+├── .github/       ← GitHub Actions: sync-and-scan, figma-diff
 └── .planning/     ← GSD project planning docs (roadmap, requirements, state)
 ```
 
@@ -40,7 +40,7 @@ Skills are invokable by any Claude session. Trigger by phrase — no manual setu
 |----------------|-----------|-------------|
 | "sync revolvenote" | RevolveNote Weekly Sync | Stage + push latest RevolveNote app to `github.com/Curadenapps/revolvenote` |
 | "sync BOB to Notion" | Jira-Notion BOB Sync | Mirror all open BOB Jira issues into Notion pages (create or update) |
-| "run BOB broadcast" | BOB Weekly Broadcast | Generate weekly sprint summary (Done / In Progress / Blockers) and post to Notion |
+| "run BOB broadcast" | Moved to the announcements agent | The BOB weekly is part of the Thursday team update |
 
 Config details for each procedure: [`skills/curaden-communications/references/`](skills/curaden-communications/references/)
 
@@ -86,7 +86,7 @@ scripts and `.claude/agents/` wrappers all use the same tier.
 | Tier | Agents | Why |
 |------|--------|-----|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
-| Sonnet 5.5 | orchestrator, truth-catcher, roadmap-watch, webflow, meeting-notes, broadcast, announcements | Judgement on structured data |
+| Sonnet 5.5 | orchestrator, truth-catcher, roadmap-watch, webflow, meeting-notes, announcements | Judgement on structured data |
 | Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
 
 Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.
@@ -97,7 +97,6 @@ Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md)
 |----------|----------------|-----------------------|------------|
 | `sync-and-scan.yml` | Manual (scheduled scan moved to the Claude Routine) | Notion edits since last sync → Asana events since last token | notion-sync (Haiku) → truth-catcher: `scripts/truth-scan.ts` does the checks and posting, Sonnet only judges unlinked tasks |
 | `figma-diff.yml` | Weekdays 07:00 | Figma file `lastModified` | figma (Haiku) |
-| `bob-broadcast.yml` | Mon 09:00 | — | broadcast (Sonnet) |
 
 `.truth-cache/` is saved between runs with `actions/cache`. Every run writes model, turns
 and cost to the job summary. Dispatch with `force: true` to skip the change checks.
@@ -164,7 +163,6 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | Figma file key / Webflow site ID not set | figma and webflow agents run in config-error state |
 | Asana webhook not registered | asana-maintenance and brand-asset webhooks don't fire; scheduled scan uses the Asana events gate |
 | `DRY_RUN=true` everywhere | No live writes to any system |
-| Jira secrets exist in CI (`JIRA_EMAIL`, `JIRA_API_TOKEN`, `JIRA_PROJECT_KEY`) but no workflow passes them yet | bob-broadcast reads Jira only in interactive sessions |
 | roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
 | `FIREFLIES_API_KEY` / `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes uses paste mode / searches for the DB by name |
 | Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |

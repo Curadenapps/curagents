@@ -44,13 +44,12 @@ On any invocation, determine trigger type:
 | Trigger | Signals | Route to |
 |---------|---------|----------|
 | `schedule:"0 6-18/4 * * 1-5"` | `sync-and-scan.yml` (gated) | notion-sync → truth-catcher (batch scan), in that order |
-| `schedule:weekly` | CRON event on Monday 09:00 UTC | BOB Weekly Broadcast skill (Notion page only; the Webex post is the team update) |
 | `schedule:"0 14 * * 4"` | Claude Routine "Team update draft" (Thursday 14:00 Zurich) | announcements (weekly; monthly on the last Thursday) — draft only |
 | `webhook:asana.task.commented` | Asana webhook payload | Asana Maintenance |
 | `webhook:asana.task.section_changed` | Asana webhook payload | Brand Asset |
 | `user:sync revolvenote` / `push revolvenote` | User phrase | curaden-communications › revolvenote-sync |
 | `user:sync BOB` / `sync jira` | User phrase | curaden-communications › jira-notion-bob-sync |
-| `user:broadcast` / `weekly update` | User phrase | curaden-communications › bob-weekly-broadcast |
+| `user:broadcast` / `run BOB broadcast` | User phrase | announcements (weekly; the BOB weekly is part of the team update) |
 | `user:check alignment` / `scan asana` | User phrase | Truth Catcher |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
 | `user:what needs attention` | User phrase | Swarm (§3a): truth-catcher + brand-asset (check only) + roadmap-watch in parallel |

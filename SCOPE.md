@@ -14,7 +14,7 @@ The Truth Catcher agent uses this document to evaluate and flag Asana requests a
 - **Pipeline Hygiene** — Asana agent posts standardized update snippets and routes tasks to correct Kanban stages
 - **Implementation Readiness** — Export and implementation checklists per asset type
 - **Status Reporting** — Weekly Brand Asset Status report with minimal manual intervention
-- **Cross-tool Sync** — RevolveNote→GitHub, Jira→Notion, BOB weekly broadcast (via `curaden-communications` skill)
+- **Cross-tool Sync** — RevolveNote→GitHub, Jira→Notion (via `curaden-communications` skill); the BOB weekly is part of the Team Update
 
 ---
 

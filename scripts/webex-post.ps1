@@ -5,7 +5,7 @@
 # Spaces: app-team, markets. These are the only spaces this script will post to.
 # Needs WEBEX_BOT_TOKEN; the bot must be a member of each space.
 # DRY_RUN=true (default) prints instead of posting. Set $env:DRY_RUN = 'false' to post.
-# Messages over 7000 characters are split at ## / ### headings. The PDF goes
+# Messages over 5000 characters are split at ## / ### headings. The PDF goes
 # with the first part.
 
 param(
@@ -21,7 +21,7 @@ $rooms = @{
     'app-team' = 'Y2lzY29zcGFyazovL3VzL1JPT00vNjdiMGNiNTAtZWU4Ny0xMWVmLTljOTMtNWIwMjE3MGI1ODY5'
     'markets'  = 'Y2lzY29zcGFyazovL3VzL1JPT00vMjc3ZTYwNDAtMGVkMi0xMWYwLTgzN2EtYmYxZmMwNjAwM2Nk'
 }
-$limit = 7000
+$limit = 5000
 
 if (-not (Test-Path $File)) { Write-Error "message file not found: $File"; exit 1 }
 if ($Attach -and -not (Test-Path $Attach)) { Write-Error "attachment not found: $Attach"; exit 1 }
