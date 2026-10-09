@@ -117,9 +117,9 @@ Update `app-hub.json` with `last_release_version` and `last_release_date`.
 
 #### For BOB App:
 
-Call `curaden-communications` skill › `bob-weekly-broadcast` to generate a
-special release broadcast (flag as `release: true` so it uses the release
-notes template rather than the sprint template).
+Hand the release notes page to the `announcements` agent. It goes into the next
+team update under Done (or an adhoc release post if Sean asks for one), and Sean
+posts it to Webex as usual.
 
 #### For RevolveNote:
 
@@ -178,7 +178,7 @@ Release Complete — {Product} {version}
 
 📋 Release notes: {Notion URL}
 🏷  GitHub tag: {GitHub release URL}
-🗞  BOB broadcast: {Notion broadcast URL}
+🗞  Team update: picked up by announcements
 🌐 Webflow: {updated | skipped}
 
 Issues included: {N} ({N} features, {N} fixes, {N} improvements)

@@ -14,7 +14,7 @@ The Truth Catcher agent uses this document to evaluate and flag Asana requests a
 - **Pipeline Hygiene** — Asana agent posts standardized update snippets and routes tasks to correct Kanban stages
 - **Implementation Readiness** — Export and implementation checklists per asset type
 - **Status Reporting** — Weekly Brand Asset Status report with minimal manual intervention
-- **Cross-tool Sync** — RevolveNote→GitHub, Jira→Notion, BOB weekly broadcast (via `curaden-communications` skill)
+- **Cross-tool Sync** — RevolveNote→GitHub, Jira→Notion (via `curaden-communications` skill); the BOB weekly is part of the Team Update
 
 ---
 
@@ -30,6 +30,7 @@ Additional capabilities active with the extended agent roster:
 - **Notion Cache Sync** — `notion-sync` agent owns `.truth-cache/`, running before every truth-catcher scan
 - **Roadmap Watch** — `roadmap-watch` agent compares the Notion BOB and Curated Treatment Plan roadmaps with Asana and Jira every Monday and writes a drift report to Notion (read-only on all systems)
 - **Meeting Notes** — `meeting-notes` agent processes Webex transcripts (or pasted text) into structured Notion pages; 3 key points + 3 next steps per meeting
+- **Team Update** — `announcements` agent consolidates Webex meeting recaps, Asana, Notion (App Hub), Jira, GitHub and agent reports into a weekly (Thursday) or monthly update; drafted in Notion, posted to the Webex App Team spaces only after Sean approves each draft
 - **Feedback QA** — `feedback-qa` agent reads new feedback from the Notion inbox, checks it against a sourced change timeline and BOB scope, and sends a PDF report to the Webex QA space when there is enough to report. Full UATs are also published to Confluence. Asana only when a human promotes an item
 
 ## In Scope — v2 (Deferred)

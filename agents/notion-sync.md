@@ -92,7 +92,7 @@ consistent structure.
 
 #### `roadmap.json` schema
 
-Written by `syncRoadmap()` in `src/truth-cache/sync.ts` (no LLM) from the BOB Roadmap
+Written by `syncRoadmap()` in `src/truth-cache/sync.ts` (no LLM) from the Product Roadmap
 DB `751b6071283e43e8b1a91054319e0db6`. truth-catcher's scan script calls it before
 every scan. Don't rewrite this file from the agent.
 

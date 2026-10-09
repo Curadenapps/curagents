@@ -1,0 +1,147 @@
+<!doctype html>
+<!--
+  Team update report (announcements agent). Curaprox Apps design system:
+  Corporate Blue #003DA5, white space first, Futura LT Pro uppercase headings,
+  Info Display Pro copy, greys #EDEDED / #706F6F only, pill shapes, one accent
+  family per report (BOB-led = Chartreuse #C4D600, Curaprox app-led = Cerise
+  #E31C79, Curaden app-led = Cornflower #8BB8E8). Set --accent / --accent-ink.
+
+  Copy this file to .announcements/{period}-{window_end}.html, replace every
+  {{…}} placeholder, repeat rows as needed, and delete sections with no rows.
+  Render: powershell -File scripts/render-pdf.ps1 <file.html>
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Team update — {{PERIOD LABEL}}</title>
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --blue: #003DA5; --white: #FFFFFF; --light: #EDEDED; --grey: #706F6F; --ink: #04090B;
+    --accent: #C4D600;        /* Chartreuse: background only, never text */
+    --accent-light: #EFF3CF;
+    --head: "Futura LT Pro", "Futura LT Pro Book", Futura, "Century Gothic", "Trebuchet MS", Arial, sans-serif;
+    --body: "Info Display Pro", "InfoDisplayPro-Book", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--white); }
+  body { font-family: var(--body); color: var(--ink); font-size: 10pt; line-height: 1.5; letter-spacing: .02em;
+         -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  .band { background: var(--blue); color: var(--white); padding: 14mm 16mm 10mm; }
+  .band-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .band img { height: 13mm; display: block; }
+  .band .issue { text-align: right; font-family: var(--head); text-transform: uppercase; letter-spacing: .08em; font-size: 8.5pt; line-height: 1.6; }
+  .band h1 { font-family: var(--head); font-weight: 400; text-transform: uppercase; letter-spacing: .04em; font-size: 26pt; line-height: 1.15; margin: 12mm 0 2mm; }
+  .band .lead { font-size: 11pt; max-width: 150mm; margin: 0; }
+
+  main { padding: 9mm 16mm 22mm; }
+  h2 { font-family: var(--head); font-weight: 400; text-transform: uppercase; letter-spacing: .06em; color: var(--blue);
+       font-size: 13pt; margin: 9mm 0 3mm; break-after: avoid; }
+  h2:first-child { margin-top: 0; }
+  p { margin: 0 0 3mm; }
+
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4mm; }
+  .tile { background: var(--light); border-radius: 4mm; padding: 4mm 5mm; }
+  .tile .n { font-family: var(--head); color: var(--blue); font-size: 22pt; line-height: 1.1; }
+  .tile .l { color: var(--grey); font-size: 8.5pt; }
+  .tile.accent { background: var(--accent); }
+  .tile.accent .l { color: var(--ink); }
+
+  .items { list-style: none; margin: 0; padding: 0; }
+  .items li { display: grid; grid-template-columns: 36mm 1fr; gap: 4mm; padding: 2.6mm 0; border-bottom: 1px solid var(--light); break-inside: avoid; }
+  .items li:last-child { border-bottom: 0; }
+  .pill { display: inline-block; align-self: start; border: 1px solid var(--blue); color: var(--blue); border-radius: 999px;
+          padding: .4mm 3mm; font-size: 8pt; font-family: var(--head); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+  .pill.fill { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  th { text-align: left; font-family: var(--head); font-weight: 400; text-transform: uppercase; letter-spacing: .06em; font-size: 8pt;
+       color: var(--grey); padding: 0 3mm 2mm 0; border-bottom: 1px solid var(--ink); }
+  td { padding: 2.4mm 3mm 2.4mm 0; border-bottom: 1px solid var(--light); vertical-align: top; }
+  tr { break-inside: avoid; }
+  td.due { white-space: nowrap; color: var(--blue); }
+
+  .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 2mm; }
+  .stop { border-top: 2mm solid var(--light); padding: 3mm 3mm 0 0; position: relative; }
+  .stop::before { content: ""; position: absolute; top: -3.5mm; left: 0; width: 5mm; height: 5mm; border-radius: 50%; background: var(--white); border: 1px solid var(--blue); }
+  .stop.next { border-top-color: var(--accent); }
+  .stop.next::before { background: var(--blue); }
+  .stop .d { font-family: var(--head); color: var(--blue); text-transform: uppercase; letter-spacing: .06em; font-size: 9pt; }
+  .stop .t { font-size: 9pt; }
+  .stop .s { font-size: 8pt; color: var(--grey); }
+
+  .next-list { columns: 2; column-gap: 8mm; margin: 0; padding-left: 4mm; }
+  .next-list li { break-inside: avoid; margin-bottom: 1.5mm; }
+
+  .sources { break-before: page; padding-top: 14mm; }
+  .sources td, .sources th { font-size: 8pt; }
+  .sources a { color: var(--blue); text-decoration: none; word-break: break-all; }
+  .muted { color: var(--grey); }
+
+  footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 0 16mm 8mm; display: flex; justify-content: space-between;
+           font-size: 7.5pt; color: var(--grey); }
+  footer .bar { position: absolute; left: 16mm; right: 16mm; top: -3mm; border-top: 1px solid var(--light); }
+</style>
+</head>
+<body>
+
+<section class="band">
+  <div class="band-top">
+    <img src="{{LOGO PATH: ../templates/curaprox-applications-white.svg}}" alt="Curaprox Applications">
+    <div class="issue">Team update · {{Week 41 | October 2026}}<br>{{2 – 9 Oct 2026}}</div>
+  </div>
+  <h1>{{Headline: what this period was about, max ~8 words}}</h1>
+  <p class="lead">{{One or two sentences: the outcome that matters most and what comes next.}}</p>
+</section>
+
+<main>
+  <h2>At a glance</h2>
+  <div class="tiles">
+    <div class="tile"><div class="n">{{n}}</div><div class="l">Done</div></div>
+    <div class="tile"><div class="n">{{n}}</div><div class="l">In progress</div></div>
+    <div class="tile"><div class="n">{{n}}</div><div class="l">Decisions needed</div></div>
+    <div class="tile accent"><div class="n">{{n days}}</div><div class="l">to {{next milestone}}</div></div>
+  </div>
+
+  <h2>Done</h2>
+  <ul class="items">
+    <li><span class="pill">{{Workstream}}</span><div>{{What was finished or decided, and why it matters.}}</div></li>
+  </ul>
+
+  <h2>In progress</h2>
+  <ul class="items">
+    <li><span class="pill">{{Workstream}}</span><div>{{What is moving and the next milestone.}}</div></li>
+  </ul>
+
+  <h2>Needs a decision</h2>
+  <table>
+    <tr><th>Decision</th><th>Owner</th><th>Due</th></tr>
+    <tr><td>{{decision and what it is waiting on}}</td><td>{{name}}</td><td class="due">{{d Mon}}</td></tr>
+  </table>
+
+  <h2>Milestones</h2>
+  <div class="timeline">
+    <div class="stop next"><div class="d">{{d Mon}}</div><div class="t">{{milestone}}</div><div class="s">{{status}}</div></div>
+    <div class="stop"><div class="d">{{d Mon}}</div><div class="t">{{milestone}}</div><div class="s">{{status}}</div></div>
+  </div>
+
+  <h2>Next {{week | month}}</h2>
+  <ul class="next-list">
+    <li>{{item}}</li>
+  </ul>
+
+  <section class="sources">
+    <h2>Sources</h2>
+    <p class="muted">Every line above comes from one of these. Read {{window}} from {{sources}}.</p>
+    <table>
+      <tr><th>Item</th><th>Source</th><th>Link</th></tr>
+      <tr><td>{{item}}</td><td>{{Asana | Notion | Meeting recap | GitHub | Jira | Agent report}}</td><td><a href="{{url}}">{{short url}}</a></td></tr>
+    </table>
+  </section>
+</main>
+
+<footer><span class="bar"></span><span>Curaden App Team · Team update {{period label}}</span><span>Prepared by Sean Dunne · {{date}}</span></footer>
+
+</body>
+</html>

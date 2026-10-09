@@ -1,8 +1,8 @@
 ---
 name: roadmap-watch
 description: >
-  Weekly roadmap watcher. Snapshots the BOB Roadmap and the Curated Treatment
-  Plan Roadmap in Notion, the BOB App milestones in Asana and the BOB project in
+  Weekly roadmap watcher. Snapshots the Product Roadmap in Notion (BOB +
+  Curaprox app), the BOB App milestones in Asana and the BOB project in
   Jira, diffs against last week, and writes one "Roadmap Watch" report page to
   Notion. Read-only on every system except the report page.
 model: claude-sonnet-5-5
@@ -30,7 +30,7 @@ idempotency_key: "roadmap-watch:{iso_week}"
 dry_run: false  # live: only writes the weekly report page + its own snapshot
 ---
 
-# Roadmap Watch: Weekly BOB Roadmap Drift Report
+# Roadmap Watch: Weekly Product Roadmap Drift Report
 
 ## Purpose
 
@@ -47,20 +47,24 @@ never edits a roadmap row, task or issue; it reports, and humans decide.
 
 | System | Object | ID |
 |--------|--------|----|
-| Notion | BOB Roadmap (data source) | `collection://2ce24f93-f696-4d3b-98be-462df08c2c29` (DB `751b6071283e43e8b1a91054319e0db6`) |
-| Notion | Curated Treatment Plan Roadmap (data source) | `collection://02e34993-4704-482d-9708-ae388d8e8b41` (DB `4eeb7d12c3fa4bdcb069334b80a8c333`) |
+| Notion | Product Roadmap (data source) | `collection://2ce24f93-f696-4d3b-98be-462df08c2c29` (DB `751b6071283e43e8b1a91054319e0db6`) |
 | Notion | Roadmap Reports (report parent page) | `3ec7e8aabbb481c09e57c7926468235c` |
 | Asana | BOB App project | `1204489225205419` |
 | Asana | BOB V2 milestone | `1217949875186079` |
 | Asana | BOB Launch - Milan Showcase | `1217552489272192` |
 | Jira | BOB project (`BA-*` keys) | via `JiraAPI` |
 
+One database holds both apps. The `Product` field says which (BOB / Curaprox app /
+Shared; empty = BOB). The Curated Treatment Plan Roadmap (`4eeb7d12…`) was merged
+into it on 2026-10-09 (Epic "Curated Treatment Plan") and is an archive: don't read it.
+
 Roadmap rows carry `Asana Link` and `Jira Key`; those are the join keys.
 Rows without either are reported under **Unlinked roadmap rows**, not guessed.
 
-Read Notion with **view-mode** queries (default table view
-`view://0958c452-8904-400a-9d41-995792d6e069`, paginate with `next_cursor`).
-SQL mode has a workspace quota and must not be relied on.
+Read Notion with **view-mode** queries on the unfiltered agent view
+`view://3f47e8aa-bbb4-818c-a54e-000c04b1a71b` ("Agents: all rows (don't filter)"), paginating with
+`next_cursor`. Don't use "All rows": it hides Done and Cut rows, which drift checks need.
+Never use SQL mode: it has a workspace quota and must not be relied on.
 
 ---
 
@@ -91,9 +95,10 @@ Build one normalised record per item:
 }
 ```
 
-- **Notion:** every row of both roadmap DBs. BOB Roadmap fields: Name, Level
+- **Notion:** every Product Roadmap row. Fields: Name, Product, Level
   (Milestone / Feature / Task), Epic, Status, Release, Priority, Difficulty,
-  Date, Track, Asana Link, Jira Key, Depends on / Blocks, CTP link, Notes.
+  Date, Track, Asana Link, Jira Key, Depends on / Blocks, Notes. Add
+  `"product"` to each Notion record.
   `Time Horizon` is a formula and is not snapshotted.
 - **Asana:** tasks in BOB App that are milestones, subtasks of BOB V2 and of the
   Milan task, plus any task referenced by a roadmap row (name, completed,
@@ -117,7 +122,7 @@ Otherwise classify each change:
 | Asana due date or Jira duedate ≠ Notion Date by more than 7 days | Drift |
 | Milestone date within 21 days and a row that Blocks it is not Done | At-risk milestones |
 | Milestone date passed and Status ≠ Done | At-risk milestones |
-| CTP MVP slips past the BOB "Show Curated Treatment Plan in BOB" date | At-risk milestones |
+| "CTP MVP: rules-based plan engine" or "Treatment plan builder in BOB" slips past V2 P1 Apr-27 | At-risk milestones |
 | New Asana BOB V2 subtask or BA issue with no roadmap row linking it | New untracked work |
 | Roadmap row with no Asana Link and no Jira Key, Release not Future/Parked | Unlinked roadmap rows |
 | Open Feature (Status not Done/Cut) with empty Priority, Difficulty, Release or Epic | Missing info |
@@ -130,12 +135,13 @@ Create one child page under Roadmap Reports titled
 
 ```
 Summary: {n} changes · {n} drift · {n} at-risk milestones · {n} untracked
+By product: BOB {n} · Curaprox app {n} · Shared {n}
 
 ## Milestones
-| Milestone | Date | Status | Blocking items open |
+| Milestone | Product | Date | Status | Blocking items open |
 
 ## Changed
-- {item} — {field}: {old} → {new} ({source})
+- [{product}] {item} — {field}: {old} → {new} ({source})
 
 ## Drift
 - {item} — Notion says {x}, {Asana|Jira} says {y} → suggested fix
@@ -157,15 +163,18 @@ Summary: {n} changes · {n} drift · {n} at-risk milestones · {n} untracked
 - {n} rows still marked "DRAFT by Claude" — review in the "Review drafts" view
 ```
 
+Prefix every Notion item with its product (`[BOB]`, `[Curaprox app]`, `[Shared]`)
+so the report reads as one product roadmap with two apps.
+
 Each "suggested fix" is a sentence for a human, never an action taken.
 
 Then write `.truth-cache/roadmap-watch/last-snapshot.json` and a dated copy in
 `history/`, both via temp-file-then-rename (atomic write, per `dream.md` §5).
 
-### Step 5 — Optional broadcast
+### Step 5 — Team update
 
-If `inputs.broadcast: true`, hand the Summary line and the At-risk section to
-the `curaden-communications` skill for a Webex post. Off by default.
+No Webex post of its own. The `announcements` agent reads this report and puts
+the Summary line and at-risk milestones into the weekly team update.
 
 ---
 
@@ -201,6 +210,6 @@ list `"jira: unavailable"` in `errors`. Never fail the whole run for one source.
 3. **Never infer status.** If a roadmap row has no join key, report it as
    unlinked; do not fuzzy-match names into Done.
 4. **Respect dry_run** — print the report to output instead of creating the page.
-5. Surface at-risk launch milestones (Soft Launch, Web, Hard Launch, CTP MVP,
-   V2 P1) to the orchestrator as `warning`; a passed launch milestone that is not
+5. Surface at-risk launch milestones (Soft Launch, Web, Hard Launch, V2 P1
+   incl. CTP MVP) to the orchestrator as `warning`; a passed launch milestone that is not
    Done is `critical`.
