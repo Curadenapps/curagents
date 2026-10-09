@@ -63,6 +63,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
 | Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Claude Routine, weekdays 07:58 + 13:58 Zurich |
+| Boom Boom Derek | [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) | Truth Catcher for one person, Derek La (Phinamic): ledger of what he owes across Webex, Jira, Confluence, recaps and Asana, checked against the roadmap; pings him in Webex "Curaden / Phinamic" | Scheduled task on Sean's computer, weekdays 08:45 Zurich (Mon rundown, Tue–Fri nudges) + manual "boom boom"; live, posts through Webex web in Sean's Chrome (no token) |
 | Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
 | Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
 
@@ -86,7 +87,7 @@ scripts and `.claude/agents/` wrappers all use the same tier.
 | Tier | Agents | Why |
 |------|--------|-----|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
-| Sonnet 5.5 | orchestrator, truth-catcher, roadmap-watch, webflow, meeting-notes, announcements | Judgement on structured data |
+| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, roadmap-watch, webflow, meeting-notes, announcements | Judgement on structured data |
 | Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
 
 Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.
@@ -168,3 +169,4 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |
 | Webex bot tokens get culled after a few days | announcements posts through Webex web in Sean's Chrome (Claude in Chrome); the post needs his machine |
 | Webex meeting summaries need Sean signed in to curaden.webex.com in Chrome | the Thursday Routine can't read them; the "post it" session adds them |
+| Boom Boom Derek runs on Sean's computer (Webex web needs his Chrome sign-in) | no ping on days the computer is off at 08:45; the next run catches up. Its scheduled task is set up in the Claude desktop app |

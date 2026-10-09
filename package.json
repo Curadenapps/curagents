@@ -11,6 +11,7 @@
     "asana-maintenance": "claude -p \"Run the asana-maintenance agent: read dream.md §2–3 and agents/asana-maintenance.md, then execute its workflow.\" --model claude-haiku-4-5-20251001",
     "truth-catcher": "claude -p \"Run the truth-catcher agent: read dream.md §2–3 and agents/truth-catcher.md, then execute its workflow.\" --model claude-sonnet-5-5",
     "webflow": "claude -p \"Run the webflow agent: read dream.md §2–3 and agents/webflow.md, then execute its workflow.\" --model claude-sonnet-5-5",
+    "boom-boom-derek": "claude -p \"Run the boom-boom-derek agent: read dream.md §2–3 and agents/boom-boom-derek.md, then execute its workflow.\" --model claude-sonnet-5-5",
     "roadmap-watch": "claude -p \"Run the roadmap-watch agent: read dream.md §2–3 and agents/roadmap-watch.md, then execute its workflow.\" --model claude-sonnet-5-5",
     "brand-asset": "claude -p \"Run the brand-asset agent: read dream.md §2–3 and agents/brand-asset.md, then execute its workflow.\" --model claude-opus-5-5",
     "release": "claude -p \"Run the release agent: read dream.md §2–3 and agents/release.md, then execute its workflow.\" --model claude-opus-5-5",

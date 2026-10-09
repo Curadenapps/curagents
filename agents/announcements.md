@@ -102,7 +102,7 @@ it `unavailable`, carry on, and say so at the top of the draft.
 | **Roadmap** | What moved on the roadmap | The Roadmap Watch report(s) in the window under Roadmap Reports `3ec7e8aabbb481c09e57c7926468235c`. Don't re-diff the roadmap; roadmap-watch already did |
 | **Jira** (the old BOB weekly) | Done, In progress, Blockers in BA; versions released | Done: `project = BA AND statusCategory = Done AND resolved >= {start}`. In progress: `project = BA AND status in ("In Progress", "In Review")`. Blockers: `project = BA AND statusCategory != Done AND (labels = "blocked" OR priority in (Highest, High))`. Released fixVersions in the window. Ignore Xray test issue types |
 | **GitHub** | PRs merged in the Curadenapps org | Merged in the window; title + repo only |
-| **Other agents** | Truth Catcher escalations, Feedback QA reports, releases | Open `truth-catcher-escalation` issues in `Curadenapps/curagents`; release changelog pages; `.truth-cache/dispatch-log.json` when run locally |
+| **Other agents** | Truth Catcher escalations, Feedback QA reports, releases, Phinamic items stuck with Derek | Open `truth-catcher-escalation` issues in `Curadenapps/curagents`; release changelog pages; the "⏳ Sean picks this up" items on Derek's Boom Boom Derek page (Notion `3f47e8aabbb48179af31f54a4acadb10`) for "Needs a decision / blocked" (internal: never in the Markets edition); `.truth-cache/dispatch-log.json` when run locally |
 | **Previous update** | Its "What's next" list | Latest page under Team Updates. Each item: done, still going, or dropped (say which) |
 
 ### App projects (Asana)
