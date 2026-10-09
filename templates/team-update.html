@@ -82,6 +82,27 @@
   footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 0 16mm 8mm; display: flex; justify-content: space-between;
            font-size: 7.5pt; color: var(--grey); }
   footer .bar { position: absolute; left: 16mm; right: 16mm; top: -3mm; border-top: 1px solid var(--light); }
+  .detail { break-before: page; padding-top: 14mm; }
+  .detail .kicker { font-family: var(--head); text-transform: uppercase; letter-spacing: .1em; font-size: 8pt; color: var(--grey); margin-bottom: 1mm; }
+  .detail h2 { margin-top: 0; font-size: 17pt; }
+  .detail h2.sub { margin-top: 9mm; font-size: 13pt; }
+  .detail h3 { font-family: var(--head); font-weight: 400; text-transform: uppercase; letter-spacing: .06em; color: var(--blue); font-size: 10pt; margin: 7mm 0 2.5mm; break-after: avoid; }
+  .intro { font-size: 10.5pt; max-width: 165mm; }
+  .loop { list-style: none; margin: 4mm 0 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2.5mm; }
+  .loop li { background: var(--light); border-radius: 3mm; padding: 3mm; font-size: 8.3pt; line-height: 1.4; break-inside: avoid; }
+  .loop li .n { display: inline-flex; align-items: center; justify-content: center; width: 5.5mm; height: 5.5mm; border-radius: 50%; background: var(--blue); color: var(--white); font-family: var(--head); font-size: 8pt; margin-bottom: 1.5mm; }
+  .loop li b { display: block; font-family: var(--head); font-weight: 400; text-transform: uppercase; letter-spacing: .05em; color: var(--blue); font-size: 9pt; margin-bottom: 1mm; }
+  .phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
+  .phase { border: 1px solid var(--light); border-radius: 3mm; padding: 3.5mm; font-size: 8.6pt; break-inside: avoid; }
+  .phase.now { border-color: var(--accent); background: var(--accent-light); }
+  .phase .when { color: var(--grey); font-size: 7.8pt; }
+  .phase .name { font-family: var(--head); text-transform: uppercase; letter-spacing: .05em; color: var(--blue); font-size: 10.5pt; margin: 1mm 0 2mm; }
+  .phase ul { margin: 0; padding-left: 4mm; }
+  .phase li { margin-bottom: 1.2mm; }
+  .phase .gate { margin-top: 2mm; padding-top: 2mm; border-top: 1px solid var(--light); font-size: 8pt; color: var(--ink); }
+  .decisions td:first-child { width: 28mm; }
+  .changes { margin: 0; padding-left: 4.5mm; }
+  .changes li { margin-bottom: 1.8mm; break-inside: avoid; }
 </style>
 </head>
 <body>
@@ -130,6 +151,40 @@
   <ul class="next-list">
     <li>{{item}}</li>
   </ul>
+
+  <!-- Detail pages: include when the window has scope, phasing, roadmap or
+       market decisions. Copy the structure; delete what has no content. -->
+  <section class="detail">
+    <div class="kicker">Scope &amp; phasing</div>
+    <h2>{{headline}}</h2>
+    <p class="intro">{{why the scope is shaped this way, 2–3 sentences}}</p>
+    <ol class="loop">
+      <li><span class="n">1</span><b>{{step}}</b><span>{{one line}}</span></li>
+    </ol>
+    <h3>Phasing</h3>
+    <div class="phases">
+      <div class="phase now"><div class="when">{{dates}}</div><div class="name">{{phase name}}</div><ul><li>{{item}}</li></ul><div class="gate">{{gate}}</div></div>
+      <div class="phase"><div class="when">{{dates}}</div><div class="name">{{phase name}}</div><ul><li>{{item}}</li></ul></div>
+    </div>
+    <h3>Not doing</h3>
+    <p class="muted">{{items separated by ·}}</p>
+  </section>
+
+  <section class="detail">
+    <div class="kicker">Decisions &amp; roadmap</div>
+    <h2>{{headline}}</h2>
+    <p class="intro">{{who decided what, when, and what happens next}}</p>
+    <table class="decisions">
+      <tr><th>Decision</th><th>What it covers</th></tr>
+      <tr><td><span class="pill fill">{{Phase 1}}</span></td><td>{{items}}</td></tr>
+    </table>
+    <h3>What changed on the roadmap in Notion</h3>
+    <ul class="changes"><li><b>{{change}}</b> {{detail}}</li></ul>
+    <h3>Open</h3>
+    <ul class="changes"><li>{{open point, owner, date}}</li></ul>
+    <h2 class="sub">Markets</h2>
+    <ul class="items"><li><span class="pill">{{market}}</span><div>{{what's happening}}</div></li></ul>
+  </section>
 
   <section class="sources">
     <h2>Sources</h2>
