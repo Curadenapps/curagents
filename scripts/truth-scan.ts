@@ -26,7 +26,9 @@ const ROADMAP_URL = "https://www.notion.so/751b6071283e43e8b1a91054319e0db6";
 const DRY_RUN = process.env.DRY_RUN !== "false";
 /** Delay questions + escalations address colleagues by name — separate switch, previewed first */
 const DELAY_DRY_RUN = DRY_RUN || process.env.DELAY_DRY_RUN !== "false";
-/** Comments post from Sean's account and read as his own: no signature, no emoji (2026-10-12) */
+/** Comments post from Sean's account in his voice, no emoji; a short sign-off says Truth Catcher wrote it and @mentions Sean so he is notified (2026-10-12) */
+const NOTIFY_GID = process.env.TRUTH_CATCHER_NOTIFY_GID || "1207214370347608"; // Sean Dunne
+const SIGN_OFF = "— Truth Catcher (automated check, not Sean personally) · cc";
 const ESCALATE_AFTER_WORKING_DAYS = 3;
 const MAX_DELAY_CANDIDATES = 20;
 
@@ -351,20 +353,28 @@ const LINES: Record<FindingType, (task: Task, row: RoadmapRow | null) => [string
 
 const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** Written the way Sean writes (skills my-writing-style): plain, no emoji, no signature */
-function findingComment(task: Task, row: RoadmapRow | null, findings: FindingType[], reason: string | null, _runId: string): string {
+/** Adds the sign-off: plain text for logs/preview, rich text with a real @mention of Sean for Asana */
+function signed(text: string, html = escapeHtml(text)): { text: string; html: string } {
+  return {
+    text: `${text}\n\n${SIGN_OFF} @Sean Dunne`,
+    html: `${html}\n\n<em>${escapeHtml(SIGN_OFF)}</em> ${mention(NOTIFY_GID)}`,
+  };
+}
+
+/** Written the way Sean writes (skills my-writing-style): plain, one clear ask, no emoji */
+function findingComment(task: Task, row: RoadmapRow | null, findings: FindingType[], reason: string | null, _runId: string): { text: string; html: string } {
   const lines = findings.map((f) => LINES[f](task, row));
   const what = lines.length === 1
     ? [`Quick flag on this one: ${lines[0][0]}`]
     : ["A couple of things on this one:", ...lines.map(([w]) => `- ${capitalise(w)}`)];
-  return [
+  return signed([
     ...what,
     ...(reason ? [capitalise(reason)] : []),
     "",
     lines.map(([, fix]) => fix).join(" "),
     "",
     `Roadmap: ${row?.url ?? ROADMAP_URL}`,
-  ].join("\n");
+  ].join("\n"));
 }
 
 /** Question comment: plain text for logs/preview, rich text with a real @mention for Asana */
@@ -380,15 +390,15 @@ function questionComment(c: any, d: any, _runId: string): { text: string; html: 
     "",
     `Roadmap: <a href="${escapeHtml(c.row.url)}">${escapeHtml(c.row.name)}</a>`,
   ].join("\n");
-  return { text, html };
+  return signed(text, html);
 }
 
-function escalationComment(q: OpenQuestion, _runId: string): string {
-  return [
+function escalationComment(q: OpenQuestion, _runId: string): { text: string; html: string } {
+  return signed([
     `${q.ask_user_name}, following up on my question above as I haven't had a reply yet: "${q.question}"`,
     "",
     "Could you get back to me on this today? I've added it to our open escalations so it doesn't get lost.",
-  ].join("\n");
+  ].join("\n"));
 }
 
 /** One GitHub issue per escalation so it survives the CI cache and shows up in reports */
@@ -447,9 +457,9 @@ async function post(): Promise<void> {
 
   let posted = 0;
   for (const { item, reason } of toPost) {
-    const text = findingComment(item.task, item.row, item.findings, reason, runId);
+    const { text, html } = findingComment(item.task, item.row, item.findings, reason, runId);
     summary(`### [${item.task.name}](${item.task.url})${item.task.section ? ` — ${item.task.section}` : ""}\n\`\`\`\n${text}\n\`\`\`\n`);
-    if (await postComment(item.task.gid, text, input.dry_run)) {
+    if (await postComment(item.task.gid, text, input.dry_run, html)) {
       posted++;
       verdicts.verdicts.push({ task_gid: item.task.gid, fingerprint: item.fingerprint, findings: item.findings, posted_at: now });
     }
@@ -480,10 +490,10 @@ async function post(): Promise<void> {
     if (q) q.resolved_at = now;
   }
   for (const e of input.escalate as OpenQuestion[]) {
-    const text = escalationComment(e, runId);
+    const { text, html } = escalationComment(e, runId);
     summary(`### 🔺 Escalation: [${e.task_name}](${e.task_url}) — waiting on ${e.ask_user_name}\n\`\`\`\n${text}\n\`\`\`\n`);
     if (input.delay_dry_run) { console.log(`[DRY RUN] Would escalate task ${e.task_gid}`); continue; }
-    await postComment(e.task_gid, text, false);
+    await postComment(e.task_gid, text, false, html);
     const issue = await openEscalationIssue(e);
     if (issue) summary(`Reported: ${issue}\n`);
     const q = verdicts.open_questions.find((x) => x.task_gid === e.task_gid && x.asked_at === e.asked_at);
