@@ -23,3 +23,6 @@ Thumbs.db
 
 # Personal Claude Code settings
 .claude/settings.local.json
+
+# Boom Boom Derek — Webex message files, never in Git
+.boom-boom-derek/
