@@ -96,7 +96,7 @@ it `unavailable`, carry on, and say so at the top of the draft.
 
 | Source | What to read | How |
 |--------|--------------|-----|
-| **Meetings (Webex)** | Recaps and decisions dated in the window | Notion "Decision Log & Meeting Recaps" `3f27e8aabbb481baa16ce7cb9e7514dd` and its child pages; meeting-notes agent pages (`NOTION_MEETING_NOTES_DB_ID` if set). On Sean's machine: Webex's own meeting summary and next steps (below). Notion AI meeting notes need a Notion Business plan, so they are skipped |
+| **Meetings (Webex)** | Recaps and decisions dated in the window | Notion "Decision Log & Meeting Recaps" `3f27e8aabbb481baa16ce7cb9e7514dd` and its child pages (the meeting-notes agent files its recaps there). On Sean's machine: Webex's own meeting summary and next steps (below). Notion AI meeting notes need a Notion Business plan, so they are skipped |
 | **Asana** | Tasks completed, created, or moved section in the window; project status updates | `search_tasks` with `completed_on_after` / `modified_on_after` over the app projects below; also tasks where Sean is assignee or follower in other projects, product work only |
 | **Notion** | Pages edited in the window under the Curaden App Hub only | `notion-search` with `page_url` = App Hub `86b68fc172dd43ff8ee3219a3a5435f6`; keep results whose `timestamp` is in the window. Always fetch the scope page `3f27e8aabbb481c49609dd919ce400a0`, Education Hub `3447e8aabbb481ef9ceaf36c73067120` and the Tasks & Notes inbox `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db` |
 | **Roadmap** | What moved on the roadmap | The Roadmap Watch report(s) in the window under Roadmap Reports `3ec7e8aabbb481c09e57c7926468235c`. Don't re-diff the roadmap; roadmap-watch already did |
