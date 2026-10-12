@@ -99,15 +99,11 @@ Generates a structured weekly status summary from Jira and posts it as a new Not
    - `## In Progress` — issue key + summary + assignee for each active issue
    - `## Blockers / Watch` — issue key + summary + reason flagged
 4. Create a new Notion page using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` under the target page from the reference file. Title format: `BOB Weekly Broadcast — {YYYY-MM-DD}`.
-5. Read `references/webex-broadcast.md`. Format the broadcast as Webex Markdown using the template in that file (append the Notion page URL at the bottom). Check `DRY_RUN`:
-   - If `DRY_RUN=true`: print the payload that would be sent and skip the API call.
-   - If `DRY_RUN=false`: POST to the Webex messages API using the curl command in the reference file. Return the `webLink` from the response, or report the error if the call fails (do not abort — the Notion page is already created).
-6. Return the Notion page URL and the Webex message link (or dry-run payload) to the user.
+5. Return the URL of the created Notion page to the user.
 
 ### Output
 
 - URL of the newly created Notion broadcast page
-- Webex message link (or dry-run payload showing what would be sent)
 - Summary: N done, N in progress, N blockers
 
 ---

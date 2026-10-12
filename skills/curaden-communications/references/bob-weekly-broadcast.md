@@ -110,9 +110,8 @@ Extract `sprint` field from the first result. If unavailable, omit the sprint li
 
 ## Delivery
 
-Two delivery targets on each run:
+Currently: Notion page only.
 
-1. **Notion page** — created under the BOB broadcast parent page (this step always runs first).
-2. **Webex space** — broadcast is posted as a Markdown message to the configured room. See `references/webex-broadcast.md` for API details, message format, and the dry-run guard.
+Future (v2): Slack channel delivery (channel TBD by Curaden team).
 
-After both steps, return the Notion page URL and the Webex message link (or dry-run payload) to the user.
+After creating the page, always return the Notion page URL to the user so they can share it directly.

@@ -101,11 +101,11 @@ Prevents agents from re-litigating resolved decisions in new sessions.
 
 | # | Date | Decision | Rationale |
 |---|------|----------|-----------|
-| 1 | 2026-03-26 | Webex delivery added to BOB broadcast (replaces deferred Slack plan) | Posts Markdown to Webex room after Notion page creation; dry-run guard preserves safe default |
-| 2 | 2026-03-26 | Design Diff Detection moved from v2 → v1 active | Ruflo background workers + figma agent make it feasible without extra infra |
-| 3 | 2026-03-26 | Asana-maintenance is the sole Asana write proxy | Prevents duplicate writes and conflicting comments from multiple agents hitting the API simultaneously |
-| 4 | 2026-03-26 | `.truth-cache/` is atomic-write only | Prevents partial reads by sibling agents during notion-sync updates |
-| 5 | 2026-03-26 | Release agent is manual-trigger only | Releases are intentional human decisions; no autonomous release ever |
+| 1 | 2026-03-26 | Design Diff Detection moved from v2 → v1 active | Ruflo background workers + figma agent make it feasible without extra infra |
+| 2 | 2026-03-26 | Asana-maintenance is the sole Asana write proxy | Prevents duplicate writes and conflicting comments from multiple agents hitting the API simultaneously |
+| 3 | 2026-03-26 | `.truth-cache/` is atomic-write only | Prevents partial reads by sibling agents during notion-sync updates |
+| 4 | 2026-03-26 | Release agent is manual-trigger only | Releases are intentional human decisions; no autonomous release ever |
+| 5 | 2026-03-26 | Notion root DB `86b68fc172dd43ff8ee3219a3a5435f6` is the discovery anchor | All child page IDs discovered dynamically by notion-sync on first run; no hardcoded sub-IDs |
 
 ---
 
@@ -118,7 +118,6 @@ Prevents agents from re-litigating resolved decisions in new sessions.
 | Figma file key not yet set | Figma agent runs in config-error state | Phase 3 (credentials) |
 | Webflow site ID not yet set | Webflow agent runs in config-error state | Phase 3 (credentials) |
 | Asana webhook not yet registered | asana-maintenance falls back to 5-min polling | Phase 3 (credentials) |
-| `WEBEX_BOT_TOKEN` + `WEBEX_ROOM_ID` not yet set | Webex delivery step skipped (dry-run output only) | Phase 3 (credentials) |
 | `DRY_RUN=true` across all agents | No live writes to any system | Phase 4 (dry-run verified) |
 
 ---
