@@ -1,17 +1,28 @@
-# Secrets — never commit
+# Environment — never commit credentials
 .env
 .env.local
-.env.*.local
+.env.production
 
-# Truth cache (written at runtime by notion-sync agent)
-.truth-cache/
+# Truth cache — auto-generated, not source controlled (except directory marker)
+.truth-cache/*
+!.truth-cache/.gitkeep
 
-# OS / editor
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
+# Feedback QA — generated report HTML/PDF, never in Git
+.feedback/
 
-# Node (if src/ is ever scaffolded)
+# Announcements — Webex message files, never in Git
+.announcements/
+
+# Node
 node_modules/
 dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Personal Claude Code settings
+.claude/settings.local.json
+
+# Boom Boom Derek — Webex message files, never in Git
+.boom-boom-derek/

@@ -35,7 +35,7 @@ Any Claude session can run Curaden's 3 cross-tool sync/broadcast workflows with 
 
 **Tech stack involved:**
 - RevolveNote: Angular 18 PWA with Firebase backend, deployed to `github.com/Curadenapps/revolvenote` and `github.com/DunneWorks/revolvenote`
-- BOB/iTOP: Curaden dental hygiene clinical tool (Plaque-Bleeding-Erythema), project tracked in Jira
+- BOB: Curaden dental hygiene clinical tool (Plaque-Bleeding-Erythema), project tracked in Jira
 - Jira MCP: `mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__*`
 - Notion MCP: `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__*`
 - GitHub: `gh` CLI available, org is `Curadenapps`

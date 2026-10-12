@@ -1,0 +1,33 @@
+{
+  "name": "curagents",
+  "version": "0.1.0",
+  "description": "Autonomous agent system for Curaden — bridges Notion, Asana, Figma, Webflow, Jira, and GitHub",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "notion-sync": "claude -p \"Run the notion-sync agent: read dream.md §2–3 and agents/notion-sync.md, then execute its workflow.\" --model claude-haiku-4-5-20251001",
+    "figma": "claude -p \"Run the figma agent: read dream.md §2–3 and agents/figma.md, then execute its workflow.\" --model claude-haiku-4-5-20251001",
+    "github": "claude -p \"Run the github agent: read dream.md §2–3 and agents/github.md, then execute its workflow.\" --model claude-haiku-4-5-20251001",
+    "asana-maintenance": "claude -p \"Run the asana-maintenance agent: read dream.md §2–3 and agents/asana-maintenance.md, then execute its workflow.\" --model claude-haiku-4-5-20251001",
+    "truth-catcher": "claude -p \"Run the truth-catcher agent: read dream.md §2–3 and agents/truth-catcher.md, then execute its workflow.\" --model claude-sonnet-5-5",
+    "webflow": "claude -p \"Run the webflow agent: read dream.md §2–3 and agents/webflow.md, then execute its workflow.\" --model claude-sonnet-5-5",
+    "boom-boom-derek": "claude -p \"Run the boom-boom-derek agent: read dream.md §2–3 and agents/boom-boom-derek.md, then execute its workflow.\" --model claude-sonnet-5-5",
+    "roadmap-watch": "claude -p \"Run the roadmap-watch agent: read dream.md §2–3 and agents/roadmap-watch.md, then execute its workflow.\" --model claude-sonnet-5-5",
+    "brand-asset": "claude -p \"Run the brand-asset agent: read dream.md §2–3 and agents/brand-asset.md, then execute its workflow.\" --model claude-opus-5-5",
+    "release": "claude -p \"Run the release agent: read dream.md §2–3 and agents/release.md, then execute its workflow.\" --model claude-opus-5-5",
+    "orchestrate": "claude -p \"Run the orchestrator agent: read dream.md §2–3 and agents/orchestrator.md, then execute its workflow.\" --model claude-sonnet-5-5",
+    "announcements": "claude -p \"Run the announcements agent: read dream.md §2–3 and agents/announcements.md, then execute its workflow with period auto and deliver draft.\" --model claude-sonnet-5-5",
+    "gate:notion": "tsx scripts/gate.ts notion",
+    "gate:asana": "tsx scripts/gate.ts asana",
+    "gate:figma": "tsx scripts/gate.ts figma"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "dotenv": "^16.0.0",
+    "tsx": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

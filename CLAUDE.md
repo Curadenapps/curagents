@@ -10,14 +10,18 @@ full system architecture.
 
 The following skills are available and will auto-load based on trigger phrases:
 
-- **`skills/curaden-communications/SKILL.md`** — RevolveNote sync, Jira-Notion BOB sync, BOB weekly broadcast
+- **`skills/feedback-qa/SKILL.md`** — Feedback QA: Notion inbox → checks → PDF report to the Webex QA space (+ Confluence for full UATs)
+- **`skills/curaden-communications/SKILL.md`** — RevolveNote sync, Jira-Notion BOB sync, Meeting Notes (Webex → Notion). The BOB weekly broadcast moved to `agents/announcements.md`
 
 Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own reference files as needed.
 
 ## Agents
 
 All agents share a common YAML frontmatter schema (trigger, memory,
-idempotency_key, dry_run, output schema). Load the relevant file for context:
+idempotency_key, dry_run, output schema). Each spec's `model:` field sets its tier
+(Haiku 4.5 / Sonnet 5.5 / Opus 5.5). The same agents are registered as Claude Code
+subagents in `.claude/agents/`. Use those to fan out in parallel, following the swarm
+rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 
 **Orchestration**
 - [`agents/orchestrator.md`](agents/orchestrator.md) — Master router; entry point for all activity
@@ -33,6 +37,11 @@ idempotency_key, dry_run, output schema). Load the relevant file for context:
 - [`agents/webflow.md`](agents/webflow.md) — Webflow publishing gate and asset sync
 - [`agents/github.md`](agents/github.md) — PR/commit linkage to Jira and Asana (Curadenapps org)
 - [`agents/release.md`](agents/release.md) — Release coordinator (BOB + RevolveNote); manual trigger only
+- [`agents/meeting-notes.md`](agents/meeting-notes.md) — Webex transcript → 3 key points + 3 next steps → Notion page
+- [`agents/roadmap-watch.md`](agents/roadmap-watch.md) — Weekly roadmap drift report (Notion roadmaps vs Asana/Jira); read-only
+- [`agents/feedback-qa.md`](agents/feedback-qa.md) — Feedback QA: reads the Notion inbox, reports to Webex; Confluence for full UATs
+- [`agents/announcements.md`](agents/announcements.md) — Team update: week / two weeks / month across every tool → Notion draft → Webex after approval
+- [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) — Boom Boom Derek: Truth Catcher for Derek La (Phinamic); autonomous, funny-but-clear pings in Webex "Curaden / Phinamic", details on his Notion page
 
 ## Scope
 

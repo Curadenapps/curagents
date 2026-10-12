@@ -14,7 +14,7 @@ Details for Procedure 2 of `curaden-communications`.
 
 ### Primary sync query (all open BOB issues):
 ```
-project = BOB AND statusCategory != Done ORDER BY priority DESC, updated DESC
+project = BA AND statusCategory != Done ORDER BY priority DESC, updated DESC
 ```
 
 ### If the project key is uncertain, discover it first:
@@ -22,7 +22,7 @@ Use `mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__getVisibleJiraProjects` and look
 
 ### Narrower query (current sprint only):
 ```
-project = BOB AND sprint in openSprints() AND statusCategory != Done ORDER BY priority DESC
+project = BA AND sprint in openSprints() AND statusCategory != Done ORDER BY priority DESC
 ```
 
 ## Jira → Notion Field Mapping

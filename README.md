@@ -1,7 +1,7 @@
 # Curadenapps Agents
 
 Automated agents and invokable skills for Curaden's BOB App and cross-tool workflows.
-Works with Claude Code, Gemini CLI, and any model that reads markdown agent definitions.
+Works with Claude Code and any model that reads markdown agent definitions.
 
 ---
 
@@ -10,7 +10,6 @@ Works with Claude Code, Gemini CLI, and any model that reads markdown agent defi
 ```
 README.md          ← You are here. System overview and entry point.
 CLAUDE.md          ← Claude Code instructions (auto-loaded by Claude)
-GEMINI.md          ← Gemini CLI instructions (auto-loaded by Gemini)
 SCOPE.md           ← Hard boundaries: what this system can and cannot do
 │
 ├── skills/        ← SKILL & SCOPE — invokable on demand by any session
@@ -18,13 +17,14 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 │       ├── SKILL.md            ← Main entry point (3 procedures)
 │       └── references/         ← Procedure-level config (JQL, templates, repo details)
 │
-├── agents/        ← Automated agents — run on schedule or triggered
-│   ├── truth-catcher.md        ← Alignment enforcer (Notion vs Asana)
-│   ├── brand-asset.md          ← Brand asset governance and delivery
-│   └── asana-maintenance.md    ← Asana hygiene, Kanban routing, update snippets
+├── agents/        ← Agent specs (single source of truth, incl. model tier)
+├── .claude/agents/← Thin Claude Code subagent wrappers → agents/*.md (for parallel swarming)
 │
-├── src/           ← API integrations (Notion sync, Asana read/write)
-├── .github/       ← GitHub Actions (CRON: constitution sync, frontier scan)
+├── src/           ← API integrations (Notion sync, Asana read/write, Figma poll)
+├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner),
+│                    render-pdf.ps1 + webex-compose.js (team update PDF; Webex post via the browser)
+├── templates/     ← team-update.html: Curaprox-styled PDF report for the announcements agent
+├── .github/       ← GitHub Actions: sync-and-scan, figma-diff
 └── .planning/     ← GSD project planning docs (roadmap, requirements, state)
 ```
 
@@ -32,7 +32,7 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 
 ## Skill & Scope
 
-Skills are invokable by any Claude or Gemini session. Trigger by phrase — no manual setup.
+Skills are invokable by any Claude session. Trigger by phrase — no manual setup.
 
 ### `curaden-communications` → [`skills/curaden-communications/SKILL.md`](skills/curaden-communications/SKILL.md)
 
@@ -40,7 +40,7 @@ Skills are invokable by any Claude or Gemini session. Trigger by phrase — no m
 |----------------|-----------|-------------|
 | "sync revolvenote" | RevolveNote Weekly Sync | Stage + push latest RevolveNote app to `github.com/Curadenapps/revolvenote` |
 | "sync BOB to Notion" | Jira-Notion BOB Sync | Mirror all open BOB Jira issues into Notion pages (create or update) |
-| "run BOB broadcast" | BOB Weekly Broadcast | Generate weekly sprint summary (Done / In Progress / Blockers) and post to Notion |
+| "run BOB broadcast" | Moved to the announcements agent | The BOB weekly is part of the Thursday team update |
 
 Config details for each procedure: [`skills/curaden-communications/references/`](skills/curaden-communications/references/)
 
@@ -50,7 +50,7 @@ Config details for each procedure: [`skills/curaden-communications/references/`]
 
 Agents share a common YAML frontmatter schema (trigger, memory, idempotency_key,
 dry_run, output schema) and are invokable by the orchestrator, GitHub Actions,
-or Ruflo background workers. Each has a strictly fenced domain.
+or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 
 ### Orchestration
 
@@ -62,7 +62,8 @@ or Ruflo background workers. Each has a strictly fenced domain.
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Hourly CRON |
+| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Claude Routine, weekdays 07:58 + 13:58 Zurich |
+| Boom Boom Derek | [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) | Truth Catcher for one person, Derek La (Phinamic): ledger of what he owes across Webex, Jira, Confluence, recaps and Asana, checked against the roadmap; pings him in Webex "Curaden / Phinamic" | Scheduled task on Sean's computer, weekdays 08:45 Zurich (Mon rundown, Tue–Fri nudges) + manual "boom boom"; live, posts through Webex web in Sean's Chrome (no token) |
 | Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
 | Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
 
@@ -70,11 +71,36 @@ or Ruflo background workers. Each has a strictly fenced domain.
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Notion Sync | [`agents/notion-sync.md`](agents/notion-sync.md) | Owns `.truth-cache/` — fetches Notion requirements, roadmap, brand guidelines | Hourly CRON (50 min) |
-| Figma | [`agents/figma.md`](agents/figma.md) | Library monitor, export validator, design diff detection | Every 2h CRON + Figma webhook |
+| Notion Sync | [`agents/notion-sync.md`](agents/notion-sync.md) | Owns `.truth-cache/` — fetches Notion requirements, roadmap, brand guidelines | Weekdays every 4h, before truth-catcher (gated on Notion edits) |
+| Figma | [`agents/figma.md`](agents/figma.md) | Library monitor, export validator, design diff detection | Weekday CRON (gated) + Figma webhook |
 | Webflow | [`agents/webflow.md`](agents/webflow.md) | Publishing gate, brand compliance, clinical claims check, asset sync | brand-asset approval event + manual |
 | GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
+| Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | Weekly CRON (Mon 08:00) + manual "roadmap watch" |
+| Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
+
+### Model tiers and swarming
+
+Each agent's `model:` frontmatter is the single source for its tier. Workflows, `package.json`
+scripts and `.claude/agents/` wrappers all use the same tier.
+
+| Tier | Agents | Why |
+|------|--------|-----|
+| Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
+| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, roadmap-watch, webflow, meeting-notes, announcements | Judgement on structured data |
+| Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
+
+Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.
+
+### Scheduled runs and token budget
+
+| Workflow | Schedule (UTC) | Change check (no LLM) | Claude run |
+|----------|----------------|-----------------------|------------|
+| `sync-and-scan.yml` | Manual (scheduled scan moved to the Claude Routine) | Notion edits since last sync → Asana events since last token | notion-sync (Haiku) → truth-catcher: `scripts/truth-scan.ts` does the checks and posting, Sonnet only judges unlinked tasks |
+| `figma-diff.yml` | Weekdays 07:00 | Figma file `lastModified` | figma (Haiku) |
+
+`.truth-cache/` is saved between runs with `actions/cache`. Every run writes model, turns
+and cost to the job summary. Dispatch with `force: true` to skip the change checks.
 
 ---
 
@@ -117,14 +143,30 @@ Required environment variables:
 | Variable | Purpose | Agent |
 |----------|---------|-------|
 | `ANTHROPIC_API_KEY` | Claude model access | All |
-| `NOTION_API_KEY` | Notion REST API (`secret_...` internal token) | notion-sync |
+| `NOTION_API_KEY` | Notion REST API (`ntn_...` internal integration token) | notion-sync |
 | `NOTION_ROOT_DATABASE_ID` | `86b68fc172dd43ff8ee3219a3a5435f6` | notion-sync |
 | `ASANA_ACCESS_TOKEN` | Asana API | truth-catcher, brand-asset, asana-maintenance |
-| `ASANA_PROJECT_GID` | BOB App Asana project GID | truth-catcher, asana-maintenance |
+| `ASANA_PROJECT_GID` | BOB App project GID — App Requests is a section within this project | truth-catcher, asana-maintenance |
 | `ASANA_WEBHOOK_SECRET` | HMAC secret for webhook verification | asana-maintenance |
 | `FIGMA_API_TOKEN` | Figma REST API token | figma |
 | `FIGMA_FILE_KEY` | BOB design system Figma file key | figma |
 | `WEBFLOW_API_TOKEN` | Webflow REST API v2 token | webflow |
 | `WEBFLOW_SITE_ID` | Curaden Webflow site ID | webflow |
 
-For model-specific setup: see [`CLAUDE.md`](CLAUDE.md) or [`GEMINI.md`](GEMINI.md).
+For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
+
+---
+
+## Known Gaps
+
+| Gap | Impact |
+|-----|--------|
+| Figma file key / Webflow site ID not set | figma and webflow agents run in config-error state |
+| Asana webhook not registered | asana-maintenance and brand-asset webhooks don't fire; scheduled scan uses the Asana events gate |
+| `DRY_RUN=true` everywhere | No live writes to any system |
+| roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
+| `FIREFLIES_API_KEY` / `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes uses paste mode / searches for the DB by name |
+| Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |
+| Webex bot tokens get culled after a few days | announcements posts through Webex web in Sean's Chrome (Claude in Chrome); the post needs his machine |
+| Webex meeting summaries need Sean signed in to curaden.webex.com in Chrome | the Thursday Routine can't read them; the "post it" session adds them |
+| Boom Boom Derek runs on Sean's computer (Webex web needs his Chrome sign-in) | no ping on days the computer is off at 08:45; the next run catches up. Its scheduled task is set up in the Claude desktop app |

@@ -1,0 +1,127 @@
+<!doctype html>
+<!--
+  Feedback QA report template. Copy this file, replace every {{…}} placeholder,
+  repeat table rows as needed, and delete any section that has no rows
+  (except "What we need to amend", which always stays with "None" if empty).
+  The same content is used for the Confluence page when the report is a full UAT.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{APP}} — Feedback QA Report — {{DATE}}</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm; }
+  :root { --ink: #1d2330; --muted: #5b6475; --line: #dde1e8; --accent: #0d6b6e; --must: #b3261e; --soft: #f4f6f9; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", Helvetica, Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.45; margin: 0; }
+  header { border-bottom: 3px solid var(--accent); padding-bottom: 10px; margin-bottom: 18px; }
+  header .kicker { color: var(--accent); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 9pt; }
+  h1 { font-size: 20pt; margin: 4px 0 6px; }
+  .meta { color: var(--muted); font-size: 9.5pt; }
+  .meta span + span::before { content: " · "; }
+  h2 { font-size: 13.5pt; margin: 22px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); break-after: avoid; }
+  h3 { font-size: 11pt; margin: 14px 0 6px; break-after: avoid; }
+  h3.must { color: var(--must); }
+  ul { margin: 6px 0 6px 18px; padding: 0; }
+  li { margin: 3px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 9.5pt; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th { background: var(--soft); font-weight: 600; }
+  tr { break-inside: avoid; }
+  .who { white-space: nowrap; color: var(--muted); }
+  .status { white-space: nowrap; }
+  .src { font-size: 8.5pt; color: var(--muted); word-break: break-all; }
+  .raw { background: var(--soft); border-left: 3px solid var(--line); padding: 8px 10px; margin: 6px 0 10px; break-inside: avoid; }
+  .raw .name { font-weight: 600; margin-bottom: 2px; }
+  .raw .src { margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">{{APP}} · {{REPORT_TYPE: UAT {build} | Feedback round}}</div>
+  <h1>Feedback QA Report</h1>
+  <div class="meta">
+    <span>{{D Month YYYY}}</span>
+    <span>{{n}} notes, {{first date}} to {{last date}}</span>
+    <span>Raised by: {{names}}</span>
+    <span>Current release: iOS {{v}}, Android {{v}}</span>
+    <span>From the Notion inbox (Tasks &amp; Notes); {{n}} notes left out as noise</span>
+  </div>
+</header>
+
+<p>{{One or two sentences: overall tone and the single most important takeaway. Priorities below are proposed and open to discussion.}}</p>
+
+<h2>At a glance</h2>
+<ul>
+  <li><strong>Most repeated:</strong> {{theme}} ({{names}})</li>
+  <li><strong>Most liked:</strong> {{features}} ({{names}})</li>
+  <li><strong>Blocker:</strong> {{item or "None"}}</li>
+  <li><strong>Gap:</strong> {{item or remove line}}</li>
+</ul>
+
+<h2>Repeated feedback</h2>
+<table>
+  <tr><th>Theme</th><th>Raised by</th><th>What they said</th></tr>
+  <tr><td><strong>{{theme}}</strong></td><td class="who">{{names}}</td><td>{{summary}}</td></tr>
+</table>
+
+<h2>What we need to amend</h2>
+
+<h3 class="must">Must-have</h3>
+<table>
+  <tr><th>Item</th><th>Raised by</th><th>Note</th><th>Status</th></tr>
+  <tr><td>{{item}}</td><td class="who">{{names}}</td><td>{{why}}</td><td class="status">To review</td></tr>
+</table>
+
+<h3>Should-have</h3>
+<table>
+  <tr><th>Item</th><th>Raised by</th><th>Note</th><th>Status</th></tr>
+  <tr><td>{{item}}</td><td class="who">{{names}}</td><td>{{why}}</td><td class="status">To review</td></tr>
+</table>
+
+<h3>Quick wins (wording and order)</h3>
+<table>
+  <tr><th>Item</th><th>Raised by</th><th>Note</th><th>Status</th></tr>
+  <tr><td>{{item}}</td><td class="who">{{names}}</td><td>{{why}}</td><td class="status">To review</td></tr>
+</table>
+
+<h3>Nice-to-have / to evaluate</h3>
+<table>
+  <tr><th>Item</th><th>Raised by</th><th>Note</th><th>Status</th></tr>
+  <tr><td>{{item}}</td><td class="who">{{names}}</td><td>{{why}}</td><td class="status">To review</td></tr>
+</table>
+
+<h2>What is working (keep)</h2>
+<table>
+  <tr><th>Feature</th><th>Raised by</th></tr>
+  <tr><td>{{feature}}</td><td class="who">{{names}}</td></tr>
+</table>
+
+<h2>Already addressed</h2>
+<table>
+  <tr><th>Item</th><th>Raised by</th><th>Changed in</th><th>Source</th></tr>
+  <tr><td>{{item}}</td><td class="who">{{names}}</td><td>{{version, date}}</td><td class="src">{{ledger source link}}</td></tr>
+</table>
+
+<h2>Not for BOB</h2>
+<table>
+  <tr><th>Item</th><th>Raised by</th><th>Reason</th><th>Belongs to</th></tr>
+  <tr><td>{{item}}</td><td class="who">{{names}}</td><td>{{reason}}</td><td>{{app, repo or team, or "Nowhere"}}</td></tr>
+</table>
+
+<h2>Open points and notes</h2>
+<ul>
+  <li><strong>{{topic}}:</strong> {{what is unclear or needs review, and by whom}}</li>
+</ul>
+
+<h2>Raw feedback</h2>
+<div class="raw">
+  <div class="name">{{Name}}{{, role}}</div>
+  <div>{{verbatim feedback, patient and contact details removed}}</div>
+  <div class="src">{{Notion row link}} · {{Captured at}}</div>
+</div>
+
+
+</body>
+</html>

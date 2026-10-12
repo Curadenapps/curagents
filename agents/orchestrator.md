@@ -5,70 +5,16 @@ description: >
   incoming triggers (schedule, webhook, user request) and dispatches to the
   correct specialist agent. Collects structured outputs and surfaces a
   consolidated report.
-model: claude-sonnet-4-6
+model: claude-sonnet-5-5
 tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI, Bash
 trigger:
+  # Routing lives in §1 (single source). Schedules live in .github/workflows/.
   - type: manual
-    phrases:
-      - "run agents"
-      - "orchestrate"
-      - "what needs attention"
-      - "agent status"
-      - "dispatch"
+    phrases: ["run agents", "orchestrate", "what needs attention", "agent status", "dispatch"]
   - type: schedule
-    label: hourly-dispatch
-    cron: "0 * * * *"
-    dispatch:
-      - agent: truth-catcher
-        inputs:
-          mode: batch
-          limit: 50
-  - type: schedule
-    label: weekly-broadcast
-    cron: "0 9 * * 1"
-    dispatch:
-      - skill: curaden-communications
-        procedure: bob-weekly-broadcast
+    note: "See §1 — CI workflows call specialist agents directly; the orchestrator is for interactive runs"
   - type: webhook
-    event: asana.task.commented
-    dispatch:
-      - agent: asana-maintenance
-        inputs:
-          trigger: webhook_comment
-  - type: webhook
-    event: asana.task.section_changed
-    dispatch:
-      - agent: brand-asset
-        inputs:
-          trigger: section_transition
-  - type: schedule
-    label: pre-scan-notion-sync
-    cron: "50 * * * *"
-    dispatch:
-      - agent: notion-sync
-  - type: schedule
-    label: figma-diff-check
-    cron: "0 */2 * * *"
-    dispatch:
-      - agent: figma
-  - type: webhook
-    event: github.pull_request.opened
-    dispatch:
-      - agent: github
-        inputs:
-          trigger: pr_opened
-  - type: webhook
-    event: github.pull_request.merged
-    dispatch:
-      - agent: github
-        inputs:
-          trigger: pr_merged
-  - type: webhook
-    event: github.push
-    dispatch:
-      - agent: github
-        inputs:
-          trigger: push
+    note: "See §1 — asana.task.*, github.pull_request.*, github.push"
 memory:
   read:
     - dream.md
@@ -97,18 +43,19 @@ On any invocation, determine trigger type:
 
 | Trigger | Signals | Route to |
 |---------|---------|----------|
-| `schedule:hourly` | CRON event from GitHub Actions | Truth Catcher (batch scan) |
-| `schedule:weekly` | CRON event on Monday 09:00 UTC | BOB Weekly Broadcast skill |
+| `schedule:"0 6-18/4 * * 1-5"` | `sync-and-scan.yml` (gated) | notion-sync → truth-catcher (batch scan), in that order |
+| `schedule:"0 14 * * 4"` | Claude Routine "Team update draft" (Thursday 14:00 Zurich) | announcements (weekly; monthly on the last Thursday) — draft only |
 | `webhook:asana.task.commented` | Asana webhook payload | Asana Maintenance |
 | `webhook:asana.task.section_changed` | Asana webhook payload | Brand Asset |
 | `user:sync revolvenote` / `push revolvenote` | User phrase | curaden-communications › revolvenote-sync |
 | `user:sync BOB` / `sync jira` | User phrase | curaden-communications › jira-notion-bob-sync |
-| `user:broadcast` / `weekly update` | User phrase | curaden-communications › bob-weekly-broadcast |
+| `user:broadcast` / `run BOB broadcast` | User phrase | announcements (weekly; the BOB weekly is part of the team update) |
 | `user:check alignment` / `scan asana` | User phrase | Truth Catcher |
+| `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's computer (Claude desktop + Claude in Chrome) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
+| `user:boom boom` / `boom boom derek` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
-| `user:what needs attention` | User phrase | Run Truth Catcher + Brand Asset in sequence |
-| `schedule:"50 * * * *"` | CRON | notion-sync (always before truth-catcher) |
-| `schedule:"0 */2 * * *"` | CRON | figma (library diff check) |
+| `user:what needs attention` | User phrase | Swarm (§3a): truth-catcher + brand-asset (check only) + roadmap-watch in parallel |
+| `schedule:"0 7 * * 1-5"` | `figma-diff.yml` (gated) | figma (library diff check) |
 | `webhook:github.pull_request.*` | GitHub webhook | github agent |
 | `webhook:github.push` | GitHub webhook | github agent |
 | `user:sync notion` / `refresh requirements` | User phrase | notion-sync |
@@ -116,6 +63,14 @@ On any invocation, determine trigger type:
 | `user:publish to webflow` / `sync assets to webflow` | User phrase | webflow agent |
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
+| `user:process meeting notes` / `summarise meeting` / `fetch from fireflies` | User phrase | curaden-communications › meeting-notes |
+| `schedule:"0 8 * * 1"` | CRON (Monday 08:00) — no CI workflow yet | roadmap-watch (weekly roadmap drift report) |
+| `user:roadmap watch` / `check the roadmap` / `roadmap drift` | User phrase | roadmap-watch |
+| `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
+| `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
+| `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |
+| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web via Claude in Chrome, `scripts/webex-compose.js`) |
+| `user:markets update` / `markets monthly` | User phrase | announcements, period `markets` (from Dec 2026) |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
 
@@ -144,7 +99,7 @@ For each routed agent, pass a structured input object:
 ```json
 {
   "trigger_type": "schedule|webhook|user",
-  "trigger_label": "hourly-dispatch|...",
+  "trigger_label": "scan|weekly-broadcast|...",
   "timestamp": "ISO-8601",
   "dry_run": false,
   "inputs": { }
@@ -163,6 +118,29 @@ Agents return a structured result:
   "summary": "Scanned 15 tasks: 1 violation flagged (BOB-88), 11 verified, 3 skipped (already processed)."
 }
 ```
+
+### 3a. Swarm Rules (interactive sessions)
+
+Specialists are available as Claude Code subagents in `.claude/agents/`, each
+pinned to its model tier. Dispatch them with the Agent tool.
+
+| Tier | Agents |
+|------|--------|
+| Haiku 4.5 | notion-sync, figma, github, asana-maintenance (mechanical: poll, diff, link, route) |
+| Sonnet 5.5 | truth-catcher, boom-boom-derek, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements (judgement on structured data) |
+| Opus 5.5 | brand-asset, release (approval gates, clinical claims, releases) |
+
+- **Run in parallel** only agents that are independent and read-only for the current
+  task. Send them in one message. Example: "what needs attention" runs truth-catcher,
+  brand-asset (check only, no approvals recorded) and roadmap-watch together.
+- **Run in sequence** when one agent reads what another writes. notion-sync always runs
+  before anything that reads `.truth-cache/`. The release chain is always sequential.
+- **Writes are never parallel.** All Asana writes go through asana-maintenance, one
+  call at a time (`dream.md` §3).
+- **Return only the result JSON** (§3). No raw API dumps or file contents. The orchestrator
+  builds the report from summaries, which keeps its own context small.
+- Don't start a subagent for a single lookup the orchestrator can answer from
+  `.truth-cache/` or `dream.md` §4.
 
 ---
 
@@ -190,7 +168,10 @@ Dispatch log updated: .truth-cache/dispatch-log.json
 Next scheduled run: {next CRON time}
 ```
 
-3. If any agent returned `status: error`, surface the error details and halt further
+4. Keep each result's `summary` specific (what changed, with ids). The
+   `announcements` agent reads `dispatch-log.json` when it runs locally, so a
+   vague summary means a thin team update.
+5. If any agent returned `status: error`, surface the error details and halt further
    dependent dispatches (e.g., do not run Brand Asset if truth-cache sync failed).
 
 ---

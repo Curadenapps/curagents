@@ -6,13 +6,13 @@ description: >
   approved asset taxonomy, notifies linked Asana tasks when assets are
   export-ready, and flags untracked design work. Moves Design Diff Detection
   from v2-deferred to active.
-model: claude-sonnet-4-6
+model: claude-haiku-4-5-20251001
 tools: Read, Write, AsanaAPI, Bash
 trigger:
   - type: schedule
     label: figma-diff-check
-    cron: "0 */2 * * *"
-    note: "Every 2 hours"
+    cron: "0 7 * * 1-5"
+    note: "Daily on weekdays, gated on Figma file version change"
   - type: webhook
     event: figma.file.update
     note: "Requires Figma webhook configured on BOB file"
