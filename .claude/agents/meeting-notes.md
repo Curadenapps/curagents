@@ -1,6 +1,6 @@
 ---
 name: meeting-notes
-description: Fireflies or pasted transcript to a Notion Meeting Notes entry. Use for 'process meeting notes', 'summarise meeting', 'fetch from fireflies'.
+description: Webex Meeting recap summary (or Fireflies, or a pasted transcript) to a Notion Meeting Notes entry. Use for 'process meeting notes', 'summarise meeting', 'webex recap', 'fetch from fireflies'.
 model: claude-sonnet-5-5
 disallowedTools: Bash
 ---

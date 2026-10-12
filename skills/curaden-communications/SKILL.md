@@ -7,9 +7,9 @@ description: This skill should be used when the user wants to "run the weekly sy
   "run the communication tasks", "process meeting notes", "summarise meeting",
   "create meeting notes", "log meeting", "post meeting recap",
   "add meeting notes", "meeting summary", "take meeting notes",
-  "capture meeting", "get fireflies transcript", "fetch from fireflies",
+  "capture meeting", "webex recap", "get fireflies transcript", "fetch from fireflies",
   or "import from fireflies". Use this skill when working across
-  Curaden's tech stack (RevolveNote, BOB/iTOP, Jira, Notion, GitHub, Fireflies).
+  Curaden's tech stack (RevolveNote, BOB/iTOP, Jira, Notion, GitHub, Webex, Fireflies).
   Covers three sub-procedures: revolve-note-weekly-sync,
   jira-notion-bob-sync and meeting-notes (the BOB weekly broadcast now runs
   through the announcements agent).
@@ -26,7 +26,7 @@ This skill packages four recurring Curaden communication workflows so any Claude
 | "sync revolvenote", "push revolvenote to GitHub", "run revolvenote sync" | [1. RevolveNote Weekly Sync](#1-revolvenote-weekly-sync) |
 | "sync BOB to Notion", "run jira notion sync", "sync BOB issues" | [2. Jira-Notion BOB Sync](#2-jira-notion-bob-sync) |
 | "run BOB broadcast", "send weekly BOB update", "post BOB status" | [3. Moved to announcements](#3-bob-weekly-broadcast-moved-to-the-announcements-agent) |
-| "process meeting notes", "summarise meeting", "create meeting notes", "log meeting", "meeting summary", "get fireflies transcript", "fetch from fireflies" | [4. Meeting Notes](#4-meeting-notes) |
+| "process meeting notes", "summarise meeting", "create meeting notes", "log meeting", "meeting summary", "webex recap", "get fireflies transcript", "fetch from fireflies" | [4. Meeting Notes](#4-meeting-notes) |
 
 Read `references/revolvenote-sync.md` for repo details and excluded files.
 Read `references/jira-notion-bob-sync.md` for JQL patterns and Notion field mapping.
@@ -103,11 +103,11 @@ announcements agent with period `weekly`. Don't create pages under the old
 
 ## 4. Meeting Notes
 
-Pulls the AI summary from **Fireflies.ai** — which connects to Webex and handles
-multilingual transcription including German — and creates a structured entry in
-the Notion **Meeting Notes database**.
+Pulls the AI summary Webex writes for each meeting (**Meetings → Meeting recap**)
+— or, as fallbacks, from **Fireflies.ai** or a pasted transcript — and creates a
+structured entry in the Notion **Meeting Notes database**.
 
-Read `references/meeting-notes.md` for: Webex→Fireflies setup, GraphQL queries,
+Read `references/meeting-notes.md` for: the Webex Meeting recap steps, Webex→Fireflies setup, GraphQL queries,
 field mappings, owner-assignment guidance, Notion database schema, and the full
 page body template.
 
@@ -115,8 +115,19 @@ page body template.
 
 ### Step 1 — Determine mode
 
-- If `FIREFLIES_API_KEY` is set → use **Fireflies mode** (default). Do not ask the user.
-- If the key is missing → tell the user: "Set `FIREFLIES_API_KEY` in your `.env` to pull from Fireflies, or paste a transcript and I'll condense it manually."
+- If Claude in Chrome is connected (Sean's machine) → use **Webex recap mode** (default). Do not ask the user.
+- Else, if `FIREFLIES_API_KEY` is set → use **Fireflies mode**.
+- Else → tell the user: "No browser here for Webex. Paste the meeting's Notes and Action items from Webex Meeting recap (or a transcript) and I'll log it."
+
+---
+
+### Webex recap mode
+
+1. Follow `references/meeting-notes.md` §0 to open the meeting in Webex web: Meetings → **Meeting recap** → the meeting → **Meeting summary**. If the user named a meeting, open that one; otherwise the most recent one with a summary.
+2. If the meeting has no summary yet → stop and tell the user: "Webex hasn't written the summary yet. Try again later."
+3. Run the idempotency check from §7 of the reference (on `Webex Meeting`). If it already has a Notion page → return the existing URL and stop.
+4. Map the Notes and Action items using §0 of the reference. Owners come from the action item text ("Derek to …"); match them to the participants named in the Overview. Mark genuinely ambiguous items `TBD`.
+5. Post to Notion — see below.
 
 ---
 
@@ -145,7 +156,7 @@ page body template.
 
 ---
 
-### Post to Notion (both modes)
+### Post to Notion (all modes)
 
 1. Get the database ID from `NOTION_MEETING_NOTES_DB_ID`. If not set, tell the user to create the database and set the env var (see `references/meeting-notes.md` §5).
 2. Create the database entry using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` with the properties and body from `references/meeting-notes.md` §5 and §6.
@@ -162,6 +173,7 @@ page body template.
 | RevolveNote GitHub org | `github.com/Curadenapps` |
 | Jira project key | See `references/jira-notion-bob-sync.md` |
 | Repo path details | See `references/revolvenote-sync.md` |
+| Webex meeting summaries | `web.webex.com` → Meetings → Meeting recap (Chrome, Sean's sign-in) |
 | Fireflies GraphQL API | `https://api.fireflies.ai/graphql` |
 | Fireflies env var | `FIREFLIES_API_KEY` |
 | Meeting Notes DB env var | `NOTION_MEETING_NOTES_DB_ID` |

@@ -1,5 +1,38 @@
 # Meeting Notes — Reference
 
+## 0. Webex Meeting recap (default source)
+
+Webex's AI Assistant writes a summary and action items for each recorded
+meeting. Read them in Webex web through Claude in Chrome, on Sean's own sign-in
+(the desktop app is unreliable for this). If Webex asks for a sign-in, stop and
+ask Sean; never type credentials.
+
+1. Open `web.webex.com` → **Meetings** → the **Meeting recap** tab (next to
+   Calendar). Past meetings are listed by date, newest first; ones with a recap
+   show summary, transcript and recording icons under the time.
+2. Open the meeting, then its **Meeting summary** tab, and read it with
+   `get_page_text`.
+3. Open the **Transcript** tab only when an action item's owner, date or meaning
+   is unclear. Never open **Recordings**; never download, share or delete.
+4. No summary yet → stop: "Webex hasn't written the summary yet."
+
+### Field mapping: Webex → Notion
+
+| Webex | Notion target | Notes |
+|-------|---------------|-------|
+| Meeting title (header) | `Name` property | `📅 {title} — {YYYY-MM-DD}` |
+| Date and time (header, e.g. "7 October 2026, 09:55 - 11:18") | `Date` + `Duration` | Duration in minutes from start and end |
+| "Key participants" line of the Overview | `Attendees` | Names only, comma-separated |
+| `{title} · {YYYY-MM-DD HH:MM}` | `Webex Meeting` property | Idempotency key (§7) |
+| Notes → Overview | **Summary** section | Condense to 2–4 sentences; keep decisions |
+| Notes → Detailed Summary headings | **Topics Covered** | One bullet per heading, a few words of detail |
+| Action items | **Next Steps** table | Owner is named first ("Derek to …"); due date only if stated |
+| — | `Source` | `Webex` |
+
+The summary is AI-generated: take owners and dates as written and never guess
+missing ones. Partner meetings (e.g. Curaden / Phinamic) may mention prices or
+commission models: keep those out unless Sean asks.
+
 ## 1. Webex → Fireflies Setup (one-time)
 
 Fireflies joins your Webex meetings as a bot and transcribes them automatically.
@@ -140,8 +173,9 @@ Create a database in Notion titled **"Meeting Notes"** with these properties:
 | `Date` | Date | Meeting date |
 | `Attendees` | Rich text | Participant display names, comma-separated |
 | `Duration` | Number (format: number) | Meeting length in minutes |
-| `Source` | Select | `Fireflies` or `Manual` |
-| `Fireflies ID` | Rich text | Transcript ID; used for duplicate prevention |
+| `Source` | Select | `Webex`, `Fireflies` or `Manual` |
+| `Webex Meeting` | Rich text | `{title} · {YYYY-MM-DD HH:MM}`; duplicate prevention for Webex entries |
+| `Fireflies ID` | Rich text | Transcript ID; duplicate prevention for Fireflies entries |
 
 Copy the database ID from the Notion URL (32-character hex string after
 `notion.so/`) and set it as `NOTION_MEETING_NOTES_DB_ID` in your `.env`.
@@ -178,7 +212,7 @@ Copy the database ID from the Notion URL (32-character hex string after
 **Attendees:** {displayName list, or "Not recorded"}
 **Duration:** {N} min
 **Date:** {YYYY-MM-DD}
-**Source:** {Fireflies — {id} | Manual}
+**Source:** {Webex Meeting recap | Fireflies — {id} | Manual}
 🏷 {keywords, comma-separated}
 ```
 
@@ -203,6 +237,9 @@ filter: {
   "rich_text": { "equals": "{fireflies_transcript_id}" }
 }
 ```
+
+For Webex entries, filter on `Webex Meeting` equals `{title} · {YYYY-MM-DD HH:MM}`
+instead.
 
 If a result is returned → skip creation and return the existing page URL:
 "Already logged: {URL}"
