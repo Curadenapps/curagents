@@ -28,7 +28,7 @@ memory:
     - "notion: Boom Boom Derek page under Derek's Team Directory entry (ledger, bánh mì count, ping history)"
   write:
     - "notion: Boom Boom Derek page 3f47e8aabbb48179af31f54a4acadb10"
-    - "webex: space 'Curaden / Phinamic' only, through Webex web in Sean's Chrome (scripts/webex-compose.js); no Webex token"
+    - "webex: space 'Curaden / Phinamic' only, through Webex web in Sean's Chrome (skills/webex-web, scripts/webex-post.js); no Webex token"
 idempotency_key: "boom-boom-derek:{date}"   # at most one Webex message per day
 dry_run: false  # live and autonomous since 2026-10-09 (Sean)
 output:
@@ -70,7 +70,7 @@ Change these only through `dream.md` §5.
 |------|----------|
 | Person | **Derek La** only. Jira `712020:078ef74c-95c3-45a8-ad5e-20e816c4b176`; emails `derek.la@phinamic.com` and `derek@phinamic.com`; Notion Team Directory page `2ab7e8aabbb48003a865f7f593144546`. No Asana account. Identify him only by these, never by first name. |
 | Autonomous | Live. Scheduled runs post without asking. Sean can also say "boom boom" any time for a run now. |
-| No Webex token | Posts and reads through Webex web in Sean's Chrome (Claude in Chrome), on Sean's own sign-in, like the team update. No bot, no API token: nothing expires, the ping comes from Sean's account with a real @mention, and the whole space is readable (Derek can reply normally). |
+| No Webex token | Posts and reads through Webex web in Sean's Chrome (Claude in Chrome), on Sean's own sign-in, following [`skills/webex-web`](../skills/webex-web/SKILL.md) like every Webex agent. No bot, no API token: nothing expires, the ping comes from Sean's account with a real @mention, and the whole space is readable (Derek can reply normally). |
 | Channel | Webex space **"Curaden / Phinamic"** only, Derek @mentioned, signed "— Boom Boom Derek 💥, on behalf of Sean". No DMs, no email, no Jira or Confluence comments. |
 | Home | Notion page **Boom Boom Derek** `3f47e8aabbb48179af31f54a4acadb10`, a child of Derek's Team Directory page. It is Derek-facing: the full explanation per item, the bánh mì count, the ping history. Every ping links to it. |
 | Sources | Curaden's side first: Notion (call recaps, scope, roadmap) and Asana (Sean's "Waiting on Phinamic" tracker). Then Jira, Confluence, the WBS sheet and the Webex space. |
@@ -100,6 +100,11 @@ plain words. The humour wraps that; it never replaces it.
   joke fair.
 - Jokes are about the overdue task, never about Derek as a person. No swearing or
   insults in any language: it posts from Sean's account in a shared partner space.
+- **Laughed off** (Sean, 12 Oct): a 😂 reaction, a joke or "too many boom boom"
+  instead of an answer is not a reply. The next ping is a bit danker and
+  mock-hurt ("Boom Boom is a little bit hurt", "the bánh mì counter doesn't take
+  emoji as payment"), still clearly a joke, still no insults, and the item moves
+  up a level as if he had stayed silent.
 
 **Reference tone** (Sean approved and sent this one, 9 Oct; automate exactly this):
 
@@ -126,7 +131,7 @@ deliverables with their source and due date, then the smallest acceptable action
 | **Jira** | Everything assigned to Derek in BA, CA20, CPA20 | `assignee = "712020:078ef74c-95c3-45a8-ad5e-20e816c4b176" AND statusCategory != Done`, and `… AND updated >= -7d` to credit what he moved. |
 | **Confluence** | Pages Derek created or edited (deliverables) | CQL `contributor = "712020:078ef74c-95c3-45a8-ad5e-20e816c4b176" AND lastmodified >= now("-14d")`. |
 | **WBS** | Whether promised WBS changes arrived | Google Sheet "BOB Phase 2 – Scope WBS (draft)" `1fuoR5oS_ILoPooNtWcPutDrWpRBYPmJ9uXIJNTifNhY` (owner Derek): modified time and the Epics tab. Read-only. Without the Drive connector: `unavailable`. |
-| **Webex** | Everything in "Curaden / Phinamic" since the last ping: Derek's replies ("done" + link, new dates, "not mine"), files he shared, his own promises ("I'll send it Friday"); plus Webex meeting summaries for calls he was in | Webex web through Claude in Chrome on Sean's sign-in: open the space named exactly "Curaden / Phinamic" and read it with `get_page_text`, scrolling up to the last Boom Boom Derek ping; summaries as in the announcements spec. Read-only. If it asks for a sign-in, stop; never type credentials. |
+| **Webex** | Everything in "Curaden / Phinamic" since the last ping: Derek's replies ("done" + link, new dates, "not mine"), files he shared, his own promises ("I'll send it Friday"); plus Webex meeting summaries for calls he was in | [`skills/webex-web`](../skills/webex-web/SKILL.md): Recipe 3 on Curaden / Phinamic (`136d9ce0-ab41-11f0-85e5-53eb7188e8c6`) with `webex-read.js` `{ since: "— Boom Boom Derek 💥, on behalf of Sean", exportText: true }` (raise `olderPages` if the last ping isn't loaded), then `get_page_text`. Reactions don't show in the text: Sean tells you about those. Meetings he was in: Recipe 4 (summary and action items; transcript when an action is unclear). Read-only. |
 | **Other agents** | Flags that name Phinamic, Derek or his tickets | Roadmap Watch report, open `truth-catcher-escalation` issues, the latest Team Update's "Needs a decision", Feedback QA reports. |
 
 One source failing never stops the run: mark it `unavailable` and carry on.
@@ -161,20 +166,22 @@ One source failing never stops the run: mark it `unavailable` and carry on.
    can see / Where / Done when, the Jira table, "Nice work" credits, "On Curaden",
    the ping history and the "How it works" toggle. Keep the existing layout.
 7. **Write the ping** as a quick sum-up with the page link (below), save it to
-   `.boom-boom-derek/{YYYY-MM-DD}.md` (gitignored), and post it:
-   1. In Chrome (Claude in Chrome), open `web.webex.com` in a new tab and the space
-      named exactly **"Curaden / Phinamic"** (search by name; never another space).
-   2. Click into the compose box, type `@Derek` and pick **Derek La** from the
-      mention list. If he isn't offered, skip the mention and start with "Derek,".
-   3. Run `scripts/webex-compose.js` with `javascript_tool` as
-      `(<function>)(message, "Curaden / Phinamic", { prefix: "Derek La" })` (no third
-      argument without the mention). It checks the space and puts the message in after the mention through the editor API.
-      If it refuses, stop.
-   4. Screenshot: check the space name, the mention and the text. Click "Send
-      message" by ref. Screenshot again to confirm it posted.
-   5. **Can't post** (Chrome not connected, Webex signed out, script refused): don't
-      try another way. Add the ping to the page history as "not sent: {reason}" and
-      put the message in the run summary for Sean.
+   `.boom-boom-derek/{YYYY-MM-DD}.md` (gitignored), and post it with
+   [`skills/webex-web`](../skills/webex-web/SKILL.md) Recipe 1:
+   1. `navigate` your own Claude in Chrome tab to Curaden / Phinamic (direct link in
+      the skill's Spaces table; never another space).
+   2. In one `javascript_tool` call run `scripts/webex-post.js` with
+      `{ space: "Curaden / Phinamic", spaceId: "136d9ce0-ab41-11f0-85e5-53eb7188e8c6", mention: "Derek La", marker: "Boom Boom Derek: {Weekday d Mon}", send: true }`.
+      Start the message at the `##` title line; the script puts the @mention first.
+      `retry: true` (Sean's own Webex tab took the connection) → reload and repeat,
+      up to 3 times. `step: "mention"` → repeat without `mention`, message opening
+      "Derek,". `alreadyPosted` → today's ping is out, go to step 8.
+   3. Verify: reload, `webex-read.js` with the same `marker`. `markerCount: 1` =
+      posted. Screenshot it. Never resend because the tab looked offline right after
+      sending.
+   4. **Can't post** (Chrome not connected, Webex signed out, a sign-in page, three
+      offline retries, any other refusal): stop there. Add the ping to the page
+      history as "not sent: {reason}" and put the message in the run summary for Sean.
 8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
    bánh mì count, and list for Sean: Asana subtasks to tick, items handed to him,
    roadmap rows that need his fix.
@@ -236,11 +243,15 @@ since the last ping. If Monday's rundown was missed, the next run is the rundown
 
 **Scheduled task prompt** (paste into the Claude desktop app, weekdays 08:45):
 
-> Run Boom Boom Derek. In my curagents folder, `git pull`, then read `dream.md` §2–3
-> and follow `agents/boom-boom-derek.md` exactly: refresh Derek's Notion page, read
-> the Curaden / Phinamic space in Webex web, and post today's ping there through
-> Claude in Chrome if the rules say so. Live: don't ask me first. If you can't
-> post, log it on the page and give me the message.
+> Run Boom Boom Derek. In my curagents folder run `git fetch origin main`. If the
+> checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
+> anything and read the files from `origin/main` (`git show origin/main:<path>`).
+> Read `dream.md` §2–3, `skills/webex-web/SKILL.md` and `agents/boom-boom-derek.md`,
+> and follow the agent spec exactly: refresh Derek's Notion page, read the Curaden /
+> Phinamic space and his meetings in Webex web, and post today's ping there through
+> Claude in Chrome with `scripts/webex-post.js` if the rules say so. Live: don't ask
+> me first. If you can't post after the skill's retries, log it on the page and give
+> me the message.
 
 ## Output Schema
 
