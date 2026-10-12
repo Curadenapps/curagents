@@ -121,16 +121,23 @@ it `unavailable`, carry on, and say so at the top of the draft.
 Webex's AI Assistant writes a summary and next steps for recorded meetings.
 Those are the meeting source; Fireflies isn't used. The desktop app is
 unreliable, so read them in Webex web through Claude in Chrome, on Sean's own
-sign-in to the Curaden Webex site (`curaden.webex.com`, Recordings). If it asks
-for a sign-in, stop and ask Sean; never type credentials.
+sign-in. If it asks for a sign-in, stop and ask Sean; never type credentials.
 
-1. List the meetings in the window that have a recording with a summary
-   (`web.webex.com/meetings` shows the past ones by date).
-2. Take only the summary and the next steps (with owners). Don't read the full
-   transcript unless a next step is unclear. Read only; never download, share or
-   delete a recording.
-3. Skip meetings that already have a recap page, and meetings with no summary.
-4. List each under Sources as "Webex summary, {title}, {date}".
+1. Open `web.webex.com` → **Meetings** → the **Meeting recap** tab (next to
+   Calendar). It lists past meetings by date, newest first; meetings with a
+   recap show summary, transcript and recording icons under the time.
+2. Open each meeting in the window, then its **Meeting summary** tab. Read it
+   with `get_page_text`:
+   - **Notes**: the *Overview* (participants, main topics, commitments) and the
+     *Detailed Summary* below it.
+   - **Action items**: one line per next step, owner named first ("Derek to …",
+     "Sean to …").
+3. Open the **Transcript** tab only when an action item's owner, date or
+   meaning is unclear. Never open **Recordings**, and never download, share or
+   delete anything. The summary is marked AI-generated: take owners and dates
+   as stated, don't guess missing ones.
+4. Skip meetings that already have a recap page, and meetings with no summary.
+5. List each under Sources as "Webex summary, {title}, {date}".
 
 The Routine has no browser, so its draft relies on the recap pages. The "post
 it" session runs this check first and adds anything missing (Step 6).
