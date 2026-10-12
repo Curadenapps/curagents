@@ -3,10 +3,10 @@ name: meeting-notes
 description: >
   Reads the AI-generated meeting summary from Webex (Meetings → Meeting recap,
   in Webex web through Claude in Chrome on Sean's sign-in), with Fireflies.ai or
-  a pasted transcript as fallbacks. Creates structured entries in
-  the Notion Meeting Notes database with three sections: Summary (what was
-  decided), Topics Covered (what was discussed), and Next Steps (action items
-  with owner assigned by judgment, not pattern rules). Manual trigger only.
+  a pasted transcript as fallbacks. Files one recap page per meeting under
+  Notion "Decision Log & Meeting Recaps" (Decided, Still open, Other notes,
+  Actions with owners assigned by judgment, Who needs to know) and adds it to
+  that page's index table. Manual trigger only.
 model: claude-sonnet-5-5
 tools: Read, NotionAPI, FirefliesAPI, ClaudeInChrome
 trigger:
@@ -29,7 +29,7 @@ output:
   schema:
     notion_page_url: string
     title: string
-    topics_covered: "string[]"
+    decisions: "string[]"
     next_steps: "array of {action, owner, due}"
     status: "ok|error|skipped"
     skipped_reason: string
@@ -37,7 +37,8 @@ output:
 
 # Meeting Notes Agent
 
-You read meeting summaries and create structured Notion database entries.
+You read meeting summaries and file them as recap pages under Decision Log &
+Meeting Recaps in Notion.
 The default source is Webex's own AI summary in **Meeting recap** (the same
 source the announcements agent uses). Fireflies.ai and a pasted transcript are
 fallbacks.

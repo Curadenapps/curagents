@@ -105,11 +105,12 @@ announcements agent with period `weekly`. Don't create pages under the old
 
 Pulls the AI summary Webex writes for each meeting (**Meetings → Meeting recap**)
 — or, as fallbacks, from **Fireflies.ai** or a pasted transcript — and creates a
-structured entry in the Notion **Meeting Notes database**.
+recap page under **Decision Log & Meeting Recaps** in Notion (the page the
+announcements agent and Boom Boom Derek read).
 
 Read `references/meeting-notes.md` for: the Webex Meeting recap steps, Webex→Fireflies setup, GraphQL queries,
-field mappings, owner-assignment guidance, Notion database schema, and the full
-page body template.
+field mappings, owner-assignment guidance, where recap pages go, and the page
+body template.
 
 ---
 
@@ -125,7 +126,7 @@ page body template.
 
 1. Follow `references/meeting-notes.md` §0 to open the meeting in Webex web: Meetings → **Meeting recap** → the meeting → **Meeting summary**. If the user named a meeting, open that one; otherwise the most recent one with a summary.
 2. If the meeting has no summary yet → stop and tell the user: "Webex hasn't written the summary yet. Try again later."
-3. Run the idempotency check from §7 of the reference (on `Webex Meeting`). If it already has a Notion page → return the existing URL and stop.
+3. Run the idempotency check from §7 of the reference (same date + meeting name). If it already has a recap page → return the existing URL and stop.
 4. Map the Notes and Action items using §0 of the reference. Owners come from the action item text ("Derek to …"); match them to the participants named in the Overview. Mark genuinely ambiguous items `TBD`.
 5. Post to Notion — see below.
 
@@ -137,7 +138,7 @@ page body template.
    - If the user gave a transcript ID → fetch that specific transcript
    - Otherwise → fetch the most recent (`limit: 1`) and proceed directly — no confirmation required
 2. If `summary` is null or `overview` is empty → stop and tell the user: "Fireflies is still processing. Try again in a few minutes."
-3. Run the idempotency check from §7 of the reference. If the Fireflies ID already has a Notion page → return the existing URL and stop.
+3. Run the idempotency check from §7 of the reference. If the meeting already has a recap page → return the existing URL and stop.
 4. Map fields using §3 of the reference.
 5. Assign owners to action items using **judgment**, not pattern-matching. Read `references/meeting-notes.md` §4 for guidance. Cross-reference `meeting_attendees` to match names. Mark genuinely ambiguous items `TBD`.
 6. Post to Notion — see below.
@@ -148,19 +149,19 @@ page body template.
 
 1. Ask the user for: meeting title, date (defaults to today), and the transcript text.
 2. Scan for speaker labels (`Name: text` lines) to build the attendees list.
-3. Write a 2–3 sentence **Summary** from the transcript content.
-4. Extract **Topics Covered** — bullet list of what was actually discussed.
-5. Extract **Next Steps** — one per action item. Assign owner by judgment from transcript context; if unclear, mark `TBD`.
-6. Set `Source = Manual`, `Fireflies ID = —`.
+3. Run the idempotency check from §7 of the reference.
+4. Fill **Decided**, **Still open** and **Other notes** from what was actually said (§6 of the reference).
+5. Fill **Actions** — one per action item, grouped by owner. Assign owner by judgment from transcript context; if unclear, mark `TBD`.
+6. Set the **Sources** line to "pasted transcript".
 7. Post to Notion — see below.
 
 ---
 
 ### Post to Notion (all modes)
 
-1. Get the database ID from `NOTION_MEETING_NOTES_DB_ID`. If not set, tell the user to create the database and set the env var (see `references/meeting-notes.md` §5).
-2. Create the database entry using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` with the properties and body from `references/meeting-notes.md` §5 and §6.
-3. Return the Notion page URL to the user.
+1. Create the recap page under Decision Log & Meeting Recaps (`3f27e8aabbb481baa16ce7cb9e7514dd`) using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages`, with the title and body from `references/meeting-notes.md` §5 and §6.
+2. Add its row to the index table on the Decision Log page (Date · Meeting · Key decision).
+3. Return the Notion page URL to the user, and list the actions so Sean can put them into Asana (BOB App or Consumer App).
 
 ---
 
@@ -176,5 +177,5 @@ page body template.
 | Webex meeting summaries | `web.webex.com` → Meetings → Meeting recap (Chrome, Sean's sign-in) |
 | Fireflies GraphQL API | `https://api.fireflies.ai/graphql` |
 | Fireflies env var | `FIREFLIES_API_KEY` |
-| Meeting Notes DB env var | `NOTION_MEETING_NOTES_DB_ID` |
+| Recap pages | Decision Log & Meeting Recaps `3f27e8aabbb481baa16ce7cb9e7514dd` |
 | Meeting Notes detail | See `references/meeting-notes.md` |

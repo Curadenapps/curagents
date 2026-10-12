@@ -165,7 +165,7 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | Asana webhook not registered | asana-maintenance and brand-asset webhooks don't fire; scheduled scan uses the Asana events gate |
 | `DRY_RUN=true` everywhere | No live writes to any system |
 | roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
-| `FIREFLIES_API_KEY` / `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes uses paste mode / searches for the DB by name |
+| No Chrome and `FIREFLIES_API_KEY` not set | meeting-notes uses paste mode |
 | Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |
 | Webex bot tokens get culled after a few days | announcements posts through Webex web in Sean's Chrome (Claude in Chrome); the post needs his machine |
 | Webex meeting summaries need Sean signed in to curaden.webex.com in Chrome | the Thursday Routine can't read them; the "post it" session adds them |
