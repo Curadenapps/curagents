@@ -43,16 +43,19 @@ On any invocation, determine trigger type:
 
 | Trigger | Signals | Route to |
 |---------|---------|----------|
-| `schedule:"0 6-18/4 * * 1-5"` | `sync-and-scan.yml` (gated) | notion-sync → truth-catcher (batch scan), in that order |
+| `schedule:"58 7,13 * * 1-5"` (Zurich) | Claude Routine "Truth Catcher scan" (reads Notion and Asana live; `sync-and-scan.yml` is manual only) | truth-catcher (BOB App scan + App Tasks board, both live) |
 | `schedule:"0 14 * * 4"` | Claude Routine "Team update draft" (Thursday 14:00 Zurich) | announcements (weekly; monthly on the last Thursday) — draft only |
 | `webhook:asana.task.commented` | Asana webhook payload | Asana Maintenance |
 | `webhook:asana.task.section_changed` | Asana webhook payload | Brand Asset |
 | `user:sync revolvenote` / `push revolvenote` | User phrase | curaden-communications › revolvenote-sync |
 | `user:sync BOB` / `sync jira` | User phrase | curaden-communications › jira-notion-bob-sync |
 | `user:broadcast` / `run BOB broadcast` | User phrase | announcements (weekly; the BOB weekly is part of the team update) |
-| `user:check alignment` / `scan asana` | User phrase | Truth Catcher |
+| `user:check alignment` / `scan asana` / `truth catcher` | User phrase | Truth Catcher |
+| `user:check intake` / `app tasks board` / `what requests are waiting` | User phrase | Truth Catcher, App Tasks, Requests & Feedback board only |
+| `user:pause App Tasks` | User phrase | Truth Catcher: Sean puts the App Tasks board back in preview (spec "App Tasks board" rollout line + `dream.md` §5) |
 | `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's computer (Claude desktop + Claude in Chrome) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
 | `user:boom boom` / `boom boom derek` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
+| `user:delegate it` (after a Boom Boom Derek run) | User phrase | boom-boom-derek: write Derek's closed items to Asana and decisions to Notion, each with its Webex source |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
 | `user:what needs attention` | User phrase | Swarm (§3a): truth-catcher + brand-asset (check only) + roadmap-watch in parallel |
 | `schedule:"0 7 * * 1-5"` | `figma-diff.yml` (gated) | figma (library diff check) |
@@ -63,13 +66,13 @@ On any invocation, determine trigger type:
 | `user:publish to webflow` / `sync assets to webflow` | User phrase | webflow agent |
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
-| `user:process meeting notes` / `summarise meeting` / `fetch from fireflies` | User phrase | curaden-communications › meeting-notes |
+| `user:process meeting notes` / `summarise meeting` / `webex recap` / `log the webex meeting` / `fetch from fireflies` | User phrase | meeting-notes (Webex Meeting recap first via `skills/webex-web`; Fireflies, then paste, as fallbacks) → recap page under Decision Log & Meeting Recaps |
 | `schedule:"0 8 * * 1"` | CRON (Monday 08:00) — no CI workflow yet | roadmap-watch (weekly roadmap drift report) |
 | `user:roadmap watch` / `check the roadmap` / `roadmap drift` | User phrase | roadmap-watch |
 | `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
 | `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
 | `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |
-| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web via Claude in Chrome, `scripts/webex-compose.js`) |
+| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web via Claude in Chrome, `skills/webex-web`) |
 | `user:markets update` / `markets monthly` | User phrase | announcements, period `markets` (from Dec 2026) |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
@@ -89,6 +92,16 @@ Before dispatching any agent:
 
 3. **Check dry-run flag** — read `DRY_RUN` env var or `.truth-cache/dispatch-log.json`.
    - If set, all dispatched agents run in dry-run mode (log actions but do not write to Asana/Notion).
+
+4. **Webex steps** — any agent that posts to or reads Webex (announcements, boom-boom-derek,
+   meeting-notes, feedback-qa) loads `skills/webex-web/SKILL.md` first. It needs Sean's
+   computer with Claude in Chrome connected and Webex web signed in. If Chrome isn't
+   connected, the agent still runs, marks Webex `unavailable` and hands Sean the message.
+
+5. **Medical-device line** — BOB stays out of medical-device legislation and stays one
+   global product (`dream.md` §2). If a routed request would add a feature that diagnoses
+   or proposes treatment, or builds a market-only (e.g. Japan PMS) integration, flag it to
+   Sean in the report instead of dispatching build work.
 
 ---
 
@@ -193,3 +206,7 @@ If a dispatched agent raises a `CRITICAL` severity item, the orchestrator must:
 - Never run destructive Asana operations (task delete, project archive) — these are
   not in scope for any agent. Refuse and log if somehow dispatched.
 - Always honour `dry_run: true` when set in the dispatch log.
+- Never post to or read Webex any way other than `skills/webex-web` (no bot tokens, no
+  typed credentials). Each agent posts only to the spaces its own spec names.
+- Truth Catcher and Boom Boom Derek comment in Sean's voice but are always signed as the
+  automated agent; never present an agent's message as Sean personally.

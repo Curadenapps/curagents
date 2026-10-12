@@ -22,7 +22,8 @@ SCOPE.md           ← Hard boundaries: what this system can and cannot do
 │
 ├── src/           ← API integrations (Notion sync, Asana read/write, Figma poll)
 ├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner),
-│                    render-pdf.ps1 + webex-compose.js (team update PDF; Webex post via the browser)
+│                    render-pdf.ps1 (team update PDF); webex-post.js, webex-read.js,
+│                    webex-meetings.js (all Webex work via the browser, see skills/webex-web)
 ├── templates/     ← team-update.html: Curaprox-styled PDF report for the announcements agent
 ├── .github/       ← GitHub Actions: sync-and-scan, figma-diff
 └── .planning/     ← GSD project planning docs (roadmap, requirements, state)
@@ -44,6 +45,17 @@ Skills are invokable by any Claude session. Trigger by phrase — no manual setu
 
 Config details for each procedure: [`skills/curaden-communications/references/`](skills/curaden-communications/references/)
 
+### `webex-web` → [`skills/webex-web/SKILL.md`](skills/webex-web/SKILL.md)
+
+The one way every agent works in Webex, through Webex web in Sean's Chrome
+(Claude in Chrome, his own sign-in, no bot tokens).
+
+| Need | Script | Recipe |
+|------|--------|--------|
+| Post a message (with @mention), or a message + PDF | `scripts/webex-post.js` | 1, 2 |
+| Read a space, check a post landed once | `scripts/webex-read.js` | 3 |
+| Meeting recaps: AI summary, action items, full transcript, recording frames | `scripts/webex-meetings.js` | 4 |
+
 ---
 
 ## Agent Roster
@@ -62,7 +74,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment on BOB App, plus intake tracking on App Tasks, Requests & Feedback (untriaged, unanswered, stuck; preview) | Claude Routine, weekdays 07:58 + 13:58 Zurich |
+| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment on BOB App, plus intake tracking on App Tasks, Requests & Feedback (untriaged, unanswered, stuck; live since 12 Oct) | Claude Routine, weekdays 07:58 + 13:58 Zurich |
 | Boom Boom Derek | [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) | Truth Catcher for one person, Derek La (Phinamic): ledger of what he owes across Webex, Jira, Confluence, recaps and Asana, checked against the roadmap; pings him in Webex "Curaden / Phinamic" | Scheduled task on Sean's computer, weekdays 08:45 Zurich (Mon rundown, Tue–Fri nudges) + manual "boom boom"; live, posts through Webex web in Sean's Chrome (no token) |
 | Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
 | Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
@@ -165,8 +177,9 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | Asana webhook not registered | asana-maintenance and brand-asset webhooks don't fire; scheduled scan uses the Asana events gate |
 | `DRY_RUN=true` everywhere | No live writes to any system |
 | roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
-| `FIREFLIES_API_KEY` / `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes uses paste mode / searches for the DB by name |
+| `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes writes recaps as child pages of Decision Log & Meeting Recaps; Fireflies is only a fallback (Webex summaries + transcripts come first) |
 | Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |
-| Webex bot tokens get culled after a few days | announcements posts through Webex web in Sean's Chrome (Claude in Chrome); the post needs his machine |
-| Webex meeting summaries need Sean signed in to curaden.webex.com in Chrome | the Thursday Routine can't read them; the "post it" session adds them |
+| Webex bot tokens get culled after a few days | every agent posts and reads through Webex web in Sean's Chrome (`skills/webex-web`); Webex steps need his machine |
+| Webex web allows one live tab per browser | with Sean's own Webex tab open, ours is online ~15–20 s per load; `webex-post.js` posts in one call and retries safely with a marker |
+| Webex meeting summaries need Sean signed in to Webex in Chrome | the Thursday Routine can't read them; the "post it" session adds them. Recording playback also needs his `curaden.webex.com` site sign-in |
 | Boom Boom Derek runs on Sean's computer (Webex web needs his Chrome sign-in) | no ping on days the computer is off at 08:45; the next run catches up. Its scheduled task is set up in the Claude desktop app |

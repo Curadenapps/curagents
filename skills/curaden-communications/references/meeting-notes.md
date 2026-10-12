@@ -1,6 +1,27 @@
 # Meeting Notes — Reference
 
-## 1. Webex → Fireflies Setup (one-time)
+## 0. Webex web (default source)
+
+Webex's AI Assistant writes a summary and action items for every recorded
+meeting, plus a transcript with speakers and timestamps. Read them in Webex web
+through Claude in Chrome on Sean's sign-in with `scripts/webex-meetings.js`; the
+steps are in `skills/webex-web/SKILL.md` Recipe 4. Nothing to set up, no API key.
+
+## 3a. Field Mapping: Webex → Notion
+
+| Webex | Notion target | Notes |
+|-------|---------------|-------|
+| Meeting title + date (list / page header) | Page `Name` | `📅 {title} — {YYYY-MM-DD}` |
+| Date | `Date` property | |
+| Start–end time | `Duration` property | Minutes between the two times |
+| Transcript `speakers` | `Attendees` property | Only people who spoke; add silent attendees if the summary names them |
+| Meeting container id (end of the decoded url) | `Fireflies ID` property | Idempotency key; `Source = Webex` |
+| Summary "Overview" | **Summary** section | Condense to 2–4 sentences, keep the decisions |
+| Summary "Detailed Summary" headings | **Topics Covered** | One bullet per heading, one line each |
+| "Action items" | **Next Steps** table | Owner and due from the item; transcript confirms (§4) |
+| Transcript | Checks only | Owners, dates, decisions the summary missed; never pasted whole |
+
+## 1. Fireflies fallback: Webex → Fireflies Setup (one-time)
 
 Fireflies joins your Webex meetings as a bot and transcribes them automatically.
 Supports German and other languages — Webex's own transcription does not.
@@ -88,21 +109,16 @@ processing. Tell the user to try again in a few minutes.
 
 ---
 
-## 3. Field Mapping: Fireflies → Notion
+## 3. Field Mapping: Fireflies → recap page
 
-| Fireflies field | Notion target | Notes |
-|----------------|---------------|-------|
-| `title` | Page `Name` property | Prefix with `📅` + date suffix |
-| `date` | `Date` property | ISO 8601 string |
-| `duration` | `Duration` property | Fireflies returns **seconds** — divide by 60 |
-| `meeting_attendees[].displayName` | `Attendees` property | Comma-separated; fall back to `organizer_email` if list is empty |
-| `id` | `Fireflies ID` property | Stored for idempotency — see §7 |
-| `summary.overview` | **Summary** body section | Verbatim from Fireflies; 2–4 sentences |
-| `summary.outline` | **Topics Covered** body section | Structured list of what was actually discussed |
-| `summary.action_items` | **Next Steps** table | Owner assigned by Claude judgment — see §4 |
-| `summary.keywords` | Footer `🏷` line | Comma-separated |
-
----
+| Fireflies field | Recap page | Notes |
+|----------------|-----------|-------|
+| `title`, `date`, `duration` | Page title + **Date / Who / Source** line | Same title format as §0; duration is in **seconds** |
+| `meeting_attendees[].displayName` | **Who** | Fall back to `organizer_email` if empty |
+| `summary.overview` | **Decided** / **Still open** | Split decisions from open questions |
+| `summary.outline` | **Other notes** | Only what isn't already above |
+| `summary.action_items` | **Actions** | Owner by judgment (§4) |
+| `id` | **Source** line | `Fireflies {id}` |
 
 ## 4. Assigning Owners to Action Items
 
@@ -140,34 +156,40 @@ Create a database in Notion titled **"Meeting Notes"** with these properties:
 | `Date` | Date | Meeting date |
 | `Attendees` | Rich text | Participant display names, comma-separated |
 | `Duration` | Number (format: number) | Meeting length in minutes |
-| `Source` | Select | `Fireflies` or `Manual` |
-| `Fireflies ID` | Rich text | Transcript ID; used for duplicate prevention |
+| `Source` | Select | `Webex`, `Fireflies` or `Manual` |
+| `Fireflies ID` | Rich text | Webex meeting container id or Fireflies transcript id; used for duplicate prevention |
 
-Copy the database ID from the Notion URL (32-character hex string after
-`notion.so/`) and set it as `NOTION_MEETING_NOTES_DB_ID` in your `.env`.
+There is **no Meeting Notes database**. Every recap is a child page of
+**Decision Log & Meeting Recaps** (`3f27e8aabbb481baa16ce7cb9e7514dd`, Curaden
+App Hub → Goals & Objectives). That page is also what the announcements agent and
+Boom Boom Derek read, so a recap filed here reaches them automatically.
 
-> ⚠️ **MCP tool check required on first run:** `notion-create-pages` must
-> create the entry with `parent.type = "database_id"`, not `"page_id"`.
-> If the first run produces a floating page instead of a database row, verify
-> that the MCP tool's `parent` parameter accepts a database ID and adjust the
-> call accordingly.
+1. Create the child page with `notion-create-pages`, parent = that page id, icon 🎙️.
+2. Add one row to the index table at the top of the Decision Log
+   (Date · Meeting · Key decision), newest first, with `notion-update-page`.
+   Change nothing else on the page.
 
----
+## 6. Recap page body
 
-## 6. Notion Page Body Template
+Follow **Template — Meeting recap** (`3f37e8aabbb481ca86edd64d1939c4e2`); the
+7 Oct 2026 Curaden × Phinamic page is the reference for tone and length.
 
 ```
-## Summary
-{summary.overview — verbatim from Fireflies, or 2–3 sentence condensation for paste mode}
+**Who:** {names by company}. Webex, {HH:MM}–{HH:MM}.
+**Sources:** {Webex meeting summary | Fireflies {id} | pasted transcript}
 
----
+## Decided
+1. **{decision}.** {one line of why, if stated}
 
-## Topics Covered
-{summary.outline — each topic on its own line as a bullet}
+## Still open
+- {open question}
 
----
+## Other notes
+- {note}
 
-## Next Steps
+## Actions
+**{Curaden person}:** {action} ({due}) · …
+**Phinamic ({name}):** {action} ({due}) · …
 
 | Action | Owner | Due |
 |--------|-------|-----|
@@ -178,34 +200,26 @@ Copy the database ID from the Notion URL (32-character hex string after
 **Attendees:** {displayName list, or "Not recorded"}
 **Duration:** {N} min
 **Date:** {YYYY-MM-DD}
-**Source:** {Fireflies — {id} | Manual}
+**Source:** {Webex — {container id} | Fireflies — {id} | Manual}
 🏷 {keywords, comma-separated}
 ```
 
+If clinical or efficacy language comes up, add a `⚠️ Clinical language` callout
+at the top.
+
 ### Language rule
 
-Output the Notion page **in the same language as the meeting** unless the user
+Write the recap **in the same language as the meeting** unless the user
 explicitly asks for a translation. Do not silently translate a German meeting
-into English — if the team speaks German, the notes should be in German.
-
----
+into English.
 
 ## 7. Idempotency Check
 
-Before creating a Notion page, query the Meeting Notes database for an existing
-entry with a matching `Fireflies ID` property using an exact-match filter:
+Before creating a page, fetch Decision Log & Meeting Recaps and look at its
+child pages and index table. A page with the same date and meeting name (e.g.
+"7 Oct 2026 — Curaden × Phinamic") means it is already logged: return that
+page's URL ("Already logged: {URL}") and stop. Two meetings with the same name
+on one day are told apart by the start time on the **Who** line.
 
-```
-mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-query-database
-database_id: {NOTION_MEETING_NOTES_DB_ID}
-filter: {
-  "property": "Fireflies ID",
-  "rich_text": { "equals": "{fireflies_transcript_id}" }
-}
-```
-
-If a result is returned → skip creation and return the existing page URL:
-"Already logged: {URL}"
-
-Do not use Notion search (`notion-search`) for this check — full-text search
-is fuzzy and will produce false positives.
+Do not use `notion-search` for this check — full-text search is fuzzy and will
+produce false positives.

@@ -120,10 +120,10 @@ link only.
 Escalation after 3 working days with no reply, the comment format, and dedupe all work as
 on the BOB App board, and comments are written in Sean's voice ("Comment format").
 
-**Rollout: preview (2026-10-12).** Until Sean switches this board live here, the Routine
-posts **nothing** on it. It lists every comment it would post, under "App Tasks preview"
-in the run summary, next to the 📥 New list. When Sean approves, change this line to
-"Live (approved <date>)" and record it in `dream.md` §5.
+**Rollout: Live (approved 2026-10-12).** The Routine posts its comments on this board
+like on BOB App. If Sean pauses it, change this line back to preview: the Routine then
+posts nothing here and lists the comments it would post under "App Tasks preview" in the
+run summary.
 
 **Script**: `scripts/truth-scan.ts` covers only the BOB App board. This board runs in the
 Routine only.
@@ -174,8 +174,8 @@ already been said, so nothing is repeated.
 7. Roadmap rows that need a change (for example, task done but row not Done) are listed in
    the run summary for Sean. They are never edited.
 8. **App Tasks summary**: end the run summary with the 📥 New list, the open findings
-   by finding type, the roadmap candidates and, while the board is in preview, the "App
-   Tasks preview" comments.
+   by finding type, the comments posted and the roadmap candidates (plus the "App Tasks
+   preview" comments if the board is ever paused).
 
 ## Script run (manual GitHub Action `sync-and-scan.yml`)
 
@@ -324,7 +324,7 @@ questions with no reply from the person asked.
   "unlinked_reviewed": 0,
   "matched": 0,
   "not_on_roadmap": 0,
-  "app_tasks": { "new": 0, "not_triaged": 0, "waiting_on_us": 0, "stuck": 0, "not_on_roadmap": 0, "posted": 0, "preview": true },
+  "app_tasks": { "new": 0, "not_triaged": 0, "waiting_on_us": 0, "stuck": 0, "not_on_roadmap": 0, "posted": 0, "preview": false },
   "errors": [],
   "summary": "..."
 }

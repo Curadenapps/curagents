@@ -6,9 +6,9 @@
 //
 // pdf   renders the HTML with a local Chrome, Edge or Chromium (headless print-to-pdf).
 //       Set CHROME_PATH to use a specific browser.
-// webex posts the summary with the PDF attached to the QA space below. It is the
-//       only space this script will post to. Needs WEBEX_BOT_TOKEN; the bot must be
-//       a member of the space. DRY_RUN=true (default) prints instead of posting.
+// webex LEGACY, not used by the feedback-qa routine: reports now go through Webex web
+//       (skills/webex-web, Recipe 2). Kept for reference: posts the summary with the
+//       PDF to the QA space below with WEBEX_BOT_TOKEN. DRY_RUN=true prints instead.
 
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
