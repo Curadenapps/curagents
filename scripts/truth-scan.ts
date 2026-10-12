@@ -26,8 +26,9 @@ const ROADMAP_URL = "https://www.notion.so/751b6071283e43e8b1a91054319e0db6";
 const DRY_RUN = process.env.DRY_RUN !== "false";
 /** Delay questions + escalations address colleagues by name — separate switch, previewed first */
 const DELAY_DRY_RUN = DRY_RUN || process.env.DELAY_DRY_RUN !== "false";
-/** Comments post from the token owner's account; the signature says who they are posted for */
-const ON_BEHALF_OF = process.env.TRUTH_CATCHER_ON_BEHALF_OF || "Sean Dunne";
+/** Comments post from Sean's account in his voice, no emoji; a short sign-off says Truth Catcher wrote it and @mentions Sean so he is notified (2026-10-12) */
+const NOTIFY_GID = process.env.TRUTH_CATCHER_NOTIFY_GID || "1207214370347608"; // Sean Dunne
+const SIGN_OFF = "— Truth Catcher (automated check, not Sean personally) · cc";
 const ESCALATE_AFTER_WORKING_DAYS = 3;
 const MAX_DELAY_CANDIDATES = 20;
 
@@ -329,76 +330,75 @@ async function prepare(): Promise<void> {
 
 const LINES: Record<FindingType, (task: Task, row: RoadmapRow | null) => [string, string]> = {
   wrong_release: (t, r) => [
-    `Too early: this task is in "${t.section}", but roadmap row "${r!.name}" is planned for ${r!.priority === "Parked" ? "Parked priority" : r!.release}.`,
-    "Move the roadmap row into a current release (Soft Launch Oct-26, Web Nov-26, Hard Launch Dec-26), or pause this task.",
+    `this is in "${t.section}", but the roadmap row "${r!.name}" is planned for ${r!.priority === "Parked" ? "later (Parked)" : r!.release}, so it's starting earlier than planned.`,
+    "Could we either move the row into a current release (Soft Launch Oct-26, Web Nov-26 or Hard Launch Dec-26) or pause this for now?",
   ],
   asana_done_roadmap_open: (_t, r) => [
-    `Status drift: this task is complete, but roadmap row "${r!.name}" is "${r!.status ?? "no status"}".`,
-    "Set the roadmap row to Done, or reopen this task if work remains.",
+    `this is complete, but the roadmap row "${r!.name}" is still "${r!.status ?? "without a status"}".`,
+    "Can we set the row to Done, or is there still work left here?",
   ],
   roadmap_done_asana_open: (_t, r) => [
-    `Status drift: roadmap row "${r!.name}" is Done, but this task is still open.`,
-    "Complete this task, or set the roadmap row back to In Progress.",
+    `the roadmap row "${r!.name}" is Done, but this task is still open.`,
+    "Can we close this, or should the row go back to In Progress?",
   ],
   roadmap_cut_asana_open: (_t, r) => [
-    `Cut from roadmap: roadmap row "${r!.name}" is Cut, but this task is still open.`,
-    "Stop work and close this task, or restore the row in Notion if the decision changed.",
+    `the roadmap row "${r!.name}" was cut, but this task is still open.`,
+    "Can we stop work here and close it? If the decision has changed, let me know and we'll restore the row.",
   ],
   not_on_roadmap: () => [
-    "Not on roadmap: no Product Roadmap row links to this task.",
-    "Add a Product Roadmap row (or put this task's link in an existing row's Asana Link) before work continues.",
+    "I can't find this on the Product Roadmap.",
+    "Before more work goes in, can we either add a roadmap row for it or link it to an existing one?",
   ],
 };
 
-const signature = (runId: string) => `— Truth Catcher, on behalf of ${ON_BEHALF_OF} · run ${runId}`;
+const capitalise = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-function findingComment(task: Task, row: RoadmapRow | null, findings: FindingType[], reason: string | null, runId: string): string {
-  const critical = findings.includes("roadmap_cut_asana_open");
+/** Adds the sign-off: plain text for logs/preview, rich text with a real @mention of Sean for Asana */
+function signed(text: string, html = escapeHtml(text)): { text: string; html: string } {
+  return {
+    text: `${text}\n\n${SIGN_OFF} @Sean Dunne`,
+    html: `${html}\n\n<em>${escapeHtml(SIGN_OFF)}</em> ${mention(NOTIFY_GID)}`,
+  };
+}
+
+/** Written the way Sean writes (skills my-writing-style): plain, one clear ask, no emoji */
+function findingComment(task: Task, row: RoadmapRow | null, findings: FindingType[], reason: string | null, _runId: string): { text: string; html: string } {
   const lines = findings.map((f) => LINES[f](task, row));
-  return [
-    `🔎 Truth Catcher: ${critical ? "🔴 cut from" : "⚠️ not aligned with"} the Product Roadmap`,
+  const what = lines.length === 1
+    ? [`Quick flag on this one: ${lines[0][0]}`]
+    : ["A couple of things on this one:", ...lines.map(([w]) => `- ${capitalise(w)}`)];
+  return signed([
+    ...what,
+    ...(reason ? [capitalise(reason)] : []),
     "",
-    ...lines.map(([what]) => `• ${what}`),
-    ...(reason ? [`  ${reason}`] : []),
+    lines.map(([, fix]) => fix).join(" "),
     "",
     `Roadmap: ${row?.url ?? ROADMAP_URL}`,
-    `Suggested fix: ${lines.map(([, fix]) => fix).join(" ")}`,
-    "",
-    signature(runId),
-  ].join("\n");
+  ].join("\n"));
 }
 
 /** Question comment: plain text for logs/preview, rich text with a real @mention for Asana */
-function questionComment(c: any, d: any, runId: string): { text: string; html: string } {
-  const head = "🔎 Truth Catcher: ❓ roadmap item at risk";
-  const why = `${d.reason} Roadmap row "${c.row.name}" is planned for ${c.row.release ?? "an unscheduled release"}${c.row.date ? ` (${c.row.date})` : ""}.`;
+function questionComment(c: any, d: any, _runId: string): { text: string; html: string } {
+  const why = `${d.reason} The roadmap row "${c.row.name}" is planned for ${c.row.release ?? "an unscheduled release"}${c.row.date ? ` (${c.row.date})` : ""}.`;
   const ask = d.question;
-  const deadline = `Please reply here with the decision or the reason. If there's no reply within ${ESCALATE_AFTER_WORKING_DAYS} working days, this is reported to ${ON_BEHALF_OF}.`;
-  const text = [head, "", `• ${why}`, "", `@${d.ask_user_name} ${ask}`, deadline, "", `Roadmap: ${c.row.url}`, "", signature(runId)].join("\n");
+  const followUp = `If I don't hear back within ${ESCALATE_AFTER_WORKING_DAYS} working days, I'll follow up again.`;
+  const text = [`@${d.ask_user_name} ${why}`, "", `${ask} ${followUp}`, "", `Roadmap: ${c.row.url}`].join("\n");
   const html = [
-    `<strong>${escapeHtml(head)}</strong>`,
+    `${mention(d.ask_user_gid)} ${escapeHtml(why)}`,
     "",
-    `• ${escapeHtml(why)}`,
-    "",
-    `${mention(d.ask_user_gid)} ${escapeHtml(ask)}`,
-    escapeHtml(deadline),
+    `${escapeHtml(ask)} ${escapeHtml(followUp)}`,
     "",
     `Roadmap: <a href="${escapeHtml(c.row.url)}">${escapeHtml(c.row.name)}</a>`,
-    "",
-    `<em>${escapeHtml(signature(runId))}</em>`,
   ].join("\n");
-  return { text, html };
+  return signed(text, html);
 }
 
-function escalationComment(q: OpenQuestion, runId: string): string {
-  return [
-    "🔎 Truth Catcher: 🔺 escalated",
+function escalationComment(q: OpenQuestion, _runId: string): { text: string; html: string } {
+  return signed([
+    `${q.ask_user_name}, following up on my question above as I haven't had a reply yet: "${q.question}"`,
     "",
-    `No reply from ${q.ask_user_name} within ${ESCALATE_AFTER_WORKING_DAYS} working days to: "${q.question}"`,
-    `This has been reported to ${ON_BEHALF_OF}.`,
-    "",
-    signature(runId),
-  ].join("\n");
+    "Could you get back to me on this today? I've added it to our open escalations so it doesn't get lost.",
+  ].join("\n"));
 }
 
 /** One GitHub issue per escalation so it survives the CI cache and shows up in reports */
@@ -457,9 +457,9 @@ async function post(): Promise<void> {
 
   let posted = 0;
   for (const { item, reason } of toPost) {
-    const text = findingComment(item.task, item.row, item.findings, reason, runId);
+    const { text, html } = findingComment(item.task, item.row, item.findings, reason, runId);
     summary(`### [${item.task.name}](${item.task.url})${item.task.section ? ` — ${item.task.section}` : ""}\n\`\`\`\n${text}\n\`\`\`\n`);
-    if (await postComment(item.task.gid, text, input.dry_run)) {
+    if (await postComment(item.task.gid, text, input.dry_run, html)) {
       posted++;
       verdicts.verdicts.push({ task_gid: item.task.gid, fingerprint: item.fingerprint, findings: item.findings, posted_at: now });
     }
@@ -490,10 +490,10 @@ async function post(): Promise<void> {
     if (q) q.resolved_at = now;
   }
   for (const e of input.escalate as OpenQuestion[]) {
-    const text = escalationComment(e, runId);
+    const { text, html } = escalationComment(e, runId);
     summary(`### 🔺 Escalation: [${e.task_name}](${e.task_url}) — waiting on ${e.ask_user_name}\n\`\`\`\n${text}\n\`\`\`\n`);
     if (input.delay_dry_run) { console.log(`[DRY RUN] Would escalate task ${e.task_gid}`); continue; }
-    await postComment(e.task_gid, text, false);
+    await postComment(e.task_gid, text, false, html);
     const issue = await openEscalationIssue(e);
     if (issue) summary(`Reported: ${issue}\n`);
     const q = verdicts.open_questions.find((x) => x.task_gid === e.task_gid && x.asked_at === e.asked_at);
