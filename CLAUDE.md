@@ -28,7 +28,7 @@ rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 - [`agents/orchestrator.md`](agents/orchestrator.md) — Master router; entry point for all activity
 
 **Core governance**
-- [`agents/truth-catcher.md`](agents/truth-catcher.md) — Notion vs Asana alignment on BOB App, plus the App Tasks, Requests & Feedback intake board (preview); comments in Sean's voice, signed Truth Catcher
+- [`agents/truth-catcher.md`](agents/truth-catcher.md) — Notion vs Asana alignment on BOB App, plus the App Tasks, Requests & Feedback intake board; comments in Sean's voice, signed Truth Catcher
 - [`agents/brand-asset.md`](agents/brand-asset.md) — Brand asset governance and RACI approval gates
 - [`agents/asana-maintenance.md`](agents/asana-maintenance.md) — Kanban routing, update snippets, audit trail writes
 

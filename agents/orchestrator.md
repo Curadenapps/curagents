@@ -43,7 +43,7 @@ On any invocation, determine trigger type:
 
 | Trigger | Signals | Route to |
 |---------|---------|----------|
-| `schedule:"58 7,13 * * 1-5"` (Zurich) | Claude Routine "Truth Catcher scan" (reads Notion and Asana live; `sync-and-scan.yml` is manual only) | truth-catcher (BOB App scan + App Tasks board, preview until Sean switches it live) |
+| `schedule:"58 7,13 * * 1-5"` (Zurich) | Claude Routine "Truth Catcher scan" (reads Notion and Asana live; `sync-and-scan.yml` is manual only) | truth-catcher (BOB App scan + App Tasks board, both live) |
 | `schedule:"0 14 * * 4"` | Claude Routine "Team update draft" (Thursday 14:00 Zurich) | announcements (weekly; monthly on the last Thursday) — draft only |
 | `webhook:asana.task.commented` | Asana webhook payload | Asana Maintenance |
 | `webhook:asana.task.section_changed` | Asana webhook payload | Brand Asset |
@@ -52,7 +52,7 @@ On any invocation, determine trigger type:
 | `user:broadcast` / `run BOB broadcast` | User phrase | announcements (weekly; the BOB weekly is part of the team update) |
 | `user:check alignment` / `scan asana` / `truth catcher` | User phrase | Truth Catcher |
 | `user:check intake` / `app tasks board` / `what requests are waiting` | User phrase | Truth Catcher, App Tasks, Requests & Feedback board only |
-| `user:App Tasks live` | User phrase | Truth Catcher: Sean switches the App Tasks board from preview to live (spec "App Tasks board" rollout line + `dream.md` §5) |
+| `user:pause App Tasks` | User phrase | Truth Catcher: Sean puts the App Tasks board back in preview (spec "App Tasks board" rollout line + `dream.md` §5) |
 | `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's computer (Claude desktop + Claude in Chrome) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
 | `user:boom boom` / `boom boom derek` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
 | `user:delegate it` (after a Boom Boom Derek run) | User phrase | boom-boom-derek: write Derek's closed items to Asana and decisions to Notion, each with its Webex source |
