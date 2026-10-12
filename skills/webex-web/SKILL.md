@@ -191,7 +191,7 @@ the agent's spec says what may leave Notion.
 | `{}` from `javascript_tool` | Promise not awaited | Call as `await (…)(args)` |
 | "Script injection timed out" / CDP 45 s timeout | Page busy, or a loop too long in a background tab | Wait a few seconds; keep calls short |
 | `step: "space"` | Wrong space open | Open the right one; never post elsewhere |
-| `step: "history"` | Messages not loaded, so duplicates can't be checked | Reload and repeat |
+| `step: "history"` / "no messages loaded" | The space was still catching up (10–20 s in a background tab) | Reload and repeat |
 | `step: "mention"` | Person not in the space's list | Post without the mention, first name instead |
 | `Quill instance not found` / `transcript data not found` | Webex changed its page | Stop; fix the script, update this skill |
 | Sign-in page or recording password | Session expired or protected recording | Stop and tell Sean |

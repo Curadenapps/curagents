@@ -104,7 +104,19 @@ plain words. The humour wraps that; it never replaces it.
   instead of an answer is not a reply. The next ping is a bit danker and
   mock-hurt ("Boom Boom is a little bit hurt", "the bánh mì counter doesn't take
   emoji as payment"), still clearly a joke, still no insults, and the item moves
-  up a level as if he had stayed silent.
+  up a level as if he had stayed silent. "Go easy" below wins over this.
+- **Go easy when he's swamped** (Sean, 12 Oct): when Derek says he has too much on
+  ("too many boom boom", asks to move a meeting or a deadline) or delivers a lot
+  at once, kind beats funny. Lead with thanks for what landed, close what he
+  delivered on the page, ask only for a new date (not the work), pause new bánh mì
+  for the rest of that week (the count stays parked, no interest), raise no
+  levels, and skip Tue–Fri nudges unless something is due that day or the next.
+  Note the pause in the page's ping history so the next run keeps it.
+- **His updates go where the team works:** Derek isn't in Asana. When his replies
+  close or change something, record it on his page and tell Sean which Asana
+  task to tick or comment. On Sean's request ("delegate it"), write the comments,
+  completions and new test tasks in Asana and the decisions in Notion (scope page
+  open questions, Decision Log & Meeting Recaps), each with the Webex source.
 
 **Reference tone** (Sean approved and sent this one, 9 Oct; automate exactly this):
 

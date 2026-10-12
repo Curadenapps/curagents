@@ -31,12 +31,13 @@ async (message, opts = {}) => {
     try { return atob(decodeURIComponent(location.pathname.split('/spaces/')[1].split('/')[0])).split('/').pop(); }
     catch { return null; }
   };
-  const loaded = () => [...document.querySelectorAll('[role="listitem"]')].some((n) => /\b\d{1,2}:\d{2}\b/.test(n.innerText));
+  const loaded = () => !!document.querySelector('[role="listitem"][aria-label^="Message from"]')
+    || [...document.querySelectorAll('[role="listitem"]')].some((n) => /\b\d{1,2}:\d{2}\b/.test(n.innerText));
 
   if (!space && !spaceId) return { ok: false, step: 'args', error: 'name the space or its spaceId' };
   if (!message && !attachment) return { ok: false, step: 'args', error: 'nothing to post' };
 
-  await until(() => document.querySelector('.ql-editor[contenteditable="true"]') && loaded(), 10000);
+  await until(() => document.querySelector('.ql-editor[contenteditable="true"]') && loaded(), 20000); // catching up can take 10-20 s
   const ed = document.querySelector('.ql-editor[contenteditable="true"]');
   if (!ed) return { ok: false, step: 'editor', error: 'no compose box; open the space first' };
   const openName = (ed.getAttribute('aria-label') || '').replace(/^Write a message to /, '');

@@ -20,9 +20,14 @@ async (opts = {}) => {
   // Wall-clock waits: in a background tab Chrome stretches each timer to ~1 s, so loops count time, not tries.
   const until = async (fn, ms) => { const end = Date.now() + ms; let v = fn(); while (!v && Date.now() < end) { await sleep(200); v = fn(); } return v; };
   const status = () => (document.body.innerText.match(/Offline - Another tab[^\n]*|Can't connect to Webex[^\n]*|Catching up[^\n]*/) || ['online'])[0];
-  const items = () => [...document.querySelectorAll('[role="listitem"]')].filter((n) => /\b\d{1,2}:\d{2}\b/.test(n.innerText));
+  // Messages are list items labelled "Message from {author}, {time}, …"; the time test is a fallback.
+  const items = () => {
+    const labelled = [...document.querySelectorAll('[role="listitem"][aria-label^="Message from"]')];
+    return labelled.length ? labelled : [...document.querySelectorAll('[role="listitem"]')].filter((n) => /\b\d{1,2}:\d{2}\b/.test(n.innerText));
+  };
 
-  if (!(await until(() => items().length, 10000))) return { ok: false, status: status(), error: 'no messages loaded; reload the space and call again' };
+  // A space can take 10-20 s to "catch up" in a background tab.
+  if (!(await until(() => items().length, 20000))) return { ok: false, status: status(), error: 'no messages loaded; reload the space and call again' };
 
   for (let p = 0; p < Math.min(olderPages, 6); p++) {
     let s = items()[0].parentElement;
