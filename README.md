@@ -62,7 +62,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment — batch scan, severity tiers, idempotent verdicts | Claude Routine, weekdays 07:58 + 13:58 Zurich |
+| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment on BOB App, plus intake tracking on App Tasks, Requests & Feedback (untriaged, unanswered, stuck; preview) | Claude Routine, weekdays 07:58 + 13:58 Zurich |
 | Boom Boom Derek | [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) | Truth Catcher for one person, Derek La (Phinamic): ledger of what he owes across Webex, Jira, Confluence, recaps and Asana, checked against the roadmap; pings him in Webex "Curaden / Phinamic" | Scheduled task on Sean's computer, weekdays 08:45 Zurich (Mon rundown, Tue–Fri nudges) + manual "boom boom"; live, posts through Webex web in Sean's Chrome (no token) |
 | Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
 | Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
