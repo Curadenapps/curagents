@@ -1,9 +1,9 @@
 ---
 name: meeting-notes
-description: Webex Meeting recap summary (or Fireflies, or a pasted transcript) to a recap page under Notion Decision Log & Meeting Recaps. Use for 'process meeting notes', 'summarise meeting', 'webex recap', 'fetch from fireflies'.
+description: Webex meeting (AI summary, action items, transcript, recording frames) to a Notion recap page; Fireflies or a pasted transcript as fallback. Use for 'meeting notes', 'meeting recap', 'meeting transcript', 'summarise meeting', 'log meeting'.
 model: claude-sonnet-5-5
 disallowedTools: Bash
 ---
 
-Read `dream.md` §2–3, then follow `agents/meeting-notes.md` exactly. Honour `DRY_RUN` and `SCOPE.md`.
+Read `dream.md` §2–3 and `skills/webex-web/SKILL.md`, then follow `agents/meeting-notes.md` exactly. Honour `DRY_RUN` and `SCOPE.md`.
 Return only the result JSON defined in `agents/orchestrator.md` §3, with no raw API output or file dumps.

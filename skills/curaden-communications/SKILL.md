@@ -103,32 +103,34 @@ announcements agent with period `weekly`. Don't create pages under the old
 
 ## 4. Meeting Notes
 
-Pulls the AI summary Webex writes for each meeting (**Meetings → Meeting recap**)
-— or, as fallbacks, from **Fireflies.ai** or a pasted transcript — and creates a
-recap page under **Decision Log & Meeting Recaps** in Notion (the page the
-announcements agent and Boom Boom Derek read).
+Reads Webex's own **AI summary, action items and transcript** in Webex web
+(Claude in Chrome, Sean's sign-in) and creates a structured Notion recap. The
+reading steps are in `skills/webex-web/SKILL.md` Recipe 4; the agent flow
+(meeting choice, idempotency, where the page goes) is in `agents/meeting-notes.md`.
 
-Read `references/meeting-notes.md` for: the Webex Meeting recap steps, Webex→Fireflies setup, GraphQL queries,
-field mappings, owner-assignment guidance, where recap pages go, and the page
-body template.
+Read `references/meeting-notes.md` for: Webex field mapping, the Fireflies
+fallback (setup, GraphQL queries), owner-assignment guidance, the Notion database
+schema, and the full page body template.
 
 ---
 
 ### Step 1 — Determine mode
 
-- If Claude in Chrome is connected (Sean's machine) → use **Webex recap mode** (default). Do not ask the user.
-- Else, if `FIREFLIES_API_KEY` is set → use **Fireflies mode**.
-- Else → tell the user: "No browser here for Webex. Paste the meeting's Notes and Action items from Webex Meeting recap (or a transcript) and I'll log it."
+- Claude in Chrome connected → **Webex mode** (default). Do not ask the user.
+- Webex has no summary or transcript for that meeting and `FIREFLIES_API_KEY` is set → **Fireflies mode**.
+- Neither → paste mode: "Paste the transcript or the Webex recap and I'll condense it."
 
 ---
 
-### Webex recap mode
+### Webex mode
 
-1. Follow `references/meeting-notes.md` §0 to open the meeting in Webex web: Meetings → **Meeting recap** → the meeting → **Meeting summary**. If the user named a meeting, open that one; otherwise the most recent one with a summary.
-2. If the meeting has no summary yet → stop and tell the user: "Webex hasn't written the summary yet. Try again later."
-3. Run the idempotency check from §7 of the reference (same date + meeting name). If it already has a recap page → return the existing URL and stop.
-4. Map the Notes and Action items using §0 of the reference. Owners come from the action item text ("Derek to …"); match them to the participants named in the Overview. Mark genuinely ambiguous items `TBD`.
-5. Post to Notion — see below.
+1. Follow `agents/meeting-notes.md` "Webex mode": list → idempotency → summary →
+   every transcript part → recording frames only when needed.
+2. Map fields using `references/meeting-notes.md` §3a.
+3. Assign owners with **judgment** (§4): the summary's action items name most
+   owners; the transcript confirms them. Genuinely unclear → `TBD`.
+4. Post to Notion — see below. `Source = Webex`, `Fireflies ID` → the meeting
+   container id (the property keeps its name for idempotency).
 
 ---
 
@@ -159,9 +161,9 @@ body template.
 
 ### Post to Notion (all modes)
 
-1. Create the recap page under Decision Log & Meeting Recaps (`3f27e8aabbb481baa16ce7cb9e7514dd`) using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages`, with the title and body from `references/meeting-notes.md` §5 and §6.
-2. Add its row to the index table on the Decision Log page (Date · Meeting · Key decision).
-3. Return the Notion page URL to the user, and list the actions so Sean can put them into Asana (BOB App or Consumer App).
+1. Get the database ID from `NOTION_MEETING_NOTES_DB_ID`. If not set, create the recap as a child page of Decision Log & Meeting Recaps `3f27e8aabbb481baa16ce7cb9e7514dd` (body from §6, the properties as a header block) and add its row to that page's table.
+2. Create the database entry using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` with the properties and body from `references/meeting-notes.md` §5 and §6.
+3. Return the Notion page URL to the user.
 
 ---
 

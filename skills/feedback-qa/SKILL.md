@@ -84,10 +84,12 @@ Trigger: "triage feedback", "QA feedback", "what should we build next"
    node scripts/qa-report.mjs pdf .feedback/reports/{file}.html
    ```
 7. **Send it to Webex.** Write the short summary (format below) to
-   `.feedback/reports/{file}.md`, then run:
-   ```
-   node scripts/qa-report.mjs webex .feedback/reports/{file}.pdf .feedback/reports/{file}.md
-   ```
+   `.feedback/reports/{file}.md`, then post it with the PDF attached through Webex
+   web, `skills/webex-web/SKILL.md` Recipe 2: the QA space only
+   (`spaceId: "644fd150-f1e6-11f0-886e-874a9ad69e32"`), `marker` = the summary's
+   title line, `attachment` = the PDF file name, then verify with `webex-read.js`.
+   No bot token (`qa-report.mjs webex` is legacy). Without Chrome, stop after the
+   PDF and hand the user the summary and PDF to post.
 8. **Full UAT only** (any included row has QA = `uat`): create a Confluence page
    under **BOB App UAT** (page `1933795`, space APPS) titled
    `{App} {build}: UAT Feedback Summary ({D Month YYYY})`, using the same

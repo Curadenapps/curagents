@@ -1,37 +1,27 @@
 # Meeting Notes — Reference
 
-## 0. Webex Meeting recap (default source)
+## 0. Webex web (default source)
 
-Webex's AI Assistant writes a summary and action items for each recorded
-meeting. Read them in Webex web through Claude in Chrome, on Sean's own sign-in
-(the desktop app is unreliable for this). If Webex asks for a sign-in, stop and
-ask Sean; never type credentials.
+Webex's AI Assistant writes a summary and action items for every recorded
+meeting, plus a transcript with speakers and timestamps. Read them in Webex web
+through Claude in Chrome on Sean's sign-in with `scripts/webex-meetings.js`; the
+steps are in `skills/webex-web/SKILL.md` Recipe 4. Nothing to set up, no API key.
 
-1. Open `web.webex.com` → **Meetings** → the **Meeting recap** tab (next to
-   Calendar). Past meetings are listed by date, newest first; ones with a recap
-   show summary, transcript and recording icons under the time.
-2. Open the meeting, then its **Meeting summary** tab, and read it with
-   `get_page_text`.
-3. Open the **Transcript** tab only when an action item's owner, date or meaning
-   is unclear. Never open **Recordings**; never download, share or delete.
-4. No summary yet → stop: "Webex hasn't written the summary yet."
+## 3a. Field Mapping: Webex → Notion
 
-### Field mapping: Webex → recap page
+| Webex | Notion target | Notes |
+|-------|---------------|-------|
+| Meeting title + date (list / page header) | Page `Name` | `📅 {title} — {YYYY-MM-DD}` |
+| Date | `Date` property | |
+| Start–end time | `Duration` property | Minutes between the two times |
+| Transcript `speakers` | `Attendees` property | Only people who spoke; add silent attendees if the summary names them |
+| Meeting container id (end of the decoded url) | `Fireflies ID` property | Idempotency key; `Source = Webex` |
+| Summary "Overview" | **Summary** section | Condense to 2–4 sentences, keep the decisions |
+| Summary "Detailed Summary" headings | **Topics Covered** | One bullet per heading, one line each |
+| "Action items" | **Next Steps** table | Owner and due from the item; transcript confirms (§4) |
+| Transcript | Checks only | Owners, dates, decisions the summary missed; never pasted whole |
 
-| Webex | Recap page | Notes |
-|-------|-----------|-------|
-| Date, start–end time, title (header) | Page title + **Date / Who / Source** line | Title `{d Mon YYYY} — {meeting title}: {2–4 topic words}` |
-| "Key participants" line of the Overview | **Who** | Names, grouped by company (Curaden; Phinamic …) |
-| Decisions and outcomes in Overview + Detailed Summary | **Decided** | Numbered, one decision per line, with who decided when stated |
-| Questions left open | **Still open** | Bullets |
-| Everything else worth keeping | **Other notes** | Bullets; keep it short |
-| Action items | **Actions** | Grouped by owner: Curaden people, then partners ("Phinamic (Derek)"); due dates only if stated |
-
-The summary is AI-generated: take owners and dates as written and never guess
-missing ones. Partner meetings (e.g. Curaden / Phinamic) may mention prices or
-commission models: keep those out unless Sean asks.
-
-## 1. Webex → Fireflies Setup (one-time)
+## 1. Fireflies fallback: Webex → Fireflies Setup (one-time)
 
 Fireflies joins your Webex meetings as a bot and transcribes them automatically.
 Supports German and other languages — Webex's own transcription does not.
@@ -156,7 +146,18 @@ month", "bis Freitag"). If none stated, leave `—`. Do not infer due dates.
 
 ---
 
-## 5. Where recap pages go
+## 5. Notion Database Schema
+
+Create a database in Notion titled **"Meeting Notes"** with these properties:
+
+| Property name | Notion type | Purpose |
+|--------------|-------------|---------|
+| `Name` | Title | Auto-set to `📅 {title} — {YYYY-MM-DD}` |
+| `Date` | Date | Meeting date |
+| `Attendees` | Rich text | Participant display names, comma-separated |
+| `Duration` | Number (format: number) | Meeting length in minutes |
+| `Source` | Select | `Webex`, `Fireflies` or `Manual` |
+| `Fireflies ID` | Rich text | Webex meeting container id or Fireflies transcript id; used for duplicate prevention |
 
 There is **no Meeting Notes database**. Every recap is a child page of
 **Decision Log & Meeting Recaps** (`3f27e8aabbb481baa16ce7cb9e7514dd`, Curaden
@@ -190,8 +191,17 @@ Follow **Template — Meeting recap** (`3f37e8aabbb481ca86edd64d1939c4e2`); the
 **{Curaden person}:** {action} ({due}) · …
 **Phinamic ({name}):** {action} ({due}) · …
 
-## Who needs to know
-{who gets told what, and through which channel}
+| Action | Owner | Due |
+|--------|-------|-----|
+| {action item} | {owner from judgment or TBD} | {due date or —} |
+
+---
+
+**Attendees:** {displayName list, or "Not recorded"}
+**Duration:** {N} min
+**Date:** {YYYY-MM-DD}
+**Source:** {Webex — {container id} | Fireflies — {id} | Manual}
+🏷 {keywords, comma-separated}
 ```
 
 If clinical or efficacy language comes up, add a `⚠️ Clinical language` callout
