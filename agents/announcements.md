@@ -39,7 +39,7 @@ memory:
     - "notion: Team Updates (earlier updates — this agent's memory)"
   write:
     - "notion: one child page per update under Team Updates"
-    - "webex: App Team (+ App Team - Markets from Dec 2026) via Webex web (scripts/webex-compose.js), only after Sean approves; test space Curaden / Phinamic"
+    - "webex: App Team (+ App Team - Markets from Dec 2026) via Webex web (skills/webex-web, scripts/webex-post.js), only after Sean approves; test space Curaden / Phinamic"
 idempotency_key: "announcements:{period}:{window_end}"
 dry_run: false  # live since 2026-10-09: writes its Notion drafts; Webex still only on Sean's "post it"
 output:
@@ -121,14 +121,15 @@ it `unavailable`, carry on, and say so at the top of the draft.
 Webex's AI Assistant writes a summary and next steps for recorded meetings.
 Those are the meeting source; Fireflies isn't used. The desktop app is
 unreliable, so read them in Webex web through Claude in Chrome, on Sean's own
-sign-in to the Curaden Webex site (`curaden.webex.com`, Recordings). If it asks
-for a sign-in, stop and ask Sean; never type credentials.
+sign-in, with [`skills/webex-web`](../skills/webex-web/SKILL.md) Recipe 4
+(`scripts/webex-meetings.js`). If it asks for a sign-in, stop and ask Sean; never
+type credentials.
 
-1. List the meetings in the window that have a recording with a summary
-   (`web.webex.com/meetings` shows the past ones by date).
-2. Take only the summary and the next steps (with owners). Don't read the full
-   transcript unless a next step is unclear. Read only; never download, share or
-   delete a recording.
+1. List the meetings in the window: `{ action: "list", since: "{window start}" }`
+   on the Meeting recaps page.
+2. For each, `{ action: "summary" }` on its page: take the summary and the action
+   items (with owners). Read the transcript (`{ action: "transcript" }`) only when
+   an action is unclear. Read only; never download, share or delete a recording.
 3. Skip meetings that already have a recap page, and meetings with no summary.
 4. List each under Sources as "Webex summary, {title}, {date}".
 
@@ -284,22 +285,19 @@ and keep the line out of the Webex message until Legal has approved it
 2. Re-read the Notion draft; Sean may have edited it. Post what's there now.
 3. Save the message to `.announcements/{period}-{window_end}.md` and render the
    PDF (Step 4). Both stay local (`.announcements/` is gitignored).
-4. Post from Sean's account in Webex web through Claude in Chrome (light DOM; no
+4. Post from Sean's account in Webex web through Claude in Chrome with
+   [`skills/webex-web`](../skills/webex-web/SKILL.md) Recipe 2 (message + PDF; no
    bot token, since those get culled):
-   - Open `web.webex.com`, search the space by name and open the one named
-     exactly: "App Team" (weekly, monthly), "App Team - Markets" (Markets
-     edition) or "Curaden / Phinamic" (tests).
-   - Run `scripts/webex-compose.js` with `javascript_tool` as
-     `(<function>)(message, "<space name>")`. It checks the open space, sets the
-     whole message through the editor in one step and returns Webex's own character
-     counter (a synthetic paste is ignored by Webex). If it refuses,
-     stop.
-   - Attach the PDF with `file_upload` on the "File attachment" input (find it
-     by ref; never click it, that opens a native dialog).
-   - Check the space name, the counter and the PDF chip ("Remove attachment
-     {file}") with `find`, then click
-     "Send message" by ref. Screenshot again to confirm it posted.
-   - If Chrome isn't connected, hand Sean the message and PDF to post.
+   - Open the space named exactly "App Team" (weekly, monthly), "App Team -
+     Markets" (Markets edition) or "Curaden / Phinamic" (tests).
+   - `file_upload` the PDF on the "File attachment" input, then run
+     `scripts/webex-post.js` with
+     `{ space, marker: "<the update's title line>", attachment: "<pdf file name>", send: true }`
+     straight after. `retry: true` → reload and start the recipe again.
+   - Verify with `webex-read.js` `{ marker }` after a reload (`markerCount: 1`) and
+     screenshot it. A split update posts each part the same way, in order.
+   - If Chrome isn't connected or the post fails after the skill's retries, hand
+     Sean the message and PDF to post.
 5. Update the page status line: `Posted {date} to {space}`.
 
 The Claude Routine "Team update draft" (`trig_01Pi2NPoRWRP6MStWHVzzkDm`, Thursday

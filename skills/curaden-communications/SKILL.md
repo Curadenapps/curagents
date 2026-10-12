@@ -103,20 +103,34 @@ announcements agent with period `weekly`. Don't create pages under the old
 
 ## 4. Meeting Notes
 
-Pulls the AI summary from **Fireflies.ai** — which connects to Webex and handles
-multilingual transcription including German — and creates a structured entry in
-the Notion **Meeting Notes database**.
+Reads Webex's own **AI summary, action items and transcript** in Webex web
+(Claude in Chrome, Sean's sign-in) and creates a structured Notion recap. The
+reading steps are in `skills/webex-web/SKILL.md` Recipe 4; the agent flow
+(meeting choice, idempotency, where the page goes) is in `agents/meeting-notes.md`.
 
-Read `references/meeting-notes.md` for: Webex→Fireflies setup, GraphQL queries,
-field mappings, owner-assignment guidance, Notion database schema, and the full
-page body template.
+Read `references/meeting-notes.md` for: Webex field mapping, the Fireflies
+fallback (setup, GraphQL queries), owner-assignment guidance, the Notion database
+schema, and the full page body template.
 
 ---
 
 ### Step 1 — Determine mode
 
-- If `FIREFLIES_API_KEY` is set → use **Fireflies mode** (default). Do not ask the user.
-- If the key is missing → tell the user: "Set `FIREFLIES_API_KEY` in your `.env` to pull from Fireflies, or paste a transcript and I'll condense it manually."
+- Claude in Chrome connected → **Webex mode** (default). Do not ask the user.
+- Webex has no summary or transcript for that meeting and `FIREFLIES_API_KEY` is set → **Fireflies mode**.
+- Neither → paste mode: "Paste the transcript or the Webex recap and I'll condense it."
+
+---
+
+### Webex mode
+
+1. Follow `agents/meeting-notes.md` "Webex mode": list → idempotency → summary →
+   every transcript part → recording frames only when needed.
+2. Map fields using `references/meeting-notes.md` §3a.
+3. Assign owners with **judgment** (§4): the summary's action items name most
+   owners; the transcript confirms them. Genuinely unclear → `TBD`.
+4. Post to Notion — see below. `Source = Webex`, `Fireflies ID` → the meeting
+   container id (the property keeps its name for idempotency).
 
 ---
 
@@ -147,7 +161,7 @@ page body template.
 
 ### Post to Notion (both modes)
 
-1. Get the database ID from `NOTION_MEETING_NOTES_DB_ID`. If not set, tell the user to create the database and set the env var (see `references/meeting-notes.md` §5).
+1. Get the database ID from `NOTION_MEETING_NOTES_DB_ID`. If not set, create the recap as a child page of Decision Log & Meeting Recaps `3f27e8aabbb481baa16ce7cb9e7514dd` (body from §6, the properties as a header block) and add its row to that page's table.
 2. Create the database entry using `mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages` with the properties and body from `references/meeting-notes.md` §5 and §6.
 3. Return the Notion page URL to the user.
 

@@ -1,6 +1,27 @@
 # Meeting Notes — Reference
 
-## 1. Webex → Fireflies Setup (one-time)
+## 0. Webex web (default source)
+
+Webex's AI Assistant writes a summary and action items for every recorded
+meeting, plus a transcript with speakers and timestamps. Read them in Webex web
+through Claude in Chrome on Sean's sign-in with `scripts/webex-meetings.js`; the
+steps are in `skills/webex-web/SKILL.md` Recipe 4. Nothing to set up, no API key.
+
+## 3a. Field Mapping: Webex → Notion
+
+| Webex | Notion target | Notes |
+|-------|---------------|-------|
+| Meeting title + date (list / page header) | Page `Name` | `📅 {title} — {YYYY-MM-DD}` |
+| Date | `Date` property | |
+| Start–end time | `Duration` property | Minutes between the two times |
+| Transcript `speakers` | `Attendees` property | Only people who spoke; add silent attendees if the summary names them |
+| Meeting container id (end of the decoded url) | `Fireflies ID` property | Idempotency key; `Source = Webex` |
+| Summary "Overview" | **Summary** section | Condense to 2–4 sentences, keep the decisions |
+| Summary "Detailed Summary" headings | **Topics Covered** | One bullet per heading, one line each |
+| "Action items" | **Next Steps** table | Owner and due from the item; transcript confirms (§4) |
+| Transcript | Checks only | Owners, dates, decisions the summary missed; never pasted whole |
+
+## 1. Fireflies fallback: Webex → Fireflies Setup (one-time)
 
 Fireflies joins your Webex meetings as a bot and transcribes them automatically.
 Supports German and other languages — Webex's own transcription does not.
@@ -140,8 +161,8 @@ Create a database in Notion titled **"Meeting Notes"** with these properties:
 | `Date` | Date | Meeting date |
 | `Attendees` | Rich text | Participant display names, comma-separated |
 | `Duration` | Number (format: number) | Meeting length in minutes |
-| `Source` | Select | `Fireflies` or `Manual` |
-| `Fireflies ID` | Rich text | Transcript ID; used for duplicate prevention |
+| `Source` | Select | `Webex`, `Fireflies` or `Manual` |
+| `Fireflies ID` | Rich text | Webex meeting container id or Fireflies transcript id; used for duplicate prevention |
 
 Copy the database ID from the Notion URL (32-character hex string after
 `notion.so/`) and set it as `NOTION_MEETING_NOTES_DB_ID` in your `.env`.
@@ -178,7 +199,7 @@ Copy the database ID from the Notion URL (32-character hex string after
 **Attendees:** {displayName list, or "Not recorded"}
 **Duration:** {N} min
 **Date:** {YYYY-MM-DD}
-**Source:** {Fireflies — {id} | Manual}
+**Source:** {Webex — {container id} | Fireflies — {id} | Manual}
 🏷 {keywords, comma-separated}
 ```
 

@@ -1,3 +1,5 @@
+# LEGACY: bot-token poster, kept only as the archive of the April 2026 monthly post.
+# All Webex posting now goes through Webex web in Sean's Chrome: skills/webex-web/SKILL.md.
 $token = $env:WEBEX_BOT_TOKEN
 if (-not $token) { Write-Error "Set WEBEX_BOT_TOKEN first, e.g. `$env:WEBEX_BOT_TOKEN = '...'"; exit 1 }
 $roomIds = @(

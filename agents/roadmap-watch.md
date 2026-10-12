@@ -63,7 +63,9 @@ Rows without either are reported under **Unlinked roadmap rows**, not guessed.
 
 Read Notion with **view-mode** queries on the unfiltered agent view
 `view://3f47e8aa-bbb4-818c-a54e-000c04b1a71b` ("Agents: all rows (don't filter)"), paginating with
-`next_cursor`. Don't use "All rows": it hides Done and Cut rows, which drift checks need.
+`next_cursor`. Don't use the human views ("Roadmap Oct-26 → Aug-27", "BOB Roadmap",
+"Curaprox Roadmap", "Engineering backlog", "Needs attention", "Shipped & closed"): they
+filter rows, and drift checks need Done and Cut rows too.
 Never use SQL mode: it has a workspace quota and must not be relied on.
 
 ---
@@ -160,7 +162,7 @@ By product: BOB {n} · Curaprox app {n} · Shared {n}
 
 ## Missing info
 - {feature} — missing {Priority|Difficulty|Release|Epic}
-- {n} rows still marked "DRAFT by Claude" — review in the "Review drafts" view
+- {n} rows still marked "DRAFT by Claude" — review in the "Needs attention" view
 ```
 
 Prefix every Notion item with its product (`[BOB]`, `[Curaprox app]`, `[Shared]`)
