@@ -6,14 +6,16 @@ description: >
   any Webex step, for "post to Webex", "ping in Webex", "read the space", "what did
   he reply", "meeting summary", "meeting transcript", "Webex recording", "post the
   update", "send QA report", "boom boom", or whenever an agent spec says Webex.
-  Runs in Webex web through Claude in Chrome on Sean's own sign-in, with three
-  scripts: webex-post.js, webex-read.js, webex-meetings.js. No bot tokens.
+  Runs in Webex web on Sean's own sign-in, in the Claude desktop app's built-in
+  browser (Claude in Chrome as fallback), with three scripts: webex-post.js,
+  webex-read.js, webex-meetings.js. No bot tokens.
 ---
 
 # Webex web
 
-Every Webex action goes through Webex web in Sean's Chrome (Claude in Chrome), on
-his own sign-in, with the scripts below. Posts come from Sean's account with real
+Every Webex action goes through Webex web on Sean's own sign-in, in the Claude
+desktop app's **built-in browser** (Claude in Chrome only as a fallback), with the
+scripts below. Posts come from Sean's account with real
 @mentions, every space and meeting he can see is readable, and nothing expires.
 **Bot tokens are not used.** They get culled after a few days, and a bot can't
 read the spaces or meetings. `WEBEX_BOT_TOKEN`, `scripts/send-webex-update.ps1`
@@ -22,7 +24,10 @@ and `scripts/qa-report.mjs webex` are legacy and not part of any routine.
 Proven live on 12 Oct 2026: the Boom Boom Derek ping went out with Derek La
 @mentioned while Sean's own Webex tab kept taking the connection back, and the
 7 Oct Curaden / Phinamic meeting read in full (summary, action items, 785
-transcript lines).
+transcript lines). On 13 Oct the 08:45 scheduled run couldn't reach Claude in
+Chrome at all (no browser connected to the session), so Sean signed in to Webex
+once in the built-in browser and the ping went out from there, first try, with no
+tab clash.
 
 | Script | Page | Does |
 |--------|------|------|
@@ -46,12 +51,20 @@ returns exactly that text (its "Source element" says `<article>`).
 
 ## Ground rules
 
-1. **Claude in Chrome only** (`mcp__claude-in-chrome__*`), loaded in one ToolSearch
-   call. Start with `tabs_context_mcp` (`createIfEmpty: true`), work in your own
-   tab, close it when done. Never use or close a tab outside your group. If Chrome
-   isn't connected, stop and follow the agent's "can't post" rule.
+1. **Built-in browser first** (`mcp__Claude_Browser__*`, loaded in one ToolSearch
+   on that prefix). It lives in the Claude desktop app, keeps Sean's Webex sign-in
+   across every session (scheduled ones included) and works with the pane hidden,
+   so it doesn't depend on the Chrome extension pairing with each session. Open the
+   space with `preview_start` and the space URL; `navigate` that tab to reload.
+   **Fallback: Claude in Chrome** (`mcp__claude-in-chrome__*`) only when the
+   built-in browser tools are missing or fail: `tabs_context_mcp`
+   (`createIfEmpty: true`), your own tab, closed when done, never a tab outside your
+   group. Neither reachable → stop and follow the agent's "can't post" rule. The
+   scripts are the same in both.
 2. **Sign-in prompts: stop.** If Webex, `curaden.webex.com` or a recording asks for
-   a sign-in or a password, stop and tell Sean. Never type credentials.
+   a sign-in or a password, stop and tell Sean. Never type credentials. In the
+   built-in browser, Sean signs in himself once (Ctrl+Shift+B shows the pane) and it
+   persists; decline optional cookies on the way.
 3. **Exact space only.** Open spaces by ID (table below) or by exact name; two
    spaces start with "Curaden / Phinamic". `webex-post.js` refuses any other space.
 4. **Posting follows the agent's own rules** (approval, one message a day, partner
@@ -82,10 +95,11 @@ list (`find` the treeitem), then add the ID's name to this table.
 
 ## The tab clash (read this before posting)
 
-Webex web keeps **one live connection per browser**. When Sean has his own Webex
-tab open and visible, a freshly loaded tab of ours is online for only about
-**15–20 seconds** before it shows "Offline - Another tab has been opened". If his
-tab is closed or idle, ours stays online. Either way:
+Webex web keeps **one live connection per browser**. In Claude in Chrome, when
+Sean has his own Webex tab open and visible, a freshly loaded tab of ours is online
+for only about **15–20 seconds** before it shows "Offline - Another tab has been
+opened". The built-in browser is a separate browser, so his Chrome tab doesn't
+take its connection (13 Oct: online throughout). Either way, keep the routine:
 
 - **Do the whole post in one `javascript_tool` call** right after a reload
   (`webex-post.js` with `send: true`). Clicking and typing are too slow, and typed
@@ -96,10 +110,16 @@ tab is closed or idle, ours stays online. Either way:
 - **Right after a send the tab may show offline, or the list may spin.** That is not
   a failure. Never resend on that basis: reload and verify with `webex-read.js`.
 
-**Background tab limits.** Our tab is hidden behind Sean's window, so Chrome
-clamps timers to about one second and throttles scroll and render work. Keep each
-in-page call well under 45 seconds (the tool's limit). Don't scroll virtual lists
-to read them; the scripts read the page's own data instead.
+**Background tab limits.** Our tab is hidden (behind Sean's window, or the hidden
+browser pane), so timers can be clamped to about one second and scroll and render
+work throttled. Keep each in-page call well under 45 seconds (the tool's limit).
+Don't scroll virtual lists to read them; the scripts read the page's own data
+instead.
+
+**Read before you scroll.** The message list is virtual: `olderPages` loads older
+messages and unloads the newest ones. For "replies since the last ping", call
+`webex-read.js` without `olderPages` first; raise it only when the `since` text
+isn't found, and then read the newest messages again after a reload.
 
 ## Recipe 1: post a message
 
@@ -150,7 +170,9 @@ start again at step 1. Do steps 2–3 back to back, without other work in betwee
    by `---`.
 
 Only the messages Webex has loaded are read; if the agent's last post is older
-than what's on screen, raise `olderPages`.
+than what's on screen, raise `olderPages` (see "Read before you scroll"). If
+`get_page_text` doesn't return the export, read it in slices with `javascript_tool`:
+`document.getElementById('webex-export').textContent.slice(from, to)`.
 
 ## Recipe 4: meetings (summary, action items, transcript, recording)
 
@@ -195,6 +217,8 @@ the agent's spec says what may leave Notion.
 | `step: "mention"` | Person not in the space's list | Post without the mention, first name instead |
 | `Quill instance not found` / `transcript data not found` | Webex changed its page | Stop; fix the script, update this skill |
 | Sign-in page or recording password | Session expired or protected recording | Stop and tell Sean |
+| "Claude in Chrome is not connected" / no connected browsers | The extension isn't paired with this session (13 Oct, scheduled run) | Use the built-in browser; it's the default anyway |
+| Built-in browser shows the Webex sign-in page | Its Webex session expired | Stop; Sean signs in once in the pane (Ctrl+Shift+B) |
 
 ## Agents that use this
 

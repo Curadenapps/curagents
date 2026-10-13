@@ -53,7 +53,7 @@ On any invocation, determine trigger type:
 | `user:check alignment` / `scan asana` / `truth catcher` | User phrase | Truth Catcher |
 | `user:check intake` / `app tasks board` / `what requests are waiting` | User phrase | Truth Catcher, App Tasks, Requests & Feedback board only |
 | `user:pause App Tasks` | User phrase | Truth Catcher: Sean puts the App Tasks board back in preview (spec "App Tasks board" rollout line + `dream.md` §5) |
-| `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's computer (Claude desktop + Claude in Chrome) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
+| `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's computer (Claude desktop app + its built-in browser) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
 | `user:boom boom` / `boom boom derek` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
 | `user:delegate it` (after a Boom Boom Derek run) | User phrase | boom-boom-derek: write Derek's closed items to Asana and decisions to Notion, each with its Webex source |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
@@ -72,7 +72,7 @@ On any invocation, determine trigger type:
 | `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
 | `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
 | `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |
-| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web via Claude in Chrome, `skills/webex-web`) |
+| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web via `skills/webex-web`) |
 | `user:markets update` / `markets monthly` | User phrase | announcements, period `markets` (from Dec 2026) |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
@@ -95,8 +95,8 @@ Before dispatching any agent:
 
 4. **Webex steps** — any agent that posts to or reads Webex (announcements, boom-boom-derek,
    meeting-notes, feedback-qa) loads `skills/webex-web/SKILL.md` first. It needs Sean's
-   computer with Claude in Chrome connected and Webex web signed in. If Chrome isn't
-   connected, the agent still runs, marks Webex `unavailable` and hands Sean the message.
+   computer with the Claude desktop app open and Webex web signed in in its built-in
+   browser (Claude in Chrome as fallback). If no browser is reachable, the agent still runs, marks Webex `unavailable` and hands Sean the message.
 
 5. **Medical-device line** — BOB stays out of medical-device legislation and stays one
    global product (`dream.md` §2). If a routed request would add a feature that diagnoses

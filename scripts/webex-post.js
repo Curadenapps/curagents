@@ -1,6 +1,6 @@
 // Webex web: compose and send one message from Sean's own sign-in.
 // Every agent that posts to Webex uses this; the routine is in skills/webex-web/SKILL.md.
-// Runs in a web.webex.com space tab through Claude in Chrome's javascript_tool:
+// Runs in a web.webex.com space tab through javascript_tool (built-in browser or Claude in Chrome):
 //
 //   (<this function>)(message, { space: "Curaden / Phinamic", mention: "Derek La",
 //                                 marker: "Boom Boom Derek: Mon 12 Oct", send: true })
