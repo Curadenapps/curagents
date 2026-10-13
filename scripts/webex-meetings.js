@@ -1,7 +1,7 @@
 // Webex web: meeting recaps (list, AI summary + action items, full transcript).
 // Used by meeting-notes, announcements, boom-boom-derek and anyone reading a meeting;
-// the routine is in skills/webex-web/SKILL.md. Runs through Claude in Chrome's
-// javascript_tool on the page named for each action:
+// the routine is in skills/webex-web/SKILL.md. Runs through
+// javascript_tool (built-in browser or Claude in Chrome) on the page named for each action:
 //
 //   web.webex.com/meetings/meetingContent                 (<this function>)({ action: "list", since: "2026-10-01" })
 //   web.webex.com/meetingcontainer/{id}/summary           (<this function>)({ action: "summary" })

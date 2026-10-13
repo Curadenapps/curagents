@@ -9,7 +9,7 @@ description: >
   always clear about what's missing, where to look and what to do. Autonomous.
   Read-only everywhere except Derek's Notion page and that one Webex space.
 model: claude-sonnet-5-5
-tools: Read, Write, NotionAPI, AsanaAPI, JiraAPI, ConfluenceAPI, GoogleDriveAPI, ClaudeInChrome
+tools: Read, Write, NotionAPI, AsanaAPI, JiraAPI, ConfluenceAPI, GoogleDriveAPI, ClaudeBrowser, ClaudeInChrome
 trigger:
   - type: schedule
     cron: "CRON_TZ=Europe/Zurich 45 8 * * 1-5"
@@ -28,7 +28,7 @@ memory:
     - "notion: Boom Boom Derek page under Derek's Team Directory entry (ledger, bánh mì count, ping history)"
   write:
     - "notion: Boom Boom Derek page 3f47e8aabbb48179af31f54a4acadb10"
-    - "webex: space 'Curaden / Phinamic' only, through Webex web in Sean's Chrome (skills/webex-web, scripts/webex-post.js); no Webex token"
+    - "webex: space 'Curaden / Phinamic' only, through Webex web on Sean's sign-in in the desktop app's built-in browser (skills/webex-web, scripts/webex-post.js); no Webex token"
 idempotency_key: "boom-boom-derek:{date}"   # at most one Webex message per day
 dry_run: false  # live and autonomous since 2026-10-09 (Sean)
 output:
@@ -70,7 +70,7 @@ Change these only through `dream.md` §5.
 |------|----------|
 | Person | **Derek La** only. Jira `712020:078ef74c-95c3-45a8-ad5e-20e816c4b176`; emails `derek.la@phinamic.com` and `derek@phinamic.com`; Notion Team Directory page `2ab7e8aabbb48003a865f7f593144546`. No Asana account. Identify him only by these, never by first name. |
 | Autonomous | Live. Scheduled runs post without asking. Sean can also say "boom boom" any time for a run now. |
-| No Webex token | Posts and reads through Webex web in Sean's Chrome (Claude in Chrome), on Sean's own sign-in, following [`skills/webex-web`](../skills/webex-web/SKILL.md) like every Webex agent. No bot, no API token: nothing expires, the ping comes from Sean's account with a real @mention, and the whole space is readable (Derek can reply normally). |
+| No Webex token | Posts and reads through Webex web on Sean's own sign-in, in the Claude desktop app's built-in browser (Claude in Chrome as fallback; 13 Oct, Sean), following [`skills/webex-web`](../skills/webex-web/SKILL.md) like every Webex agent. No bot, no API token: nothing expires, the ping comes from Sean's account with a real @mention, and the whole space is readable (Derek can reply normally). |
 | Channel | Webex space **"Curaden / Phinamic"** only, Derek @mentioned, signed "— Boom Boom Derek 💥, on behalf of Sean". No DMs, no email, no Jira or Confluence comments. |
 | Home | Notion page **Boom Boom Derek** `3f47e8aabbb48179af31f54a4acadb10`, a child of Derek's Team Directory page. It is Derek-facing: the full explanation per item, the bánh mì count, the ping history. Every ping links to it. |
 | Sources | Curaden's side first: Notion (call recaps, scope, roadmap) and Asana (Sean's "Waiting on Phinamic" tracker). Then Jira, Confluence, the WBS sheet and the Webex space. |
@@ -180,8 +180,9 @@ One source failing never stops the run: mark it `unavailable` and carry on.
 7. **Write the ping** as a quick sum-up with the page link (below), save it to
    `.boom-boom-derek/{YYYY-MM-DD}.md` (gitignored), and post it with
    [`skills/webex-web`](../skills/webex-web/SKILL.md) Recipe 1:
-   1. `navigate` your own Claude in Chrome tab to Curaden / Phinamic (direct link in
-      the skill's Spaces table; never another space).
+   1. Open Curaden / Phinamic in the built-in browser (`preview_start` with the
+      direct link from the skill's Spaces table; `navigate` it to reload). Claude in
+      Chrome only as the fallback. Never another space.
    2. In one `javascript_tool` call run `scripts/webex-post.js` with
       `{ space: "Curaden / Phinamic", spaceId: "136d9ce0-ab41-11f0-85e5-53eb7188e8c6", mention: "Derek La", marker: "Boom Boom Derek: {Weekday d Mon}", send: true }`.
       Start the message at the `##` title line; the script puts the @mention first.
@@ -191,7 +192,7 @@ One source failing never stops the run: mark it `unavailable` and carry on.
    3. Verify: reload, `webex-read.js` with the same `marker`. `markerCount: 1` =
       posted. Screenshot it. Never resend because the tab looked offline right after
       sending.
-   4. **Can't post** (Chrome not connected, Webex signed out, a sign-in page, three
+   4. **Can't post** (no browser reachable, Webex signed out, a sign-in page, three
       offline retries, any other refusal): stop there. Add the ping to the page
       history as "not sent: {reason}" and put the message in the run summary for Sean.
 8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
@@ -246,8 +247,8 @@ computer**, not in the cloud.
 
 | Run | Where | Needs |
 |-----|-------|-------|
-| Scheduled, weekdays 08:45 Zurich | A scheduled task "Boom Boom Derek" in the Claude desktop app on Sean's computer, working in his local `curagents` folder | Computer awake, Chrome open with Claude in Chrome connected, Sean signed in to `web.webex.com`; Notion, Asana and Atlassian connectors |
-| "boom boom" from Sean | Any Claude session on Sean's computer with Claude in Chrome | Same |
+| Scheduled, weekdays 08:45 Zurich | A scheduled task "Boom Boom Derek" in the Claude desktop app on Sean's computer, working in his local `curagents` folder | Computer awake, Claude desktop app open, Sean signed in to `web.webex.com` in the app's built-in browser (once; it persists); Notion, Asana and Atlassian connectors. Claude in Chrome is only the fallback |
+| "boom boom" from Sean | Any Claude desktop session on Sean's computer (built-in browser) | Same |
 | "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes Derek's page and returns the ping for Sean to paste |
 
 **Missed runs** (computer off or asleep at 08:45): the next run covers everything
@@ -261,7 +262,8 @@ since the last ping. If Monday's rundown was missed, the next run is the rundown
 > Read `dream.md` §2–3, `skills/webex-web/SKILL.md` and `agents/boom-boom-derek.md`,
 > and follow the agent spec exactly: refresh Derek's Notion page, read the Curaden /
 > Phinamic space and his meetings in Webex web, and post today's ping there through
-> Claude in Chrome with `scripts/webex-post.js` if the rules say so. Live: don't ask
+> the desktop app's built-in browser (Claude in Chrome as fallback) with
+> `scripts/webex-post.js` if the rules say so. Live: don't ask
 > me first. If you can't post after the skill's retries, log it on the page and give
 > me the message.
 
