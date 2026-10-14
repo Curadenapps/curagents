@@ -33,13 +33,14 @@ Additional capabilities active with the extended agent roster:
 - **Team Update** — `announcements` agent consolidates Webex meeting recaps, Asana, Notion (App Hub), Jira, GitHub and agent reports into a weekly (Thursday) or monthly update; drafted in Notion, posted to the Webex App Team spaces only after Sean approves each draft
 - **Boom Boom Derek** — `boom-boom-derek` agent keeps a ledger of what Derek La (Phinamic) owes across Webex, Jira, Confluence, meeting recaps and Sean's "Waiting on Phinamic" tasks, checks it against the Product Roadmap, and updates his own Notion page and pings him in the Webex space "Curaden / Phinamic" when something is due or forgotten, autonomously (read-only elsewhere)
 - **Feedback QA** — `feedback-qa` agent reads new feedback from the Notion inbox, checks it against a sourced change timeline and BOB scope, and sends a PDF report to the Webex QA space when there is enough to report. Full UATs are also published to Confluence. Asana only when a human promotes an item
+- **Campaign support: IDB Challenge (Q1 2027, with Blanca Suarez, Marketing)** — product side is the Phase 1 loop (treatment plan, reminders, Shopify links and discount codes, re-BOB) plus small additions (start-challenge option, 10-day reminder template, two engagement events); promotion through existing agents (`webflow` landing-page gate, `brand-asset` approvals, `announcements`). Roadmap row "IDB Challenge: Q1 2027 campaign with Blanca". Clinical-claims rule applies to every touchpoint
 
 ## In Scope — v2 (Deferred)
 
 Any immediate Asana requests for these items are premature scope creep — flag and reject.
 
 - **Bulk Localization** — Safe bulk-creation tooling for localization variants (e.g. App Store screenshots in 15+ languages)
-- **GTM Automation** — Email drafts, web kit packaging, channel notifications
+- **GTM Automation** — Email drafts, web kit packaging, channel notifications (except the IDB Challenge campaign support above)
 
 ---
 
