@@ -41,6 +41,8 @@ Every agent must agree on these facts:
 | Notion root database | `86b68fc172dd43ff8ee3219a3a5435f6` (workspace: seandunne) |
 | Truth cache owner | `notion-sync` — only it writes `.truth-cache/` (exception: `roadmap-watch` owns `.truth-cache/roadmap-watch/`) |
 | Roadmap of record | Notion Product Roadmap `751b6071283e43e8b1a91054319e0db6` (BOB + Curaprox app, split by the `Product` field; views "BOB Roadmap" and "Curaprox Roadmap"). The Curated Treatment Plan Roadmap `4eeb7d12…` was merged in on 2026-10-09 and is an archive. |
+| Milestones | 15–18 Oct iTOP Symposium soft launch (tablet build, T2T Sat 17 Oct; before/during/after plan on the milestone row `3ec7e8aabbb481949ad7c497cc88771b`) · 5 Nov first partner session (Webex) · 9 Nov BOB web · 14 Dec BOB mobile + hard launch · 21 Jan 2027 (proposed) Milan partner session · Q1 2027 IDB Challenge campaign with Blanca Suarez (Marketing) · 30 Apr 2027 V2 Phase 1 complete · Apr–Aug 2027 rollout (DACH, Italy, France, Brazil, Spain/LATAM) |
+| Phase 1 scope (7 Oct reset) | Close one loop and make it robust: BOB + BPE assessment → treatment plan with consent → Curaprox app web edition → Shopify (practice commission) → reminders → re-BOB. Consent/GDPR and per-practice feature opt-in are Phase 1. Not doing: PMS, OralScan route A, perio charts, 3D, subscriptions, in-app checkout, a separate Web Companion app, MGI. Scope page `3f27e8aabbb481c49609dd919ce400a0` |
 | Asana write proxy | `asana-maintenance` — all Asana writes route through it (exception: truth-catcher's own comments, posted by its Claude Routine or `scripts/truth-scan.ts`) |
 | Approval gate owner | `brand-asset` — only it records approvals |
 | Release authority | Human only — `release` agent is manual trigger, never autonomous |
