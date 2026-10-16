@@ -197,6 +197,8 @@ One source failing never stops the run: mark it `unavailable` and carry on.
 8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
    bánh mì count, and list for Sean: Asana subtasks to tick, items handed to him,
    roadmap rows that need his fix.
+9. **Run log**: write one row to the Agent run log (`RUNTIME.md`), also when nothing
+   was posted or the run failed.
 
 ## The ping (quick sum-up + link)
 
@@ -263,7 +265,8 @@ since the last ping. If Monday's rundown was missed, the next run is the rundown
 > Phinamic space and his meetings in Webex web, and post today's ping there through
 > Claude in Chrome with `scripts/webex-post.js` if the rules say so. Live: don't ask
 > me first. If you can't post after the skill's retries, log it on the page and give
-> me the message.
+> me the message. Last step, always: one row in the Agent run log as `RUNTIME.md`
+> describes. Don't edit specs or push.
 
 ## Output Schema
 

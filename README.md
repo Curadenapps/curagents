@@ -11,6 +11,7 @@ Works with Claude Code and any model that reads markdown agent definitions.
 README.md          ← You are here. System overview and entry point.
 CLAUDE.md          ← Claude Code instructions (auto-loaded by Claude)
 SCOPE.md           ← Hard boundaries: what this system can and cannot do
+RUNTIME.md         ← Where each agent runs (PC vs cloud), schedules, run log, monitoring
 │
 ├── skills/        ← SKILL & SCOPE — invokable on demand by any session
 │   └── curaden-communications/
