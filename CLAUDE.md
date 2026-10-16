@@ -2,6 +2,8 @@
 
 ## System Context
 
+Read [`RUNTIME.md`](RUNTIME.md) for where each agent runs (PC vs cloud) and the run-log rule every run follows.
+
 Read [`dream.md`](dream.md) FIRST — it is the shared ambient context for all agents and
 replaces the need to load sibling agent specs. Then read [`README.md`](README.md) for the
 full system architecture.
