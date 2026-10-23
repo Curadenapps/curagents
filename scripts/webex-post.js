@@ -2,8 +2,9 @@
 // Every agent that posts to Webex uses this; the routine is in skills/webex-web/SKILL.md.
 // Runs in a web.webex.com space tab through Claude in Chrome's javascript_tool:
 //
-//   (<this function>)(message, { space: "Curaden / Phinamic", mention: "Derek La",
-//                                 marker: "Boom Boom Derek: Mon 12 Oct", send: true })
+//   (<this function>)(message, { spaceId: "644fd150-f1e6-11f0-886e-874a9ad69e32",
+//                                 mention: ["Derek La", "Khanh Nguyen"],
+//                                 marker: "Boom Boom: Fri 23 Oct", send: true })
 //
 // One call does the whole post, because Webex web keeps one live connection per
 // browser: when Sean's own Webex tab is open, a freshly loaded tab is online for
@@ -13,7 +14,8 @@
 // opts
 //   space       exact space name (checked against the compose box)        } at least
 //   spaceId     conversation UUID (checked against the tab URL)          } one
-//   mention     display name(s) to @mention first, e.g. "Derek La" or ["Derek La", "…"] (picked from Webex's own list)
+//   mention     display name(s) to @mention first, e.g. "Derek La" or ["Derek La", "Khanh Nguyen"]
+//               (each picked from Webex's own list; one space between chips, so "@Derek @Khanh")
 //   marker      text unique to this post; if the space already shows it, nothing is sent
 //   attachment  file name that must already be attached (file_upload) before sending
 //   send        false (default) composes only; true presses Enter after every check passes

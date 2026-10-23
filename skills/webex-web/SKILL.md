@@ -69,14 +69,15 @@ the base64 of `https://conv-a.wbx2.com/conversation/api/v1/conversations/{id}`.
 | Space | ID | Used by |
 |-------|----|---------|
 | Curaden / Phinamic | `136d9ce0-ab41-11f0-85e5-53eb7188e8c6` | boom-boom-derek (Derek-only pings), announcements (tests) |
-| QA (the common chat with the Phinamic team) | `644fd150-f1e6-11f0-886e-874a9ad69e32` | feedback-qa reports, boom-boom-derek (team pings, from 23 Oct) |
+| The common chat: "Curaden / Phinamic — BOB App & Admin" (Webex's name; older specs call it the QA space) | `644fd150-f1e6-11f0-886e-874a9ad69e32` | boom-boom-derek (team pings, from 23 Oct), feedback-qa reports |
 | App Team | look up by exact name | announcements (weekly, monthly) |
 | App Team - Markets | look up by exact name | announcements (Markets edition, from Dec 2026) |
 
 Curaden / Phinamic segment:
 `aHR0cHM6Ly9jb252LWEud2J4Mi5jb20vY29udmVyc2F0aW9uL2FwaS92MS9jb252ZXJzYXRpb25zLzEzNmQ5Y2UwLWFiNDEtMTFmMC04NWU1LTUzZWI3MTg4ZThjNg==`.
-QA segment:
-`aHR0cHM6Ly9jb252LWEud2J4Mi5jb20vY29udmVyc2F0aW9uL2FwaS92MS9jb252ZXJzYXRpb25zLzY0NGZkMTUwLWYxZTYtMTFmMC04ODZlLTg3NGE5YWQ2OWUzMg==`.
+Common chat segment (Sean's own link, `conv-r` host; opened and posted to on 23 Oct):
+`aHR0cHM6Ly9jb252LXIud2J4Mi5jb20vY29udmVyc2F0aW9uL2FwaS92MS9jb252ZXJzYXRpb25zLzY0NGZkMTUwLWYxZTYtMTFmMC04ODZlLTg3NGE5YWQ2OWUzMg==`.
+Two spaces start with "Curaden / Phinamic", so check the ID, not the name.
 If a direct link doesn't open the space, search by exact name in the Messaging
 list (`find` the treeitem), then add the ID's name to this table.
 
@@ -111,8 +112,9 @@ to read them; the scripts read the page's own data instead.
      "Boom Boom Derek: Mon 12 Oct"). If the space already shows it, the script
      returns `alreadyPosted` and sends nothing.
    - `mention` is the person's Webex display name ("Derek La"), or a list of them
-     for several people. The script picks each from Webex's own list, so they become
-     real @mentions (shown as "@Derek"). If one isn't offered (`step: "mention"`),
+     for several people (`["Derek La", "Khanh Nguyen"]`). The script picks each from
+     Webex's own list, so they become real @mentions with a space between them
+     (shown as "@Derek @Khanh"). If one isn't offered (`step: "mention"`),
      post without `mention` and open the message with their first names.
    - Webex markdown renders: `##` titles, `**bold**`, `-` bullets, links. Max 5,000
      characters; split longer posts at a heading into "Part 1 of N"….
@@ -200,7 +202,7 @@ the agent's spec says what may leave Notion.
 
 | Agent | Webex use |
 |-------|-----------|
-| [boom-boom-derek](../../agents/boom-boom-derek.md) | Reads the common chat (QA space), Curaden / Phinamic and the Phinamic team's meetings; posts one ping a day, to the common chat by default |
+| [boom-boom-derek](../../agents/boom-boom-derek.md) | Reads the common chat, Curaden / Phinamic and the Phinamic team's meetings; posts one ping a day, to the common chat by default |
 | [announcements](../../agents/announcements.md) | Reads meeting summaries; posts the approved update (+ PDF) to App Team |
 | [meeting-notes](../../agents/meeting-notes.md) | Meeting summary, action items and transcript → Notion recap page |
 | [feedback-qa](../../agents/feedback-qa.md) | Posts the QA report (+ PDF) to the QA space |
