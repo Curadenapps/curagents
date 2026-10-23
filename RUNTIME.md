@@ -21,7 +21,7 @@ and runs more reliably in the cloud, without the PC being on.
 
 | Agent | Where | Started by | Notes |
 |-------|-------|------------|-------|
-| `boom-boom-derek` | **PC** | Desktop app scheduled task, weekdays 08:45 Zurich (prompt below); "boom boom" any time | Posts to the common chat (QA space) for the Phinamic team, or Curaden / Phinamic for Derek-only items. A cloud "boom boom" refreshes the page and queues the ping there; the next PC run posts it |
+| `boom-boom-derek` | **PC** | Desktop app scheduled tasks "Boom Boom Derek" (weekdays 08:45 Zurich) and "Boom Boom queued" (weekdays 14:00, posts a ping a cloud run queued); "boom boom" any time | Posts to the common chat (QA space) for the Phinamic team, or Curaden / Phinamic for Derek-only items. A cloud "boom boom" refreshes the page and queues the ping there; the next PC run posts it |
 | `announcements` (post) | **PC** | Sean's "post it" | Posting stays behind Sean's approval of each draft |
 | `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | The routine `trig_01Pi2NPoRWRP6MStWHVzzkDm` named in the spec no longer appears in the Routines list: recreate it or draft on "team update" |
 | `feedback-qa` (report) | **PC** | "send QA report" | The PDF goes to the Webex QA space |
@@ -78,25 +78,48 @@ weekday at 10:15 Zurich:
 
 ## Scheduled task prompts (PC)
 
-Set these up in the Claude desktop app as scheduled tasks on the `curagents`
-folder. Each run starts a fresh session, so nothing piles up.
+Set these up once in the Claude desktop app as scheduled tasks on the `curagents`
+folder. Each run starts a fresh session, so nothing piles up. The prompts only
+point here: what a run does lives in this file and the agent specs on `main`, so a
+change merged here reaches the next run without touching the scheduled task.
 
-### Boom Boom Derek — weekdays 08:45
+**Paste-once prompt** (replace `{name}` with the run's name below):
 
-> Run Boom Boom Derek. In my curagents folder run `git fetch origin main`. If the
-> checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
-> anything and read the files from `origin/main` (`git show origin/main:<path>`).
-> Read `RUNTIME.md`, `dream.md` §2–3, `skills/webex-web/SKILL.md` and
-> `agents/boom-boom-derek.md`, and follow the agent spec exactly: refresh the Boom
-> Boom Derek page, read the common chat, the Curaden / Phinamic space and the team's
-> meetings in Webex web, and post today's ping (or the page's queued ping) in the
-> space the spec's "Channel" rule names, through Claude in Chrome with
-> `scripts/webex-post.js` if the rules say so. Live: don't ask me first. If you
-> can't post after the skill's retries, log it on the page and give me the message. Last step, always: one
-> row in the Agent run log as `RUNTIME.md` describes. Don't edit specs or push.
+> In my curagents folder run `git fetch origin main`. If the checkout is on `main`
+> and clean, `git pull --ff-only`; otherwise don't merge anything and read every
+> file from `origin/main` (`git show origin/main:<path>`). Then do the "{name}" run
+> exactly as `RUNTIME.md` describes under "PC runs". Live: don't ask me first.
+
+| Scheduled task | When (Zurich) | `{name}` |
+|----------------|---------------|----------|
+| Boom Boom Derek | Weekdays 08:45 | Boom Boom Derek |
+| Boom Boom queued | Weekdays 14:00 | Boom Boom queued |
+
+## PC runs
+
+Every PC run reads `RUNTIME.md` and `dream.md` §2–3 first and ends with one row in
+the Agent run log. Runs never edit specs or push.
+
+### Boom Boom Derek
+
+Read `skills/webex-web/SKILL.md` and `agents/boom-boom-derek.md`, and follow the
+agent spec exactly: refresh the Boom Boom Derek page, read the common chat, the
+Curaden / Phinamic space and the team's meetings in Webex web, and post today's ping
+(or the page's queued ping) in the space the spec's "Channel" rule names, through
+Claude in Chrome with `scripts/webex-post.js` if the rules say so. If you can't post
+after the skill's retries, log it on the page and in the run log.
+
+### Boom Boom queued
+
+Open the Boom Boom Derek page. No "📤 Queued ping", or a Boom Boom message already
+posted today (ping history): log `no-op` and stop. Otherwise read
+`skills/webex-web/SKILL.md` and the "Workflow" step 7 of `agents/boom-boom-derek.md`,
+check the queued ping against the space (anything it asks for already answered
+there gets dropped), post it in the space the queued section names, record it in the
+ping history and delete the queued section.
 
 ### Manual PC runs
 
 For "post it" (announcements), "send QA report" (feedback-qa) and "meeting notes",
-start with the same first paragraph (fetch, read `RUNTIME.md` and the agent's spec)
-and end with the same last step (run-log row, no spec edits).
+start with the paste-once prompt's fetch step, read the agent's spec, and end like
+every PC run (run-log row, no spec edits).

@@ -278,24 +278,16 @@ computer**, not in the cloud.
 |-----|-------|-------|
 | Scheduled, weekdays 08:45 Zurich | A scheduled task "Boom Boom Derek" in the Claude desktop app on Sean's computer, working in his local `curagents` folder | Computer awake, Chrome open with Claude in Chrome connected, Sean signed in to `web.webex.com`; Notion, Asana and Atlassian connectors |
 | "boom boom" from Sean | Any Claude session on Sean's computer with Claude in Chrome | Same |
-| "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes the page and puts the ping under "📤 Queued ping" on it. The next PC run posts it automatically (Sean, 23 Oct: never hand him a ping to paste) |
+| Queued post, weekdays 14:00 Zurich | A second scheduled task "Boom Boom queued" on Sean's computer | Same. Posts a "📤 Queued ping" only if no Boom Boom message went out that day, so a ping queued in the morning still goes out the same day |
+| "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes the page and puts the ping under "📤 Queued ping" on it, naming the space. The 14:00 run (or the next morning's) posts it automatically (Sean, 23 Oct: never hand him a ping to paste) |
 
 **Missed runs** (computer off or asleep at 08:45): the next run covers everything
 since the last ping. If Monday's rundown was missed, the next run is the rundown.
 
-**Scheduled task prompt** (paste into the Claude desktop app, weekdays 08:45):
-
-> Run Boom Boom Derek. In my curagents folder run `git fetch origin main`. If the
-> checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
-> anything and read the files from `origin/main` (`git show origin/main:<path>`).
-> Read `RUNTIME.md`, `dream.md` §2–3, `skills/webex-web/SKILL.md` and
-> `agents/boom-boom-derek.md`, and follow the agent spec exactly: refresh the Boom
-> Boom Derek page, read the common chat, the Curaden / Phinamic space and the team's
-> meetings in Webex web, and post today's ping (or the page's queued ping) in the
-> space the spec's "Channel" rule names, through Claude in Chrome with
-> `scripts/webex-post.js` if the rules say so. Live: don't ask me first. If you
-> can't post after the skill's retries, log it on the page and give me the message. Last step, always: one row in the Agent run log as `RUNTIME.md`
-> describes. Don't edit specs or push.
+**Scheduled tasks:** set up once with the paste-once prompt in
+[`RUNTIME.md`](../RUNTIME.md) "Scheduled task prompts (PC)". The prompt only
+points at `RUNTIME.md`, so changes merged to this spec reach the next run without
+editing the task.
 
 ## Output Schema
 
