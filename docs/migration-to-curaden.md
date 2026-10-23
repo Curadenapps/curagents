@@ -4,6 +4,9 @@ One clean move of curagents and its automations from Sean's **Personal** Claude
 account to the **Curaden AG** account. Started 23 Oct 2026. Personal is expected
 to go within about six months.
 
+Shortcut: `docs/migration-mega-prompts.md` has three paste-in prompts that do
+Phases 1 and 2.
+
 ## What moves, what stays
 
 | Moves to Curaden | Stays on Personal |
