@@ -9,6 +9,7 @@ Where each agent runs, what starts it, and how runs are checked. Agreed with Sea
 |-------|----------|----------|
 | **What** an agent does (specs, skills, scripts) | This repo, `main` | The cloud maintenance session: every change goes through a PR |
 | **When** it runs (schedules, triggers) | Claude on Sean's PC (desktop app scheduled tasks) for browser work; Claude Routines in the cloud for connector-only work | Sean sets each one up once |
+| **Who** runs it (which Claude account) | The **Agent registry** in Notion (below, "The switch") | Sean flips one field |
 | **The run** | A fresh session that reads the specs from `origin/main` and follows them | Automatic |
 | **Checking and fixing** | The Agent run log in Notion, read by the cloud maintenance session every weekday | The cloud session: it fixes specs by PR; the next run picks the fix up |
 
@@ -16,6 +17,42 @@ Why the split: Webex has no connector, so anything that posts to or reads Webex
 needs Sean's Chrome (`skills/webex-web/SKILL.md`), and only a session on his PC has
 it. Everything else (Notion, Asana, Jira, Confluence, GitHub, Drive) has a connector
 and runs more reliably in the cloud, without the PC being on.
+
+## Accounts and the switch
+
+Sean has two Claude accounts on the same PC (agreed 23 Oct 2026):
+
+| Account | Job | Future |
+|---------|-----|--------|
+| **Curaden** | Runs the automations: cloud Routines and PC scheduled tasks | Stays. Everything durable moves here |
+| **Personal** | Builds: specs, PRs, design, heavy one-off work | Goes away later. Nothing may live only here: its work lands in this repo or Notion |
+
+Both desktop apps read the same task files in `~/.claude/scheduled-tasks/`, but each
+app keeps its own schedule and on/off state, and each account has its own cloud
+Routines. So a task registered on both accounts would run twice. The switch stops that.
+
+**Agent registry** `49feb8b53b6c41838cf4cb916fcbb205`
+(data source `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418`), under Goals &
+Objectives, next to the Agent run log. One row per agent run, with **Account**
+(`Curaden`, `Personal`, `Paused`, `On request`), Where, Started by, Schedule, Spec,
+Run log name, and **Last run** (rolled up from the run log). It is the full list of
+what runs where; the table below is the background.
+
+**The switch.** Every scheduled run starts by checking its registry row:
+
+1. Its prompt names the account it runs on (`Account: Curaden` or `Account: Personal`,
+   see the paste-once prompt below). A prompt that names no account is from before
+   23 Oct: skip the check, run as before, and log Account `unknown`.
+2. Find the row whose **Started by** names this task or Routine. If **Account** is
+   `Paused`, or names the other account, write a run-log row with Outcome `no-op` and
+   Summary `switch: assigned to {Account}`, and stop.
+3. If the registry can't be read, write a `failed` row with the reason and stop.
+   Running blind could double a run.
+
+Moving an agent to the other account: set up its scheduled task or Routine there with
+the account-aware prompt, then change **Account** on its row. The next run on each
+side follows the row. Neither account's copy has to be deleted. Runs Sean starts by
+asking ("boom boom", "post it") skip the switch and run wherever he asks.
 
 ## Where each agent runs
 
@@ -34,6 +71,8 @@ and runs more reliably in the cloud, without the PC being on.
 
 ## Rules for every run
 
+0. **Scheduled runs check the switch first** (above). A run that isn't its account's
+   turn logs `no-op` and stops before reading anything else.
 1. **Fresh session, latest specs.** Start with `git fetch origin main`. If the
    checkout is on `main` and clean, `git pull --ff-only`; otherwise read the files
    from `origin/main` (`git show origin/main:<path>`). Never merge or rebase.
@@ -57,6 +96,8 @@ Objectives. One row per run, written as the run's last step:
 | Agent | The agent's name (`other` if not listed) |
 | When | Date and time of the run |
 | Where | `PC` or `Cloud` |
+| Account | `Curaden` or `Personal`, from the prompt; `unknown` if the prompt names none |
+| Registry | The agent's row in the Agent registry (this fills its **Last run**) |
 | Outcome | `posted` (something went out), `ok` (work done, nothing to post), `no-op` (nothing to do), `partial`, `failed` |
 | Summary | One or two lines: what it did, with ids |
 | Error | The exact error or blocker, or empty |
@@ -74,6 +115,9 @@ weekday at 10:15 Zurich:
 - Rows with `failed` or `partial`: find the cause. If the spec, skill or script is
   wrong, open a PR with the fix; the next run picks it up through `git fetch`. If
   it's the PC (asleep, Chrome not connected, signed out), tell Sean what to fix.
+- Two rows for the same scheduled run from different accounts is a double run: say
+  so to Sean once, naming the account that should pause its copy.
+- A registry row whose **Last run** is older than its schedule allows is a missed run.
 - Tick **Reviewed** on every row it has looked at.
 - Nothing wrong: no message.
 
@@ -84,12 +128,18 @@ folder. Each run starts a fresh session, so nothing piles up. The prompts only
 point here: what a run does lives in this file and the agent specs on `main`, so a
 change merged here reaches the next run without touching the scheduled task.
 
-**Paste-once prompt** (replace `{name}` with the run's name below):
+**Paste-once prompt** (replace `{name}` with the run's name below and `{account}`
+with `Curaden` or `Personal`, the account whose desktop app holds the task):
 
-> In my curagents folder run `git fetch origin main`. If the checkout is on `main`
-> and clean, `git pull --ff-only`; otherwise don't merge anything and read every
-> file from `origin/main` (`git show origin/main:<path>`). Then do the "{name}" run
-> exactly as `RUNTIME.md` describes under "PC runs". Live: don't ask me first.
+> Account: {account}. In my curagents folder run `git fetch origin main`. If the
+> checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
+> anything and read every file from `origin/main` (`git show origin/main:<path>`).
+> Check the switch as `RUNTIME.md` describes, then do the "{name}" run exactly as
+> `RUNTIME.md` describes under "PC runs". Live: don't ask me first.
+
+The task files are shared on disk, so give each account's task its own name, e.g.
+"Boom Boom Derek (Curaden)", and put that name in the registry row's **Started by**.
+Cloud Routine prompts take the same `Account:` first line.
 
 | Scheduled task | When (Zurich) | `{name}` |
 |----------------|---------------|----------|

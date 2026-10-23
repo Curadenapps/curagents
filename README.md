@@ -100,7 +100,7 @@ scripts and `.claude/agents/` wrappers all use the same tier.
 | Tier | Agents | Why |
 |------|--------|-----|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
-| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, roadmap-watch, webflow, meeting-notes, announcements | Judgement on structured data |
+| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements | Judgement on structured data |
 | Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
 
 Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.

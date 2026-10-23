@@ -3,6 +3,8 @@
 ## System Context
 
 Read [`RUNTIME.md`](RUNTIME.md) for where each agent runs (PC vs cloud) and the run-log rule every run follows.
+Which Claude account (Curaden or Personal) runs what right now lives in the Notion
+**Agent registry**, not in memory notes: check it before answering or changing a schedule.
 
 Read [`dream.md`](dream.md) FIRST — it is the shared ambient context for all agents and
 replaces the need to load sibling agent specs. Then read [`README.md`](README.md) for the
