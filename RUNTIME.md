@@ -54,6 +54,36 @@ the account-aware prompt, then change **Account** on its row. The next run on ea
 side follows the row. Neither account's copy has to be deleted. Runs Sean starts by
 asking ("boom boom", "post it") skip the switch and run wherever he asks.
 
+## Migration to Curaden (decided 23 Oct 2026)
+
+**Curaden runs everything on a schedule. Personal builds.** The Personal account
+is expected to go within about six months, so from now on:
+
+- **Curaden** holds every scheduled task and Routine, and the on-request ops runs
+  ("boom boom", "post it", "check webex").
+- **Personal** holds no schedules once the move is done. It is the build and
+  maintenance seat: spec and skill changes by PR, design, analysis, testing a new
+  agent before it gets a schedule on Curaden. Nothing may live only on Personal.
+- Move one item at a time: set it up on Curaden with the `Account: Curaden` prompt,
+  flip **Account** on its Agent registry row, check its next run-log row, then
+  delete the Personal copy (Routines) or switch it off (PC tasks).
+
+| Item | Today | Decision | On Curaden as |
+|------|-------|----------|---------------|
+| Webex Sweep | — | **Keep** (new) | PC task "Webex Sweep (Curaden)", 11:40 + 16:40 |
+| Boom Boom Derek | Personal PC | **Keep, move** | PC task "Boom Boom Derek (Curaden)", 08:45 |
+| Truth Catcher scan | Personal Routine | **Keep, move** | Routine, 07:58 + 13:58 |
+| Roadmap ← Jira sync | Personal Routine | **Keep, move** | Routine, Thu 07:30 |
+| Agent run log check | Personal Routine (`trig_01AN1dTjvTV3YNhhmLAqV4tL`) | **Keep, move** (it is the monitoring) | Routine, weekdays 10:15 |
+| Team update draft | Missing (Routine gone) | **Keep, recreate** | Routine, Thu 14:00 |
+| Roadmap watch | Personal PC, Mon 08:00 | **Keep, move to the cloud**: it only uses connectors, so it shouldn't need the PC | Routine, Mon 08:00 |
+| Roadmap dashboard refresh | Personal PC, 09:15 | **Keep, move** after one check that it still has a reader | PC task (or Routine if connector-only) |
+| Boom Boom queued | Personal PC, 14:00 | **Retire after the move**: it only posts pings that a cloud "boom boom" queued; with Curaden running Boom Boom on the PC, the 08:45 run can post a queued ping itself (spec change by PR) | — |
+| Webex keep-alive | Personal PC, hourly 07–20 | **Review**: 14 runs a day. If it only keeps Webex signed in for the Webex runs, cut it to a few minutes before each (08:40, 11:35, 16:35) or drop it | PC task, fewer runs |
+| Asana ↔ Notion sync | Paused | **Retire**: Webex Sweep now pushes approved inbox rows to Asana; running both would duplicate tasks | — |
+| App team weekly digest | Personal Routine, disabled | **Delete**: replaced by the team update | — |
+| Everything "On request" | — | Stays on request, run from whichever account Sean is in | — |
+
 ## Where each agent runs
 
 | Agent | Where | Started by | Notes |
