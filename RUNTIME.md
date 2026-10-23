@@ -29,6 +29,7 @@ and runs more reliably in the cloud, without the PC being on.
 | `truth-catcher` | Cloud | Claude Routine "Truth Catcher scan" (`trig_01BxmV4KaG4CPbZMU4GmMHa7`), weekdays 07:58 + 13:58 Zurich | Asana, Notion, GitHub connectors |
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
 | `roadmap-watch` | Cloud | "roadmap watch" (no schedule yet) | Weekly Monday report once a routine exists |
+| `webex-sweep` | **PC** | Desktop app scheduled task "Webex Sweep" (weekdays 11:40 + 16:40 Zurich); "check webex" any time | Reads the watched Webex spaces and new meeting action items; writes Notion inbox rows, Asana update comments and approved inbox rows to Asana. Never posts in Webex |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
@@ -94,6 +95,7 @@ change merged here reaches the next run without touching the scheduled task.
 |----------------|---------------|----------|
 | Boom Boom Derek | Weekdays 08:45 | Boom Boom Derek |
 | Boom Boom queued | Weekdays 14:00 | Boom Boom queued |
+| Webex Sweep | Weekdays 11:40 and 16:40 | Webex Sweep |
 
 ## PC runs
 
@@ -123,3 +125,12 @@ ping history and delete the queued section.
 For "post it" (announcements), "send QA report" (feedback-qa) and "meeting notes",
 start with the paste-once prompt's fetch step, read the agent's spec, and end like
 every PC run (run-log row, no spec edits).
+
+### Webex Sweep
+
+Read `skills/webex-web/SKILL.md` and `agents/webex-sweep.md`, and follow the agent
+spec exactly: read each watched space and the new meeting recaps since the last
+`webex-sweep` row in the Agent run log, write the Notion inbox rows and Asana
+update comments it describes, push approved inbox rows to Asana, and never post in
+Webex. A space you can't read after the skill's retries goes in the run log as
+`partial` with its name.
