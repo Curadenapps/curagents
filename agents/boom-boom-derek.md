@@ -183,8 +183,11 @@ One source failing never stops the run: mark it `unavailable` and carry on.
 
 ## Workflow
 
-1. **Load** the Boom Boom Derek page: ledger, bánh mì count, ping history. If today's ping is
-   already posted, stop (a manual "boom boom" can still refresh the page).
+1. **Load** the Boom Boom Derek page: ledger, bánh mì count, ping history and any
+   "📤 Queued ping". If today's ping is already posted, stop (a manual "boom boom"
+   can still refresh the page). A queued ping from a cloud run is posted by this
+   run: refresh its facts in steps 2–6, post it in step 7, then delete the queued
+   section.
 2. **Collect** every source above in parallel.
 3. **Update the ledger**: add new promises; mark delivered with the evidence;
    record Derek's and Khanh's replies ("done" → check it; new date → new due; "not mine" →
@@ -273,7 +276,7 @@ computer**, not in the cloud.
 |-----|-------|-------|
 | Scheduled, weekdays 08:45 Zurich | A scheduled task "Boom Boom Derek" in the Claude desktop app on Sean's computer, working in his local `curagents` folder | Computer awake, Chrome open with Claude in Chrome connected, Sean signed in to `web.webex.com`; Notion, Asana and Atlassian connectors |
 | "boom boom" from Sean | Any Claude session on Sean's computer with Claude in Chrome | Same |
-| "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes the page and returns the ping for Sean to paste |
+| "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes the page and puts the ping under "📤 Queued ping" on it. The next PC run posts it automatically (Sean, 23 Oct: never hand him a ping to paste) |
 
 **Missed runs** (computer off or asleep at 08:45): the next run covers everything
 since the last ping. If Monday's rundown was missed, the next run is the rundown.
