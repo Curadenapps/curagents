@@ -288,13 +288,13 @@ since the last ping. If Monday's rundown was missed, the next run is the rundown
 > Run Boom Boom Derek. In my curagents folder run `git fetch origin main`. If the
 > checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
 > anything and read the files from `origin/main` (`git show origin/main:<path>`).
-> Read `dream.md` §2–3, `skills/webex-web/SKILL.md` and `agents/boom-boom-derek.md`,
-> and follow the agent spec exactly: refresh the Boom Boom Derek page, read the
-> common chat, the Curaden / Phinamic space and the team's meetings in Webex web,
-> and post today's ping in the space the spec's "Channel" rule names, through
-> Claude in Chrome with `scripts/webex-post.js` if the rules say so. Live: don't ask
-> me first. If you can't post after the skill's retries, log it on the page and give
-> me the message. Last step, always: one row in the Agent run log as `RUNTIME.md`
+> Read `RUNTIME.md`, `dream.md` §2–3, `skills/webex-web/SKILL.md` and
+> `agents/boom-boom-derek.md`, and follow the agent spec exactly: refresh the Boom
+> Boom Derek page, read the common chat, the Curaden / Phinamic space and the team's
+> meetings in Webex web, and post today's ping (or the page's queued ping) in the
+> space the spec's "Channel" rule names, through Claude in Chrome with
+> `scripts/webex-post.js` if the rules say so. Live: don't ask me first. If you
+> can't post after the skill's retries, log it on the page and give me the message. Last step, always: one row in the Agent run log as `RUNTIME.md`
 > describes. Don't edit specs or push.
 
 ## Output Schema

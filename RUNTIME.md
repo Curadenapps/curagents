@@ -21,7 +21,7 @@ and runs more reliably in the cloud, without the PC being on.
 
 | Agent | Where | Started by | Notes |
 |-------|-------|------------|-------|
-| `boom-boom-derek` | **PC** | Desktop app scheduled task, weekdays 08:45 Zurich (prompt below); "boom boom" any time | Posts to Curaden / Phinamic. A cloud "boom boom" only refreshes Derek's page and returns the message |
+| `boom-boom-derek` | **PC** | Desktop app scheduled task, weekdays 08:45 Zurich (prompt below); "boom boom" any time | Posts to the common chat (QA space) for the Phinamic team, or Curaden / Phinamic for Derek-only items. A cloud "boom boom" refreshes the page and queues the ping there; the next PC run posts it |
 | `announcements` (post) | **PC** | Sean's "post it" | Posting stays behind Sean's approval of each draft |
 | `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | The routine `trig_01Pi2NPoRWRP6MStWHVzzkDm` named in the spec no longer appears in the Routines list: recreate it or draft on "team update" |
 | `feedback-qa` (report) | **PC** | "send QA report" | The PDF goes to the Webex QA space |
@@ -87,11 +87,12 @@ folder. Each run starts a fresh session, so nothing piles up.
 > checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
 > anything and read the files from `origin/main` (`git show origin/main:<path>`).
 > Read `RUNTIME.md`, `dream.md` §2–3, `skills/webex-web/SKILL.md` and
-> `agents/boom-boom-derek.md`, and follow the agent spec exactly: refresh Derek's
-> Notion page, read the Curaden / Phinamic space and his meetings in Webex web, and
-> post today's ping there through Claude in Chrome with `scripts/webex-post.js` if
-> the rules say so. Live: don't ask me first. If you can't post after the skill's
-> retries, log it on Derek's page and give me the message. Last step, always: one
+> `agents/boom-boom-derek.md`, and follow the agent spec exactly: refresh the Boom
+> Boom Derek page, read the common chat, the Curaden / Phinamic space and the team's
+> meetings in Webex web, and post today's ping (or the page's queued ping) in the
+> space the spec's "Channel" rule names, through Claude in Chrome with
+> `scripts/webex-post.js` if the rules say so. Live: don't ask me first. If you
+> can't post after the skill's retries, log it on the page and give me the message. Last step, always: one
 > row in the Agent run log as `RUNTIME.md` describes. Don't edit specs or push.
 
 ### Manual PC runs
