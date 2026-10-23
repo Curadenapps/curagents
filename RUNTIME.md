@@ -56,6 +56,10 @@ asking ("boom boom", "post it") skip the switch and run wherever he asks.
 
 ## Migration to Curaden (decided 23 Oct 2026)
 
+The step-by-step runbook is `docs/migration-to-curaden.md`; paste-ready Curaden prompts are in
+`docs/curaden-routines.md`. iTOP agent, marketing, website, game design and other
+personal projects stay on Personal; curagents and its automations move.
+
 **Curaden runs everything on a schedule. Personal builds.** The Personal account
 is expected to go within about six months, so from now on:
 
