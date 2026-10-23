@@ -69,7 +69,7 @@ the base64 of `https://conv-a.wbx2.com/conversation/api/v1/conversations/{id}`.
 | Space | ID | Used by |
 |-------|----|---------|
 | Curaden / Phinamic | `136d9ce0-ab41-11f0-85e5-53eb7188e8c6` | boom-boom-derek (Derek-only pings), announcements (tests) |
-| QA (the common chat with the Phinamic team) | `644fd150-f1e6-11f0-886e-874a9ad69e32` | feedback-qa reports, boom-boom-derek (team pings, from 23 Oct) |
+| Curaden / Phinamic — BOB App & Admin (the common chat with the Phinamic team; feedback-qa calls it the QA space) | `644fd150-f1e6-11f0-886e-874a9ad69e32` | feedback-qa reports, boom-boom-derek (team pings, from 23 Oct) |
 | App Team | look up by exact name | announcements (weekly, monthly) |
 | App Team - Markets | look up by exact name | announcements (Markets edition, from Dec 2026) |
 
@@ -200,7 +200,7 @@ the agent's spec says what may leave Notion.
 
 | Agent | Webex use |
 |-------|-----------|
-| [boom-boom-derek](../../agents/boom-boom-derek.md) | Reads the common chat (QA space), Curaden / Phinamic and the Phinamic team's meetings; posts one ping a day, to the common chat by default |
+| [boom-boom-derek](../../agents/boom-boom-derek.md) | Reads the common chat (Curaden / Phinamic — BOB App & Admin), Curaden / Phinamic and the Phinamic team's meetings; posts one ping a day, to the common chat by default |
 | [announcements](../../agents/announcements.md) | Reads meeting summaries; posts the approved update (+ PDF) to App Team |
 | [meeting-notes](../../agents/meeting-notes.md) | Meeting summary, action items and transcript → Notion recap page |
 | [feedback-qa](../../agents/feedback-qa.md) | Posts the QA report (+ PDF) to the QA space |
