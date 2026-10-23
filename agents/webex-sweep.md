@@ -108,6 +108,11 @@ One message can hold several items: split them. A thread that resolves itself
 | Captured at | The message's date and time |
 | Status | `new` (`reference` for decisions and resolved threads) |
 | Kind | What sort of work it is (table below) |
+| Requester | Who asked or said it (Webex display name) |
+| Owner | Who it's on, only if the message says so (a name, or "Curaden" / "Phinamic"); else empty |
+| Due | Only a date the message gives ("by Friday" → that Friday); else empty |
+| Priority | `P1` blocks a release, a demo or a customer; `P2` this week or someone waiting; `P3` the rest |
+| Ticket ID | Set by Notion automatically (`WX-…`); never typed |
 | Notes | `{author} in {space}, {date time}:` then the message word for word (trimmed to what matters), then one line: who owns it and by when, if said |
 
 **Kind** (one per row, by judgment):
@@ -120,9 +125,11 @@ One message can hold several items: split them. A thread that resolves itself
 
 Fingerprint: `webex:{space id or meeting id}:{author}:{YYYY-MM-DD HH:mm}:{first 40 characters of the text}`.
 
-### Update on an existing Asana task
+### Update on an existing ticket or Asana task
 
-Match on, in order: a BA key or Asana link in the message; then the task names in
+A message that names a ticket (`WX-42`) is about that inbox row: add the news to
+its Notes (dated, word for word) and, if the row is pushed, comment on its Asana
+task as below. Then match on, in order: a BA key or Asana link in the message; then the task names in
 the BOB App board (`1204489225205419`) and App Tasks board (`1200298616652229`),
 open tasks only, by clear wording overlap. Not sure it's the same task: make an
 inbox row instead.
@@ -149,7 +156,7 @@ How each kind is pushed once approved:
 | Kind | Where it goes |
 |------|---------------|
 | `Development` | BOB App board (`1204489225205419`) Backlog, description starts "Development: needs a Jira ticket (BA) from Phinamic". The sweep never creates Jira tickets |
-| `Asana task` | The row's `Project`, else the BOB App board Backlog |
+| `Asana task` | The row's `Project`, else the **App Tasks, Requests & Feedback** board (`1200298616652229`), where Truth Catcher's triage and SLA checks apply |
 | `Notion` | Not pushed to Asana. Status stays `approved` and the row shows under "Notion" in the triage nudge until Sean does it and sets it to `reference` |
 
 Rows marked `task` are waiting for Sean; leave them.
@@ -165,10 +172,10 @@ So new rows don't sit unseen, each run that created at least one inbox row keeps
 - **Name:** `Triage Webex inbox ({N} new)`, where N = inbox rows with Source
   `webex`/`meeting` and Status `new`.
 - **Description:** replace it with the current list, grouped by kind, each line
-  `- {title} ({author}, {D Mon}) {Notion row link}`:
+  `- WX-{n} {title} ({requester}, {priority}, due {due or —}) {Notion row link}`:
   "Development ({n})", "Asana task ({n})", "Notion ({n})", then "Approved, waiting
   on you ({n})" for `Notion` rows still `approved`. Last line: the Triage queue view
-  link and "Set a row to approved to send it on, skip to drop it."
+  link, the "Tickets by Kind" board view, and "Set a row to approved to send it on, skip to drop it. Say WX-{n} in Webex to update a ticket."
 - **Notify:** add one comment, "{k} new from Webex since {time}: {a} Development,
   {b} Asana task, {c} Notion", which @mentions Sean so he gets an Asana
   notification. Due date: today.
