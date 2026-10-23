@@ -136,7 +136,7 @@ See [`SCOPE.md`](SCOPE.md) for hard boundaries — what this system can and cann
 
 Key rules:
 - Clinical/medical claims require Legal gate before any asset ships
-- Truth Catcher cannot take destructive Asana actions — comments only
+- Truth Catcher cannot take destructive Asana actions: it comments, and marks a task complete only when it is obviously done (it tells Sean each time)
 - `.truth-cache/` is auto-synced from Notion — never edit manually
 - Brand assets need `[Agent Audit: Approved by {Name} on {Date}]` before Done transition
 
