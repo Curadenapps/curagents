@@ -176,6 +176,11 @@ already been said, so nothing is repeated.
 8. **App Tasks summary**: end the run summary with the 📥 New list, the open findings
    by finding type, the comments posted and the roadmap candidates (plus the "App Tasks
    preview" comments if the board is ever paused).
+9. **Run log** (last step, always, also when nothing needed a comment or a step failed):
+   one row in the Notion Agent run log as [`RUNTIME.md`](../RUNTIME.md) "Agent run log"
+   describes: Run `truth-catcher {YYYY-MM-DD HH:mm}` (Zurich), Agent `truth-catcher`,
+   Where `Cloud`, Outcome `posted` (comments went out), `no-op` or `failed`, the
+   summary's first line, the exact error if any, and `git rev-parse --short origin/main`.
 
 ## Script run (manual GitHub Action `sync-and-scan.yml`)
 

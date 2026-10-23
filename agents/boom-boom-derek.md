@@ -220,8 +220,12 @@ One source failing never stops the run: mark it `unavailable` and carry on.
       posted. Screenshot it. Never resend because the tab looked offline right after
       sending.
    4. **Can't post** (Chrome not connected, Webex signed out, a sign-in page, three
-      offline retries, any other refusal): stop there. Add the ping to the page
-      history as "not sent: {reason}" and put the message in the run summary for Sean.
+      offline retries, any other refusal): stop there. Put the message on the page
+      under "📤 Queued ping", naming the space, add "not sent: {reason}" to the ping
+      history, and give the reason in the run summary and the run log. The page is
+      the only queue: never keep the ping in a local file or outbox, because the
+      14:00 run and the next morning's run only look at the page. If the page
+      already has a queued ping, replace it with today's.
 8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
    bánh mì count, and list for Sean: Asana subtasks to tick, items handed to him,
    roadmap rows that need his fix.
