@@ -29,7 +29,7 @@ memory:
     - "notion: Tasks & Notes inbox collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db (Source ID = dedupe key)"
   write:
     - "notion: Tasks & Notes inbox (new rows; Status approved → pushed with Asana link)"
-    - "asana: update comments on existing tasks, and tasks for approved inbox rows, through asana-maintenance"
+    - "asana: update comments on existing tasks, tasks for approved inbox rows, and one 'Triage Webex inbox (N new)' task assigned to Sean, all through asana-maintenance"
     - "notion: one Agent run log row per run"
 idempotency_key: "webex-sweep:{space}:{message fingerprint}"   # one inbox row or comment per message, ever
 dry_run: false  # live from 23 Oct 2026 (Sean)
@@ -38,7 +38,8 @@ output:
     window: "{since, until}"
     spaces_read: "string[] (with message counts)"
     meetings_read: "string[]"
-    inbox_rows_created: "array of {title, notion_url}"
+    inbox_rows_created: "array of {title, kind, notion_url}"
+    triage_task: "{url, new_count}"
     asana_updates: "array of {task, comment_url}"
     asana_tasks_created: "array of {title, task_url}"
     skipped: "count, with reasons (chatter, already captured, private)"
@@ -106,7 +107,16 @@ One message can hold several items: split them. A thread that resolves itself
 | Source link | The space link (`https://web.webex.com/spaces/{segment}`) or the meeting summary URL |
 | Captured at | The message's date and time |
 | Status | `new` (`reference` for decisions and resolved threads) |
+| Kind | What sort of work it is (table below) |
 | Notes | `{author} in {space}, {date time}:` then the message word for word (trimmed to what matters), then one line: who owns it and by when, if said |
+
+**Kind** (one per row, by judgment):
+
+| Kind | Means | Examples |
+|------|-------|----------|
+| `Development` | Code or app change: a bug, a feature, a build, anything Phinamic builds (Jira BA) | "BPE back button doesn't work", "add bridge status" |
+| `Asana task` | Team or ops work tracked in Asana, no code: send, organise, decide, check, buy, brief | "send Derek the Tuft accounts", "book the Milan store" |
+| `Notion` | A page or document to write or update in Notion: roadmap note, how-to, scope, recap | "add this to the how-to", "update the scope page" |
 
 Fingerprint: `webex:{space id or meeting id}:{author}:{YYYY-MM-DD HH:mm}:{first 40 characters of the text}`.
 
@@ -134,7 +144,35 @@ link in the description; write the task link to `Asana link` and set Status
 `pushed`. Set `pushed` straight after creating, so a second run can't create it
 twice.
 
+How each kind is pushed once approved:
+
+| Kind | Where it goes |
+|------|---------------|
+| `Development` | BOB App board (`1204489225205419`) Backlog, description starts "Development: needs a Jira ticket (BA) from Phinamic". The sweep never creates Jira tickets |
+| `Asana task` | The row's `Project`, else the BOB App board Backlog |
+| `Notion` | Not pushed to Asana. Status stays `approved` and the row shows under "Notion" in the triage nudge until Sean does it and sets it to `reference` |
+
 Rows marked `task` are waiting for Sean; leave them.
+
+### Triage nudge (Asana, to Sean)
+
+So new rows don't sit unseen, each run that created at least one inbox row keeps
+**one** Asana task up to date, through `asana-maintenance`:
+
+- **Find it:** an incomplete task assigned to Sean (`1207214370347608`) named
+  `Triage Webex inbox (…)`, in no project. None (Sean completed the last one):
+  create it, assigned to Sean, due today.
+- **Name:** `Triage Webex inbox ({N} new)`, where N = inbox rows with Source
+  `webex`/`meeting` and Status `new`.
+- **Description:** replace it with the current list, grouped by kind, each line
+  `- {title} ({author}, {D Mon}) {Notion row link}`:
+  "Development ({n})", "Asana task ({n})", "Notion ({n})", then "Approved, waiting
+  on you ({n})" for `Notion` rows still `approved`. Last line: the Triage queue view
+  link and "Set a row to approved to send it on, skip to drop it."
+- **Notify:** add one comment, "{k} new from Webex since {time}: {a} Development,
+  {b} Asana task, {c} Notion", which @mentions Sean so he gets an Asana
+  notification. Due date: today.
+- No new rows this run: don't touch it. N back to 0: complete the task.
 
 ## Guardrails
 
@@ -159,4 +197,5 @@ Rows marked `task` are waiting for Sean; leave them.
 Last step of every run: one row in the Agent run log (`RUNTIME.md`), Agent
 `webex-sweep`, Where `PC`, Outcome `ok` (rows or comments written), `no-op`
 (nothing new), `partial` or `failed`. Summary: "{n} messages in {spaces}; {a} inbox
-rows, {b} Asana updates, {c} tasks pushed". Its `When` is where the next sweep starts.
+rows ({d} Development, {e} Asana task, {f} Notion), {b} Asana updates, {c} tasks
+pushed; triage task {url}". Its `When` is where the next sweep starts.
