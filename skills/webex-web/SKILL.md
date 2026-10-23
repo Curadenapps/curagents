@@ -204,4 +204,5 @@ the agent's spec says what may leave Notion.
 | [announcements](../../agents/announcements.md) | Reads meeting summaries; posts the approved update (+ PDF) to App Team |
 | [meeting-notes](../../agents/meeting-notes.md) | Meeting summary, action items and transcript → Notion recap page |
 | [feedback-qa](../../agents/feedback-qa.md) | Posts the QA report (+ PDF) to the QA space |
+| [webex-sweep](../../agents/webex-sweep.md) | Reads App Team, the QA space and Curaden / Phinamic, plus new meeting recaps (action items only). Never posts |
 | Any new agent | Load this skill; add its spaces to the table above |
