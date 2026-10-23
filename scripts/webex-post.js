@@ -13,7 +13,7 @@
 // opts
 //   space       exact space name (checked against the compose box)        } at least
 //   spaceId     conversation UUID (checked against the tab URL)          } one
-//   mention     display name to @mention first, e.g. "Derek La" (picked from Webex's own list)
+//   mention     display name(s) to @mention first, e.g. "Derek La" or ["Derek La", "…"] (picked from Webex's own list)
 //   marker      text unique to this post; if the space already shows it, nothing is sent
 //   attachment  file name that must already be attached (file_upload) before sending
 //   send        false (default) composes only; true presses Enter after every check passes
@@ -51,17 +51,22 @@ async (message, opts = {}) => {
   if (offline()) return { ok: false, step: 'offline', retry: true, error: offline() };
   q.focus();
 
-  if (mention) {
+  const mentions = mention ? [].concat(mention) : [];
+  if (mentions.length) {
     const m = q.getModule('mention');
-    const query = mention.split(' ')[0].slice(0, 4);
-    q.insertText(0, `@${query}`, 'user');
-    q.setSelection(query.length + 1, 0, 'user');
-    const li = await until(() => [...document.querySelectorAll('li.ql-mention-list-item')].find((l) => l.dataset.displayName === mention), 4000);
-    if (!m || !li) { q.setText('', 'user'); return { ok: false, step: 'mention', error: `"${mention}" not offered; post without the mention and open with their first name` }; }
-    m.itemIndex = Number(li.dataset.index);
-    m.selectItem();
-    await sleep(200);
-    if (q.getContents().ops[0]?.insert?.mention?.displayName !== mention) { q.setText('', 'user'); return { ok: false, step: 'mention', error: 'mention chip did not stick' }; }
+    const chips = () => q.getContents().ops.map((o) => o.insert?.mention?.displayName).filter(Boolean);
+    for (const name of mentions) {
+      const at = q.getLength() - 1;
+      const query = name.split(' ')[0].slice(0, 4);
+      q.insertText(at, `${at ? ' ' : ''}@${query}`, 'user');
+      q.setSelection(q.getLength() - 1, 0, 'user');
+      const li = await until(() => [...document.querySelectorAll('li.ql-mention-list-item')].find((l) => l.dataset.displayName === name), 4000);
+      if (!m || !li) { q.setText('', 'user'); return { ok: false, step: 'mention', error: `"${name}" not offered; post without the mention and open with their first name` }; }
+      m.itemIndex = Number(li.dataset.index);
+      m.selectItem();
+      await sleep(200);
+      if (!chips().includes(name)) { q.setText('', 'user'); return { ok: false, step: 'mention', error: `mention chip for "${name}" did not stick` }; }
+    }
     if (message) q.insertText(q.getLength() - 1, `\n${message}`, 'user');
   } else if (message) {
     q.setText(message, 'user');
