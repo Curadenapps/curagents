@@ -68,8 +68,8 @@ the base64 of `https://conv-a.wbx2.com/conversation/api/v1/conversations/{id}`.
 
 | Space | ID | Used by |
 |-------|----|---------|
-| Curaden / Phinamic | `136d9ce0-ab41-11f0-85e5-53eb7188e8c6` | boom-boom-derek (pings), announcements (tests) |
-| QA | `644fd150-f1e6-11f0-886e-874a9ad69e32` | feedback-qa reports |
+| Curaden / Phinamic | `136d9ce0-ab41-11f0-85e5-53eb7188e8c6` | boom-boom-derek (Derek-only pings), announcements (tests) |
+| QA (the common chat with the Phinamic team) | `644fd150-f1e6-11f0-886e-874a9ad69e32` | feedback-qa reports, boom-boom-derek (team pings, from 23 Oct) |
 | App Team | look up by exact name | announcements (weekly, monthly) |
 | App Team - Markets | look up by exact name | announcements (Markets edition, from Dec 2026) |
 
@@ -110,10 +110,10 @@ to read them; the scripts read the page's own data instead.
    - `marker` is a phrase unique to this post (its title line, e.g.
      "Boom Boom Derek: Mon 12 Oct"). If the space already shows it, the script
      returns `alreadyPosted` and sends nothing.
-   - `mention` is the person's Webex display name ("Derek La"). The script picks it
-     from Webex's own list, so it becomes a real @mention (shown as "@Derek"). If
-     they aren't offered (`step: "mention"`), post without `mention` and open the
-     message with their first name.
+   - `mention` is the person's Webex display name ("Derek La"), or a list of them
+     for several people. The script picks each from Webex's own list, so they become
+     real @mentions (shown as "@Derek"). If one isn't offered (`step: "mention"`),
+     post without `mention` and open the message with their first names.
    - Webex markdown renders: `##` titles, `**bold**`, `-` bullets, links. Max 5,000
      characters; split longer posts at a heading into "Part 1 of N"….
 4. `retry: true` → step 2. `ok: true, sent: true` → step 5. Any other `ok: false`:
@@ -200,7 +200,7 @@ the agent's spec says what may leave Notion.
 
 | Agent | Webex use |
 |-------|-----------|
-| [boom-boom-derek](../../agents/boom-boom-derek.md) | Reads Curaden / Phinamic and meetings Derek was in; posts one ping a day there |
+| [boom-boom-derek](../../agents/boom-boom-derek.md) | Reads the common chat (QA space), Curaden / Phinamic and the Phinamic team's meetings; posts one ping a day, to the common chat by default |
 | [announcements](../../agents/announcements.md) | Reads meeting summaries; posts the approved update (+ PDF) to App Team |
 | [meeting-notes](../../agents/meeting-notes.md) | Meeting summary, action items and transcript → Notion recap page |
 | [feedback-qa](../../agents/feedback-qa.md) | Posts the QA report (+ PDF) to the QA space |
