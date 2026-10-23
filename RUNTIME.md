@@ -77,9 +77,9 @@ is expected to go within about six months, so from now on:
 | Agent run log check | Personal Routine (`trig_01AN1dTjvTV3YNhhmLAqV4tL`) | **Keep, move** (it is the monitoring) | Routine, weekdays 10:15 |
 | Team update draft | Missing (Routine gone) | **Keep, recreate** | Routine, Thu 14:00 |
 | Roadmap watch | Personal PC, Mon 08:00 | **Keep, move to the cloud**: it only uses connectors, so it shouldn't need the PC | Routine, Mon 08:00 |
-| Roadmap dashboard refresh | Personal PC, 09:15 | **Keep, move** after one check that it still has a reader | PC task (or Routine if connector-only) |
+| Roadmap dashboard refresh | Personal PC, 09:15 | **On request** (Sean, 23 Oct): switch its schedule off and run it on click | — |
 | Boom Boom queued | Personal PC, 14:00 | **Retire after the move**: it only posts pings that a cloud "boom boom" queued; with Curaden running Boom Boom on the PC, the 08:45 run can post a queued ping itself (spec change by PR) | — |
-| Webex keep-alive | Personal PC, hourly 07–20 | **Review**: 14 runs a day. If it only keeps Webex signed in for the Webex runs, cut it to a few minutes before each (08:40, 11:35, 16:35) or drop it | PC task, fewer runs |
+| Webex keep-alive | Personal PC, hourly 07–20 | **Cut to one warm-up**, weekdays 08:35, before the first Webex run. Webex web allows one live connection per browser, so every keep-alive tab knocked Sean's own Webex tab offline, 14 times a day. The Webex runs reload and retry themselves (`skills/webex-web`). If a run logs "signed out", add a warm-up a few minutes before that run rather than going back to hourly | PC task "Webex keep-alive (Curaden)", 08:35 |
 | Asana ↔ Notion sync | Paused | **Retire**: Webex Sweep now pushes approved inbox rows to Asana; running both would duplicate tasks | — |
 | App team weekly digest | Personal Routine, disabled | **Delete**: replaced by the team update | — |
 | Everything "On request" | — | Stays on request, run from whichever account Sean is in | — |
