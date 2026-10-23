@@ -8,16 +8,17 @@ description: >
 model: claude-sonnet-5-5
 tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI, Bash
 trigger:
-  # Routing lives in §1 (single source). Schedules live in .github/workflows/.
+  # Routing lives in §1 (single source). Where and when each agent runs lives in RUNTIME.md.
   - type: manual
     phrases: ["run agents", "orchestrate", "what needs attention", "agent status", "dispatch"]
   - type: schedule
-    note: "See §1 — CI workflows call specialist agents directly; the orchestrator is for interactive runs"
+    note: "See §1 and RUNTIME.md — PC scheduled tasks and Claude Routines call specialist agents directly; the orchestrator is for interactive runs"
   - type: webhook
     note: "See §1 — asana.task.*, github.pull_request.*, github.push"
 memory:
   read:
     - dream.md
+    - RUNTIME.md
     - .truth-cache/requirements.json
     - .truth-cache/verdicts.json
     - .truth-cache/approvals.json
@@ -27,6 +28,7 @@ memory:
   write:
     - dream.md
     - .truth-cache/dispatch-log.json
+    - .truth-cache/escalations.json
 ---
 
 # Curaden Orchestrator
@@ -53,7 +55,8 @@ On any invocation, determine trigger type:
 | `user:check alignment` / `scan asana` / `truth catcher` | User phrase | Truth Catcher |
 | `user:check intake` / `app tasks board` / `what requests are waiting` | User phrase | Truth Catcher, App Tasks, Requests & Feedback board only |
 | `user:pause App Tasks` | User phrase | Truth Catcher: Sean puts the App Tasks board back in preview (spec "App Tasks board" rollout line + `dream.md` §5) |
-| `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's computer (Claude desktop + Claude in Chrome) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
+| `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's PC (RUNTIME.md) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
+| `schedule:"0 14 * * 1-5"` (Zurich) | Scheduled task "Boom Boom queued" on Sean's PC (RUNTIME.md) | boom-boom-derek (posts a ping a cloud run queued, if none went out today) |
 | `user:boom boom` / `boom boom derek` / `boom boom team` / `boom boom phinamic` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
 | `user:delegate it` (after a Boom Boom Derek run) | User phrase | boom-boom-derek: write Derek's closed items to Asana and decisions to Notion, each with its Webex source |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
@@ -67,13 +70,13 @@ On any invocation, determine trigger type:
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
 | `user:process meeting notes` / `summarise meeting` / `webex recap` / `log the webex meeting` / `fetch from fireflies` | User phrase | meeting-notes (Webex Meeting recap first via `skills/webex-web`; Fireflies, then paste, as fallbacks) → recap page under Decision Log & Meeting Recaps |
-| `schedule:"0 8 * * 1"` | CRON (Monday 08:00) — no CI workflow yet | roadmap-watch (weekly roadmap drift report) |
+| `schedule:"0 8 * * 1"` | Monday 08:00 — see RUNTIME.md for where it is scheduled | roadmap-watch (weekly roadmap drift report) |
 | `user:roadmap watch` / `check the roadmap` / `roadmap drift` | User phrase | roadmap-watch |
 | `user:check webex` / `webex sweep` / `what's new in webex` · PC scheduled task "Webex Sweep" (weekdays 11:40 + 16:40 Zurich) | User phrase / schedule | webex-sweep |
 | `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
 | `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
 | `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |
-| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web via Claude in Chrome, `skills/webex-web`) |
+| `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web, `skills/webex-web`) |
 | `user:markets update` / `markets monthly` | User phrase | announcements, period `markets` (from Dec 2026) |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
@@ -95,11 +98,16 @@ Before dispatching any agent:
    - If set, all dispatched agents run in dry-run mode (log actions but do not write to Asana/Notion).
 
 4. **Webex steps** — any agent that posts to or reads Webex (announcements, boom-boom-derek,
-   meeting-notes, feedback-qa) loads `skills/webex-web/SKILL.md` first. It needs Sean's
-   computer with Claude in Chrome connected and Webex web signed in. If Chrome isn't
-   connected, the agent still runs, marks Webex `unavailable` and hands Sean the message.
+   meeting-notes, feedback-qa, webex-sweep) loads `skills/webex-web/SKILL.md` first and
+   runs on Sean's PC (`RUNTIME.md`). The skill says which browser to use and what to do
+   when Webex web is signed out or unreachable.
 
-5. **Medical-device line** — BOB stays out of medical-device legislation and stays one
+5. **The switch** — a scheduled trigger runs only if the Agent registry in Notion gives
+   that agent to the account the run is on (`RUNTIME.md`, "The switch"). If it doesn't,
+   log `no-op` and dispatch nothing. "Which account runs X?" is answered from the
+   registry, not from memory. User phrases skip the switch.
+
+6. **Medical-device line** — BOB stays out of medical-device legislation and stays one
    global product (`dream.md` §2). If a routed request would add a feature that diagnoses
    or proposes treatment, or builds a market-only (e.g. Japan PMS) integration, flag it to
    Sean in the report instead of dispatching build work.
@@ -162,7 +170,8 @@ pinned to its model tier. Dispatch them with the Agent tool.
 
 After all dispatched agents complete:
 
-1. Append each result to `.truth-cache/dispatch-log.json` with timestamp.
+1. Append each result to `.truth-cache/dispatch-log.json` with timestamp, and make sure
+   each dispatched agent wrote its row in the Agent run log (`RUNTIME.md`).
 2. **Update `dream.md` §4 (Active Context)** with current timestamps, open
    escalation count, and pending approval count. This is the only section
    of `dream.md` the orchestrator edits autonomously. Never edit §1–3 or §5
