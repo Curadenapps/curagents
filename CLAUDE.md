@@ -3,6 +3,8 @@
 ## System Context
 
 Read [`RUNTIME.md`](RUNTIME.md) for where each agent runs (PC vs cloud) and the run-log rule every run follows.
+Which Claude account (Curaden or Personal) runs what right now lives in the Notion
+**Agent registry**, not in memory notes: check it before answering or changing a schedule.
 
 Read [`dream.md`](dream.md) FIRST — it is the shared ambient context for all agents and
 replaces the need to load sibling agent specs. Then read [`README.md`](README.md) for the
@@ -45,6 +47,7 @@ rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 - [`agents/feedback-qa.md`](agents/feedback-qa.md) — Feedback QA: reads the Notion inbox, reports to Webex; Confluence for full UATs
 - [`agents/announcements.md`](agents/announcements.md) — Team update: week / two weeks / month across every tool → Notion draft → Webex after approval
 - [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) — Boom Boom Derek: Truth Catcher for the Phinamic team (Derek La and Khanh); autonomous, funny-but-clear pings in the Webex common chat (QA space) or "Curaden / Phinamic", details on its Notion page
+- [`agents/webex-sweep.md`](agents/webex-sweep.md) — Webex Sweep: reads the watched Webex spaces and meeting action items; new asks into the Notion inbox, updates onto Asana tasks, approved rows to Asana. Read-only in Webex
 
 ## Scope
 

@@ -9,6 +9,7 @@ Where each agent runs, what starts it, and how runs are checked. Agreed with Sea
 |-------|----------|----------|
 | **What** an agent does (specs, skills, scripts) | This repo, `main` | The cloud maintenance session: every change goes through a PR |
 | **When** it runs (schedules, triggers) | Claude on Sean's PC (desktop app scheduled tasks) for browser work; Claude Routines in the cloud for connector-only work | Sean sets each one up once |
+| **Who** runs it (which Claude account) | The **Agent registry** in Notion (below, "The switch") | Sean flips one field |
 | **The run** | A fresh session that reads the specs from `origin/main` and follows them | Automatic |
 | **Checking and fixing** | The Agent run log in Notion, read by the cloud maintenance session every weekday | The cloud session: it fixes specs by PR; the next run picks the fix up |
 
@@ -16,6 +17,76 @@ Why the split: Webex has no connector, so anything that posts to or reads Webex
 needs Sean's Chrome (`skills/webex-web/SKILL.md`), and only a session on his PC has
 it. Everything else (Notion, Asana, Jira, Confluence, GitHub, Drive) has a connector
 and runs more reliably in the cloud, without the PC being on.
+
+## Accounts and the switch
+
+Sean has two Claude accounts on the same PC (agreed 23 Oct 2026):
+
+| Account | Job | Future |
+|---------|-----|--------|
+| **Curaden** | Runs the automations: cloud Routines and PC scheduled tasks | Stays. Everything durable moves here |
+| **Personal** | Builds: specs, PRs, design, heavy one-off work | Goes away later. Nothing may live only here: its work lands in this repo or Notion |
+
+Both desktop apps read the same task files in `~/.claude/scheduled-tasks/`, but each
+app keeps its own schedule and on/off state, and each account has its own cloud
+Routines. So a task registered on both accounts would run twice. The switch stops that.
+
+**Agent registry** `49feb8b53b6c41838cf4cb916fcbb205`
+(data source `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418`), under Goals &
+Objectives, next to the Agent run log. One row per agent run, with **Account**
+(`Curaden`, `Personal`, `Paused`, `On request`), Where, Started by, Schedule, Spec,
+Run log name, and **Last run** (rolled up from the run log). It is the full list of
+what runs where; the table below is the background.
+
+**The switch.** Every scheduled run starts by checking its registry row:
+
+1. Its prompt names the account it runs on (`Account: Curaden` or `Account: Personal`,
+   see the paste-once prompt below). A prompt that names no account is from before
+   23 Oct: skip the check, run as before, and log Account `unknown`.
+2. Find the row whose **Started by** names this task or Routine. If **Account** is
+   `Paused`, or names the other account, write a run-log row with Outcome `no-op` and
+   Summary `switch: assigned to {Account}`, and stop.
+3. If the registry can't be read, write a `failed` row with the reason and stop.
+   Running blind could double a run.
+
+Moving an agent to the other account: set up its scheduled task or Routine there with
+the account-aware prompt, then change **Account** on its row. The next run on each
+side follows the row. Neither account's copy has to be deleted. Runs Sean starts by
+asking ("boom boom", "post it") skip the switch and run wherever he asks.
+
+## Migration to Curaden (decided 23 Oct 2026)
+
+The step-by-step runbook is `docs/migration-to-curaden.md`; paste-ready Curaden prompts are in
+`docs/curaden-routines.md`. iTOP agent, marketing, website, game design and other
+personal projects stay on Personal; curagents and its automations move.
+
+**Curaden runs everything on a schedule. Personal builds.** The Personal account
+is expected to go within about six months, so from now on:
+
+- **Curaden** holds every scheduled task and Routine, and the on-request ops runs
+  ("boom boom", "post it", "check webex").
+- **Personal** holds no schedules once the move is done. It is the build and
+  maintenance seat: spec and skill changes by PR, design, analysis, testing a new
+  agent before it gets a schedule on Curaden. Nothing may live only on Personal.
+- Move one item at a time: set it up on Curaden with the `Account: Curaden` prompt,
+  flip **Account** on its Agent registry row, check its next run-log row, then
+  delete the Personal copy (Routines) or switch it off (PC tasks).
+
+| Item | Today | Decision | On Curaden as |
+|------|-------|----------|---------------|
+| Webex Sweep | — | **Keep** (new) | PC task "Webex Sweep (Curaden)", 11:40 + 16:40 |
+| Boom Boom Derek | Personal PC | **Keep, move** | PC task "Boom Boom Derek (Curaden)", 08:45 |
+| Truth Catcher scan | Personal Routine | **Keep, move** | Routine, 07:58 + 13:58 |
+| Roadmap ← Jira sync | Personal Routine | **Keep, move** | Routine, Thu 07:30 |
+| Agent run log check | Personal Routine (`trig_01AN1dTjvTV3YNhhmLAqV4tL`) | **Keep, move** (it is the monitoring) | Routine, weekdays 10:15 |
+| Team update draft | Missing (Routine gone) | **Keep, recreate** | Routine, Thu 14:00 |
+| Roadmap watch | Personal PC, Mon 08:00 | **Keep, move to the cloud**: it only uses connectors, so it shouldn't need the PC | Routine, Mon 08:00 |
+| Roadmap dashboard refresh | Personal PC, 09:15 | **On request** (Sean, 23 Oct): switch its schedule off and run it on click | — |
+| Boom Boom queued | Personal PC, 14:00 | **Retire after the move**: it only posts pings that a cloud "boom boom" queued; with Curaden running Boom Boom on the PC, the 08:45 run can post a queued ping itself (spec change by PR) | — |
+| Webex keep-alive | Personal PC, hourly 07–20 | **Cut to one warm-up**, weekdays 08:35, before the first Webex run. Webex web allows one live connection per browser, so every keep-alive tab knocked Sean's own Webex tab offline, 14 times a day. The Webex runs reload and retry themselves (`skills/webex-web`). If a run logs "signed out", add a warm-up a few minutes before that run rather than going back to hourly | PC task "Webex keep-alive (Curaden)", 08:35 |
+| Asana ↔ Notion sync | Paused | **Retire**: Webex Sweep now pushes approved inbox rows to Asana; running both would duplicate tasks | — |
+| App team weekly digest | Personal Routine, disabled | **Delete**: replaced by the team update | — |
+| Everything "On request" | — | Stays on request, run from whichever account Sean is in | — |
 
 ## Where each agent runs
 
@@ -29,10 +100,13 @@ and runs more reliably in the cloud, without the PC being on.
 | `truth-catcher` | Cloud | Claude Routine "Truth Catcher scan" (`trig_01BxmV4KaG4CPbZMU4GmMHa7`), weekdays 07:58 + 13:58 Zurich | Asana, Notion, GitHub connectors |
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
 | `roadmap-watch` | Cloud | "roadmap watch" (no schedule yet) | Weekly Monday report once a routine exists |
+| `webex-sweep` | **PC** | Desktop app scheduled task "Webex Sweep" (weekdays 11:40 + 16:40 Zurich); "check webex" any time | Reads the watched Webex spaces and new meeting action items; writes Notion inbox rows, Asana update comments and approved inbox rows to Asana. Never posts in Webex |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
 
+0. **Scheduled runs check the switch first** (above). A run that isn't its account's
+   turn logs `no-op` and stops before reading anything else.
 1. **Fresh session, latest specs.** Start with `git fetch origin main`. If the
    checkout is on `main` and clean, `git pull --ff-only`; otherwise read the files
    from `origin/main` (`git show origin/main:<path>`). Never merge or rebase.
@@ -56,6 +130,8 @@ Objectives. One row per run, written as the run's last step:
 | Agent | The agent's name (`other` if not listed) |
 | When | Date and time of the run |
 | Where | `PC` or `Cloud` |
+| Account | `Curaden` or `Personal`, from the prompt; `unknown` if the prompt names none |
+| Registry | The agent's row in the Agent registry (this fills its **Last run**) |
 | Outcome | `posted` (something went out), `ok` (work done, nothing to post), `no-op` (nothing to do), `partial`, `failed` |
 | Summary | One or two lines: what it did, with ids |
 | Error | The exact error or blocker, or empty |
@@ -73,6 +149,9 @@ weekday at 10:15 Zurich:
 - Rows with `failed` or `partial`: find the cause. If the spec, skill or script is
   wrong, open a PR with the fix; the next run picks it up through `git fetch`. If
   it's the PC (asleep, Chrome not connected, signed out), tell Sean what to fix.
+- Two rows for the same scheduled run from different accounts is a double run: say
+  so to Sean once, naming the account that should pause its copy.
+- A registry row whose **Last run** is older than its schedule allows is a missed run.
 - Tick **Reviewed** on every row it has looked at.
 - Nothing wrong: no message.
 
@@ -83,17 +162,24 @@ folder. Each run starts a fresh session, so nothing piles up. The prompts only
 point here: what a run does lives in this file and the agent specs on `main`, so a
 change merged here reaches the next run without touching the scheduled task.
 
-**Paste-once prompt** (replace `{name}` with the run's name below):
+**Paste-once prompt** (replace `{name}` with the run's name below and `{account}`
+with `Curaden` or `Personal`, the account whose desktop app holds the task):
 
-> In my curagents folder run `git fetch origin main`. If the checkout is on `main`
-> and clean, `git pull --ff-only`; otherwise don't merge anything and read every
-> file from `origin/main` (`git show origin/main:<path>`). Then do the "{name}" run
-> exactly as `RUNTIME.md` describes under "PC runs". Live: don't ask me first.
+> Account: {account}. In my curagents folder run `git fetch origin main`. If the
+> checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
+> anything and read every file from `origin/main` (`git show origin/main:<path>`).
+> Check the switch as `RUNTIME.md` describes, then do the "{name}" run exactly as
+> `RUNTIME.md` describes under "PC runs". Live: don't ask me first.
+
+The task files are shared on disk, so give each account's task its own name, e.g.
+"Boom Boom Derek (Curaden)", and put that name in the registry row's **Started by**.
+Cloud Routine prompts take the same `Account:` first line.
 
 | Scheduled task | When (Zurich) | `{name}` |
 |----------------|---------------|----------|
 | Boom Boom Derek | Weekdays 08:45 | Boom Boom Derek |
 | Boom Boom queued | Weekdays 14:00 | Boom Boom queued |
+| Webex Sweep | Weekdays 11:40 and 16:40 | Webex Sweep |
 
 ## PC runs
 
@@ -123,3 +209,12 @@ ping history and delete the queued section.
 For "post it" (announcements), "send QA report" (feedback-qa) and "meeting notes",
 start with the paste-once prompt's fetch step, read the agent's spec, and end like
 every PC run (run-log row, no spec edits).
+
+### Webex Sweep
+
+Read `skills/webex-web/SKILL.md` and `agents/webex-sweep.md`, and follow the agent
+spec exactly: read each watched space and the new meeting recaps since the last
+`webex-sweep` row in the Agent run log, write the Notion inbox rows and Asana
+update comments it describes, push approved inbox rows to Asana, and never post in
+Webex. A space you can't read after the skill's retries goes in the run log as
+`partial` with its name.

@@ -80,11 +80,11 @@ Channel and the sign-off.
 
 | Rule | Decision |
 |------|----------|
-| People | **The Phinamic team**, two people tracked by name. **Derek La**, technical owner: Jira `712020:078ef74c-95c3-45a8-ad5e-20e816c4b176`; emails `derek.la@phinamic.com` and `derek@phinamic.com`; Notion Team Directory page `2ab7e8aabbb48003a865f7f593144546`; no Asana account; identify him only by these, never by first name. **Khanh**, Business Analyst: full name, Webex display name and Jira account still to come from Sean (add them here); until then, match Khanh only in Webex messages and recaps that say "Khanh" next to Phinamic. **Ky** and the rest of the team read the chat but aren't tracked or @mentioned. |
+| People | **The Phinamic team**, two people tracked by name. **Derek La**, technical owner: Jira `712020:078ef74c-95c3-45a8-ad5e-20e816c4b176`; emails `derek.la@phinamic.com` and `derek@phinamic.com`; Notion Team Directory page `2ab7e8aabbb48003a865f7f593144546`; no Asana account; identify him only by these, never by first name. **Khanh Nguyen**, Business Analyst: Webex display name `Khanh Nguyen` (a real @mention in the common chat, used 23 Oct); Jira account still to come from Sean (add it here); until then, match Khanh in Jira only by name. **Ky** and the rest of the team read the chat but aren't tracked or @mentioned. |
 | Owners | Each item belongs to whoever its source names. Flows, rules, requirements and documentation lean to Khanh, the build to Derek, but never guess: an item with no named owner is "Phinamic team" and Derek decides who takes it. |
 | Autonomous | Live. Scheduled runs post without asking. Sean can also say "boom boom" any time for a run now. |
 | No Webex token | Posts and reads through Webex web in Sean's Chrome (Claude in Chrome), on Sean's own sign-in, following [`skills/webex-web`](../skills/webex-web/SKILL.md) like every Webex agent. No bot, no API token: nothing expires, the ping comes from Sean's account with a real @mention, and the whole space is readable (Derek and Khanh can reply normally). |
-| Channel | The **common chat** (Webex space "Curaden / Phinamic — BOB App & Admin" `644fd150-f1e6-11f0-886e-874a9ad69e32`, where Khanh, Ky and the team are) by default. **"Curaden / Phinamic"** (`136d9ce0-ab41-11f0-85e5-53eb7188e8c6`) only when Sean asks for it there or an item concerns Derek alone. Still one message a day across both. @mention Derek and Khanh (whoever has an item in the ping); sign "— Boom Boom 💥, on behalf of Sean". No DMs, no email, no Jira or Confluence comments. |
+| Channel | The **common chat** (Webex "Curaden / Phinamic — BOB App & Admin", `644fd150-f1e6-11f0-886e-874a9ad69e32`, where Khanh, Ky and the team are) by default. **"Curaden / Phinamic"** (`136d9ce0-ab41-11f0-85e5-53eb7188e8c6`) only when Sean asks for it there or an item concerns Derek alone. Still one message a day across both. @mention Derek and Khanh (whoever has an item in the ping); sign "— Boom Boom 💥, on behalf of Sean". No DMs, no email, no Jira or Confluence comments. |
 | Home | Notion page **Boom Boom Derek** `3f47e8aabbb48179af31f54a4acadb10`, a child of Derek's Team Directory page. It is team-facing ("Hi Derek, Khanh and the Phinamic team"): the full explanation per item with its owner, the bánh mì count, the ping history. Every ping links to it. |
 | Sources | Curaden's side first: Notion (call recaps, scope, roadmap) and Asana (Sean's "Waiting on Phinamic" tracker). Then Jira, Confluence, the WBS sheet and the two Webex spaces. |
 | Voice | Dank and a bit funny, never at the cost of clarity. See "Voice". |
@@ -207,10 +207,9 @@ One source failing never stops the run: mark it `unavailable` and carry on.
       common chat unless Sean said otherwise; direct links in the skill's Spaces
       table; never another space).
    2. In one `javascript_tool` call run `scripts/webex-post.js` with
-      `{ spaceId: "644fd150-f1e6-11f0-886e-874a9ad69e32", mention: ["Derek La", "{Khanh's Webex display name}"], marker: "Boom Boom: {Weekday d Mon}", send: true }`
+      `{ spaceId: "644fd150-f1e6-11f0-886e-874a9ad69e32", mention: ["Derek La", "Khanh Nguyen"], marker: "Boom Boom: {Weekday d Mon}", send: true }`
       (for Curaden / Phinamic: `spaceId: "136d9ce0-ab41-11f0-85e5-53eb7188e8c6"`).
-      Mention only the people who own an item in the ping, and Khanh only once the
-      display name is in "People". Start the message at the `##` title line; the
+      Mention only the people who own an item in the ping. Start the message at the `##` title line; the
       script puts the @mentions first.
       `retry: true` (Sean's own Webex tab took the connection) → reload and repeat,
       up to 3 times. `step: "mention"` → repeat without `mention`, message opening
@@ -220,12 +219,8 @@ One source failing never stops the run: mark it `unavailable` and carry on.
       posted. Screenshot it. Never resend because the tab looked offline right after
       sending.
    4. **Can't post** (Chrome not connected, Webex signed out, a sign-in page, three
-      offline retries, any other refusal): stop there. Put the message on the page
-      under "📤 Queued ping", naming the space, add "not sent: {reason}" to the ping
-      history, and give the reason in the run summary and the run log. The page is
-      the only queue: never keep the ping in a local file or outbox, because the
-      14:00 run and the next morning's run only look at the page. If the page
-      already has a queued ping, replace it with today's.
+      offline retries, any other refusal): stop there. Add the ping to the page
+      history as "not sent: {reason}" and put the message in the run summary for Sean.
 8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
    bánh mì count, and list for Sean: Asana subtasks to tick, items handed to him,
    roadmap rows that need his fix.
