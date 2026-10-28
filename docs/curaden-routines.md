@@ -35,9 +35,10 @@ Schedule: weekdays 07:58 and 13:58.
 > if its Account isn't Curaden, log `no-op` and stop.
 > Then run Truth Catcher live exactly as `agents/truth-catcher.md` "Routine run"
 > describes, with its "Agreed rules", "App Tasks board" and "Comment format". The
-> spec is the source of truth. Never edit tasks or Notion rows; don't commit or push.
+> spec is the source of truth. Never edit Notion rows; the only task edit is closing an
+> obviously done task under "Closing done tasks". Don't commit or push.
 > Finish with a 3–5 line summary (comments posted with links, escalations, roadmap
-> rows Sean should update, the App Tasks 📥 New list). Last step, always, also on
+> rows Sean should update, "Closed by Truth Catcher", the App Tasks 📥 New list). Last step, always, also on
 > failure: one row in the Agent run log as `RUNTIME.md` "Agent run log" describes
 > (Agent `truth-catcher`, Where Cloud).
 
@@ -108,7 +109,7 @@ desktop app and Webex signed in. One prompt for all, `{name}` from the table:
 
 | Task name | When (weekdays) | `{name}` |
 |-----------|-----------------|----------|
-| Webex keep-alive (Curaden) | 08:35 | Webex keep-alive (its steps are still only on the PC: copy `~/.claude/scheduled-tasks/webex-keepalive/SKILL.md` into this repo first) |
+| Webex keep-alive (Curaden) | 08:35 | Webex keep-alive (steps: `pc-tasks/webex-keepalive/SKILL.md`) |
 | Boom Boom Derek (Curaden) | 08:45 | Boom Boom Derek |
 | Webex Sweep (Curaden) | 11:40 and 16:40 | Webex Sweep |
 
