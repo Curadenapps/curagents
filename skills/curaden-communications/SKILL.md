@@ -104,7 +104,7 @@ announcements agent with period `weekly`. Don't create pages under the old
 ## 4. Meeting Notes
 
 Reads Webex's own **AI summary, action items and transcript** in Webex web
-(Claude in Chrome, Sean's sign-in) and creates a structured Notion recap. The
+(built-in browser or Claude in Chrome, Sean's sign-in) and creates a structured Notion recap. The
 reading steps are in `skills/webex-web/SKILL.md` Recipe 4; the agent flow
 (meeting choice, idempotency, where the page goes) is in `agents/meeting-notes.md`.
 
@@ -116,7 +116,7 @@ schema, and the full page body template.
 
 ### Step 1 — Determine mode
 
-- Claude in Chrome connected → **Webex mode** (default). Do not ask the user.
+- A browser reachable (built-in, or Claude in Chrome) → **Webex mode** (default). Do not ask the user.
 - Webex has no summary or transcript for that meeting and `FIREFLIES_API_KEY` is set → **Fireflies mode**.
 - Neither → paste mode: "Paste the transcript or the Webex recap and I'll condense it."
 
@@ -176,7 +176,7 @@ schema, and the full page body template.
 | RevolveNote GitHub org | `github.com/Curadenapps` |
 | Jira project key | See `references/jira-notion-bob-sync.md` |
 | Repo path details | See `references/revolvenote-sync.md` |
-| Webex meeting summaries | `web.webex.com` → Meetings → Meeting recap (Chrome, Sean's sign-in) |
+| Webex meeting summaries | `web.webex.com` → Meetings → Meeting recap (built-in browser, Sean's sign-in) |
 | Fireflies GraphQL API | `https://api.fireflies.ai/graphql` |
 | Fireflies env var | `FIREFLIES_API_KEY` |
 | Recap pages | Decision Log & Meeting Recaps `3f27e8aabbb481baa16ce7cb9e7514dd` |

@@ -50,13 +50,13 @@ curagents folder):
    Confluence), GitHub (with access to `Curadenapps/curagents`), Google Drive, and
    Figma and Webflow if those agents are used. Fireflies only if meeting-notes'
    fallback is wanted.
-2. **Desktop app (Curaden):** sign in, open the `curagents` folder, and connect
-   **Claude in Chrome** to this app, with Webex signed in in Chrome.
+2. **Desktop app (Curaden):** sign in, open the `curagents` folder, and sign in to
+   Webex once in the app's **built-in browser** (Ctrl+Shift+B; it persists).
 3. **Routines:** create the five from `docs/curaden-routines.md` (Truth Catcher
    scan, Roadmap ← Jira sync, Agent run log check, Team update draft, Roadmap
    watch).
 4. **PC tasks:** create the three from `docs/curaden-routines.md` (Webex keep-alive
-   08:35, Boom Boom Derek 08:45, Webex Sweep 11:40 + 16:40), names ending
+   every 2 hours 07:05–17:05, Boom Boom Derek 08:45, Webex Sweep 11:40 + 16:40), names ending
    "(Curaden)".
 5. **Registry:** for each one, set **Started by** to its exact Curaden name.
 

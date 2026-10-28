@@ -65,7 +65,7 @@ Schedule: weekdays 10:15.
 > Then do the weekday check exactly as `RUNTIME.md` "Monitoring" describes, using
 > the Agent registry for what was due. If a spec, skill or script is wrong, fix it
 > in a PR on `Curadenapps/curagents` and merge it once it's clean. If it's the PC
-> (asleep, Chrome not connected, Webex signed out), tell Sean exactly what to fix.
+> (asleep, desktop app closed, Webex signed out), tell Sean exactly what to fix.
 > Tick Reviewed on every row you looked at. Nothing wrong: no message.
 
 ### Team update draft (Curaden)
@@ -98,8 +98,8 @@ Schedule: Mondays 08:00. Moves from a PC task to a Routine: it only uses connect
 
 ## PC scheduled tasks (Curaden desktop app)
 
-On the `curagents` folder, with Claude in Chrome connected to the **Curaden**
-desktop app and Webex signed in. One prompt for all, `{name}` from the table:
+On the `curagents` folder, in the **Curaden** desktop app, with Webex signed in
+once in its built-in browser (Ctrl+Shift+B shows the pane; the sign-in persists). One prompt for all, `{name}` from the table:
 
 > Account: Curaden. In my curagents folder run `git fetch origin main`. If the
 > checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
@@ -109,11 +109,11 @@ desktop app and Webex signed in. One prompt for all, `{name}` from the table:
 
 | Task name | When (weekdays) | `{name}` |
 |-----------|-----------------|----------|
-| Webex keep-alive (Curaden) | 08:35 | Webex keep-alive (steps: `pc-tasks/webex-keepalive/SKILL.md`) |
+| Webex keep-alive (Curaden) | 07:05, then every 2 hours to 17:05 (`5 7-17/2 * * 1-5`) | Webex keep-alive |
 | Boom Boom Derek (Curaden) | 08:45 | Boom Boom Derek |
 | Webex Sweep (Curaden) | 11:40 and 16:40 | Webex Sweep |
 
-Not moved: Boom Boom queued and the Asana ↔ Notion sync (retired), Roadmap
+Not moved: Boom Boom queued (the keep-alive posts queued pings) and the Asana ↔ Notion sync (retired), Roadmap
 dashboard refresh (on click), the old App team digest (delete).
 
 ## Jira sync steps

@@ -3,11 +3,11 @@ name: meeting-notes
 description: >
   Turns a recorded Webex meeting into a Notion recap: reads Webex's own AI summary,
   action items and full transcript (and, when needed, screen-shared frames from the
-  recording) in Webex web through Claude in Chrome on Sean's sign-in, then writes
+  recording) in Webex web (built-in browser, Claude in Chrome as fallback) on Sean's sign-in, then writes
   Summary (what was decided), Topics Covered and Next Steps (owner by judgment, not
   pattern rules). Fireflies and pasted transcripts are fallbacks. Manual trigger only.
 model: claude-sonnet-5-5
-tools: Read, NotionAPI, ClaudeInChrome, FirefliesAPI
+tools: Read, NotionAPI, ClaudeBrowser, ClaudeInChrome, FirefliesAPI
 trigger:
   - type: manual
     phrases:
@@ -43,7 +43,7 @@ output:
 # Meeting Notes Agent
 
 You turn a meeting into a Notion recap. The source is **Webex's own AI summary,
-action items and transcript**, read in Webex web through Claude in Chrome on
+action items and transcript**, read in Webex web (built-in browser, Claude in Chrome as fallback) on
 Sean's sign-in, the same way every agent works in Webex:
 [`skills/webex-web/SKILL.md`](../skills/webex-web/SKILL.md) Recipe 4
 (`scripts/webex-meetings.js`). Sean prefers Webex's summaries to Fireflies'.
@@ -57,7 +57,7 @@ format, owner judgment and posting. Do not re-implement those steps here.
 
 | Condition | Action |
 |-----------|--------|
-| Claude in Chrome connected, Sean signed in to Webex | **Webex mode** (default): the meeting he names, or the latest recorded one without a recap |
+| A browser reachable (built-in, or Claude in Chrome), Sean signed in to Webex | **Webex mode** (default): the meeting he names, or the latest recorded one without a recap |
 | Webex has no AI summary or transcript for that meeting, `FIREFLIES_API_KEY` is set | Fireflies mode |
 | No browser (cloud session), or nothing recorded | Paste mode: ask for the transcript or the Webex recap text |
 

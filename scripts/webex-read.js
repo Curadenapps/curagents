@@ -1,6 +1,6 @@
 // Webex web: read the open space (status, recent messages, did a post land).
 // Every agent that reads a Webex space uses this; the routine is in skills/webex-web/SKILL.md.
-// Runs in a web.webex.com space tab through Claude in Chrome's javascript_tool:
+// Runs in a web.webex.com space tab through javascript_tool (built-in browser or Claude in Chrome):
 //
 //   (<this function>)({ marker: "Boom Boom Derek: Mon 12 Oct" })          // verify a post
 //   (<this function>)({ since: "Boom Boom Derek 💥, on behalf of Sean" })  // what came after

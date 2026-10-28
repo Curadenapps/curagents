@@ -4,7 +4,7 @@
 
 Webex's AI Assistant writes a summary and action items for every recorded
 meeting, plus a transcript with speakers and timestamps. Read them in Webex web
-through Claude in Chrome on Sean's sign-in with `scripts/webex-meetings.js`; the
+in the desktop app's built-in browser (Claude in Chrome as fallback) on Sean's sign-in with `scripts/webex-meetings.js`; the
 steps are in `skills/webex-web/SKILL.md` Recipe 4. Nothing to set up, no API key.
 
 ## 3a. Field Mapping: Webex → Notion

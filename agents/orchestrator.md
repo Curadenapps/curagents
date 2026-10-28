@@ -56,7 +56,7 @@ On any invocation, determine trigger type:
 | `user:check intake` / `app tasks board` / `what requests are waiting` | User phrase | Truth Catcher, App Tasks, Requests & Feedback board only |
 | `user:pause App Tasks` | User phrase | Truth Catcher: Sean puts the App Tasks board back in preview (spec "App Tasks board" rollout line + `dream.md` §5) |
 | `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's PC (RUNTIME.md) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
-| `schedule:"0 14 * * 1-5"` (Zurich) | Scheduled task "Boom Boom queued" on Sean's PC (RUNTIME.md) | boom-boom-derek (posts a ping a cloud run queued, if none went out today) |
+| `schedule:"5 7-17/2 * * 1-5"` (Zurich) | Scheduled task "Webex keep-alive" on Sean's PC (RUNTIME.md) | keeps the built-in browser's Webex sign-in warm; boom-boom-derek (posts a queued ping, if none went out today) |
 | `user:boom boom` / `boom boom derek` / `boom boom team` / `boom boom phinamic` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
 | `user:delegate it` (after a Boom Boom Derek run) | User phrase | boom-boom-derek: write Derek's closed items to Asana and decisions to Notion, each with its Webex source |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
