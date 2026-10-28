@@ -33,9 +33,9 @@ const ESCALATE_AFTER_WORKING_DAYS = 3;
 const MAX_DELAY_CANDIDATES = 20;
 
 /** Releases being built now — delays here put a launch at risk */
-const CURRENT_RELEASES = ["Soft Launch Oct-26", "Web Nov-26", "Hard Launch Dec-26"];
+const CURRENT_RELEASES = ["Soft Launch Oct-26", "Web Nov-26", "Hard Launch Dec-26", "Phase 1 Nov-26–Oct-27"];
 /** Releases that are not being built now — active work on them is "too early" */
-const LATER_RELEASES = ["V2 P1 Apr-27", "Rollout Apr–Aug-27", "Future", "Parked", "Unscheduled"];
+const LATER_RELEASES = ["Phase 2 Oct-27–Aug-28", "Later 2028", "V2 P1 Apr-27", "Rollout Apr–Aug-27", "Future", "Parked", "Unscheduled"];
 /** Sections that mean work is happening. */
 const ACTIVE_SECTION = /implementation|in progress|development|review|qa/i;
 /** Sections that mean work is waiting on someone. */
