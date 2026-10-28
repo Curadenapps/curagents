@@ -120,7 +120,7 @@ it `unavailable`, carry on, and say so at the top of the draft.
 
 Webex's AI Assistant writes a summary and next steps for recorded meetings.
 Those are the meeting source; Fireflies isn't used. The desktop app is
-unreliable, so read them in Webex web through Claude in Chrome, on Sean's own
+unreliable, so read them in Webex web (built-in browser, Claude in Chrome as fallback), on Sean's own
 sign-in, with [`skills/webex-web`](../skills/webex-web/SKILL.md) Recipe 4
 (`scripts/webex-meetings.js`). If it asks for a sign-in, stop and ask Sean; never
 type credentials.
@@ -285,7 +285,7 @@ and keep the line out of the Webex message until Legal has approved it
 2. Re-read the Notion draft; Sean may have edited it. Post what's there now.
 3. Save the message to `.announcements/{period}-{window_end}.md` and render the
    PDF (Step 4). Both stay local (`.announcements/` is gitignored).
-4. Post from Sean's account in Webex web through Claude in Chrome with
+4. Post from Sean's account in Webex web (built-in browser, Claude in Chrome as fallback) with
    [`skills/webex-web`](../skills/webex-web/SKILL.md) Recipe 2 (message + PDF; no
    bot token, since those get culled):
    - Open the space named exactly "App Team" (weekly, monthly), "App Team -
@@ -296,7 +296,7 @@ and keep the line out of the Webex message until Legal has approved it
      straight after. `retry: true` → reload and start the recipe again.
    - Verify with `webex-read.js` `{ marker }` after a reload (`markerCount: 1`) and
      screenshot it. A split update posts each part the same way, in order.
-   - If Chrome isn't connected or the post fails after the skill's retries, hand
+   - If no browser is reachable or the post fails after the skill's retries, hand
      Sean the message and PDF to post.
 5. Update the page status line: `Posted {date} to {space}`.
 
