@@ -3,13 +3,13 @@ name: webex-sweep
 # Display name: Webex Sweep
 description: >
   Checks around Webex a few times a day so nothing said there gets lost. Reads the
-  watched spaces and new meeting recaps in Webex web (Sean's Chrome), then keeps
+  watched spaces and new meeting recaps in Webex web (Sean's sign-in, desktop app's built-in browser), then keeps
   Notion and Asana in step: new asks and commitments become rows in the Notion
   inbox (Tasks & Notes), progress on existing work becomes a short update comment
   on the matching Asana task, and inbox rows Sean approved become Asana tasks.
   Read-only in Webex: it never posts, reacts or replies there.
 model: claude-sonnet-5-5
-tools: Read, NotionAPI, AsanaAPI, JiraAPI, ClaudeInChrome
+tools: Read, NotionAPI, AsanaAPI, JiraAPI, ClaudeBrowser, ClaudeInChrome
 trigger:
   - type: schedule
     cron: "CRON_TZ=Europe/Zurich 40 11,16 * * 1-5"   # PC scheduled task "Webex Sweep" (RUNTIME.md)

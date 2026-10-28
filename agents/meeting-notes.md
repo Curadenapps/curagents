@@ -7,7 +7,7 @@ description: >
   Summary (what was decided), Topics Covered and Next Steps (owner by judgment, not
   pattern rules). Fireflies and pasted transcripts are fallbacks. Manual trigger only.
 model: claude-sonnet-5-5
-tools: Read, NotionAPI, ClaudeInChrome, FirefliesAPI
+tools: Read, NotionAPI, ClaudeBrowser, ClaudeInChrome, FirefliesAPI
 trigger:
   - type: manual
     phrases:

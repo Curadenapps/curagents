@@ -8,7 +8,7 @@ each one where it says, in this order. Each prompt reads the details from this r
 |---|-----------|------|
 | 1 | **Personal** desktop app, curagents folder, on the PC | Phase 1: saves the PC task files into the repo (PR, not merged) |
 | 2 | **Curaden** claude.ai/code, new session on `Curadenapps/curagents` | Phase 2: the five cloud Routines + registry Started by |
-| 3 | **Curaden** desktop app, curagents folder, on the PC | Phase 2: the three PC tasks + Chrome/Webex check |
+| 3 | **Curaden** desktop app, curagents folder, on the PC | Phase 2: the three PC tasks + built-in browser/Webex check |
 
 Then Phase 3 (flip **Account** one row at a time) stays with Sean: prompt 2 and 3
 never flip it, so nothing runs twice.
@@ -86,7 +86,8 @@ docs/curaden-routines.md. Don't change any repo file; don't merge or push.
 ## 3. PC tasks (Curaden desktop app, PC)
 
 Sign in to the desktop app with the **Curaden** account, open the curagents
-folder, and connect Claude in Chrome to this app (Webex signed in in Chrome).
+folder, and sign in to Webex once in the app's built-in browser (Ctrl+Shift+B shows
+the pane; the sign-in persists across sessions).
 
 ```text
 Migration step 3 of 3 for curagents. This desktop app is on the Curaden AG
@@ -95,17 +96,16 @@ git pull --ff-only, else read files with git show origin/main:<path>. Read
 RUNTIME.md ("PC runs", "Accounts and the switch"), docs/curaden-routines.md
 ("PC scheduled tasks") and skills/webex-web/SKILL.md. Don't merge or push.
 
-1. Check the setup: Claude in Chrome answers, a Webex web tab can be opened and
-   is signed in (never type credentials; if it asks to sign in, stop and tell me),
+1. Check the setup: the built-in browser tools (mcp__Claude_Browser__*) load, Webex
+   web opens in it (preview_start) and is signed in (never type credentials; if it asks to sign in, stop and tell me),
    and the Notion and Asana connectors work. Anything missing: stop and say what.
 
-2. If pc-tasks/ exists on origin/main (from the extract PR), use the Webex
-   keep-alive steps from pc-tasks/; otherwise tell me the keep-alive needs its
-   steps copied into the repo first and skip that one task.
+2. Check the old Personal tasks are known: pc-tasks/README.md lists them. Don't
+   copy their prompts; the new tasks use the shared prompt below.
 
 3. Create these desktop scheduled tasks (Europe/Zurich, weekdays), each with the
    shared PC prompt from docs/curaden-routines.md, {name} filled in:
-   - "Webex keep-alive (Curaden)"  08:35
+   - "Webex keep-alive (Curaden)"  07:05, then every 2 hours to 17:05
    - "Boom Boom Derek (Curaden)"   08:45
    - "Webex Sweep (Curaden)"       11:40 and 16:40
    If you have no tool to create desktop scheduled tasks, give me the exact

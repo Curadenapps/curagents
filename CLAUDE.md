@@ -16,7 +16,7 @@ The following skills are available and will auto-load based on trigger phrases:
 
 - **`skills/feedback-qa/SKILL.md`** — Feedback QA: Notion inbox → checks → PDF report to the Webex QA space (+ Confluence for full UATs)
 - **`skills/curaden-communications/SKILL.md`** — RevolveNote sync, Jira-Notion BOB sync, Meeting Notes (Webex → Notion). The BOB weekly broadcast moved to `agents/announcements.md`
-- **`skills/webex-web/SKILL.md`** — The only way to work in Webex: post (with @mentions, files), read spaces, read meetings (AI summary, action items, transcript, recording). Webex web in Sean's Chrome via Claude in Chrome; no bot tokens. Load it before any Webex step
+- **`skills/webex-web/SKILL.md`** — The only way to work in Webex: post (with @mentions, files), read spaces, read meetings (AI summary, action items, transcript, recording). Webex web on Sean's sign-in in the Claude desktop app's built-in browser (Claude in Chrome as fallback); no bot tokens. Load it before any Webex step
 
 Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own reference files as needed.
 
