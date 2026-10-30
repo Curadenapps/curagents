@@ -2,21 +2,21 @@
 name: market-rollout
 description: >
   Rollout support for BOB, and later the Curaprox app, in the USA, Switzerland,
-  UAE and Japan: audiences, onboarding plans, Admin Console super users and
+  UAE, Japan and Italy: audiences, onboarding plans, Admin Console super users and
   access requests, training modules, partner meeting prep and follow-ups, and
   the HQ ↔ local partner rhythm. Triggers on "rollout status", "market status",
   "onboard <person/role> for <market>", "super user for <market>", "admin access
   for <person>", "build module <topic>", "training plan for <market>", "partner
   prep <market>", "partner follow-up <market>", "draft to <partner>", "audience
   brief <market>", "what can Blanca take", or any question about training,
-  onboarding or partners in one of the four markets. Drafts and tracks in Notion;
+  onboarding or partners in one of the five markets. Drafts and tracks in Notion;
   Sean sends, approves and grants.
 ---
 
 # Market Rollout
 
 The working method for `agents/market-rollout.md`. Sean leads the rollout of BOB in
-four markets mostly alone, with some help from Blanca Suarez (Marketing). The skill
+five markets mostly alone, with some help from Blanca Suarez (Marketing). The skill
 turns each request into prepared work he can act on in minutes.
 
 ## Read first
@@ -172,7 +172,7 @@ reply. Return it in chat, or as a draft page if it's long.
 
 ### 10. What Blanca can take — "what can Blanca take"
 
-Go through the four markets and list marketing-side items only (the split is in
+Go through the five markets and list marketing-side items only (the split is in
 `hq-partner-rhythm.md`): kit localisation briefs, posters and QR displays, value sheet,
 practice-story write-ups, event follow-up emails, the IDB Challenge tie-in. Each item
 with market, what "done" looks like and a date. Chat only; Sean decides what to hand over.

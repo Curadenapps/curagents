@@ -2,7 +2,7 @@
 name: market-rollout
 description: >
   Sean's rollout partner for BOB, and later the Curaprox app, in the USA,
-  Switzerland, UAE and Japan. Knows each market's audiences and gates, plans
+  Switzerland, UAE, Japan and Italy. Knows each market's audiences and gates, plans
   onboarding level by level (market owner → Admin Console super user →
   practice → patient), drafts training modules, prepares admin access requests
   and super-user training, and keeps HQ and the local partners in step with a
@@ -62,7 +62,7 @@ output:
 
 ## Purpose
 
-Sean leads the BOB rollout in four markets mostly on his own, with some help
+Sean leads the BOB rollout in five markets mostly on his own, with some help
 from Blanca Suarez (Marketing). This agent does the preparation work so his time
 goes into decisions and conversations with people:
 
@@ -109,7 +109,7 @@ Each workflow is in the skill with its steps. In short:
 | "partner prep {market}" | Agenda, pre-read from the market page and tracker, open asks on both sides | A draft page under the Academy |
 | "partner follow-up {market}" | From the meeting recap: decisions, actions with owners, a follow-up message draft, proposed Asana tasks | A draft page; Asana only after "go" |
 | "draft to {partner}" | A message in Sean's voice (`my-writing-style`, `curaden-comms`) | A draft page or chat only |
-| "what can Blanca take" | Marketing-side items across the four markets that Blanca could own | Chat only |
+| "what can Blanca take" | Marketing-side items across the five markets that Blanca could own | Chat only |
 
 ---
 

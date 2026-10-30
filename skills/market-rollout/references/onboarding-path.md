@@ -49,7 +49,8 @@ Never put a password in the request or the tracker. Access is removed the same w
 
 **Certification checklist** (Sean or the HQ trainer ticks it during a live session)
 - [ ] Approves a test practice and explains what they checked before approving
-      (US: BAA signed; CH: processing agreement; JP: entrustment agreement; UAE: clinic agreement)
+      (US: BAA signed; CH: processing agreement; JP: entrustment agreement; UAE: clinic agreement;
+      IT: processing agreement)
 - [ ] Adds staff to a practice and switches a feature on and off
 - [ ] Runs a BOB assessment end to end on the demo practice and sends the plan
 - [ ] Explains consent to a patient in the market's language, using the market's consent text

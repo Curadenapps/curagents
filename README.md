@@ -48,7 +48,7 @@ Config details for each procedure: [`skills/curaden-communications/references/`]
 
 ### `market-rollout` → [`skills/market-rollout/SKILL.md`](skills/market-rollout/SKILL.md)
 
-Rollout support for the four 2027 markets (USA, Switzerland, UAE, Japan). Used by the
+Rollout support for the 2027 markets (USA, Switzerland, UAE, Japan, and Italy, which pilots first from the Milan launch). Used by the
 `market-rollout` agent; Notion home is the Market Rollout Academy (training modules +
 onboarding tracker).
 
@@ -104,7 +104,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
 | Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | Weekly CRON (Mon 08:00) + manual "roadmap watch" |
-| Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in USA, CH, UAE, Japan: audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
+| Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in USA, CH, UAE, Japan, Italy: audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
 | Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
 
 ### Model tiers and swarming

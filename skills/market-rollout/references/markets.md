@@ -1,6 +1,6 @@
 # Markets: IDs and people
 
-Last checked: 29 Oct 2026. The market pages in Notion win over this file; update
+Last checked: 30 Oct 2026. The market pages in Notion win over this file; update
 this file when an owner, ID or gate changes.
 
 ## Shared
@@ -25,8 +25,9 @@ this file when an owner, ID or gate changes.
 | Blanca Suarez (Marketing) | look up her Asana user by name before assigning; only when Sean names her |
 | Phinamic technical owner | Derek La |
 
-Rollout window: Apr–Aug 2027 (CH, DE, UAE, BR, USA, JP). Germany and Brazil get a page
-and a row here when Sean starts them.
+Rollout window: Apr–Aug 2027 (CH, DE, UAE, BR, USA, JP). Italy (added 30 Oct 2026) starts
+earlier: Milan launch session (proposed 21 Jan 2027), then a 2–3 month pilot to ≈ end
+Apr/May 2027. Germany and Brazil get a page and a row here when Sean starts them.
 
 ## USA
 
@@ -81,3 +82,18 @@ and a row here when Sean starts them.
 | Languages | Japanese |
 | Hard rule | Clinics already live with real patients: Japanese consent and entrustment agreement first. No sponsored posts until the advertising check. |
 | Patient side | Curaprox app web edition |
+
+## Italy
+
+| What | Value |
+|------|-------|
+| Market page | `4097e8aabbb4800d8cf5ffb8c45bc397` |
+| Rollout task | `1220067715520562` (due 31 May 2027, end of pilot [confirm]) |
+| Admin super user + training (Gate 1) | `1220067667419747` |
+| Gate milestones | G0 `1220067667364410` · G1 `1220067667469030` · G2 `1220067667301024` · G3 `1220067716274803` |
+| Linked launch | Milan session: Asana `1217552489272192`, Notion milestone `3f97e8aabbb4812a923eced30d6aa7bd` (proposed 21 Jan 2027); G0 also waits on its subtasks `1217600712018222` (scope with Blanca, 20 Nov) and `1217600685885178` (Milan store + Italy board buy-in, 4 Dec); G1 waits on the Milan task |
+| Campaign | IDB activation campaign from Jan 2027 (Blanca), Notion `3fe7e8aabbb48138aea4eac451fdcf35` |
+| Owner | [confirm: Paolo Saggiorato (Curaprox Italy), pending his reply to Sean's drafted email] |
+| Languages | Italian (BOB practice interface lists Italian; patient side [confirm]) |
+| Hard rule | Pilot runs before the Apr–Aug 2027 window; Legal frame (GDPR, processing agreement, Italian consent) [confirm with Tino] before real patients |
+| Patient side | [confirm] Curaprox app web edition |
