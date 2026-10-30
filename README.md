@@ -46,6 +46,20 @@ Skills are invokable by any Claude session. Trigger by phrase — no manual setu
 
 Config details for each procedure: [`skills/curaden-communications/references/`](skills/curaden-communications/references/)
 
+### `market-rollout` → [`skills/market-rollout/SKILL.md`](skills/market-rollout/SKILL.md)
+
+Rollout support for the 2027 markets (USA, Switzerland, UAE, Japan, and Italy, which pilots first from the Milan launch). Used by the
+`market-rollout` agent; Notion home is the Market Rollout Academy (training modules +
+onboarding tracker).
+
+| Trigger phrase | What it does |
+|----------------|-------------|
+| "rollout status [market]" | Gate, people, training, partner rhythm; writes the market page's Rollout status |
+| "onboard {person} for {market}" / "super user for {market}" | Onboarding plan, tracker row, Admin Console access request draft for Phinamic |
+| "build module {topic}" / "training plan for {market}" | Module draft from the catalogue (M0–M9, C1–C2); market training plan |
+| "partner prep {market}" / "partner follow-up {market}" | Agenda and pre-read; decisions, actions, follow-up draft, proposed Asana tasks |
+| "what can Blanca take" | Marketing-side items Sean could hand to Blanca |
+
 ### `webex-web` → [`skills/webex-web/SKILL.md`](skills/webex-web/SKILL.md)
 
 The one way every agent works in Webex, through Webex web on Sean's own sign-in
@@ -90,6 +104,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
 | Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | Weekly CRON (Mon 08:00) + manual "roadmap watch" |
+| Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in USA, CH, UAE, Japan, Italy: audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
 | Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
 
 ### Model tiers and swarming
@@ -100,7 +115,7 @@ scripts and `.claude/agents/` wrappers all use the same tier.
 | Tier | Agents | Why |
 |------|--------|-----|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
-| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements | Judgement on structured data |
+| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout | Judgement on structured data |
 | Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
 
 Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.
