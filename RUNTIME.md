@@ -93,6 +93,7 @@ is expected to go within about six months, so from now on:
 | Agent | Where | Started by | Notes |
 |-------|-------|------------|-------|
 | `boom-boom-derek` | **PC** | Desktop app scheduled task "Boom Boom Derek" (weekdays 08:45 Zurich); "boom boom" any time | Posts to the common chat (QA space) for the Phinamic team, or Curaden / Phinamic for Derek-only items. A ping that can't go out (or a cloud "boom boom") is queued on its Notion page; the next Webex keep-alive posts it |
+| `webex-keepalive` | **PC** | Desktop app scheduled task "Webex keep-alive" (weekdays 07:05, then every 2 hours to 17:05) | Keeps Webex signed in in the built-in browser, tells Sean when it isn't, posts the Boom Boom page's queued ping. One run-log row per run |
 | `announcements` (post) | **PC** | Sean's "post it" | Posting stays behind Sean's approval of each draft |
 | `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | The routine `trig_01Pi2NPoRWRP6MStWHVzzkDm` named in the spec no longer appears in the Routines list: recreate it or draft on "team update" |
 | `feedback-qa` (report) | **PC** | "send QA report" | The PDF goes to the Webex QA space |
@@ -216,6 +217,10 @@ this section is what runs now. Quick and quiet: it runs every 2 hours.
    replied in a way that changes it, leave it queued and tell Sean), post it in the
    space the queued section names, record it in the ping history and delete the
    queued section. A queued ping from an earlier day is stale: delete it and note it.
+5. **Run log, every run:** one row, Agent `webex-keepalive`, Where `PC`, Outcome `ok`
+   ("signed in, kept alive" or "signed in, queued ping posted {HH:MM}"), `partial`
+   ("signed out") or `failed` (no built-in browser). The run-log check uses these rows
+   to see whether Webex was signed in before Boom Boom and Webex Sweep ran.
 
 ### Manual PC runs
 
