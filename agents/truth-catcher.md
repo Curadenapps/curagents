@@ -76,8 +76,8 @@ These rules apply to every session and every run. Change them only through
 | Finding | Rule | Decided by |
 |---------|------|-----------|
 | **Not on roadmap** | Product or engineering work that no roadmap row links (task or parent) and that doesn't clearly belong to an existing Feature or Milestone. Non-product work is skipped. | Agent (Step 2a) |
-| **Roadmap at risk** ❓ | A launch-relevant task (row Release Soft Launch / Web / Hard Launch, or Priority P1) is in a waiting section, overdue, due after the roadmap date, or had its due date moved, and no real rationale is recorded | Script finds signals, agent judges (Step 2b) |
-| **Too early** | The task is open in an active section (Implementation, In progress, Development, Review, QA), but the row's Release is V2 P1 Apr-27, Rollout Apr–Aug-27, Future, Parked or Unscheduled, or its Priority is Parked | Script |
+| **Roadmap at risk** ❓ | A launch-relevant task (row Release Soft Launch / Web / Hard Launch / Phase 1 Nov-26–Oct-27, or Priority P1) is in a waiting section, overdue, due after the roadmap date, or had its due date moved, and no real rationale is recorded | Script finds signals, agent judges (Step 2b) |
+| **Too early** | The task is open in an active section (Implementation, In progress, Development, Review, QA), but the row's Release is Phase 2 Oct-27–Aug-28, Later 2028, Future, Parked or Unscheduled (or the retired V2 P1 Apr-27 / Rollout Apr–Aug-27), or its Priority is Parked | Script |
 | **Status drift** | The task is complete but the row isn't Done or Cut; or the row is Done and the task is open | Script |
 | **Cut** 🔴 | The row is Cut but the task is still open | Script |
 
@@ -292,9 +292,9 @@ In rich text the sign-off is `<em>— Truth Catcher (automated check, not Sean p
 
 Roadmap finding:
 ```
-Quick flag on this one: this is in "Implementation", but the roadmap row "Clinic reports" is planned for V2 P1 Apr-27, so it's starting earlier than planned.
+Quick flag on this one: this is in "Implementation", but the roadmap row "Clinic reports" is planned for Phase 2 Oct-27–Aug-28, so it's starting earlier than planned.
 
-Could we either move the row into a current release (Soft Launch Oct-26, Web Nov-26 or Hard Launch Dec-26) or pause this for now?
+Could we either move the row into a current release (Web Nov-26, Hard Launch Dec-26 or Phase 1 Nov-26–Oct-27) or pause this for now?
 
 Roadmap: {row URL}
 

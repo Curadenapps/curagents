@@ -124,7 +124,7 @@ Otherwise classify each change:
 | Asana due date or Jira duedate ≠ Notion Date by more than 7 days | Drift |
 | Milestone date within 21 days and a row that Blocks it is not Done | At-risk milestones |
 | Milestone date passed and Status ≠ Done | At-risk milestones |
-| "CTP MVP: rules-based plan engine" or "Treatment plan builder in BOB" slips past V2 P1 Apr-27 | At-risk milestones |
+| "CTP MVP: rules-based plan engine" or "Treatment plan builder in BOB" slips past 25 Jun 2027 ("Milestone: Treatment plan live", WBS "voice first") | At-risk milestones |
 | New Asana BOB V2 subtask or BA issue with no roadmap row linking it | New untracked work |
 | Roadmap row with no Asana Link and no Jira Key, Release not Future/Parked | Unlinked roadmap rows |
 | Open Feature (Status not Done/Cut) with empty Priority, Difficulty, Release or Epic | Missing info |
