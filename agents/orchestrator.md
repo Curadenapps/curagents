@@ -77,6 +77,7 @@ On any invocation, determine trigger type:
 | `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
 | `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |
 | `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web, `skills/webex-web`) |
+| `user:rollout status` / `onboard * for *` / `super user for *` / `admin access for *` / `build module *` / `training plan for *` / `partner prep *` / `partner follow-up *` / `audience brief *` / `what can Blanca take` | User phrase | market-rollout (drafts and tracker rows in Notion; Asana only after Sean says go, via asana-maintenance) |
 | `user:markets update` / `markets monthly` | User phrase | announcements, period `markets` (from Dec 2026) |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
@@ -149,7 +150,7 @@ pinned to its model tier. Dispatch them with the Agent tool.
 | Tier | Agents |
 |------|--------|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance (mechanical: poll, diff, link, route) |
-| Sonnet 5.5 | truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements (judgement on structured data) |
+| Sonnet 5.5 | truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout (judgement on structured data) |
 | Opus 5.5 | brand-asset, release (approval gates, clinical claims, releases) |
 
 - **Run in parallel** only agents that are independent and read-only for the current
