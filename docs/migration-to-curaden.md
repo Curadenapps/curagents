@@ -52,11 +52,11 @@ curagents folder):
    fallback is wanted.
 2. **Desktop app (Curaden):** sign in, open the `curagents` folder, and sign in to
    Webex once in the app's **built-in browser** (Ctrl+Shift+B; it persists).
-3. **Routines:** create the five from `docs/curaden-routines.md` (Truth Catcher
-   scan, Roadmap ← Jira sync, Agent run log check, Team update draft, Roadmap
-   watch).
-4. **PC tasks:** create the three from `docs/curaden-routines.md` (Webex keep-alive
-   every 2 hours 07:05–17:05, Boom Boom Derek 08:45, Webex Sweep 11:40 + 16:40), names ending
+3. **Routines:** create the four from `docs/curaden-routines.md` (Truth Catcher
+   scan, Roadmap ← Jira sync, Agent run log check, Team update draft).
+4. **PC tasks:** create the five from `docs/curaden-routines.md` (Webex keep-alive
+   every 2 hours 07:05–17:05, Boom Boom Derek 08:45, Webex Sweep 11:40 + 16:40,
+   Roadmap watch Mon 08:00, Feedback QA report Fri 10:40), names ending
    "(Curaden)".
 5. **Registry:** for each one, set **Started by** to its exact Curaden name.
 

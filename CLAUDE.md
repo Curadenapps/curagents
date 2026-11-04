@@ -44,12 +44,12 @@ rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 - [`agents/github.md`](agents/github.md) — PR/commit linkage to Jira and Asana (Curadenapps org)
 - [`agents/release.md`](agents/release.md) — Release coordinator (BOB + RevolveNote); manual trigger only
 - [`agents/meeting-notes.md`](agents/meeting-notes.md) — Webex meeting (AI summary, action items, transcript, recording frames) → Notion recap page
-- [`agents/roadmap-watch.md`](agents/roadmap-watch.md) — Weekly roadmap drift report (Notion roadmaps vs Asana/Jira); read-only
-- [`agents/feedback-qa.md`](agents/feedback-qa.md) — Feedback QA: reads the Notion inbox, reports to Webex; Confluence for full UATs
+- [`agents/roadmap-watch.md`](agents/roadmap-watch.md) — Weekly roadmap drift report (Notion roadmaps vs Asana/Jira); read-only, plus a Monday summary to Webex App Team
+- [`agents/feedback-qa.md`](agents/feedback-qa.md) — Feedback QA: reads the Notion inbox, posts the PDF report to the Webex QA space on its own every Friday when there's enough; Confluence for full UATs
 - [`agents/announcements.md`](agents/announcements.md) — Team update: week / two weeks / month across every tool → Notion draft → Webex after approval
 - [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) — Boom Boom Derek: Truth Catcher for the Phinamic team (Derek La and Khanh); autonomous, funny-but-clear pings in the Webex common chat (QA space) or "Curaden / Phinamic", details on its Notion page
 - [`agents/market-rollout.md`](agents/market-rollout.md) — Market Rollout: Sean's rollout partner for BOB (then the Curaprox app) in the USA, Switzerland, UAE, Japan and Italy; onboarding tracker, super users, training modules, HQ ↔ partner rhythm. Manual only
-- [`agents/webex-sweep.md`](agents/webex-sweep.md) — Webex Sweep: reads the watched Webex spaces and meeting action items; new asks into the Notion inbox, updates onto Asana tasks, approved rows to Asana. Read-only in Webex
+- [`agents/webex-sweep.md`](agents/webex-sweep.md) — Webex Sweep: reads the watched Webex spaces and meeting action items; new asks into the Notion inbox, updates onto Asana tasks, approved rows to Asana; posts one "logged" note per space in Webex
 
 ## Scope
 

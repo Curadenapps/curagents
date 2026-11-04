@@ -80,7 +80,8 @@ is expected to go within about six months, so from now on:
 | Roadmap ← Jira sync | Personal Routine | **Keep, move** | Routine, Thu 07:30 |
 | Agent run log check | Personal Routine (`trig_01AN1dTjvTV3YNhhmLAqV4tL`) | **Keep, move** (it is the monitoring) | Routine, weekdays 10:15 |
 | Team update draft | Missing (Routine gone) | **Keep, recreate** | Routine, Thu 14:00 |
-| Roadmap watch | Personal PC, Mon 08:00 | **Keep, move to the cloud**: it only uses connectors, so it shouldn't need the PC | Routine, Mon 08:00 |
+| Roadmap watch | Personal PC, Mon 08:00 | **Keep on the PC** (4 Nov): it now posts its summary to Webex App Team | PC task "Roadmap watch (Curaden)", Mon 08:00 |
+| Feedback QA report | On request | **New, weekly** (4 Nov): posts on its own when there's enough feedback | PC task "Feedback QA report (Curaden)", Fri 10:40 |
 | Roadmap dashboard refresh | Personal PC, 09:15 | **On request** (Sean, 23 Oct): switch its schedule off and run it on click | — |
 | Boom Boom queued | Personal PC, 14:00 | **Retire**: the Webex keep-alive posts queued pings now (28 Oct) | — |
 | Webex keep-alive | Personal PC, hourly 07–20 | **Every 2 hours**, weekdays 07:05–17:05 (28 Oct). It runs in the desktop app's built-in browser, a separate browser from Sean's Chrome, so it no longer knocks his own Webex tab offline. It keeps the sign-in warm, tells Sean once when Webex is signed out, and posts a queued Boom Boom ping | PC task "Webex keep-alive (Curaden)", `5 7-17/2 * * 1-5` |
@@ -96,11 +97,11 @@ is expected to go within about six months, so from now on:
 | `webex-keepalive` | **PC** | Desktop app scheduled task "Webex keep-alive" (weekdays 07:05, then every 2 hours to 17:05) | Keeps Webex signed in in the built-in browser, tells Sean when it isn't, posts the Boom Boom page's queued ping. One run-log row per run |
 | `announcements` (post) | **PC** | Sean's "post it" | Posting stays behind Sean's approval of each draft |
 | `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | The routine `trig_01Pi2NPoRWRP6MStWHVzzkDm` named in the spec no longer appears in the Routines list: recreate it or draft on "team update" |
-| `feedback-qa` (report) | **PC** | "send QA report" | The PDF goes to the Webex QA space |
+| `feedback-qa` (report) | **PC** | Desktop app scheduled task "Feedback QA report" (Fridays 10:40 Zurich); "send QA report" any time | Posts the PDF to the Webex QA space on its own when the rubric's threshold is met; below it, logs `no-op` |
 | `meeting-notes` | **PC** | "meeting notes" | Reads Webex meeting summaries and transcripts |
 | `truth-catcher` | Cloud | Claude Routine "Truth Catcher scan" (`trig_01BxmV4KaG4CPbZMU4GmMHa7`), weekdays 07:58 + 13:58 Zurich | Asana, Notion, GitHub connectors |
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
-| `roadmap-watch` | Cloud | "roadmap watch" (no schedule yet) | Weekly Monday report once a routine exists |
+| `roadmap-watch` | **PC** | Desktop app scheduled task "Roadmap watch" (Mondays 08:00 Zurich); "roadmap watch" any time | Writes the Notion report, then posts a short summary with the link to Webex App Team |
 | `webex-sweep` | **PC** | Desktop app scheduled task "Webex Sweep" (weekdays 11:40 + 16:40 Zurich); "check webex" any time | Reads the watched Webex spaces and new meeting action items; writes Notion inbox rows, Asana update comments and approved inbox rows to Asana. Never posts in Webex |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
@@ -181,6 +182,8 @@ Cloud Routine prompts take the same `Account:` first line.
 | Boom Boom Derek | Weekdays 08:45 | Boom Boom Derek |
 | Webex keep-alive | Weekdays 07:05, then every 2 hours to 17:05 | Webex keep-alive |
 | Webex Sweep | Weekdays 11:40 and 16:40 | Webex Sweep |
+| Roadmap watch | Mondays 08:00 | Roadmap watch |
+| Feedback QA report | Fridays 10:40 | Feedback QA report |
 
 ## PC runs
 
@@ -224,7 +227,7 @@ this section is what runs now. Quick and quiet: it runs every 2 hours.
 
 ### Manual PC runs
 
-For "post it" (announcements), "send QA report" (feedback-qa) and "meeting notes",
+For "post it" (announcements), "send QA report" (feedback-qa), "roadmap watch" and "meeting notes",
 start with the paste-once prompt's fetch step, read the agent's spec, and end like
 every PC run (run-log row, no spec edits).
 
@@ -233,6 +236,20 @@ every PC run (run-log row, no spec edits).
 Read `skills/webex-web/SKILL.md` and `agents/webex-sweep.md`, and follow the agent
 spec exactly: read each watched space and the new meeting recaps since the last
 `webex-sweep` row in the Agent run log, write the Notion inbox rows and Asana
-update comments it describes, push approved inbox rows to Asana, and never post in
-Webex. A space you can't read after the skill's retries goes in the run log as
+update comments it describes, push approved inbox rows to Asana, and post the
+"Logged from this chat" note in each space it took tickets from (nothing else in
+Webex). A space you can't read after the skill's retries goes in the run log as
 `partial` with its name.
+
+### Roadmap watch
+
+Read `skills/webex-web/SKILL.md` and `agents/roadmap-watch.md` and follow the spec:
+write this week's report page, then post its Step 5 summary to App Team. Live:
+don't ask first.
+
+### Feedback QA report
+
+Read `skills/webex-web/SKILL.md`, `agents/feedback-qa.md` and
+`skills/feedback-qa/SKILL.md` and run Procedure 1 as the spec's "Scheduled run"
+says: report and post only when the rubric's threshold is met, otherwise log
+`no-op` with what is waiting. Live: don't ask first.

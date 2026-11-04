@@ -9,6 +9,9 @@ description: >
 model: claude-sonnet-5-5
 tools: Read, Write, Bash, WebFetch, NotionAPI, ConfluenceAPI, JiraAPI, GitHubAPI, AsanaAPI
 trigger:
+  - type: schedule
+    cron: "CRON_TZ=Europe/Zurich 40 10 * * 5"   # PC scheduled task "Feedback QA report" (RUNTIME.md); posts on its own (4 Nov, Sean)
+    label: weekly-qa-report
   - type: manual
     phrases:
       - "triage feedback"
@@ -34,7 +37,7 @@ memory:
     - "confluence: child pages of BOB App UAT (1933795), full UATs only"
     - skills/uat/references/uat-log.md
 idempotency_key: "{notion_row_id}:{QA value}"
-dry_run: true
+dry_run: false  # live and autonomous from 4 Nov 2026: the Friday run posts when the rubric's threshold is met
 output:
   schema:
     reported: boolean
@@ -51,6 +54,14 @@ output:
 Execute `skills/feedback-qa/SKILL.md`. Checks, sections and the report
 threshold are in `references/rubric.md`; the "already addressed" proof rules
 are in `references/ledger.md`. Do not restate them here.
+
+## Scheduled run (Fridays 10:40, autonomous)
+
+Like Truth Catcher in Asana, the Friday run doesn't ask: it runs Procedure 1 and, if
+`references/rubric.md` §5 says report, builds the PDF and posts it to the QA space
+itself. Below the threshold it posts nothing and logs `no-op` with what is waiting.
+Full UATs still go to Confluence as in the skill. Never more than one report a week
+from the schedule; "send QA report" from Sean can add one any time.
 
 ## Hard rules
 

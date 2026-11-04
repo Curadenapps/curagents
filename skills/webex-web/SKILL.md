@@ -229,6 +229,7 @@ the agent's spec says what may leave Notion.
 | [boom-boom-derek](../../agents/boom-boom-derek.md) | Reads the common chat, Curaden / Phinamic and the Phinamic team's meetings; posts one ping a day, to the common chat by default |
 | [announcements](../../agents/announcements.md) | Reads meeting summaries; posts the approved update (+ PDF) to App Team |
 | [meeting-notes](../../agents/meeting-notes.md) | Meeting summary, action items and transcript → Notion recap page |
-| [feedback-qa](../../agents/feedback-qa.md) | Posts the QA report (+ PDF) to the QA space |
-| [webex-sweep](../../agents/webex-sweep.md) | Reads App Team, the QA space and Curaden / Phinamic, plus new meeting recaps (action items only). Never posts |
+| [feedback-qa](../../agents/feedback-qa.md) | Posts the QA report (+ PDF) to the QA space; on its own every Friday 10:40 when the threshold is met |
+| [roadmap-watch](../../agents/roadmap-watch.md) | Posts the Monday summary with the report link to App Team |
+| [webex-sweep](../../agents/webex-sweep.md) | Reads App Team, the QA space and Curaden / Phinamic, plus new meeting recaps (action items only). Posts one "Logged from this chat" note per space per run |
 | Any new agent | Load this skill; add its spaces to the table above |
