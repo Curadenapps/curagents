@@ -30,6 +30,7 @@ memory:
     - skills/market-rollout/references/modules.md  # what BOB does, in plain words
     - "asana: App Tasks, Requests & Feedback 1200298616652229 (tasks, fields, comments)"
     - "notion: App Hub and Product Roadmap 751b6071283e43e8b1a91054319e0db6 (read-only, to answer 'does it do X' and 'is it planned')"
+    - "notion: Curaden Education Hub → Markets (collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce), Commercial Managers (0ad2e4d48e414c1d8c93a46390960019) and Partners (collection://b2bed6f9-8cc0-42ef-b406-c4ebf76063c0), read-only, to find the local contact for a requester's country"
   write:
     - "asana (only through asana-maintenance): one triage comment per submission, field fixes, assignee if empty"
     - "notion: rows in the inbox Tasks & Notes (Source `asana-form`), for product ideas only"
@@ -142,6 +143,25 @@ writes "sent" on the task or likes the draft comment. That counts as the answer.
 **Follow-up.** On later runs, a draft that hasn't been sent after 2 working days gets
 one reminder to its owner. After that, it's listed in `for_sean` / `for_fabian` and
 nothing more is posted.
+
+## Local contact lookup
+
+For any request tied to a country (a lead, a market-specific question, "Not Listed"
+with a likely country), App Support looks the country up in the Curaden Education Hub,
+read-only:
+
+1. **Markets** (`collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce`): the market row, its
+   `Commercial Manager` and `Local Partners`.
+2. **Commercial Managers** (`0ad2e4d48e414c1d8c93a46390960019`): the regional commercial
+   manager.
+3. **Partners** (`collection://b2bed6f9-8cc0-42ef-b406-c4ebf76063c0`): the local subsidiary or
+   distributor, with its Country Manager and Education Manager. Education Managers are
+   usually the right first contact for clinicians.
+
+It names them in the triage comment and `for_sean` (internal Curaden contacts are fine
+to name). If a partner row says `Active: No` or the market has no partner, it adds
+`[confirm: local contact for {country}]`. The reply draft never names a local contact
+until Sean or Fabian confirms one.
 
 ## Hand-offs
 
