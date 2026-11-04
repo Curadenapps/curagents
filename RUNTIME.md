@@ -103,6 +103,7 @@ is expected to go within about six months, so from now on:
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
 | `roadmap-watch` | **PC** | Desktop app scheduled task "Roadmap watch" (Mondays 08:00 Zurich); "roadmap watch" any time | Writes the Notion report, then posts a short summary with the link to Webex App Team |
 | `webex-sweep` | **PC** | Desktop app scheduled task "Webex Sweep" (weekdays 11:40 + 16:40 Zurich); "check webex" any time | Reads the watched Webex spaces and new meeting action items; writes Notion inbox rows, Asana update comments and approved inbox rows to Asana. Never posts in Webex |
+| `app-support` | Cloud (proposed) | "support triage" for now; a Claude Routine weekdays 08:20 + 14:20 Zurich once Sean sets it live | Preview: posts nothing until approved. Asana and Notion connectors |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run

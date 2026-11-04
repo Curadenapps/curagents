@@ -105,6 +105,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
 | Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | PC task Mon 08:00 (report + App Team summary in Webex) + manual "roadmap watch" |
 | Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in USA, CH, UAE, Japan, Italy: audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
+| App Support | [`agents/app-support.md`](agents/app-support.md) | First line for the App Tasks, Requests & Feedback form: spam check, field fixes, routing (BOB → Sean, rest → Fabian), reply drafts sent from support@bobscore.com | Manual — "support triage"; Routine after preview |
 | Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
 
 ### Model tiers and swarming
@@ -115,7 +116,7 @@ scripts and `.claude/agents/` wrappers all use the same tier.
 | Tier | Agents | Why |
 |------|--------|-----|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
-| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout | Judgement on structured data |
+| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout, app-support | Judgement on structured data |
 | Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
 
 Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.
