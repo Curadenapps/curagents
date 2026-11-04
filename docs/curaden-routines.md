@@ -82,20 +82,6 @@ Schedule: Thursdays 14:00.
 > on his PC. Last step, always: one row in the Agent run log (Agent
 > `announcements`, Where Cloud, Link = the draft page).
 
-### Roadmap watch (Curaden)
-
-Schedule: Mondays 08:00. Moves from a PC task to a Routine: it only uses connectors.
-
-> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
-> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
-> find the Agent registry row whose Started by names "Roadmap watch (Curaden)"; if
-> its Account isn't Curaden, log `no-op` and stop.
-> Then run the weekly report exactly as `agents/roadmap-watch.md` describes. A cloud
-> run has no local snapshot from last week: use last Monday's report page under
-> Roadmap Reports as the baseline for "Changed" and "Drift". Write the report page;
-> nothing else. Last step, always: one row in the Agent run log (Agent
-> `roadmap-watch`, Where Cloud, Link = the report page).
-
 ## PC scheduled tasks (Curaden desktop app)
 
 On the `curagents` folder, in the **Curaden** desktop app, with Webex signed in
@@ -107,11 +93,13 @@ once in its built-in browser (Ctrl+Shift+B shows the pane; the sign-in persists)
 > Check the switch as `RUNTIME.md` describes, then do the "{name}" run exactly as
 > `RUNTIME.md` describes under "PC runs". Live: don't ask me first.
 
-| Task name | When (weekdays) | `{name}` |
+| Task name | When | `{name}` |
 |-----------|-----------------|----------|
 | Webex keep-alive (Curaden) | 07:05, then every 2 hours to 17:05 (`5 7-17/2 * * 1-5`) | Webex keep-alive |
 | Boom Boom Derek (Curaden) | 08:45 | Boom Boom Derek |
 | Webex Sweep (Curaden) | 11:40 and 16:40 | Webex Sweep |
+| Roadmap watch (Curaden) | Mondays 08:00 | Roadmap watch |
+| Feedback QA report (Curaden) | Fridays 10:40 | Feedback QA report |
 
 Not moved: Boom Boom queued (the keep-alive posts queued pings) and the Asana ↔ Notion sync (retired), Roadmap
 dashboard refresh (on click), the old App team digest (delete).

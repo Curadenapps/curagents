@@ -70,7 +70,8 @@ On any invocation, determine trigger type:
 | `user:github status` / `check prs` | User phrase | github agent |
 | `user:cut release` / `release * v*` | User phrase | release coordinator |
 | `user:process meeting notes` / `summarise meeting` / `webex recap` / `log the webex meeting` / `fetch from fireflies` | User phrase | meeting-notes (Webex Meeting recap first via `skills/webex-web`; Fireflies, then paste, as fallbacks) → recap page under Decision Log & Meeting Recaps |
-| `schedule:"0 8 * * 1"` | Monday 08:00 — see RUNTIME.md for where it is scheduled | roadmap-watch (weekly roadmap drift report) |
+| `schedule:"0 8 * * 1"` (Zurich) | PC scheduled task "Roadmap watch" (RUNTIME.md) | roadmap-watch (weekly drift report + App Team summary in Webex, posts on its own) |
+| `schedule:"40 10 * * 5"` (Zurich) | PC scheduled task "Feedback QA report" (RUNTIME.md) | feedback-qa (posts the PDF report to the QA space on its own when the rubric's threshold is met) |
 | `user:roadmap watch` / `check the roadmap` / `roadmap drift` | User phrase | roadmap-watch |
 | `user:check webex` / `webex sweep` / `what's new in webex` · PC scheduled task "Webex Sweep" (weekdays 11:40 + 16:40 Zurich) | User phrase / schedule | webex-sweep |
 | `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
@@ -99,7 +100,7 @@ Before dispatching any agent:
    - If set, all dispatched agents run in dry-run mode (log actions but do not write to Asana/Notion).
 
 4. **Webex steps** — any agent that posts to or reads Webex (announcements, boom-boom-derek,
-   meeting-notes, feedback-qa, webex-sweep) loads `skills/webex-web/SKILL.md` first and
+   meeting-notes, feedback-qa, webex-sweep, roadmap-watch) loads `skills/webex-web/SKILL.md` first and
    runs on Sean's PC (`RUNTIME.md`). The skill says which browser to use and what to do
    when Webex web is signed out or unreachable.
 

@@ -103,7 +103,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | Webflow | [`agents/webflow.md`](agents/webflow.md) | Publishing gate, brand compliance, clinical claims check, asset sync | brand-asset approval event + manual |
 | GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
-| Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | Weekly CRON (Mon 08:00) + manual "roadmap watch" |
+| Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | PC task Mon 08:00 (report + App Team summary in Webex) + manual "roadmap watch" |
 | Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in USA, CH, UAE, Japan, Italy: audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
 | Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
 

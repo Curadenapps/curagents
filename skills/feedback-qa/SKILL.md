@@ -76,7 +76,8 @@ Trigger: "triage feedback", "QA feedback", "what should we build next"
    then score what passes (§3). Count repeats across people, including rows
    marked `reported` in the last 90 days, so recurring issues get noticed.
 5. **Decide whether to report** (`references/rubric.md` §5).
-   - No: tell the user what is waiting and why it is not reported yet. Stop.
+   - No: tell the user what is waiting and why it is not reported yet (the
+     scheduled Friday run logs `no-op` with that). Stop.
    - Yes: continue.
 6. **Build the report.** Fill `references/report-template.html` and save it as
    `.feedback/reports/{YYYY-MM-DD}-{app}-qa.html`. Then render the PDF:

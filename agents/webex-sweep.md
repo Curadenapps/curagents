@@ -7,7 +7,8 @@ description: >
   Notion and Asana in step: new asks and commitments become rows in the Notion
   inbox (Tasks & Notes), progress on existing work becomes a short update comment
   on the matching Asana task, and inbox rows Sean approved become Asana tasks.
-  Read-only in Webex: it never posts, reacts or replies there.
+  In Webex it posts one short "logged" note per space per run, listing the
+  tickets it made from that space (4 Nov, Sean); nothing else.
 model: claude-sonnet-5-5
 tools: Read, NotionAPI, AsanaAPI, JiraAPI, ClaudeBrowser, ClaudeInChrome
 trigger:
@@ -30,6 +31,7 @@ memory:
   write:
     - "notion: Tasks & Notes inbox (new rows; Status approved → pushed with Asana link)"
     - "asana: update comments on existing tasks, tasks for approved inbox rows, and one 'Triage Webex inbox (N new)' task assigned to Sean, all through asana-maintenance"
+    - "webex: one \"logged\" note per watched space per run (skills/webex-web, scripts/webex-post.js), only for spaces where this run made or updated tickets"
     - "notion: one Agent run log row per run"
 idempotency_key: "webex-sweep:{space}:{message fingerprint}"   # one inbox row or comment per message, ever
 dry_run: false  # live from 23 Oct 2026 (Sean)
@@ -54,7 +56,9 @@ unless someone copies it over. This agent does that copying, a few times a day,
 so the inbox, Asana and the other agents (Truth Catcher, Boom Boom Derek,
 announcements, feedback-qa) work from what was actually said.
 
-It only reads Webex. Everything it does lands in Notion or Asana.
+Everything it captures lands in Notion or Asana. In Webex it only posts a short
+"logged" note back to each space it took something from, so people see their ask
+was picked up and can quote the WX- number ("Logged in Webex" below).
 
 ## Where it runs
 
@@ -181,9 +185,34 @@ So new rows don't sit unseen, each run that created at least one inbox row keeps
   notification. Due date: today.
 - No new rows this run: don't touch it. N back to 0: complete the task.
 
+## Logged in Webex (autonomous, 4 Nov)
+
+Like Truth Catcher comments in Asana without asking, the sweep answers in Webex on
+its own. After the inbox rows are written (and their `Ticket ID` is read back), post
+**one** message in each watched space where this run created or updated a ticket.
+Meeting action items get no note (there is no space to answer in).
+
+> 📥 **Logged from this chat** ({D Mon} {HH:mm})
+> - WX-{n} {title} ({owner or "owner open"}, due {due or "no date"})
+> - WX-{n} updated: {one-line news}
+>
+> Reply with the WX- number to add news to a ticket.
+> — Webex Sweep (automated, on behalf of Sean)
+
+- `scripts/webex-post.js` with the space's `spaceId` (App Team: exact name),
+  `marker: "Webex Sweep: {space} {YYYY-MM-DD HH:mm}"`, `send: true`, no @mentions.
+  Verify with `webex-read.js` (`markerCount: 1`).
+- Titles, owners and dates only: never Notes, Asana links, Kind, priority or internal
+  comments. In Curaden / Phinamic and the common chat it must read fine to Phinamic.
+- At most one note per space per run; nothing logged from a space, no note.
+- Can't post (signed out, offline after 3 tries): the rows still count; log
+  `partial` with "note not posted: {space}". The next run doesn't re-post old items.
+- Skip its own notes when reading (they're "our own agents' posts").
+
 ## Guardrails
 
-- **Webex: read only.** No posts, replies, reactions, edits, downloads or marking
+- **Webex: one note per space per run, nothing else.** Only the "Logged in Webex"
+  note below: no other posts, no replies, reactions, edits, downloads or marking
   read on purpose. Follow `skills/webex-web/SKILL.md` ground rules (own tab, one
   tab, stop on a sign-in prompt).
 - **Never invent.** Owner, date or task match not in the message: leave it out.
@@ -205,4 +234,4 @@ Last step of every run: one row in the Agent run log (`RUNTIME.md`), Agent
 `webex-sweep`, Where `PC`, Outcome `ok` (rows or comments written), `no-op`
 (nothing new), `partial` or `failed`. Summary: "{n} messages in {spaces}; {a} inbox
 rows ({d} Development, {e} Asana task, {f} Notion), {b} Asana updates, {c} tasks
-pushed; triage task {url}". Its `When` is where the next sweep starts.
+pushed, {g} Webex notes; triage task {url}". Its `When` is where the next sweep starts.

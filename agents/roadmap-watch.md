@@ -3,13 +3,14 @@ name: roadmap-watch
 description: >
   Weekly roadmap watcher. Snapshots the Product Roadmap in Notion (BOB +
   Curaprox app), the BOB App milestones in Asana and the BOB project in
-  Jira, diffs against last week, and writes one "Roadmap Watch" report page to
-  Notion. Read-only on every system except the report page.
+  Jira, diffs against last week, writes one "Roadmap Watch" report page to
+  Notion and posts a short summary with the link to the Webex App Team space.
+  Read-only on every system except the report page and that one post.
 model: claude-sonnet-5-5
-tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI
+tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI, ClaudeBrowser, ClaudeInChrome
 trigger:
   - type: schedule
-    cron: "0 8 * * 1"
+    cron: "CRON_TZ=Europe/Zurich 0 8 * * 1"   # PC scheduled task "Roadmap watch" (RUNTIME.md): needs Webex for the summary
     label: weekly-roadmap-watch
     inputs:
       mode: weekly
@@ -27,7 +28,7 @@ memory:
     - .truth-cache/roadmap-watch/last-snapshot.json
     - .truth-cache/roadmap-watch/history/{YYYY-MM-DD}.json
 idempotency_key: "roadmap-watch:{iso_week}"
-dry_run: false  # live: only writes the weekly report page + its own snapshot
+dry_run: false  # live: writes the weekly report page + its own snapshot, posts one summary to App Team (4 Nov)
 ---
 
 # Roadmap Watch: Weekly Product Roadmap Drift Report
@@ -173,10 +174,22 @@ Each "suggested fix" is a sentence for a human, never an action taken.
 Then write `.truth-cache/roadmap-watch/last-snapshot.json` and a dated copy in
 `history/`, both via temp-file-then-rename (atomic write, per `dream.md` §5).
 
-### Step 5 — Team update
+### Step 5 — Webex summary (autonomous, 4 Nov)
 
-No Webex post of its own. The `announcements` agent reads this report and puts
-the Summary line and at-risk milestones into the weekly team update.
+Like Truth Catcher in Asana, it posts without asking: one message in the Webex
+**App Team** space (exact name; `skills/webex-web/SKILL.md` Recipe 1), with
+`marker: "Roadmap Watch: {iso_week}"` so a rerun never posts twice:
+
+> 🗺️ **Roadmap Watch, week {nn}**: {changes} changes, {drift} drift, {n} at-risk
+> milestones.
+> {the report's Summary line, one sentence}
+> {at-risk milestones, one line each, or "Nothing at risk."}
+> Full report: {report_url}
+> — Roadmap Watch (automated, on behalf of Sean)
+
+Verify with `webex-read.js` (`markerCount: 1`). No browser or signed out: the
+report page still counts; return `partial` with "summary not posted". The
+`announcements` agent still reads the report for the team update.
 
 ---
 
@@ -207,7 +220,7 @@ list `"jira: unavailable"` in `errors`. Never fail the whole run for one source.
 ## Hard Rules
 
 1. **Read-only** on Notion roadmap rows, Asana and Jira. The only writes are the
-   report page and the snapshot files.
+   report page, the snapshot files and the one App Team summary (Step 5).
 2. **One report per ISO week** for scheduled runs.
 3. **Never infer status.** If a roadmap row has no join key, report it as
    unlinked; do not fuzzy-match names into Done.
