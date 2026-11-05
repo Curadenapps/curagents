@@ -225,6 +225,9 @@ list `"jira: unavailable"` in `errors`. Never fail the whole run for one source.
 3. **Never infer status.** If a roadmap row has no join key, report it as
    unlinked; do not fuzzy-match names into Done.
 4. **Respect dry_run** — print the report to output instead of creating the page.
-5. Surface at-risk launch milestones (Soft Launch, Web, Hard Launch, V2 P1
+5. Name the launch KPI a slipping row delays when the row is in the dependency
+   table of Launch KPIs for local partners (Notion `40f7e8aabbb48114bdbfe8715c020740`), e.g. "Recall live slips → K6
+   moves".
+6. Surface at-risk launch milestones (Soft Launch, Web, Hard Launch, V2 P1
    incl. CTP MVP) to the orchestrator as `warning`; a passed launch milestone that is not
    Done is `critical`.

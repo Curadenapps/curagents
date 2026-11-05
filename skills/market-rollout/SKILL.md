@@ -68,7 +68,10 @@ The page is the source of truth for that market; the references only hold IDs an
      in its language yet.
    - **Partner rhythm**: when the last review or check-in was, and when the next is due
      (`hq-partner-rhythm.md`).
-   - **KPIs**: once practices are live, the activation ladder against the market's targets.
+   - **KPIs**: from go-live, the **launch KPIs** (K1–K7 and full-loop clinics, Notion `40f7e8aabbb48114bdbfe8715c020740`):
+     only the KPIs whose roadmap step is live count; say which are still waiting and on
+     which roadmap row. After the first 90 days, the activation ladder against the
+     market's targets.
 3. Write it to the market page's `## Rollout status` section (create it under the
    snapshot if missing; replace only that section). Format:
    - one line: gate, date, overall (on track / at risk / blocked) and why
