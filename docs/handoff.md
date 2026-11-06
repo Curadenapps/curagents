@@ -21,6 +21,18 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## Synced 6 Nov (from the other instance's Notion work)
+
+- **Partner onboarding** is one flow for every partner and internal team: Notion
+  page `4107e8aabbb481c9a15fe680c321efd2` plus the email template
+  `4107e8aabbb48125b595c2d72a33ff7d` (first sent to Curaden Czech, 6 Nov). The
+  Training modules DB ("The School of BOB") now links each module's How-To pages.
+  The market-rollout skill uses both (workflow 8b) and knows light-touch partners
+  (Czech Republic) in `references/markets.md`.
+- **Not synced: Agent 25 / App Website.** That work lives only in the local Marketing
+  project on Sean's PC (Windows, not reachable from cloud sessions). To share it, have
+  that session commit it to a repo or write a summary page in Notion.
+
 ## Needs Sean (he can't be done by an agent)
 
 1. **Reconnect Atlassian** with the curaden-apps account that can see Jira project
