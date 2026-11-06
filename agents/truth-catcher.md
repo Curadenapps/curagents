@@ -122,6 +122,12 @@ link only.
 Escalation after 3 working days with no reply, the comment format, and dedupe all work as
 on the BOB App board, and comments are written in Sean's voice ("Comment format").
 
+**App Support (added 2026-11-04).** `agents/app-support.md` gives form submissions a
+first look (spam check, field fixes, routing, reply draft). Its comments, signed
+"App Support (automated triage)", and the assignee it sets don't count as triage for
+"⏳ Not triaged" or as a Curaden reply for "💬 Waiting on us". Reply-draft follow-up is
+App Support's job, so Truth Catcher doesn't repeat it.
+
 **Rollout: Live (approved 2026-10-12).** The Routine posts its comments on this board
 like on BOB App. If Sean pauses it, change this line back to preview: the Routine then
 posts nothing here and lists the comments it would post under "App Tasks preview" in the
