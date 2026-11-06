@@ -98,7 +98,7 @@ The page is the source of truth for that market; the references only hold IDs an
    certified super user, unless Sean says HQ trains directly).
 3. Build the plan: modules in order, format, who trains (HQ, super user or market owner),
    dates counted back from the market's gate, what "done" looks like.
-4. Create or update the tracker row: Person, Organisation, Market, Role, App, Stage
+4. Create or update the tracker row: Person, Organisation, Market, Edu Hub market, Role, App, Stage
    `Named` (or `Invited` if Sean says the invite went out), Modules done, Trainer,
    Next step, Next date, Asana link if a task exists.
 5. If the person needs Admin Console access → workflow 4.
@@ -131,7 +131,9 @@ The page is the source of truth for that market; the references only hold IDs an
    task), materials, localisation notes per market, sources.
 4. Create the Training modules row: Module, Code, Audience, App, Markets, Format,
    Minutes, Language (English plus the languages it will need), Status `Draft`,
-   Clinical wording ticked if it has any efficacy or clinical wording.
+   Clinical wording ticked if it has any efficacy or clinical wording, and
+   `How-to guides` linked to the How-To pages the module uses. Add the module and
+   its how-tos to the table on the Partner onboarding page if every partner needs it.
 5. Tell Sean what needs checking and by whom (HQ, Legal, the local market for language).
 
 ### 6. Training plan for a market — "training plan for {market}"
@@ -166,6 +168,21 @@ The page is the source of truth for that market; the references only hold IDs an
 5. Propose updates to the market page (targets, audiences, requests table) and the
    tracker. Apply tracker updates directly; page text after "update it".
 6. Draft page under the Academy: "{Market} partner session {date}: follow-up".
+
+### 8b. Onboard a partner — "onboard {partner}" / "getting-started pack for {partner}"
+
+For any subsidiary, distributor or internal team getting onto BOB, including
+light-touch partners outside the rollout markets (`markets.md`).
+
+1. Copy **Template: Partner onboarding email** (`markets.md`) into a draft and fill
+   the fields: names from the request, the market (or "Other countries" if it isn't
+   in the registration list), the Academy link. Use `my-writing-style`. Sean sends it.
+2. Point to **Partner onboarding: BOB setup and training**; don't write a separate
+   pack per partner.
+3. One tracker row per person (Edu Hub market set), and the one Admin Console person
+   through workflow 4 (account request to Derek; Sean sends).
+4. Light-touch partner: add or update its row in `markets.md` "Light-touch partners"
+   by PR, or list it for Sean.
 
 ### 9. Draft to a partner — "draft to {partner}"
 

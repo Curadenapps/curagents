@@ -23,6 +23,8 @@ trigger:
       - "partner prep {market}"
       - "partner follow-up {market}"
       - "draft to {partner}"
+      - "onboard {partner}"
+      - "getting-started pack for {partner}"
       - "audience brief {market}"
       - "what can Blanca take"
 memory:
@@ -92,6 +94,7 @@ Everything follows `skills/market-rollout/SKILL.md`. Read it before any workflow
 | Module catalogue and template | `skills/market-rollout/references/modules.md` |
 | HQ ↔ partner rhythm, who does what, Blanca | `skills/market-rollout/references/hq-partner-rhythm.md` |
 | Market Rollout Academy (module DB, tracker) | Notion `4087e8aabbb481df9fa3c1662efbbe6a` |
+| Partner onboarding page and email template (one flow for every partner) | Notion `4107e8aabbb481c9a15fe680c321efd2`, `4107e8aabbb48125b595c2d72a33ff7d` |
 
 ---
 

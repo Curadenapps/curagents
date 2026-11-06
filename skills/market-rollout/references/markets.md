@@ -1,6 +1,6 @@
 # Markets: IDs and people
 
-Last checked: 30 Oct 2026. The market pages in Notion win over this file; update
+Last checked: 6 Nov 2026. The market pages in Notion win over this file; update
 this file when an owner, ID or gate changes.
 
 ## Shared
@@ -9,8 +9,12 @@ this file when an owner, ID or gate changes.
 |------|-----------|
 | Markets playbook (Notion) | `4087e8aabbb481e69b5cc1744133076b` |
 | Market Rollout Academy (Notion) | `4087e8aabbb481df9fa3c1662efbbe6a` |
-| Training modules (data source) | `collection://ac2f0425-bc31-4bc9-8826-3b01736035c6` (DB `6bf9ded6247f435aaf9c7d7176493382`) |
-| Onboarding tracker (data source) | `collection://ccb6b29c-2a46-4022-8320-4c24327e61f2` (DB `0d4440155cf2449d8c733d36de73645e`) |
+| Training modules (data source, "The School of BOB") | `collection://ac2f0425-bc31-4bc9-8826-3b01736035c6` (DB `6bf9ded6247f435aaf9c7d7176493382`); each module links its How-To pages in `How-to guides` |
+| How-To documents (data source) | `collection://1f97e8aa-bbb4-81c1-8277-000b39b5c1b2` |
+| Partner onboarding: BOB setup and training (Notion) | `4107e8aabbb481c9a15fe680c321efd2`: the one onboarding flow for every partner and internal team (register, download, approval, login, modules with their how-tos, support) |
+| Template: Partner onboarding email (Notion, App Hub Templates) | `4107e8aabbb48125b595c2d72a33ff7d`: To country manager, Cc Commercial Manager, education manager, Fabian, support@bobscore.com |
+| Launch KPIs for local partners (Notion) | `40f7e8aabbb48114bdbfe8715c020740` |
+| Onboarding tracker (data source) | `collection://ccb6b29c-2a46-4022-8320-4c24327e61f2` (DB `0d4440155cf2449d8c733d36de73645e`). Set `Edu Hub market` (relation to the Education Hub markets, `collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce`) so the market's Commercial Manager shows. Market options: USA, Switzerland, UAE, Japan, Italy, Czech Republic, HQ |
 | Market launch template (Notion) | `3f37e8aabbb481459902f24c7fc73b76` |
 | Market Findings, 2025 launches (Notion) | `1eb7e8aabbb48065aa75d8e1435f2d29` |
 | BOB Kit (Notion) | `1fb7e8aabbb480d29c88cbd43aaee5fc` |
@@ -97,3 +101,14 @@ Apr/May 2027. Germany and Brazil get a page and a row here when Sean starts them
 | Languages | Italian (BOB practice interface lists Italian; patient side [confirm]) |
 | Hard rule | Pilot runs before the Apr–Aug 2027 window; Legal frame (GDPR, processing agreement, Italian consent) [confirm with Tino] before real patients |
 | Patient side | [confirm] Curaprox app web edition |
+
+## Light-touch partners (outside the rollout markets)
+
+Partners that ask for BOB before their market has a rollout. No gates, no market
+page: they get the Partner onboarding page and email, one Admin Console person, and
+tracker rows. Promote to a full market only when Sean says so.
+
+| Partner | Since | People | Notes |
+|---------|-------|--------|-------|
+| Curaden Czech (Czech Republic) | 6 Nov 2026, onboarding email sent | Marie Glaserová (Admin Console, account requested from Derek), Hana [confirm role] | Tracker Market `Czech Republic`. Country not in the registration list yet: "Other countries" |
+
