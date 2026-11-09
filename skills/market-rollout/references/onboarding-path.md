@@ -68,8 +68,8 @@ Stage moves: `Named` → `Invited` (Sean sent the invite) → `Access granted` �
 2. 30-minute kick-off with the owner (M2): the loop, the commission (where live), consent.
 3. In-practice session with the hygienist (M3, M4): first real assessment together on day one.
 4. Day 7 check: assessments done? If none, a call (not an email).
-5. Day 30: activated (5 assessments) or a plan to get there.
-6. Day 90: habit (10 a month) and loop running where Shopify is live.
+5. Day 30: at least 5 finished BOBs a week (K3) or a plan to get there.
+6. Day 90: habit held (5 a week) and loop running where Shopify is live.
 
 ## Timing against the gates
 
