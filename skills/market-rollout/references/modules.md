@@ -16,7 +16,7 @@ This file holds the codes and the template so every module is built the same way
 | M6 | Commission and codes: how the practice code works on the local store and what the practice earns | Practice owner, super user | Both | One-pager | 15 |
 | M7 | Data protection in {market}: what the practice and we each do | Market owner, super user, practice owner | BOB | One-pager per market | 15 |
 | M8 | Support and requests: first-line answers, when and how to send to HQ | Market owner, super user | Both | Self-paced page | 20 |
-| M9 | Activation plays: first wave, events with 48-hour follow-up, the KPI ladder | Market owner, market team / OHC | BOB | Live session | 45 |
+| M9 | Activation plays: first wave, events with 48-hour follow-up, the launch KPIs (K1–K7) | Market owner, market team / OHC | BOB | Live session | 45 |
 | C1 | Curaprox app for practices: what patients see in the web edition and app | Practice owner, hygienist | Curaprox app | Video | 10 |
 | C2 | Curaprox app launch in {market}: patient reach, reminders, seasonal pushes | Market owner, market team | Curaprox app | Live session | 30 |
 
@@ -31,7 +31,7 @@ Every module page uses these headings, in this order:
 Callout: Code · Audience · App · Markets · Format · Minutes · Status · Last checked against build {version/date}
 
 ## Why this matters
-One paragraph: what the person can do after it, tied to a stage of the activation ladder.
+One paragraph: what the person can do after it, tied to a launch KPI step (K1–K7, Launch KPIs — BOB markets).
 
 ## Before you start
 Prerequisite modules, access needed, materials to have open.

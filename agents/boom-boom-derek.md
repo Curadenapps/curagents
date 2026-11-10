@@ -226,6 +226,10 @@ One source failing never stops the run: mark it `unavailable` and carry on.
       the only queue: never keep the ping in a local file or outbox, because the
       next run only looks at the page. If the page already has a queued ping,
       replace it with today's.
+      **Legacy outbox:** if `.boom-boom-derek/outbox/pending-*.json` files exist (the
+      old PC keep-alive wrote them), move today's message onto the page queue, naming
+      the space this spec's "Channel" rule picks (common chat by default), delete the
+      files, and note it in the run log. Never post from the outbox.
 8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
    bánh mì count, and list for Sean: Asana subtasks to tick, items handed to him,
    roadmap rows that need his fix.

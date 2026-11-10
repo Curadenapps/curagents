@@ -21,6 +21,21 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## Synced 10 Nov
+
+- **Jira guard** is now a shared rule in `dream.md` §2: 0 issues for BA or a 404 on a
+  known key means the connector lost access, never "no changes". Boom Boom (9 Nov) and
+  Roadmap Watch W45 had read the empty result as "no updates".
+- **Official launch**: Sean's Asana task (6 Nov) says place and date are open (Milan not
+  confirmed). `dream.md`, roadmap-watch, market-rollout and SCOPE now say so; the Notion
+  milestone row and the launch KPIs page were renamed to match.
+- **Boom Boom queue**: the old PC keep-alive still writes `.boom-boom-derek/outbox/`
+  files and posts to Curaden / Phinamic with Derek only. Specs now say: never post from
+  the outbox, move it onto the page, the space comes from the "Channel" rule. The real
+  fix is Sean updating the PC keep-alive task (below).
+- New in Asana: two curaden.de BOB tasks for Sascha Märtsch (Germany, due 16 Nov). If
+  Germany starts, it's a light-touch partner (`skills/market-rollout/references/markets.md`).
+
 ## Synced 6 Nov (from the other instance's Notion work)
 
 - **Partner onboarding** is one flow for every partner and internal team: Notion
@@ -64,7 +79,6 @@ finish one of the items, so the next session starts from the truth.
 | # | What | Why | Where |
 |---|------|-----|-------|
 | 1 | Review **PR #53 (App Support agent)** from another session, bring it up to date with `main` and check it against Truth Catcher's App Tasks rules (triage stays with Fabian, App Tasks submissions never closed by Truth Catcher, Mon–Thu rule) | Opened 4 Nov before #52/#54; touches `dream.md`, `RUNTIME.md`, `CLAUDE.md`, `truth-catcher.md`, so expect conflicts and overlap | `agents/app-support.md`, `agents/truth-catcher.md` |
-| 2 | Jira-sync guard is good (it aborted instead of flagging every key); add the same "0 issues = auth problem, stop" rule to roadmap-watch and boom-boom so they mark Jira `unavailable` instead of reporting drift | 5 Nov failure mode | `agents/roadmap-watch.md`, `agents/boom-boom-derek.md` |
 | 3 | Webex sign-out keeps happening even with a keep-alive. After the PC task is updated, check a week of `webex-keepalive` rows: if it still drops daily, make Claude in Chrome an accepted fallback for scheduled runs (not an error) and say so in the skill | Built-in browser signed out most days; Chrome fallback did the work | `skills/webex-web/SKILL.md`, `RUNTIME.md` |
 | 4 | Webex Sweep's "Logged from this chat" note is one message per space. If people find it noisy, add thread replies to `scripts/webex-post.js` (no thread support today) | #52 shipped the simpler version | `scripts/webex-post.js`, `agents/webex-sweep.md` |
 | 5 | Run-log rows from Truth Catcher say Account `unknown`: the Personal routine prompt names no account. Fixed by the Curaden prompt; no action on Personal (its prompt can only be edited from its own session) | Monitoring | `docs/curaden-routines.md` |

@@ -13,7 +13,7 @@ watching the first time.
 | 3 | Practice owner | Dentist or practice manager who signs | Super user or market team | M2, M6 (once the loop is live there) | Agreement signed, practice approved, staff named |
 | 4 | Hygienist / PA | Runs BOB in the chair | Super user, in the practice | M3, M4 | First 5 real assessments done (the "Activated" stage) |
 | 5 | Front desk | Consent, handover, recall | Super user or hygienist | M4 | Can run consent and handover without help |
-| 6 | Patient | Gets the plan | The practice | M5 (patient materials, not a course) | Opens the plan (patient ladder stage 1) |
+| 6 | Patient | Gets the plan | The practice | M5 (patient materials, not a course) | Opens the plan (K5) |
 
 Field teams (OHCs in the UAE, sales reps elsewhere) take M0, M2, M3 and M9 so they
 can demo and recruit; they get Admin Console access only if they're also super users.
@@ -54,7 +54,7 @@ Never put a password in the request or the tracker. Access is removed the same w
 - [ ] Adds staff to a practice and switches a feature on and off
 - [ ] Runs a BOB assessment end to end on the demo practice and sends the plan
 - [ ] Explains consent to a patient in the market's language, using the market's consent text
-- [ ] Finds a practice's numbers on the KPI ladder
+- [ ] Finds a clinic's numbers for the launch KPIs (K1–K7) in the Admin Console
 - [ ] Answers three common support questions and knows when to send one to HQ
 - [ ] Knows what not to say: no diagnosis, no "prescription", no efficacy claims beyond approved wording
 - [ ] Onboards one real practice with HQ watching
