@@ -52,6 +52,7 @@ rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 - [`agents/announcements.md`](agents/announcements.md) — Team update: week / two weeks / month across every tool → Notion draft → Webex after approval
 - [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) — Boom Boom Derek: Truth Catcher for the Phinamic team (Derek La and Khanh); autonomous, funny-but-clear pings in the Webex common chat (QA space) or "Curaden / Phinamic", details on its Notion page
 - [`agents/market-rollout.md`](agents/market-rollout.md) — Market Rollout: Sean's rollout partner for BOB (then the Curaprox app) in the USA, Switzerland, UAE, Japan and Italy; onboarding tracker, super users, training modules, HQ ↔ partner rhythm. Manual only
+- [`agents/app-support.md`](agents/app-support.md) — App Support: replies to "App Requests & Feedback" form submissions on the App Tasks board in Sean's voice (@mentioning the submitter's guest follower), tells Sean what to change in BOB Admin, closes on his confirm; product gaps to dev-triage. Drafts until Sean approves a request type
 - [`agents/webex-sweep.md`](agents/webex-sweep.md) — Webex Sweep: reads the watched Webex spaces and meeting action items; new asks into the Notion inbox, updates onto Asana tasks, approved rows to Asana; posts one "logged" note per space in Webex
 
 ## Scope
