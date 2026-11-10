@@ -82,7 +82,7 @@ is expected to go within about six months, so from now on:
 | Team update draft | Missing (Routine gone) | **Keep, recreate** | Routine, Thu 14:00 |
 | Roadmap watch | Personal PC, Mon 08:00 | **Keep on the PC** (4 Nov): it now posts its summary to Webex App Team | PC task "Roadmap watch (Curaden)", Mon 08:00 |
 | Feedback QA report | On request | **New, weekly** (4 Nov): posts on its own when there's enough feedback | PC task "Feedback QA report (Curaden)", Fri 10:40 |
-| App Support | — | **New** (10 Nov): drafts replies to form submissions into each owner's "replies to approve" task; posts only auto-approved types | Routine "App Support (Curaden)" `trig_01NzNgUy17FxJiHFc8otT4oS`, created 10 Nov |
+| App Support | — | **New** (10 Nov): answers form submissions on its own, hourly in work hours; bugs and gaps to Jira | Routine "App Support (Curaden)" `trig_01NzNgUy17FxJiHFc8otT4oS`, created 10 Nov |
 | Roadmap dashboard refresh | Personal PC, 09:15 | **On request** (Sean, 23 Oct): switch its schedule off and run it on click | — |
 | Boom Boom queued | Personal PC, 14:00 | **Retire**: the Webex keep-alive posts queued pings now (28 Oct) | — |
 | Webex keep-alive | Personal PC, hourly 07–20 | **Every 2 hours**, weekdays 07:05–17:05 (28 Oct). It runs in the desktop app's built-in browser, a separate browser from Sean's Chrome, so it no longer knocks his own Webex tab offline. It keeps the sign-in warm, tells Sean once when Webex is signed out, and posts a queued Boom Boom ping | PC task "Webex keep-alive (Curaden)", `5 7-17/2 * * 1-5` |
@@ -100,7 +100,7 @@ is expected to go within about six months, so from now on:
 | `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | The routine `trig_01Pi2NPoRWRP6MStWHVzzkDm` named in the spec no longer appears in the Routines list: recreate it or draft on "team update" |
 | `feedback-qa` (report) | **PC** | Desktop app scheduled task "Feedback QA report" (Fridays 10:40 Zurich); "send QA report" any time | Posts the PDF to the Webex QA space on its own when the rubric's threshold is met; below it, logs `no-op` |
 | `meeting-notes` | **PC** | "meeting notes" | Reads Webex meeting summaries and transcripts |
-| `app-support` | Cloud | Claude Routine "App Support (Curaden)" (`trig_01NzNgUy17FxJiHFc8otT4oS`), weekdays 08:20 + 14:20 Zurich (cron in UTC, so 09:20 + 15:20 in summer time); "app support" any time | Asana + Notion connectors. Drafts go to each owner's "App Support: replies to approve" task in Asana; the owner ticks to approve. Spec "Scheduled run" |
+| `app-support` | Cloud | Claude Routine "App Support (Curaden)" (`trig_01NzNgUy17FxJiHFc8otT4oS`), hourly 07:20–19:20 Zurich on weekdays (cron in UTC, so an hour later in summer time); "app support" any time | Asana + Notion connectors. Answers on its own; what it can't answer goes to each owner's "App Support: needs you" task in Asana. Most runs are `no-op` (nothing new). Spec "Scheduled run" |
 | `truth-catcher` | Cloud | Claude Routine "Truth Catcher scan" (`trig_01BxmV4KaG4CPbZMU4GmMHa7`), weekdays 07:58 + 13:58 Zurich | Asana, Notion, GitHub connectors |
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
 | `roadmap-watch` | **PC** | Desktop app scheduled task "Roadmap watch" (Mondays 08:00 Zurich); "roadmap watch" any time | Writes the Notion report, then posts a short summary with the link to Webex App Team |

@@ -84,7 +84,7 @@ Schedule: Thursdays 14:00.
 
 ### App Support (Curaden)
 
-Schedule: weekdays 08:20 and 14:20 (cron `20 7,13 * * 1-5` UTC). Connectors: Asana, Notion
+Schedule: hourly 07:20–19:20 on weekdays (cron `20 6-18 * * 1-5` UTC). Connectors: Asana, Notion
 only. Created 10 Nov 2026 as `trig_01NzNgUy17FxJiHFc8otT4oS`.
 
 > Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
@@ -93,10 +93,11 @@ only. Created 10 Nov 2026 as `trig_01NzNgUy17FxJiHFc8otT4oS`.
 > Account isn't Curaden, log `no-op` and stop. If `agents/app-support.md` isn't on
 > `origin/main`, log `no-op` ("spec not merged") and stop.
 > Then do the run exactly as `agents/app-support.md` "Scheduled run" describes:
-> answer from the FAQs, post only what "Auto-post approvals" allows and only replies
-> owned by the account this runs on, put every other draft on its owner's "App
-> Support: replies to approve" task, post the subtasks the owner ticked, and record
-> anonymised FAQ candidates. Never edit BOB Admin, handle passwords or write
+> answer every request on its own from the FAQs, signed as automated; send bugs and
+> product gaps to Jira by moving one ticket into In Development on BOB App; hold only
+> what the spec says for the owner's "App Support: needs you" task; post the held
+> replies the owner ticked; record anonymised FAQ candidates. Nothing new since the
+> last run: log `no-op` and stop. Never edit BOB Admin, handle passwords or write
 > personal data outside Asana. Don't commit or push.
 > Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
 > describes (Agent `app-support`, Where Cloud), with the FAQ candidates in its body.

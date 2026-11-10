@@ -123,8 +123,9 @@ Escalation after 3 working days with no reply, the comment format, and dedupe al
 on the BOB App board, and comments are written in Sean's voice ("Comment format").
 
 **App Support (added 2026-11-10).** `agents/app-support.md` answers form submitters on the
-task, @mentioning their guest follower, and closes a submission once Sean confirms the
-fix. Truth Catcher still never contacts requesters and never closes submissions. Its
+task on its own, @mentioning their guest follower, closes a submission once its owner
+confirms the fix, and moves its own dev tickets into In Development on BOB App (judge
+those like any other BOB App task: an unlinked gap is "not on roadmap"). Truth Catcher still never contacts requesters and never closes submissions. Its
 replies count as a Curaden comment for "⏳ Not triaged" (assigning and Request Type stay
 with Fabian). A form task with a guest follower emails that follower on every comment,
 so Truth Catcher lists its findings on such tasks in the run summary instead of

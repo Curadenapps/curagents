@@ -1,9 +1,10 @@
 # App Support: quickstart for Fabian (and Sean)
 
 App Support answers the people who send requests through the Asana form "App
-Requests & Feedback". It reads each new submission on **App Tasks, Requests &
-Feedback**, drafts a reply to the submitter on the task, tells you exactly what to
-change when they answer, and closes the task once you say it's done.
+Requests & Feedback". It runs on its own in the cloud every hour on weekdays (07:20 to
+19:20 Zurich), reads each new submission on **App Tasks, Requests & Feedback**, and
+answers the submitter on the task. Every reply is signed "Curaden App Support
+(automated reply)". Bugs and product gaps go straight to Jira.
 
 Requests are split by owner:
 
@@ -11,96 +12,64 @@ Requests are split by owner:
 - **Everything else** goes to **Fabian**: Curaprox app, iTOP, Admin Panel, HubSpot,
   vouchers and general questions.
 
-You only ever post replies for your own requests, from your own Asana account. The
-full rules are in [`agents/app-support.md`](../agents/app-support.md).
+The owner doesn't write the replies. The owner does the things only a person can do.
+The full rules are in [`agents/app-support.md`](../agents/app-support.md).
 
-## What you need (once)
+## What you do (all in Asana, nothing to install)
 
-1. **Claude** with Claude Code: the Claude desktop app (Code tab) or the `claude` CLI,
-   signed in with your Curaden account.
-2. **Read access to the GitHub repo** `Curadenapps/curagents`. Ask Sean if you can't
-   open it.
-3. **Connectors** in Claude, signed in as you:
-   - **Asana** (posts replies and subtasks as you)
-   - **Notion** (reads the Market Rollout Academy how-tos)
-4. **A local copy of the repo.** In a terminal:
+1. **Make the changes.** When a submitter sends the details App Support asked for, you
+   get a subtask on the form task, "Fabian: change in {system}", with the exact change.
+   Make it, tick the subtask, and App Support tells the submitter and closes the task.
+2. **Answer what it can't.** Your task **"App Support: needs you (Fabian)"** (in My
+   Tasks, not on the board, so submitters never see it) gets one subtask per request
+   it held back: no answer in the FAQs, patient data, spam, or something it wasn't
+   sure about. The submitter has already been told the team will get back to them.
+   For each one, either:
+   - write or fix the reply above the `---` line in the subtask's notes and **tick
+     it**: the next hourly run posts it; or
+   - reply on the form task yourself; or
+   - comment **"skip"**.
+3. **Correct it when it's wrong.** Reply on the form task with the right answer. App
+   Support learns from your correction.
+
+Nothing is sent to you Friday to Sunday; held requests wait for Monday.
+
+## How it gets smarter
+
+App Support answers from the existing FAQs first (BOB — FAQ, Curaprox — FAQ and the
+How-Tos in Notion, which the curaprox-apps.com FAQ is built from). When you or Sean
+answer something those don't cover, or correct one of its replies, the answer is
+saved without names or contact details in
+[`docs/app-support-faq.md`](app-support-faq.md). The next person who asks the same
+thing gets your answer on its own.
+
+## Running it yourself (optional)
+
+You don't need this for the everyday work above. It's for asking it things directly.
+
+1. **Claude** with Claude Code (the Claude desktop app's Code tab, or the `claude`
+   CLI), signed in with your Curaden account, with the **Asana** and **Notion**
+   connectors.
+2. **Access to the GitHub repo** `Curadenapps/curagents` and a copy of it:
 
 ```bash
 git clone https://github.com/Curadenapps/curagents.git
 ```
 
-Then open the `curagents` folder in the Claude desktop app (Code tab → choose
-folder), or run `claude` inside it.
-
-## Using it on request (start here)
-
-Say one of these in a session opened on the `curagents` folder:
+Open the `curagents` folder in Claude, pull before each session (`git -C curagents
+pull`), and say:
 
 | You say | What happens |
 |---------|--------------|
-| `my support requests` | Checks the board for your requests only and shows each draft reply |
-| `app support` | Checks every new request; drafts for both Sean and you |
-| `reply to <Asana task link>` | Drafts the reply for one task |
-| `post the support replies` | Posts the drafts you approved (all, or name the tasks), from your account |
-| `done on <Asana task link>` | You've made the change: it posts "All done" to the submitter and closes the task |
+| `my support requests` | Runs App Support now for your requests only |
+| `app support` | Runs it now for every new request |
 | `support faq <question>` | Answers from the BOB / Curaprox FAQs and what App Support has learned |
-| `add that to the support faq` | Saves the reply you just sent as an FAQ answer (a PR to `docs/app-support-faq.md`) |
+| `teach support: <question> → <answer>` | Adds your answer to the learned FAQ (a PR) |
+| `done on <Asana task link>` | You've made the change: it tells the submitter and closes the task |
 
-Nothing is posted until you say "post". When a submitter answers, you get a subtask
-"Fabian: change in {system}" with the exact change. Make the change, tick the subtask,
-and App Support closes the loop.
-
-Before each session, pull the latest version so you run the current rules:
-
-```bash
-git -C curagents pull
-```
-
-## Running it on a schedule (optional)
-
-Only one account should run the schedule, otherwise every request is handled twice.
-The Notion **Agent registry** decides which account: ask Sean to set the App Support
-row's **Started by** to your Routine's name before you turn it on.
-
-Create a Claude Routine on your account:
-
-- **Repository:** `Curadenapps/curagents`
-- **Connectors:** Asana, Notion
-- **Schedule:** weekdays 08:20 and 14:20, Europe/Zurich
-- **Name:** `App Support (Fabian)`
-
-Prompt (paste as is):
-
-> Fetch `Curadenapps/curagents` and read every file from `origin/main` (never merge or
-> push). Find the Agent registry row whose Started by names "App Support (Fabian)"
-> (`RUNTIME.md`, "The switch"). If there is none, or its Account is `Paused`, log
-> `no-op` in the Agent run log and stop.
-> Then run App Support as `agents/app-support.md` describes, as operator Fabian
-> (`1196321462158324`). Post only replies Fabian owns whose type is `auto` in
-> "Auto-post approvals". Everything else stays a draft in the summary, including all
-> BOB requests (they're Sean's). Don't commit or push.
-> Finish with a short summary: new requests (task links only), drafts waiting for
-> Fabian, drafts waiting for Sean, changes to make, tasks closed. Last step, always,
-> also on failure: one row in the Agent run log as `RUNTIME.md` describes
-> (Agent `app-support`, Where Cloud).
-
-While every type is still `draft`, the scheduled run only prepares drafts. They land
-in Asana as subtasks of your task **"App Support: replies to approve (Fabian)"** (in My
-Tasks, not on the board, so the submitter never sees them):
-
-- **Tick the subtask** to approve. Change the reply text in its notes first if you
-  want; what's above the `---` line is what gets posted.
-- **Comment "skip"** to drop it, or just reply on the form task yourself.
-- Ticked replies are posted from your account the next time you run App Support
-  ("post the support replies"), or by the schedule if it runs on your account.
-
-## How it gets smarter
-
-App Support answers from the existing FAQs first (BOB — FAQ, Curaprox — FAQ and the
-How-Tos in Notion, which the curaprox-apps.com FAQ is built from). What you and Sean
-send that those don't cover is saved, without names or contact details, in
-[`docs/app-support-faq.md`](app-support-faq.md), so the next draft for the same question
-starts from your answer. If you edit a draft, it learns from your edit.
+Only one account runs the hourly schedule (the Notion **Agent registry** row "App
+Support" decides, today Curaden). Don't set up a second schedule, or every request
+gets answered twice.
 
 ## Good to know
 
@@ -108,9 +77,10 @@ starts from your answer. If you edit a draft, it learns from your edit.
   in the app.
 - **No patient data** in comments. If a user posts some, remove it in Asana.
 - **Every comment on a form task emails the submitter** (they follow the task as a
-  guest). Keep internal notes in the subtask, not in comments.
-- **Product gaps and bugs** become one Jira-ready ticket that Sean approves. You don't
-  need to write one yourself.
+  guest). Keep internal notes in subtasks, not in comments.
+- **Bugs and product gaps** become one Jira-ready ticket in BOB App, moved to In
+  Development so Phinamic gets it in Jira. Sean sees each one in the run log, and Truth
+  Catcher flags any that aren't on the roadmap.
 - **Mailboxes** support@bobscore.com and info@bobscore.com: planned. App Support will
   draft (and, on your "send", send) replies there once Curaden IT approves a mail
   connector. Until then it doesn't touch email.

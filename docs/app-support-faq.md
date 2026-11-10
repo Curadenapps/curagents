@@ -18,8 +18,10 @@ How-To pages for each are indexed in BOB Kit `1fb7e8aabbb480d29c88cbd43aaee5fc`.
 
 ## How entries get here
 
-- **From runs:** each run writes anonymised FAQ candidates into its Agent run log
-  row. The weekday maintenance session adds them here by PR.
+- **From runs:** when Sean or Fabian answer a held request or correct an automated
+  reply, the run writes an anonymised FAQ candidate into its Agent run log row. The
+  weekday maintenance session adds them here by PR. App Support never learns from
+  its own replies.
 - **From Sean or Fabian:** "add that to the support faq" after a reply, or "teach
   support: {question} → {answer}", in a session. Their words count as approved.
 - **Never:** names, emails, practice names, addresses, phone numbers or patient
