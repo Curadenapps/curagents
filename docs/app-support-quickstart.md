@@ -1,10 +1,11 @@
 # App Support: quickstart for Fabian (and Sean)
 
 App Support answers the people who send requests through the Asana form "App
-Requests & Feedback". It runs on its own in the cloud every hour on weekdays (07:20 to
-19:20 Zurich), reads each new submission on **App Tasks, Requests & Feedback**, and
-answers the submitter on the task. Every reply is signed "Curaden App Support
-(automated reply)". Bugs and product gaps go straight to Jira.
+Requests & Feedback". It runs on its own in the cloud every hour (07:20 to 19:20
+Zurich), reads each new submission on **App Tasks, Requests & Feedback**, and
+answers the submitter on the task, in the owner's own voice, with a short sign-off
+saying it was sent by their support assistant (automated). Bugs and product gaps go
+straight to Jira.
 
 Requests are split by owner:
 
@@ -12,7 +13,10 @@ Requests are split by owner:
 - **Everything else** goes to **Fabian**: Curaprox app, iTOP, Admin Panel, HubSpot,
   vouchers and general questions.
 
-The owner doesn't write the replies. The owner does the things only a person can do.
+The owner doesn't write the replies, but they sound like the owner: Sean's are written
+from [`docs/app-support-voice-sean.md`](app-support-voice-sean.md), Fabian's from
+[`docs/app-support-voice-fabian.md`](app-support-voice-fabian.md). The owner does the
+things only a person can do.
 The full rules are in [`agents/app-support.md`](../agents/app-support.md).
 
 ## What you do (all in Asana, nothing to install)
@@ -30,7 +34,16 @@ The full rules are in [`agents/app-support.md`](../agents/app-support.md).
    - reply on the form task yourself; or
    - comment **"skip"**.
 3. **Correct it when it's wrong.** Reply on the form task with the right answer. App
-   Support learns from your correction.
+   Support learns from your correction, and from how you word it.
+
+## Your voice
+
+Your Routine writes every reply the way
+[`docs/app-support-voice-fabian.md`](app-support-voice-fabian.md) says. It's a
+starting point Sean wrote: open it, change anything that doesn't sound like you (or
+tell Claude "my support voice: …"), and merge it. The weekday maintenance session also
+adds what it notices in your own replies to its "Learned" section, by PR. When Sean's
+Routine covers your requests on a Friday, it writes in Sean's voice.
 
 Nothing is sent to you Friday to Sunday; held requests wait for Monday.
 
@@ -42,6 +55,51 @@ answer something those don't cover, or correct one of its replies, the answer is
 saved without names or contact details in
 [`docs/app-support-faq.md`](app-support-faq.md). The next person who asks the same
 thing gets your answer on its own.
+
+## Your Routine (set up once)
+
+App Support runs as two Routines, one per owner. Yours answers your requests (everything
+that isn't BOB) from your own Asana account, Monday to Thursday. On Fridays, and
+whenever yours is off, Sean's Routine covers your requests, so nothing waits for you.
+
+1. In Claude (signed in with your account), create a **Routine** (claude.ai → Code →
+   Routines, or ask Claude Code "create a routine"):
+   - **Name:** `App Support (Fabian)`
+   - **Repository:** `Curadenapps/curagents`
+   - **Connectors:** Asana and Notion only (both signed in as you)
+   - **Model:** Claude Sonnet
+   - **Schedule:** every hour, Monday to Thursday, 07:20 to 19:20 Zurich. Routines
+     use UTC: `20 6-18 * * 1-4` in winter time (in summer time that runs an hour
+     later; that's fine)
+2. Paste this prompt as is:
+
+> Account: Fabian. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "App Support (Fabian)"; if its
+> Account isn't Fabian, log `no-op` and stop. If `agents/app-support.md` isn't on
+> `origin/main`, log `no-op` ("spec not merged") and stop.
+> This Routine handles Fabian's requests only (everything that isn't BOB); leave BOB
+> requests alone. Write every reply in Fabian's voice exactly as
+> `docs/app-support-voice-fabian.md` says, with its sign-off. Do the run exactly as
+> `agents/app-support.md` "Scheduled run" describes: answer every request on its own
+> from the FAQs;
+> send Curaprox app bugs and product gaps to Jira by moving one ticket into In
+> Development on BOB App; hold only what the spec says for Fabian's "App Support:
+> needs you" task; post the held replies Fabian ticked; record anonymised FAQ
+> candidates and voice notes. Nothing new since the last run: log `no-op` and stop. Never edit any
+> app or admin system, handle passwords or write personal data outside Asana. Don't
+> commit or push.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `app-support`, Where Cloud, Account Fabian), with the FAQ
+> candidates, voice notes and dev tickets in its body. Use the Asana and Notion connectors; if
+> either is missing, log `failed` with which one.
+
+   Or, quicker: open the repo in Claude Code on your account and say "create my App
+   Support routine from docs/app-support-quickstart.md". It reads this section and
+   sets it up for you to confirm.
+3. Tell Sean it's on. The Notion **Agent registry** row "App Support (Fabian)" is
+   already there; its **Account** says `Fabian`. Set it to `Paused` any time to stop
+   yours: Sean's Routine then covers your requests automatically.
 
 ## Running it yourself (optional)
 
@@ -67,9 +125,8 @@ pull`), and say:
 | `teach support: <question> → <answer>` | Adds your answer to the learned FAQ (a PR) |
 | `done on <Asana task link>` | You've made the change: it tells the submitter and closes the task |
 
-Only one account runs the hourly schedule (the Notion **Agent registry** row "App
-Support" decides, today Curaden). Don't set up a second schedule, or every request
-gets answered twice.
+Don't set up a second Routine of your own: one per owner, or requests get answered
+twice.
 
 ## Good to know
 
