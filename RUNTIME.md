@@ -114,7 +114,9 @@ is expected to go within about six months, so from now on:
    turn logs `no-op` and stops before reading anything else.
 1. **Fresh session, latest specs.** Start with `git fetch origin main`. If the
    checkout is on `main` and clean, `git pull --ff-only`; otherwise read the files
-   from `origin/main` (`git show origin/main:<path>`). Never merge or rebase.
+   from `origin/main` (`git show origin/main:<path>`). Never merge or rebase. On the
+   PC the SessionStart hook (`scripts/sync-checkout.sh`) usually has done this
+   already, for every session on either account; the steps above are the fallback.
 2. **Runs never edit agent specs, skills or scripts.** If a spec is wrong or a step
    fails, say so in the run log's Error column. Fixes go through a PR from the
    maintenance session, so there is only ever one version.

@@ -90,6 +90,14 @@ When the trigger is ambiguous, ask one clarifying question before routing.
 
 Before dispatching any agent:
 
+0. **Latest `main`** — the SessionStart hook in `.claude/settings.json` runs
+   `scripts/sync-checkout.sh` whenever any Claude (Curaden, Personal, Fabian's) starts
+   a session in this repo: it fast-forwards the curagents folder to `origin/main`, or
+   switches it to `main` when it's on a branch that's already merged. If the session
+   opens with a "checkout sync:" line saying it left the folder alone (uncommitted
+   changes, unmerged commits, offline), read specs from `origin/main`
+   (`git show origin/main:<path>`) and tell Sean that line once.
+
 1. **Read `dream.md`** — load the shared mental model (§2), cross-agent contracts (§3),
    and active context (§4). This replaces the need to load sibling agent specs.
 
