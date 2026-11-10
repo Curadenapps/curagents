@@ -2,6 +2,10 @@
 
 ## System Context
 
+Every session in this repo starts with `scripts/sync-checkout.sh` (SessionStart hook in
+`.claude/settings.json`): it keeps the curagents folder on an up-to-date `main` for
+both Claude accounts, and says in one "checkout sync:" line when it had to leave it alone.
+
 Read [`RUNTIME.md`](RUNTIME.md) for where each agent runs (PC vs cloud) and the run-log rule every run follows.
 Which Claude account (Curaden or Personal) runs what right now lives in the Notion
 **Agent registry**, not in memory notes: check it before answering or changing a schedule.
