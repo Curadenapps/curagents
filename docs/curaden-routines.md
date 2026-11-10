@@ -82,6 +82,34 @@ Schedule: Thursdays 14:00.
 > on his PC. Last step, always: one row in the Agent run log (Agent
 > `announcements`, Where Cloud, Link = the draft page).
 
+### App Support (Curaden)
+
+Schedule: hourly 07:20–19:20 on weekdays (cron `20 6-18 * * 1-5` UTC). Connectors: Asana, Notion
+only. Created 10 Nov 2026 as `trig_01NzNgUy17FxJiHFc8otT4oS`.
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "App Support (Curaden)"; if its
+> Account isn't Curaden, log `no-op` and stop. If `agents/app-support.md` isn't on
+> `origin/main`, log `no-op` ("spec not merged") and stop.
+> This Routine handles Sean's requests (BOB). It also handles Fabian's when
+> `agents/app-support.md` "Two Routines, split by owner" says to cover him (Friday,
+> his "App Support (Fabian)" registry row paused or missing, or its Last run empty or
+> more than 2 hours old); say so in the run log.
+> Write every reply in Sean's voice exactly as `docs/app-support-voice-sean.md` says,
+> with its sign-off, also when covering Fabian.
+> Then do the run exactly as `agents/app-support.md` "Scheduled run" describes:
+> answer every request on its own from the FAQs; send bugs and
+> product gaps to Jira by moving one ticket into In Development on BOB App; hold only
+> what the spec says for the owner's "App Support: needs you" task; post the held
+> replies the owner ticked; record anonymised FAQ candidates and voice notes. Nothing new since the
+> last run: log `no-op` and stop. Never edit BOB Admin, handle passwords or write
+> personal data outside Asana. Don't commit or push.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `app-support`, Where Cloud, Account Curaden), with the FAQ
+> candidates, voice notes and dev tickets in its body. Use the Asana and Notion
+> connectors; if either is missing, log `failed` with which one.
+
 ## PC scheduled tasks (Curaden desktop app)
 
 On the `curagents` folder, in the **Curaden** desktop app, with Webex signed in
