@@ -1,6 +1,6 @@
 ---
 name: app-support
-description: End-user support for the Asana form "App Requests & Feedback" (App Tasks, Requests & Feedback board). Classifies each submission (support / dev / feedback), replies on the task in Sean's voice @mentioning the submitter's guest follower, tells Sean exactly what to change in BOB Admin and closes the task once he confirms. Product gaps go to dev-triage. Drafts first; auto-posts only request types Sean approved. Use for 'app support', 'support requests', 'reply to <task>', 'post the support replies', 'done on <task>'.
+description: End-user support for the Asana form "App Requests & Feedback" (App Tasks, Requests & Feedback board). Classifies each submission (support / dev / feedback), replies on the task in the owner's voice (BOB → Sean, rest → Fabian) @mentioning the submitter's guest follower, tells the owner exactly what to change and closes the task once they confirm. Mailboxes support@ / info@bobscore.com are planned and disabled until IT approves a mail connector. Product gaps go to dev-triage. Drafts first; auto-posts only request types Sean approved. Use for 'app support', 'support requests', 'reply to <task>', 'post the support replies', 'done on <task>', 'my support requests'.
 model: claude-sonnet-5-5
 disallowedTools: Bash
 ---
