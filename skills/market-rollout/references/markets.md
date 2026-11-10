@@ -13,7 +13,7 @@ this file when an owner, ID or gate changes.
 | How-To documents (data source) | `collection://1f97e8aa-bbb4-81c1-8277-000b39b5c1b2` |
 | Partner onboarding: BOB setup and training (Notion) | `4107e8aabbb481c9a15fe680c321efd2`: the one onboarding flow for every partner and internal team (register, download, approval, login, modules with their how-tos, support) |
 | Template: Partner onboarding email (Notion, App Hub Templates) | `4107e8aabbb48125b595c2d72a33ff7d`: To country manager, Cc Commercial Manager, education manager, Fabian, support@bobscore.com |
-| Launch KPIs for local partners (Notion) | `40f7e8aabbb48114bdbfe8715c020740` |
+| Launch KPIs — BOB markets (Notion; source of truth for KPI targets) | `40f7e8aabbb48114bdbfe8715c020740` |
 | Onboarding tracker (data source) | `collection://ccb6b29c-2a46-4022-8320-4c24327e61f2` (DB `0d4440155cf2449d8c733d36de73645e`). Set `Edu Hub market` (relation to the Education Hub markets, `collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce`) so the market's Commercial Manager shows. Market options: USA, Switzerland, UAE, Japan, Italy, Czech Republic, HQ |
 | Market launch template (Notion) | `3f37e8aabbb481459902f24c7fc73b76` |
 | Market Findings, 2025 launches (Notion) | `1eb7e8aabbb48065aa75d8e1435f2d29` |
@@ -30,7 +30,7 @@ this file when an owner, ID or gate changes.
 | Phinamic technical owner | Derek La |
 
 Rollout window: Apr–Aug 2027 (CH, DE, UAE, BR, USA, JP). Italy (added 30 Oct 2026) starts
-earlier: Milan launch session (proposed 21 Jan 2027), then a 2–3 month pilot to ≈ end
+earlier if Milan goes ahead (not confirmed since 6 Nov; Blanca is asking Paolo, due 20 Nov), then a 2–3 month pilot to ≈ end
 Apr/May 2027. Germany and Brazil get a page and a row here when Sean starts them.
 
 ## USA
@@ -95,7 +95,7 @@ Apr/May 2027. Germany and Brazil get a page and a row here when Sean starts them
 | Rollout task | `1220067715520562` (due 31 May 2027, end of pilot [confirm]) |
 | Admin super user + training (Gate 1) | `1220067667419747` |
 | Gate milestones | G0 `1220067667364410` · G1 `1220067667469030` · G2 `1220067667301024` · G3 `1220067716274803` |
-| Linked launch | Milan session: Asana `1217552489272192`, Notion milestone `3f97e8aabbb4812a923eced30d6aa7bd` (proposed 21 Jan 2027); G0 also waits on its subtasks `1217600712018222` (scope with Blanca, 20 Nov) and `1217600685885178` (Milan store + Italy board buy-in, 4 Dec); G1 waits on the Milan task |
+| Linked launch | BOB official launch, place and date open (Milan not confirmed, 6 Nov): Asana `1217552489272192`, Notion milestone `3f97e8aabbb4812a923eced30d6aa7bd` (proposed 21 Jan 2027); G0 also waits on its subtasks `1217600712018222` (scope with Blanca, 20 Nov) and `1217600685885178` (Milan store + Italy board buy-in, 4 Dec); G1 waits on the Milan task |
 | Campaign | IDB activation campaign from Jan 2027 (Blanca), Notion `3fe7e8aabbb48138aea4eac451fdcf35` |
 | Owner | [confirm: Paolo Saggiorato (Curaprox Italy), pending his reply to Sean's drafted email] |
 | Languages | Italian (BOB practice interface lists Italian; patient side [confirm]) |

@@ -52,7 +52,7 @@ never edits a roadmap row, task or issue; it reports, and humans decide.
 | Notion | Roadmap Reports (report parent page) | `3ec7e8aabbb481c09e57c7926468235c` |
 | Asana | BOB App project | `1204489225205419` |
 | Asana | BOB V2 milestone | `1217949875186079` |
-| Asana | BOB Launch - Milan Showcase | `1217552489272192` |
+| Asana | BOB official launch (place and date open) | `1217552489272192` |
 | Jira | BOB project (`BA-*` keys) | via `JiraAPI` |
 
 One database holds both apps. The `Product` field says which (BOB / Curaprox app /
@@ -226,7 +226,7 @@ list `"jira: unavailable"` in `errors`. Never fail the whole run for one source.
    unlinked; do not fuzzy-match names into Done.
 4. **Respect dry_run** — print the report to output instead of creating the page.
 5. Name the launch KPI a slipping row delays when the row is in the dependency
-   table of Launch KPIs for local partners (Notion `40f7e8aabbb48114bdbfe8715c020740`), e.g. "Recall live slips → K6
+   table of Launch KPIs — BOB markets (Notion `40f7e8aabbb48114bdbfe8715c020740`), e.g. "Recall live slips → K6
    moves".
 6. Surface at-risk launch milestones (Soft Launch, Web, Hard Launch, V2 P1
    incl. CTP MVP) to the orchestrator as `warning`; a passed launch milestone that is not

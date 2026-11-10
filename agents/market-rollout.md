@@ -87,8 +87,8 @@ Everything follows `skills/market-rollout/SKILL.md`. Read it before any workflow
 
 | What | Where |
 |------|-------|
-| Shared playbook (audiences, activation ladder, plays) | Notion `4087e8aabbb481e69b5cc1744133076b` |
-| Launch KPIs for local partners (K1–K7, full-loop clinics, roadmap dependencies) | Notion `40f7e8aabbb48114bdbfe8715c020740` |
+| Shared playbook (audiences, plays) | Notion `4087e8aabbb481e69b5cc1744133076b` |
+| Launch KPIs — BOB markets (K1–K7, full-loop clinics, roadmap dependencies; source of truth for targets) | Notion `40f7e8aabbb48114bdbfe8715c020740` |
 | Market pages, rollout tasks, gates, people | `skills/market-rollout/references/markets.md` |
 | Onboarding levels, admin access, certification | `skills/market-rollout/references/onboarding-path.md` |
 | Module catalogue and template | `skills/market-rollout/references/modules.md` |

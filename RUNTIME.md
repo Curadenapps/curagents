@@ -220,6 +220,9 @@ this section is what runs now. Quick and quiet: it runs every 2 hours.
    replied in a way that changes it, leave it queued and tell Sean), post it in the
    space the queued section names, record it in the ping history and delete the
    queued section. A queued ping from an earlier day is stale: delete it and note it.
+   Old local `.boom-boom-derek/outbox/` files: don't post from them; move today's onto
+   the page as `agents/boom-boom-derek.md` step 7.4 says. The space always comes from
+   the spec's "Channel" rule (common chat by default), never from an old prompt.
 5. **Run log, every run:** one row, Agent `webex-keepalive`, Where `PC`, Outcome `ok`
    ("signed in, kept alive" or "signed in, queued ping posted {HH:MM}"), `partial`
    ("signed out") or `failed` (no built-in browser). The run-log check uses these rows

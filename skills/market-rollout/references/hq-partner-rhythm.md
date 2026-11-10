@@ -9,7 +9,7 @@ on Sean remembering to ask. The agent prepares every meeting and follow-up below
 |------|------|-----|----------------|
 | Kick-off | Once, at Gate 0 | Sean, market owner, super user candidate | Agenda, pre-read, follow-up (workflow 7–8) |
 | Rollout check-in | Every two weeks until Gate 1, then weekly for 8 weeks after first practices | Sean, market owner (super user once named) | Status from workflow 1 as the agenda |
-| Monthly market review | First week of each month | Sean, market owner, market team lead | Agenda (below), KPI ladder, follow-up |
+| Monthly market review | First week of each month | Sean, market owner, market team lead | Agenda (below), launch KPIs (K1–K7), follow-up |
 | Markets broadcast | Monthly from Jan 2027 | All markets (Webex App Team – Markets) | Market lines for `announcements` (partner-safe) |
 | Partner session | Quarterly, or at launch moments (first one week of 14 Dec, Milan session early 2027) | All partners | Per-market pre-read |
 
@@ -17,7 +17,7 @@ on Sean remembering to ask. The agent prepares every meeting and follow-up below
 
 | Min | Part | Owner |
 |-----|------|-------|
-| 5 | Where we are: gate, people, practices on the ladder | Sean |
+| 5 | Where we are: gate, people, clinics on the launch KPIs (K1–K7) | Sean |
 | 10 | Market: what worked, what didn't, practice stories | Market owner |
 | 10 | Asks to HQ, and HQ answers to last month's asks | Both |
 | 10 | Next month: training, events, first-wave practices | Market owner |
