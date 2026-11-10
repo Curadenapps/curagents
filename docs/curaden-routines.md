@@ -82,6 +82,25 @@ Schedule: Thursdays 14:00.
 > on his PC. Last step, always: one row in the Agent run log (Agent
 > `announcements`, Where Cloud, Link = the draft page).
 
+### App Support (Curaden)
+
+Schedule: weekdays 08:20 and 14:20 (cron `20 7,13 * * 1-5` UTC). Connectors: Asana, Notion
+only. Created 10 Nov 2026 as `trig_01NzNgUy17FxJiHFc8otT4oS`.
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "App Support (Curaden)"; if its
+> Account isn't Curaden, log `no-op` and stop. If `agents/app-support.md` isn't on
+> `origin/main`, log `no-op` ("spec not merged") and stop.
+> Then do the run exactly as `agents/app-support.md` "Scheduled run" describes:
+> answer from the FAQs, post only what "Auto-post approvals" allows and only replies
+> owned by the account this runs on, put every other draft on its owner's "App
+> Support: replies to approve" task, post the subtasks the owner ticked, and record
+> anonymised FAQ candidates. Never edit BOB Admin, handle passwords or write
+> personal data outside Asana. Don't commit or push.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `app-support`, Where Cloud), with the FAQ candidates in its body.
+
 ## PC scheduled tasks (Curaden desktop app)
 
 On the `curagents` folder, in the **Curaden** desktop app, with Webex signed in

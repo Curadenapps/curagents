@@ -43,6 +43,8 @@ Say one of these in a session opened on the `curagents` folder:
 | `reply to <Asana task link>` | Drafts the reply for one task |
 | `post the support replies` | Posts the drafts you approved (all, or name the tasks), from your account |
 | `done on <Asana task link>` | You've made the change: it posts "All done" to the submitter and closes the task |
+| `support faq <question>` | Answers from the BOB / Curaprox FAQs and what App Support has learned |
+| `add that to the support faq` | Saves the reply you just sent as an FAQ answer (a PR to `docs/app-support-faq.md`) |
 
 Nothing is posted until you say "post". When a submitter answers, you get a subtask
 "Fabian: change in {system}" with the exact change. Make the change, tick the subtask,
@@ -82,8 +84,23 @@ Prompt (paste as is):
 > also on failure: one row in the Agent run log as `RUNTIME.md` describes
 > (Agent `app-support`, Where Cloud).
 
-While every type is still `draft`, the scheduled run only prepares drafts. You post
-them with "post the support replies" in a normal session.
+While every type is still `draft`, the scheduled run only prepares drafts. They land
+in Asana as subtasks of your task **"App Support: replies to approve (Fabian)"** (in My
+Tasks, not on the board, so the submitter never sees them):
+
+- **Tick the subtask** to approve. Change the reply text in its notes first if you
+  want; what's above the `---` line is what gets posted.
+- **Comment "skip"** to drop it, or just reply on the form task yourself.
+- Ticked replies are posted from your account the next time you run App Support
+  ("post the support replies"), or by the schedule if it runs on your account.
+
+## How it gets smarter
+
+App Support answers from the existing FAQs first (BOB — FAQ, Curaprox — FAQ and the
+How-Tos in Notion, which the curaprox-apps.com FAQ is built from). What you and Sean
+send that those don't cover is saved, without names or contact details, in
+[`docs/app-support-faq.md`](app-support-faq.md), so the next draft for the same question
+starts from your answer. If you edit a draft, it learns from your edit.
 
 ## Good to know
 

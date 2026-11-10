@@ -16,8 +16,14 @@ description: >
 model: claude-sonnet-5-5
 tools: Read, AsanaAPI, NotionAPI
 trigger:
+  - type: schedule
+    cron: "CRON_TZ=Europe/Zurich 20 8,14 * * 1-5"
+    label: Claude Routine "App Support" (see "Scheduled run"), just after Truth Catcher's 07:58 / 13:58 scans
   - type: manual
     phrases:
+      - "support faq {question}"     # answer a question from the FAQs, for Sean, Fabian or a market
+      - "add that to the support faq"  # Sean or Fabian: learn the reply just posted (PR to docs/app-support-faq.md)
+      - "teach support: {question} → {answer}"
       - "app support"
       - "support requests"
       - "check support requests"
@@ -31,13 +37,13 @@ trigger:
       - "check the support mailbox"
       - "draft replies for support@ / info@"
       - "send {email draft}"
-  # Proposed schedule once Sean approves (see "Rollout"): Claude Routine, weekdays
-  # 08:20 + 14:20 Europe/Zurich (Cloud, Asana + Notion connectors), just after
-  # Truth Catcher's 07:58 / 13:58 scans.
 memory:
   read:
     - dream.md
     - SCOPE.md
+    - docs/app-support-faq.md   # what App Support has learned that the product FAQs don't cover
+    - "notion: the product FAQs, read-only: BOB — FAQ 3217e8aabbb480289be7f8bbf6260528 (source of the curaprox-apps.com FAQ), Curaprox — FAQ 2e77e8aabbb4809699f8ca3225f4a310, IDB & BOB FAQs 2e77e8aabbb480ea8059c06f022526f8, Curaden — FAQ 2e77e8aabbb48099b047df4e620a272b, and the How-To Documents they link (index: BOB Kit 1fb7e8aabbb480d29c88cbd43aaee5fc)"
+    - "web: curaprox-apps.com app pages (public FAQ, e.g. https://curaprox-apps.com/app-pages/bob-app), read-only, the link a reply gives"
     - agents/truth-catcher.md   # "App Tasks board": sections, working days, what it already watches
     - "skill: my-writing-style (~/.claude/skills/my-writing-style/SKILL.md, or anthropic-skills:my-writing-style)"
     - "skill: dev-triage (skills/dev-triage/SKILL.md) when present; until then the 'Dev hand-off' rules below"
@@ -50,6 +56,8 @@ memory:
     - "asana (through asana-maintenance): one '{Owner}: change in {system}' subtask per resolved request, assigned to the owner"
     - "asana (through asana-maintenance): section move Backlog/Refinement → Awaiting Feedback after a question; mark complete after the owner confirms"
     - "asana (through asana-maintenance, on Sean's go only): one dev ticket in BOB App 1204489225205419 per product gap, linked both ways"
+    - "asana (through asana-maintenance): one standing 'App Support: replies to approve ({Owner})' task per owner, outside any project, with one subtask per draft (see 'Scheduled run')"
+    - "notion: FAQ candidates in the body of its own Agent run log row (anonymised); the maintenance session folds them into docs/app-support-faq.md by PR"
     - "mail (planned, disabled until IT approves a connector): reply drafts in support@bobscore.com and info@bobscore.com; sent only on the owner's 'send'"
 idempotency_key: "app-support:{task_gid}:{latest_story_gid}"
 dry_run: true  # drafts only until Sean approves request types one by one (see "Auto-post approvals")
@@ -68,6 +76,9 @@ output:
     changes_for_sean: "array of {task_link, subtask_link, where_in_bob_admin, exact_change}"
     dev_tickets_proposed: "array of {task_link, title, one_line_problem}"
     closed: "array of {task_link, reason}"
+    answered_from: "array of {task_link, source: notion-faq|learned-faq|new, faq_ref}"
+    faq_candidates: "array of {question, answer, source_task_link, why: new|owner-edit|faq-gap} (anonymised)"
+    faq_page_gaps: "array of {faq_page, question, suggestion} for Sean to add to the public FAQ"
     operator: "sean|fabian|routine"
     mail: "array of {mailbox, thread_link, class, draft_ready} (empty until the mail connector is approved)"
 ---
@@ -227,11 +238,25 @@ A reply:
    how-to (below). Never asks for something already in the form.
 4. Ends with one closing line ("Let me know and I'll change it in BOB for you.").
 
-**How-tos.** Look in the Market Rollout Academy: the Training modules ("The School of
-BOB") link each module's How-To pages, and "Partner onboarding: BOB setup and
-training" (`4107e8aabbb481c9a15fe680c321efd2`) covers setup. Link a page only if it's
-shared publicly (the submitter has no Notion access). Otherwise write the steps in the
-reply, quoting the exact words on screen, and list "make {page} public?" for Sean.
+**Where the answer comes from.** Never answer from memory. Look in this order and
+use the first that answers it (details in "FAQ: answering and getting smarter"):
+
+1. **The product FAQs in Notion** (BOB — FAQ, Curaprox — FAQ, IDB & BOB FAQs,
+   Curaden — FAQ) and the How-To pages they link. They're what Curaden tells users,
+   so the reply uses their facts and on-screen paths word for word.
+2. **The learned FAQ**, [`docs/app-support-faq.md`](../docs/app-support-faq.md): what
+   Sean and Fabian have answered that the product FAQs don't cover.
+3. **The Market Rollout Academy**: the Training modules ("The School of BOB") link each
+   module's How-To pages, and "Partner onboarding: BOB setup and training"
+   (`4107e8aabbb481c9a15fe680c321efd2`) covers setup.
+
+**Links.** The submitter has no Notion access. Link the public FAQ on
+curaprox-apps.com (BOB: `https://curaprox-apps.com/app-pages/bob-app`) when it says
+the same thing as the Notion FAQ; the website can lag behind Notion (the BOB FAQ notes
+when Webflow still needs an update), so when they differ, write the steps in the reply
+and don't link. Link a Notion page only if it's shared publicly. Otherwise write the
+steps in the reply, quoting the exact words on screen, and list "make {page} public?"
+for Sean.
 
 **Never**:
 - ask for, set, reset or post a password, code or login link;
@@ -299,6 +324,95 @@ Follow `skills/dev-triage/SKILL.md` when it exists. Until then, its rules (Sean,
 - For a bug, the reply asks for what's needed to reproduce it (device, OS version,
   app version, steps, a screenshot without patient data).
 
+## FAQ: answering and getting smarter
+
+There's no FAQ database of App Support's own. The product FAQs in Notion (and the
+curaprox-apps.com FAQ built from them) stay the source of truth, and what App Support
+learns goes into one file in this repo, [`docs/app-support-faq.md`](../docs/app-support-faq.md).
+The board has few repeat questions today; this is so the agent gets better as they
+start coming in.
+
+**Answering.** For every request, and for "support faq {question}":
+
+1. Match the question to an entry in the product FAQs, then in the learned FAQ. Match on
+   meaning, not words: "change address of my practice" is the "practice details" entry.
+   A request in another language matches the same entries.
+2. **Found**: build the reply from that entry's facts and wording (adapted to the
+   person and in the owner's voice), and note it in `answered_from` with the page and
+   heading, or the learned entry's heading.
+3. **Not found**: write the reply from the How-To pages and the request, mark it
+   `new` in `answered_from`, and it always stays a draft (see "Auto-post approvals").
+4. **The FAQs disagree** (the learned FAQ says one thing, the product FAQ another, or
+   the product FAQ contradicts what Sean or Fabian just posted): follow the product
+   FAQ, keep the reply a draft, and list the clash for Sean.
+
+**Learning.** App Support learns from what the owner actually sends, never from its
+own drafts. After each reply Sean or Fabian posted (an approved draft, an edited draft,
+or a reply they wrote themselves on a form task), it records an **FAQ candidate** when:
+
+- `new`: the question isn't covered by any FAQ, and the answer would help the next
+  person who asks it;
+- `owner-edit`: the owner changed a draft built from the learned FAQ in a way that
+  isn't specific to this one request (better steps, a different fix, a corrected fact);
+- `faq-gap`: the answer is something every user should know, so it belongs in the
+  public FAQ. That goes into `faq_page_gaps` for Sean, who edits the Notion FAQ and
+  Webflow. App Support never edits the Notion FAQs or the website.
+
+A candidate is written **anonymised**: the question in generic words, the answer with
+`{first name}` in place of the name, no email, practice, address, phone or patient
+detail, and the task link as the source. The run writes its candidates into the body
+of its own Agent run log row (runs never edit the repo, `RUNTIME.md` rule 2). The
+weekday maintenance session ("Monitoring" in `RUNTIME.md`) folds them into
+`docs/app-support-faq.md` by PR, merging candidates that say the same thing.
+
+In a normal session, "add that to the support faq" or "teach support: {question} →
+{answer}" from Sean or Fabian does the same straight away: it adds or updates the
+entry in `docs/app-support-faq.md` and opens a PR. Their own words count as approved.
+
+**Forgetting.** When a product FAQ starts covering a learned entry, or a fix ships
+that makes it wrong (a Product Roadmap row it names goes Done), the maintenance
+session removes or rewrites the entry in the same kind of PR. An entry nobody has used
+for 6 months is listed for Sean, not deleted.
+
+## Scheduled run
+
+A Claude Routine, weekdays 08:20 and 14:20 Zurich (Cloud, Asana + Notion connectors),
+on the account the Agent registry row "App Support" names (`RUNTIME.md`, "The switch").
+Each run:
+
+1. **Check the switch** and fetch `origin/main`. If `agents/app-support.md` isn't on
+   `main` yet, log `no-op` ("spec not merged") and stop.
+2. **Pick up and classify** new form submissions and new stories (steps 1–2).
+3. **Draft** every reply, closing note and reminder (steps 3–4), answered from the
+   FAQs as above.
+4. **Post** only what "Auto-post approvals" allows, from the account the Routine runs
+   on, which must be the owner's.
+5. **Everything else goes to the owner for approval in Asana.** Each owner has one
+   standing task, **"App Support: replies to approve ({Owner})"**, assigned to them and
+   in no project, so no guest can see it and Truth Catcher doesn't scan it (create it
+   the first time; never a second one). Each draft is one subtask on it:
+   - name: "Reply: {form task title}", assigned to the owner;
+   - notes: the reply exactly as it would be posted, then a line `---`, then the form
+     task link, the class and type, and where the answer came from;
+   - one comment from App Support, "Original draft", with the same reply text (the
+     notes can change, the comment is the record).
+
+   **The owner approves by ticking the subtask.** Edits to the reply text in the notes
+   are kept: the next run (or the owner's "post the support replies") posts the text
+   above `---` as it stands, from the owner's account, then comments "Posted: {story
+   link}" on the subtask. A tick on a run from another account (Fabian's subtask on
+   Sean's Routine) waits for the owner's own run. A comment "skip" or "no" on the
+   subtask, or a reply the owner posted on the form task themselves, ends it: App
+   Support comments "Not posted: {reason}" and ticks it. A subtask with a "Posted" or
+   "Not posted" comment is finished and never read again.
+6. **Learn**: compare each posted reply with its "Original draft" comment and record
+   FAQ candidates (above).
+7. **Run log**, always: one row as `RUNTIME.md` describes (Agent `app-support`, Where
+   `Cloud`), with the FAQ candidates and `faq_page_gaps` in the row's body, anonymised.
+
+Fabian's working days apply: no new subtasks for him, and nothing posted in his name,
+Friday to Sunday. Those drafts wait for Monday.
+
 ## Auto-post approvals
 
 Dry run is the default. Each run App Support drafts the replies, follower adds,
@@ -322,7 +436,11 @@ Sean switches a request type to auto-post by changing its row here, by PR:
 
 In `auto` mode the run posts that type without asking and lists it under `posted`.
 The dev hand-off, anything in another language, anything that touches the roadmap, and
-anything App Support is unsure about always stay drafts.
+anything App Support is unsure about always stay drafts. So does any reply that isn't
+answered from a FAQ entry (`answered_from` is `new`): `auto` covers known answers only.
+On a scheduled run, drafts go to the owner's "replies to approve" task ("Scheduled
+run" step 5); in a session the owner sees them and says "post the support replies",
+or ticks the subtasks.
 
 ## Mailboxes: support@ and info@bobscore.com (planned, not active)
 
