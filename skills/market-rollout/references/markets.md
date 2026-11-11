@@ -8,11 +8,11 @@ this file when an owner, ID or gate changes.
 | What | ID / link |
 |------|-----------|
 | Markets playbook (Notion) | `4087e8aabbb481e69b5cc1744133076b` |
-| Market Rollout Academy (Notion) | `4087e8aabbb481df9fa3c1662efbbe6a` |
+| BOB Academy (Notion; renamed from Market Rollout Academy on 11 Nov 2026) | `4087e8aabbb481df9fa3c1662efbbe6a`: where partners and staff learn BOB, including the FAQs. Holds the partner onboarding page and the Training modules database below |
 | Training modules (data source, "The School of BOB") | `collection://ac2f0425-bc31-4bc9-8826-3b01736035c6` (DB `6bf9ded6247f435aaf9c7d7176493382`); each module links its How-To pages in `How-to guides` |
 | How-To documents (data source) | `collection://1f97e8aa-bbb4-81c1-8277-000b39b5c1b2` |
 | Partner onboarding: BOB setup and training (Notion) | `4107e8aabbb481c9a15fe680c321efd2`: the one onboarding flow for every partner and internal team (register, download, approval, login, modules with their how-tos, support) |
-| Template: Partner onboarding email (Notion, App Hub Templates) | `4107e8aabbb48125b595c2d72a33ff7d`: To country manager, Cc Commercial Manager, education manager, Fabian, support@bobscore.com |
+| Template — Partner onboarding email (Notion, Curaden App Hub → Templates) | `4107e8aabbb48125b595c2d72a33ff7d`: To country manager, Cc Commercial Manager, education manager, Fabian, support@bobscore.com |
 | Launch KPIs — BOB markets (Notion; source of truth for KPI targets) | `40f7e8aabbb48114bdbfe8715c020740` |
 | Onboarding tracker (data source) | `collection://ccb6b29c-2a46-4022-8320-4c24327e61f2` (DB `0d4440155cf2449d8c733d36de73645e`). Set `Edu Hub market` (relation to the Education Hub markets, `collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce`) so the market's Commercial Manager shows. Market options: USA, Switzerland, UAE, Japan, Italy, Czech Republic, HQ |
 | Market launch template (Notion) | `3f37e8aabbb481459902f24c7fc73b76` |

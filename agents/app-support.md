@@ -53,7 +53,7 @@ memory:
     - agents/truth-catcher.md   # "App Tasks board": sections, working days, what it already watches
     - "skill: dev-triage (skills/dev-triage/SKILL.md) when present; until then the 'Dev hand-off' rules below"
     - "asana: App Tasks, Requests & Feedback 1200298616652229 (tasks, notes, custom fields, followers with email, stories)"
-    - "notion: Market Rollout Academy 4087e8aabbb481df9fa3c1662efbbe6a, Training modules (collection://ac2f0425-bc31-4bc9-8826-3b01736035c6) and their linked How-To pages, read-only"
+    - "notion: BOB Academy 4087e8aabbb481df9fa3c1662efbbe6a, Training modules (collection://ac2f0425-bc31-4bc9-8826-3b01736035c6) and their linked How-To pages, read-only"
     - "notion: Product Roadmap 751b6071283e43e8b1a91054319e0db6, read-only (to answer 'is it planned' without promising dates)"
     - "notion: Curaden Education Hub Markets (collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce, view mode on view://4157e8aa-bbb4-81a8-ac7d-000ccdcaaf8a) and the Commercial Manager and Local Partners pages it links, read-only, to find the local contact for a requester's country"
   write:
@@ -322,8 +322,8 @@ use the first that answers it (details in "FAQ: answering and getting smarter"):
    so the reply uses their facts and on-screen paths word for word.
 2. **The learned FAQ**, [`docs/app-support-faq.md`](../docs/app-support-faq.md): what
    Sean and Fabian have answered that the product FAQs don't cover.
-3. **The Market Rollout Academy**: the Training modules ("The School of BOB") link each
-   module's How-To pages, and "Partner onboarding: BOB setup and training"
+3. **The BOB Academy** (where partners and staff learn BOB): the Training modules
+   ("The School of BOB") link each module's How-To pages through `How-to guides`, and "Partner onboarding: BOB setup and training"
    (`4107e8aabbb481c9a15fe680c321efd2`) covers setup.
 
 **Links.** The submitter has no Notion access. Link the public FAQ on

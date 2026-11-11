@@ -117,7 +117,7 @@ The page is the source of truth for that market; the references only hold IDs an
    checklist, then "train with HQ watching" (the first practice they onboard).
 4. Tracker row: Role `Admin super user`, Admin access `To request` (Sean moves it to
    `Requested` and `Granted`), Stage `Named`.
-5. Put the request draft and plan on one page under Market Rollout Academy, titled
+5. Put the request draft and plan on one page under BOB Academy, titled
    "{Market} super user: {Person}".
 
 ### 5. Build a module — "build module {topic}"

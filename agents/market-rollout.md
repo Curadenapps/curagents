@@ -44,7 +44,7 @@ memory:
     - "notion: the 'Rollout status' section of each market page (that section only)"
     - "notion: rows in Training modules (Status Draft or HQ check only) and their pages"
     - "notion: rows in Onboarding tracker"
-    - "notion: draft pages under Market Rollout Academy 4087e8aabbb481df9fa3c1662efbbe6a (agendas, follow-ups, message drafts)"
+    - "notion: draft pages under BOB Academy 4087e8aabbb481df9fa3c1662efbbe6a (agendas, follow-ups, message drafts)"
     - "asana: only through asana-maintenance, only after Sean says go"
 idempotency_key: "market-rollout:{workflow}:{market}:{YYYY-MM-DD}"
 dry_run: false  # writes only drafts and tracker rows in Notion; nothing leaves Curaden without Sean
@@ -93,8 +93,8 @@ Everything follows `skills/market-rollout/SKILL.md`. Read it before any workflow
 | Onboarding levels, admin access, certification | `skills/market-rollout/references/onboarding-path.md` |
 | Module catalogue and template | `skills/market-rollout/references/modules.md` |
 | HQ ↔ partner rhythm, who does what, Blanca | `skills/market-rollout/references/hq-partner-rhythm.md` |
-| Market Rollout Academy (module DB, tracker) | Notion `4087e8aabbb481df9fa3c1662efbbe6a` |
-| Partner onboarding page and email template (one flow for every partner) | Notion `4107e8aabbb481c9a15fe680c321efd2`, `4107e8aabbb48125b595c2d72a33ff7d` |
+| BOB Academy (module DB, tracker, partner onboarding page) | Notion `4087e8aabbb481df9fa3c1662efbbe6a` |
+| Partner onboarding page (in the BOB Academy) and "Template — Partner onboarding email" (Curaden App Hub → Templates); one flow for every partner and internal team | Notion `4107e8aabbb481c9a15fe680c321efd2`, `4107e8aabbb48125b595c2d72a33ff7d` |
 
 ---
 
