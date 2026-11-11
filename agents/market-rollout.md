@@ -28,6 +28,8 @@ trigger:
       - "getting-started pack for {partner}"
       - "audience brief {market}"
       - "what can Blanca take"
+      - "rollout watch"
+      - "rock n rollout"
 memory:
   read:
     - dream.md
@@ -115,6 +117,7 @@ Each workflow is in the skill with its steps. In short:
 | "partner follow-up {market}" | From the meeting recap: decisions, actions with owners, a follow-up message draft, proposed Asana tasks | A draft page; Asana only after "go" |
 | "draft to {partner}" | A message in Sean's voice (`my-writing-style`, `curaden-comms`) | A draft page or chat only |
 | "what can Blanca take" | Marketing-side items across the active rollout markets that Blanca could own | Chat only |
+| "rollout watch" / "rock n rollout" | Alignment check across the BOB Market Rollouts board, the Notion Market rollout system and market pages, the Product Roadmap and the WBS (see Rollout watch below) | A "Rollout watch — YYYY-Www" report page under the Market rollout system; card comments only once Sean has switched comments on |
 
 ---
 
@@ -175,6 +178,43 @@ Each workflow is in the skill with its steps. In short:
   Status 11 Nov 2026: USA is assigned to Sarah Jackson (Thomas Niederberger asked her to
   lead, in a comment on the card). UAE, Italy and Switzerland are in the new format and
   stay with Sean until each market confirms its responsible person.
+
+
+### Rollout watch
+
+Keeps the rollout, the roadmap and the build plan in step, so Sean doesn't have to
+check it by hand. Read-only apart from the report page (and card comments once switched on).
+
+Checks, per active market card (Parked cards are skipped):
+
+| Check | Flag when |
+|---|---|
+| Calendar | Card due date or "BOB rollout [market] finished" date differs from the Market rollout system calendar or the market page |
+| Build dependencies | A stage needs something the WBS hasn't delivered by then: treatment plan live (25 Jun 2027) for Loop on, Curaprox app v1 (11 Jun 2027), Shopify checkout (6 Aug 2027) for a Shopify market's Loop on, voice in the market's language |
+| Roadmap | A roadmap row the market depends on slipped to a later Release, is Parked or Unscheduled |
+| Stage | The card's column doesn't match its milestones (column ahead of an open milestone, or every milestone of the stage done but the card not moved) |
+| Overdue | A milestone or subtask past its due date |
+| Owner | No confirmed responsible person (still assigned to Sean) for more than 2 weeks after kickoff, per Board upkeep |
+| Notion | The market page's "Rollout status" is older than 2 weeks or says something the card doesn't |
+| Links | The referral and Shopify dependencies are missing on a Shopify market's Loop on milestone |
+
+Output: one report page, top three things for Sean first, then a table per market
+(check, finding, proposed fix, who: market-rollout, asana-maintenance or Sean).
+Routine fixes (card moves, Status field) go to asana-maintenance as directives.
+Structural fixes (dates, milestones, descriptions) are proposed and applied after
+Sean says go. Dry run first: the first runs write the report only, no card comments,
+until Sean switches comments on.
+
+### Signing what this agent writes in Asana
+
+People should know when it's the agent, not Sean. Every comment, and every
+description change the agent makes, ends with:
+
+`— Rock 'n' Rollout 🎸 (rollout agent, not Sean personally) · cc @Sean Dunne`
+
+In rich text: `<em>— Rock 'n' Rollout 🎸 (rollout agent, not Sean personally) · cc</em> <a data-asana-gid="1207214370347608"/>`.
+In a description, the line goes at the bottom: `<em>Last updated by Rock 'n' Rollout 🎸 (rollout agent), DD Mon YYYY</em>`.
+Drafts Sean sends himself (emails, Webex messages in his voice) are not signed.
 
 ---
 
