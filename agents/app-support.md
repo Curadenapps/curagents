@@ -55,6 +55,7 @@ memory:
     - "asana: App Tasks, Requests & Feedback 1200298616652229 (tasks, notes, custom fields, followers with email, stories)"
     - "notion: Market Rollout Academy 4087e8aabbb481df9fa3c1662efbbe6a, Training modules (collection://ac2f0425-bc31-4bc9-8826-3b01736035c6) and their linked How-To pages, read-only"
     - "notion: Product Roadmap 751b6071283e43e8b1a91054319e0db6, read-only (to answer 'is it planned' without promising dates)"
+    - "notion: Curaden Education Hub Markets (collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce, view mode on view://4157e8aa-bbb4-81a8-ac7d-000ccdcaaf8a) and the Commercial Manager and Local Partners pages it links, read-only, to find the local contact for a requester's country"
   write:
     - "asana (through asana-maintenance): reply comments on form submissions, @mentioning the submitter's guest follower"
     - "asana (through asana-maintenance): add the submitter's email (from the form) as a follower when none matches"
@@ -76,12 +77,13 @@ output:
     errors: array
     summary: string
     new_requests: "array of {task_link, class: support|dev|feedback|spam, type, application, app_country}"
-    held_for_owner: "array of {task_link, owner, reason: no-source|patient-data|spam|unsure|other-app, subtask_link}"
+    held_for_owner: "array of {task_link, owner, reason: no-source|patient-data|spam|unsure|other-app|local-contact, subtask_link}"
     posted: "array of {task_link, type, story_gid}"
     changes_for_sean: "array of {task_link, subtask_link, where_in_bob_admin, exact_change}"
     dev_tickets: "array of {task_link, ticket_link, title, kind: bug|gap, new_or_linked}"
     closed: "array of {task_link, reason}"
     answered_from: "array of {task_link, source: notion-faq|learned-faq|new, faq_ref}"
+    local_contacts: "array of {task_link, country, commercial_manager_page, partner_page, confirm_needed: bool} (Notion links only, no names or emails)"
     faq_candidates: "array of {question, answer, source_task_link, why: new|owner-edit|faq-gap} (anonymised)"
     voice_notes: "array of {owner: Sean|Fabian, pattern, source_task_link} (no requester details)"
     faq_page_gaps: "array of {faq_page, question, suggestion} for Sean to add to the public FAQ"
@@ -256,6 +258,36 @@ A free email domain, "Not Listed" as country, a degree in the Title field ("Dr."
 **Who owns it** (Sean, 4 Nov): anything BOB → Sean, everything else → Fabian (see
 "Who runs it"). Replies to users go out any weekday. Subtasks and @mentions for Fabian
 wait for Monday to Thursday (same working-day rule as Truth Catcher).
+
+## Local contact (country-tied requests)
+
+Some requests are really for the local team: a practice that wants BOB or a demo, a
+distributor or partner asking, a market-specific question (pricing, local products,
+training), or "Not Listed" as country with a likely country in the text. For those,
+App Support looks up who covers that country in the Curaden Education Hub, read-only,
+so the owner knows whom to bring in (from #53, 4 Nov):
+
+1. **Markets** (`collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce`): view mode on
+   `view://4157e8aa-bbb4-81a8-ac7d-000ccdcaaf8a` ("Agents: all rows (don't filter)"),
+   paging with `next_cursor`, never SQL (`RUNTIME.md` "Reading Notion"). Match the
+   country on Market Name (some rows are hubs, like "UAE (MEA HUB)"). Take its
+   **Commercial Manager** and **Local Partners** links.
+2. **Fetch those pages** (`notion-fetch`): the Commercial Manager page for the regional
+   commercial manager; each partner page for the local subsidiary or distributor, its
+   Status / Active, Country Manager and Education Manager. Education Managers are
+   usually the right first contact for clinicians.
+3. **Tell the owner, not the submitter.** The contact goes into the owner's subtask on
+   "App Support: needs you" (reason `local-contact`), named with role and Notion page link:
+   internal Curaden and partner contacts are fine to name to Sean and Fabian. No
+   partner, partner Inactive or `Active` unticked, or no market row: say
+   "[confirm: local contact for {country}]".
+4. **The reply** to the submitter says the local team will be in touch, and names no
+   person, email or company until the owner confirms one. App Support never contacts
+   the local team itself (Rules).
+
+The result JSON and the run log carry only the Notion page links (`local_contacts`),
+never names or emails. Leads for Sean's market work still go to market-rollout through
+him.
 
 ## 3. Reply (class a)
 
@@ -466,7 +498,8 @@ connectors), one per owner ("Two Routines, split by owner"). A request that land
 4. **Post the held replies the owner ticked** (below).
 5. **Hold for the owner** only what App Support can't or mustn't answer: no source for
    the answer, patient data in the request, spam, a dev request outside Phinamic's
-   apps, or anything it's unsure about. Each owner has one standing task, **"App
+   apps, a request for the local team ("Local contact": the reply still goes out, the
+   subtask names the contact), or anything it's unsure about. Each owner has one standing task, **"App
    Support: needs you ({Owner})"**, assigned to them and in no project, so no guest can
    see it and Truth Catcher doesn't scan it (create it the first time; never a second
    one). Each held request is one subtask on it:
