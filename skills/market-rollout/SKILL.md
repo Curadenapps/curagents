@@ -9,14 +9,14 @@ description: >
   for <person>", "build module <topic>", "training plan for <market>", "partner
   prep <market>", "partner follow-up <market>", "draft to <partner>", "audience
   brief <market>", "what can Blanca take", or any question about training,
-  onboarding or partners in one of the five markets. Drafts and tracks in Notion;
+  onboarding or partners in one of the rollout markets. Drafts and tracks in Notion;
   Sean sends, approves and grants.
 ---
 
 # Market Rollout
 
 The working method for `agents/market-rollout.md`. Sean leads the rollout of BOB in
-five markets mostly alone, with some help from Blanca Suarez (Marketing). The skill
+rollout markets mostly alone, with some help from Blanca Suarez (Marketing). The skill
 turns each request into prepared work he can act on in minutes.
 
 ## Read first
@@ -60,8 +60,9 @@ The page is the source of truth for that market; the references only hold IDs an
    (`references/markets.md`), the market's Onboarding tracker rows and the modules
    tagged for it.
 2. Work out:
-   - **Gate**: the lowest gate with open subtasks, and which of them are overdue or have
-     no owner.
+   - **Stage**: the card's column on the BOB Market Rollouts board and the lowest stage
+     milestone with open subtasks; which of them are overdue or have no owner; days to
+     launch (card due date) and to "BOB rollout [market] finished".
    - **People**: is there a market owner, a super user with access granted, a super
      user certified? (`onboarding-path.md` levels 1–2.)
    - **Training**: which modules the market needs that aren't `Ready`, and which aren't
@@ -193,7 +194,7 @@ reply. Return it in chat, or as a draft page if it's long.
 
 ### 10. What Blanca can take — "what can Blanca take"
 
-Go through the five markets and list marketing-side items only (the split is in
+Go through the active rollout markets and list marketing-side items only (the split is in
 `hq-partner-rhythm.md`): kit localisation briefs, posters and QR displays, value sheet,
 practice-story write-ups, event follow-up emails, the IDB Challenge tie-in. Each item
 with market, what "done" looks like and a date. Chat only; Sean decides what to hand over.

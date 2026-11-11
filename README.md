@@ -48,7 +48,7 @@ Config details for each procedure: [`skills/curaden-communications/references/`]
 
 ### `market-rollout` → [`skills/market-rollout/SKILL.md`](skills/market-rollout/SKILL.md)
 
-Rollout support for the 2027 markets (USA, Switzerland, UAE, Japan, and Italy, which pilots first from the Milan launch). Used by the
+Rollout support for the 2027 markets: UAE (Apr 2027), Italy (Jul), Slovenia and South Africa (Aug, on hold), USA and Japan (Aug–Sep); Switzerland undated, Germany self-service, Brazil parked. Calendar and stages live on the Notion Market rollout system page; to-dos on the Asana board BOB Market Rollouts. Used by the
 `market-rollout` agent; Notion home is the Market Rollout Academy (training modules +
 onboarding tracker).
 
