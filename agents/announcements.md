@@ -257,7 +257,7 @@ message). Whenever the window has them, add the template's two detail pages:
 *Scope & phasing* (the loop, products, phasing with gates, not doing) and
 *Decisions & roadmap* (WBS or other client decisions, what changed on the
 roadmap in Notion, open points before the next phase, Markets: Japan, US,
-rollout countries). Read the scope page, the WBS sheet and the roadmap review
+rollout countries). Read the scope page, the WBS (in the Notion roadmap) and the roadmap review
 pages for them, and credit the people who did the work (for example Fabian on
 the WBS). The Webex message points to them in one line.
 

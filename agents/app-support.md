@@ -151,8 +151,11 @@ its run:
 - it's **Friday** (Fabian works Monday to Thursday);
 - Fabian's registry row "App Support (Fabian)" is missing, or its **Account** is
   `Paused`;
-- Fabian's row's **Last run** is empty or more than 2 hours old during his hours (his
-  Routine isn't set up yet, is off, or is failing). It says so in its run-log row ("covering for Fabian: {reason}").
+- Fabian's last run is missing or more than 2 hours old during his hours (his
+  Routine isn't set up yet, is off, or is failing). Read it from the run-log view,
+  newest first (`RUNTIME.md` "Reading Notion"): the newest row with Agent
+  `app-support` and Account `Fabian`. The registry's **Last run** rollup can't be read
+  through the connector, and never use SQL for this. It says so in its run-log row ("covering for Fabian: {reason}").
 
 Fabian's Routine never covers Sean's requests: when it sees a BOB request it leaves it
 alone. Each Routine checks its own registry row first (`RUNTIME.md`, "The switch").
@@ -453,7 +456,9 @@ connectors), one per owner ("Two Routines, split by owner"). A request that land
 1. **Check the switch** and fetch `origin/main`. If `agents/app-support.md` isn't on
    `main` yet, log `no-op` ("spec not merged") and stop. Then work out which owners'
    requests this run handles: its own, plus Fabian's if Sean's Routine is covering
-   (Friday, Fabian's row paused or missing, or his Last run more than 2 hours old).
+   (Friday, Fabian's row paused or missing, or his last run more than 2 hours old).
+   Read Notion in view mode only (`RUNTIME.md` "Reading Notion"): this Routine runs
+   every hour, so SQL here would use up the workspace's query allowance.
 2. **Pick up and classify** new form submissions and new stories (steps 1–2). Nothing
    new since the last run: log `no-op` and stop (most hourly runs end here).
 3. **Answer** every request on its own (step 3), handle replies from submitters (step

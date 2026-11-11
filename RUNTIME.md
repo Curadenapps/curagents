@@ -47,7 +47,8 @@ what runs where; the table below is the background.
    or `Account: Fabian` for a Routine on Fabian Jöhl's Claude account, see the
    paste-once prompt below). A prompt that names no account is from before 23 Oct:
    skip the check, run as before, and log Account `unknown`.
-2. Find the row whose **Started by** names this task or Routine. If **Account** is
+2. Find the row whose **Started by** names this task or Routine (read the registry in
+   view mode, "Reading Notion" below; never SQL). If **Account** is
    `Paused`, or names another account, write a run-log row with Outcome `no-op` and
    Summary `switch: assigned to {Account}`, and stop.
 3. If the registry can't be read, write a `failed` row with the reason and stop.
@@ -128,6 +129,39 @@ personal projects stay on Personal; curagents and its automations move.
    counts as missed.
 4. **Never type credentials.** A sign-in prompt is a failed run with the reason
    logged.
+5. **Read Notion databases in view mode only** (below). Never SQL or rows mode.
+
+## Reading Notion (view mode only)
+
+Notion's SQL and rows-mode queries share one small hourly allowance across the whole
+workspace (no Notion Business, Sean 11 Nov). App Support runs every hour, the courier
+four times a day, and Sean's own sessions spend from the same allowance. It was used
+up by mid-morning on 11 Nov; from then on, a run that reads that way can't even read
+its registry row and has to log `failed`. View mode and page fetches don't count
+against it (checked 11 Nov: view mode still worked with the allowance used up).
+
+- **Read a database** with `notion-query-data-sources` in **view mode** on the view
+  below, paging with `next_cursor` (`page_size` 100). Filter and sort the rows
+  yourself. Never SQL mode, never rows mode, not even as a fallback.
+- **Read one page or row** with `notion-fetch`.
+- **Writing is fine**: creating and updating pages doesn't use the allowance.
+- A database not in the table: fetch the database, pick a view with no filter, and
+  use view mode on it. If it only has filtered views, say so in the run log's Error
+  column so the maintenance session adds an "Agents: … (don't filter)" view.
+- The "Agents: … (don't filter)" views are for the agents. Nobody adds filters or
+  hides rows there; to look at a slice, use another view.
+
+| Database | View for agents (view mode) |
+|----------|-----------------------------|
+| Agent registry | `view://4157e8aa-bbb4-8151-9c1a-000c4e4613fc` "Agents: all rows (don't filter)" |
+| Agent run log | `view://4027e8aa-bbb4-816e-b040-000cbf51881b` "Command center: latest first (don't filter)"; the newest rows come first, so stop paging once you're past the window you need |
+| Webex outbox | `view://4157e8aa-bbb4-813c-a25e-000c3f1f159d` "Agents: all rows, newest first (don't filter)" |
+| 🚩 Inbox (Tasks & Notes) | `view://4157e8aa-bbb4-815b-b0a6-000cb183ca38` "Agents: all rows, newest first (don't filter)" |
+| Product Roadmap | `view://3f47e8aa-bbb4-818c-a54e-000c04b1a71b` "Agents: all rows (don't filter)" |
+
+The registry's **Last run** rollup comes back as a `rollupResult://` reference, not a
+date, in view mode and in page fetches. For a row's last run, use its **Runs** relation
+(empty = never ran) or the run-log view, newest first.
 
 ## Agent run log
 
@@ -162,7 +196,12 @@ weekday at 10:15 Zurich:
   it's the PC (asleep, desktop app closed, Webex signed out), tell Sean what to fix.
 - Two rows for the same scheduled run from different accounts is a double run: say
   so to Sean once, naming the account that should pause its copy.
-- A registry row whose **Last run** is older than its schedule allows is a missed run.
+- A registry row whose last run (its **Runs** relation or the run-log view; the
+  **Last run** rollup can't be read through the connector) is older than its schedule
+  allows is a missed run.
+- A `failed` row whose Error mentions the Notion query or usage limit means some step
+  used SQL or rows mode: find the spec, skill or prompt that told it to and switch it
+  to view mode ("Reading Notion") in the PR.
 - `app-support` rows with **FAQ candidates** in their body: fold them into
   `docs/app-support-faq.md` in one PR (merge duplicates, keep them anonymised, drop
   anything a product FAQ already answers), and list the row's `faq_page_gaps` for
@@ -216,7 +255,8 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
    browser. Open Claude desktop, Ctrl+Shift+B, sign in to web.webex.com.") unless a
    run-log row from the last 4 hours already says "Webex signed out"; log `partial`
    with "Webex signed out" and stop. Nothing is lost: the outbox waits.
-2. **Outbox.** Read the Webex outbox (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`). For every row with
+2. **Outbox.** Read the Webex outbox (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`) in view mode on
+   `view://4157e8aa-bbb4-813c-a25e-000c3f1f159d` ("Reading Notion"). For every row with
    Status `Queued`, or `Held` with **Approved** ticked, whose **Post after** has passed:
    - **Expires** passed → Status `Dropped`, Courier note "expired".
    - Otherwise post it with `scripts/webex-post.js` exactly as the skill's Recipe 1

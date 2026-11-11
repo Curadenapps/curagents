@@ -29,7 +29,7 @@ memory:
     - .truth-cache/requirements.json
     - skills/uat/references/apps.md
     - skills/uat/references/uat-log.md
-    - "notion: Tasks & Notes (collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db)"
+    - "notion: Tasks & Notes (collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db), view mode on view://4157e8aa-bbb4-815b-b0a6-000cb183ca38, never SQL (RUNTIME.md 'Reading Notion')"
   write:
     - "notion: Tasks & Notes — QA column; Status new → reference for claimed feedback only"
     - ".feedback/reports/ (gitignored)"

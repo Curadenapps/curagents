@@ -26,8 +26,8 @@ memory:
   read:
     - dream.md
     - skills/webex-web/SKILL.md
-    - "notion: Agent run log (last webex-sweep row = where the last sweep stopped)"
-    - "notion: Tasks & Notes inbox collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db (Source ID = dedupe key)"
+    - "notion: Agent run log (last webex-sweep row = where the last sweep stopped), view mode on the newest-first view, never SQL (RUNTIME.md 'Reading Notion')"
+    - "notion: Tasks & Notes inbox collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db (Source ID = dedupe key), view mode on view://4157e8aa-bbb4-815b-b0a6-000cb183ca38, never SQL (RUNTIME.md 'Reading Notion')"
   write:
     - "notion: Tasks & Notes inbox (new rows; Status approved → pushed with Asana link)"
     - "asana: update comments on existing tasks, tasks for approved inbox rows, and one 'Triage Webex inbox (N new)' task assigned to Sean, all through asana-maintenance"
