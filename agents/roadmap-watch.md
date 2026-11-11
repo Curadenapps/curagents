@@ -4,13 +4,13 @@ description: >
   Weekly roadmap watcher. Snapshots the Product Roadmap in Notion (BOB +
   Curaprox app), the BOB App milestones in Asana and the BOB project in
   Jira, diffs against last week, writes one "Roadmap Watch" report page to
-  Notion and posts a short summary with the link to the Webex App Team space.
+  Notion and puts a short summary with the link in the Webex outbox for App Team.
   Read-only on every system except the report page and that one post.
 model: claude-sonnet-5-5
-tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI, ClaudeBrowser, ClaudeInChrome
+tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI
 trigger:
   - type: schedule
-    cron: "CRON_TZ=Europe/Zurich 0 8 * * 1"   # PC scheduled task "Roadmap watch" (RUNTIME.md): needs Webex for the summary
+    cron: "CRON_TZ=Europe/Zurich 40 7 * * 1"   # Claude Routine "Roadmap watch (Curaden)"; the Webex courier posts the summary
     label: weekly-roadmap-watch
     inputs:
       mode: weekly
@@ -176,9 +176,11 @@ Then write `.truth-cache/roadmap-watch/last-snapshot.json` and a dated copy in
 
 ### Step 5 — Webex summary (autonomous, 4 Nov)
 
-Like Truth Catcher in Asana, it posts without asking: one message in the Webex
-**App Team** space (exact name; `skills/webex-web/SKILL.md` Recipe 1), with
-`marker: "Roadmap Watch: {iso_week}"` so a rerun never posts twice:
+Like Truth Catcher in Asana, it posts without asking. Since 11 Nov it runs as a
+cloud Routine, so it writes one row to the **Webex outbox** (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`):
+Space `App Team`, Marker `Roadmap Watch: {iso_week}`, Agent `roadmap-watch`, Status
+`Queued`, Source the report page, the message in the row's body. The Webex courier on
+Sean's PC posts it (`RUNTIME.md` "Webex courier"). Message:
 
 > 🗺️ **Roadmap Watch, week {nn}**: {changes} changes, {drift} drift, {n} at-risk
 > milestones.
@@ -187,8 +189,7 @@ Like Truth Catcher in Asana, it posts without asking: one message in the Webex
 > Full report: {report_url}
 > — Roadmap Watch (automated, on behalf of Sean)
 
-Verify with `webex-read.js` (`markerCount: 1`). No browser or signed out: the
-report page still counts; return `partial` with "summary not posted". The
+One row per ISO week: if the row exists, update its body instead. The
 `announcements` agent still reads the report for the team update.
 
 ---
@@ -220,7 +221,7 @@ list `"jira: unavailable"` in `errors`. Never fail the whole run for one source.
 ## Hard Rules
 
 1. **Read-only** on Notion roadmap rows, Asana and Jira. The only writes are the
-   report page, the snapshot files and the one App Team summary (Step 5).
+   report page, the snapshot files and the one Webex outbox row (Step 5).
 2. **One report per ISO week** for scheduled runs.
 3. **Never infer status.** If a roadmap row has no join key, report it as
    unlinked; do not fuzzy-match names into Done.

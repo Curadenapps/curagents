@@ -21,6 +21,16 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 11 Nov (later): cloud thinks, PC posts
+
+IT blocks browser automation on Curaden, so: every scheduled agent is a Curaden
+Routine; Webex posts go through the Notion **Webex outbox**
+(`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`, under Agents & Other Projects);
+the one PC task is the **Webex courier (Personal)** (weekdays 08:02, 09:02, 12:02,
+17:02): sign-in check, post the outbox, Webex Sweep. Prompts: `docs/curaden-routines.md`
+and `docs/migration-mega-prompts.md` (prompt 2 = seven Routines on Curaden, prompt 3 =
+the courier on Personal). Sean runs prompt 2, then prompt 3.
+
 ## 11 Nov
 
 - **Jira works again** (BA visible, no reconnect needed). BA-12 and BA-263 are still

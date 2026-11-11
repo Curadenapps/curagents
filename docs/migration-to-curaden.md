@@ -50,13 +50,14 @@ curagents folder):
    Confluence), GitHub (with access to `Curadenapps/curagents`), Google Drive, and
    Figma and Webflow if those agents are used. Fireflies only if meeting-notes'
    fallback is wanted.
-2. **Desktop app (Curaden):** sign in, open the `curagents` folder, and sign in to
-   Webex once in the app's **built-in browser** (Ctrl+Shift+B; it persists).
-3. **Routines:** create the four from `docs/curaden-routines.md` (Truth Catcher
-   scan, Roadmap ← Jira sync, Agent run log check, Team update draft).
-4. **PC tasks:** create the four from `docs/curaden-routines.md` (Boom Boom Derek 08:45, Webex Sweep 11:40 + 16:40,
-   Roadmap watch Mon 08:00, Feedback QA report Fri 10:40), names ending
-   "(Curaden)".
+2. **Desktop app:** the Webex courier runs in the **Personal** desktop app (IT blocks
+   browser automation on Curaden, 11 Nov). Sign in to Webex once in its built-in
+   browser (Ctrl+Shift+B; it persists).
+3. **Routines (Curaden):** create the seven from `docs/curaden-routines.md` (Truth
+   Catcher scan, Roadmap ← Jira sync, Agent run log check, Team update draft, Boom
+   Boom Derek, Roadmap watch, Feedback QA report). App Support already exists.
+4. **PC task (Personal):** "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02,
+   17:02 (`docs/curaden-routines.md`).
 5. **Registry:** for each one, set **Started by** to its exact Curaden name.
 
 ## Phase 3: switch over, one at a time
@@ -65,10 +66,11 @@ Status 11 Nov: Phase 1 done (#44). App Support already runs on Curaden (created
 10 Nov). Everything else still runs on Personal. Started 11 Nov (Sean): run prompts
 2 and 3 today, then switch in this order (least risky first), one a day:
 
-Agent run log check → Team update draft (new, nothing to switch off) → Jira sync →
-Truth Catcher → Roadmap watch → Boom Boom Derek → Webex Sweep and Feedback QA report
-(new on Curaden, nothing to switch off). The Personal Webex keep-alive is retired:
-just switch it off.
+Webex courier on (Personal, prompt 3) → Agent run log check → Team update draft (new)
+→ Jira sync → Truth Catcher → Roadmap watch (switch off the Personal PC task) → Boom
+Boom Derek (switch off the Personal PC task) → Feedback QA report (new). The Personal
+Webex keep-alive and roadmap dashboard refresh: just switch them off. Webex Sweep
+runs inside the courier and stays on Personal.
 
 1. Flip **Account** to `Curaden` on its registry row.
 2. Wait for its next run: one run-log row from Curaden, and a `no-op` "switch:
@@ -79,7 +81,8 @@ The switch check means nothing runs twice while both copies exist.
 
 ## Phase 4: decommission Personal (for curagents)
 
-- [ ] No registry row has Account `Personal`.
+- [ ] Only the Webex courier row has Account `Personal` (it stays there while IT
+      blocks browser automation on Curaden).
 - [ ] Personal Routines for curagents deleted: Truth Catcher scan
       (`trig_01BxmV4KaG4CPbZMU4GmMHa7`), Bob roadmap jira sync
       (`trig_01EREg8Ra4divTV2Jomidy9g`), Agent run log check
@@ -88,7 +91,7 @@ The switch check means nothing runs twice while both copies exist.
 - [ ] Personal PC tasks for curagents switched off: Boom Boom Derek, Boom Boom
       queued, Webex keep-alive, Roadmap watch, Roadmap dashboard refresh, Asana ↔
       Notion sync.
-- [ ] A week of run-log rows from Curaden only, no misses.
-- [ ] `RUNTIME.md` "Accounts" says Personal holds no curagents schedules.
+- [ ] A week of run-log rows from Curaden (and the courier on Personal), no misses.
+- [ ] `RUNTIME.md` "Accounts" says Personal holds only the Webex courier.
 
 Personal keeps the iTOP agent, marketing, website, game design and minor projects.

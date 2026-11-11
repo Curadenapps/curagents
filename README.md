@@ -199,4 +199,4 @@ For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
 | Webex bot tokens get culled after a few days | every agent posts and reads through Webex web on Sean's sign-in (`skills/webex-web`); Webex steps need his machine |
 | Webex web allows one live tab per browser | with Sean's own Webex tab open, ours is online ~15–20 s per load; `webex-post.js` posts in one call and retries safely with a marker |
 | Webex meeting summaries need Sean signed in to Webex in the desktop app's browser | the Thursday Routine can't read them; the "post it" session adds them. Recording playback also needs his `curaden.webex.com` site sign-in |
-| Boom Boom Derek runs on Sean's computer (Webex web needs his sign-in in the desktop app) | no ping on days the computer is off at 08:45; the next run catches up. Its scheduled task is set up in the Claude desktop app |
+| Webex needs Sean's PC (IT blocks browser automation on the Curaden account) | cloud Routines on Curaden write Webex posts to the Notion Webex outbox; the one PC task, the Webex courier on the Personal desktop app, posts them 4 times a weekday. PC off or Webex signed out: posts wait (Boom Boom pings expire at 18:00) |

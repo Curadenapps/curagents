@@ -35,6 +35,17 @@ tab clash.
 | [`scripts/webex-read.js`](../../scripts/webex-read.js) | a space | Status, messages (all, or since a marker), how many times a post landed, export for `get_page_text` |
 | [`scripts/webex-meetings.js`](../../scripts/webex-meetings.js) | Meetings | Recap list, AI summary + action items, full transcript (from page data), export for `get_page_text` |
 
+## Who posts: the Webex outbox (11 Nov)
+
+IT blocks browser automation on the Curaden account, so scheduled agents run in the
+cloud and never post themselves. They write one row per message to the Notion
+**Webex outbox** (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`): Title,
+Space, Mentions, Marker, the message in the row's page body (the Message property is
+a preview), Agent, Status `Queued` (or `Held` until Sean ticks **Approved**), optional
+Post after / Expires / Attachment. The **Webex courier** on Sean's PC (Personal
+desktop app, `RUNTIME.md` "Webex courier") posts them with the recipes below and sets
+Posted. Manual runs on the PC ("post it", "boom boom") may post at once the same way.
+
 ## How to run a script
 
 `javascript_tool` returns the last expression, and a promise comes back empty
@@ -226,10 +237,11 @@ the agent's spec says what may leave Notion.
 
 | Agent | Webex use |
 |-------|-----------|
-| [boom-boom-derek](../../agents/boom-boom-derek.md) | Reads the common chat, Curaden / Phinamic and the Phinamic team's meetings; posts one ping a day, to the common chat by default |
+| [boom-boom-derek](../../agents/boom-boom-derek.md) | Cloud run: queues one ping a day in the outbox (common chat by default). A manual "boom boom" on the PC reads the spaces and meetings directly and posts at once |
 | [announcements](../../agents/announcements.md) | Reads meeting summaries; posts the approved update (+ PDF) to App Team |
 | [meeting-notes](../../agents/meeting-notes.md) | Meeting summary, action items and transcript → Notion recap page |
-| [feedback-qa](../../agents/feedback-qa.md) | Posts the QA report (+ PDF) to the QA space; on its own every Friday 10:40 when the threshold is met |
-| [roadmap-watch](../../agents/roadmap-watch.md) | Posts the Monday summary with the report link to App Team |
+| [feedback-qa](../../agents/feedback-qa.md) | Queues the QA report (+ PDF) for the QA space in the outbox every Friday 10:10 when the threshold is met |
+| [roadmap-watch](../../agents/roadmap-watch.md) | Queues the Monday summary with the report link for App Team in the outbox |
+| Webex courier (`RUNTIME.md`) | The only scheduled poster: sign-in check, posts the outbox, runs Webex Sweep |
 | [webex-sweep](../../agents/webex-sweep.md) | Reads App Team, the QA space and Curaden / Phinamic, plus new meeting recaps (action items only). Posts one "Logged from this chat" note per space per run |
 | Any new agent | Load this skill; add its spaces to the table above |

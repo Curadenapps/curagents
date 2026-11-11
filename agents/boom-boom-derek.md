@@ -13,7 +13,7 @@ model: claude-sonnet-5-5
 tools: Read, Write, NotionAPI, AsanaAPI, JiraAPI, ConfluenceAPI, GoogleDriveAPI, ClaudeBrowser, ClaudeInChrome
 trigger:
   - type: schedule
-    cron: "CRON_TZ=Europe/Zurich 45 8 * * 1-5"
+    cron: "CRON_TZ=Europe/Zurich 20 8 * * 1-5"   # Claude Routine "Boom Boom Derek (Curaden)"; the Webex courier posts at 09:02
     label: derek-check (Monday = full rundown, Tue–Fri = ping only if something is due or slipping)
   - type: manual
     phrases:
@@ -31,7 +31,7 @@ memory:
     - "notion: Boom Boom Derek page under Derek's Team Directory entry (ledger, bánh mì count, ping history)"
   write:
     - "notion: Boom Boom Derek page 3f47e8aabbb48179af31f54a4acadb10"
-    - "webex: the common chat ('Curaden / Phinamic — BOB App & Admin', 644fd150-f1e6-11f0-886e-874a9ad69e32) or 'Curaden / Phinamic' only, through Webex web on Sean's sign-in in the desktop app's built-in browser (skills/webex-web, scripts/webex-post.js); no Webex token"
+    - "notion: one row a day in the Webex outbox (collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d) for the common chat or 'Curaden / Phinamic'; the Webex courier on Sean's PC posts it (skills/webex-web, scripts/webex-post.js); no Webex token"
 idempotency_key: "boom-boom-derek:{date}"   # at most one Webex message per day, across both spaces
 dry_run: false  # live and autonomous since 2026-10-09 (Sean)
 output:
@@ -83,7 +83,7 @@ Channel and the sign-off.
 | People | **The Phinamic team**, two people tracked by name. **Derek La**, technical owner: Jira `712020:078ef74c-95c3-45a8-ad5e-20e816c4b176`; emails `derek.la@phinamic.com` and `derek@phinamic.com`; Notion Team Directory page `2ab7e8aabbb48003a865f7f593144546`; no Asana account; identify him only by these, never by first name. **Khanh Nguyen**, Business Analyst: Webex display name `Khanh Nguyen` (a real @mention in the common chat, used 23 Oct); Jira account still to come from Sean (add it here); until then, match Khanh in Jira only by name. **Ky** and the rest of the team read the chat but aren't tracked or @mentioned. |
 | Owners | Each item belongs to whoever its source names. Flows, rules, requirements and documentation lean to Khanh, the build to Derek, but never guess: an item with no named owner is "Phinamic team" and Derek decides who takes it. |
 | Autonomous | Live. Scheduled runs post without asking. Sean can also say "boom boom" any time for a run now. |
-| No Webex token | Posts and reads through Webex web on Sean's own sign-in, in the Claude desktop app's built-in browser (Claude in Chrome as fallback), following [`skills/webex-web`](../skills/webex-web/SKILL.md) like every Webex agent. No bot, no API token: nothing expires, the ping comes from Sean's account with a real @mention, and the whole space is readable (Derek and Khanh can reply normally). |
+| No Webex token | Its ping goes out from Sean's own Webex sign-in: the cloud run writes it to the Webex outbox and the Webex courier on his PC posts it in the built-in browser (Claude in Chrome as fallback), following [`skills/webex-web`](../skills/webex-web/SKILL.md) like every Webex agent. No bot, no API token: nothing expires, the ping comes from Sean's account with a real @mention, and the whole space is readable (Derek and Khanh can reply normally). |
 | Channel | The **common chat** (Webex "Curaden / Phinamic — BOB App & Admin", `644fd150-f1e6-11f0-886e-874a9ad69e32`, where Khanh, Ky and the team are) by default. **"Curaden / Phinamic"** (`136d9ce0-ab41-11f0-85e5-53eb7188e8c6`) only when Sean asks for it there or an item concerns Derek alone. Still one message a day across both. @mention Derek and Khanh (whoever has an item in the ping); sign "— Boom Boom 💥, on behalf of Sean". No DMs, no email, no Jira or Confluence comments. |
 | Home | Notion page **Boom Boom Derek** `3f47e8aabbb48179af31f54a4acadb10`, a child of Derek's Team Directory page. It is team-facing ("Hi Derek, Khanh and the Phinamic team"): the full explanation per item with its owner, the bánh mì count, the ping history. Every ping links to it. |
 | Sources | Curaden's side first: Notion (call recaps, scope, roadmap) and Asana (Sean's "Waiting on Phinamic" tracker). Then Jira, Confluence, the WBS sheet and the two Webex spaces. |
@@ -163,7 +163,7 @@ deliverables with their source and due date, then the smallest acceptable action
 | **Jira** | Everything assigned to Derek (and to Khanh once that Jira account is in "People") in BA, CA20, CPA20 | `assignee = "712020:078ef74c-95c3-45a8-ad5e-20e816c4b176" AND statusCategory != Done`, and `… AND updated >= -7d` to credit what he moved. |
 | **Confluence** | Pages Derek created or edited (deliverables) | CQL `contributor = "712020:078ef74c-95c3-45a8-ad5e-20e816c4b176" AND lastmodified >= now("-14d")`. |
 | **WBS** | Whether promised WBS changes arrived | Google Sheet "BOB Phase 2 – Scope WBS (draft)" `1fuoR5oS_ILoPooNtWcPutDrWpRBYPmJ9uXIJNTifNhY` (owner Derek): modified time and the Epics tab. Read-only. Without the Drive connector: `unavailable`. |
-| **Webex** | Everything in the common chat and in "Curaden / Phinamic" since the last ping: replies from Derek or Khanh ("done" + link, new dates, "not mine"), files they shared, their own promises ("I'll send it Friday"), and new asks Sean or Fabian put to Phinamic there; plus Webex meeting summaries for calls they were in | [`skills/webex-web`](../skills/webex-web/SKILL.md): Recipe 3 on the common chat (`644fd150-f1e6-11f0-886e-874a9ad69e32`) and on Curaden / Phinamic (`136d9ce0-ab41-11f0-85e5-53eb7188e8c6`) with `webex-read.js` `{ since: "— Boom Boom", exportText: true }` (matches the old "Boom Boom Derek" sign-off too; raise `olderPages` if the last ping isn't loaded), then `get_page_text`. Skip Feedback QA's own reports in the common chat. Reactions don't show in the text: Sean tells you about those. Meetings they were in: Recipe 4 (summary and action items; transcript when an action is unclear). Read-only. |
+| **Webex** | Everything in the common chat and in "Curaden / Phinamic" since the last ping: replies from Derek or Khanh ("done" + link, new dates, "not mine"), files they shared, their own promises ("I'll send it Friday"), and new asks Sean or Fabian put to Phinamic there; plus Webex meeting summaries for calls they were in | **Cloud run (default, 11 Nov):** what Webex Sweep captured from both spaces since the last ping: Notion inbox rows (`collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db`, Source `webex`/`meeting`, Requester Derek La or Khanh Nguyen, or naming Phinamic) and Webex Sweep's update comments on Asana tasks; plus the Webex outbox (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`) for posted / held Boom Boom rows. **PC run** (manual "boom boom" on Sean's PC): read Webex directly with [`skills/webex-web`](../skills/webex-web/SKILL.md): Recipe 3 on the common chat (`644fd150-f1e6-11f0-886e-874a9ad69e32`) and on Curaden / Phinamic (`136d9ce0-ab41-11f0-85e5-53eb7188e8c6`) with `webex-read.js` `{ since: "— Boom Boom", exportText: true }` (matches the old "Boom Boom Derek" sign-off too; raise `olderPages` if the last ping isn't loaded), then `get_page_text`. Skip Feedback QA's own reports in the common chat. Reactions don't show in the text: Sean tells you about those. Meetings they were in: Recipe 4 (summary and action items; transcript when an action is unclear). Read-only. |
 | **Other agents** | Flags that name Phinamic, Derek, Khanh or their tickets | Roadmap Watch report, open `truth-catcher-escalation` issues, the latest Team Update's "Needs a decision", Feedback QA reports. |
 
 One source failing never stops the run: mark it `unavailable` and carry on.
@@ -183,11 +183,9 @@ One source failing never stops the run: mark it `unavailable` and carry on.
 
 ## Workflow
 
-1. **Load** the Boom Boom Derek page: ledger, bánh mì count, ping history and any
-   "📤 Queued ping". If today's ping is already posted, stop (a manual "boom boom"
-   can still refresh the page). A queued ping from a cloud run is posted by this
-   run: refresh its facts in steps 2–6, post it in step 7, then delete the queued
-   section.
+1. **Load** the Boom Boom Derek page (ledger, bánh mì count, ping history) and the
+   Webex outbox rows for Boom Boom. If today's ping is already Posted, or a row for
+   today is Queued, stop unless Sean asked ("boom boom" refreshes the queued row).
 2. **Collect** every source above in parallel.
 3. **Update the ledger**: add new promises; mark delivered with the evidence;
    record Derek's and Khanh's replies ("done" → check it; new date → new due; "not mine" →
@@ -200,37 +198,23 @@ One source failing never stops the run: mark it `unavailable` and carry on.
    updated, then one section per finding type, each item with From / Owner / Due /
    What we can see / Where / Done when, the Jira table, "Nice work" credits, "On Curaden",
    the ping history and the "How it works" toggle. Keep the existing layout.
-7. **Write the ping** as a quick sum-up with the page link (below), save it to
-   `.boom-boom-derek/{YYYY-MM-DD}.md` (gitignored), and post it with
-   [`skills/webex-web`](../skills/webex-web/SKILL.md) Recipe 1:
-   1. Open today's space in the built-in browser (`preview_start` with its direct
-      link from the skill's Spaces table, `navigate` to reload; Claude in Chrome only
-      as the fallback). See "Channel": the common chat unless Sean said otherwise;
-      never another space.
-   2. In one `javascript_tool` call run `scripts/webex-post.js` with
-      `{ spaceId: "644fd150-f1e6-11f0-886e-874a9ad69e32", mention: ["Derek La", "Khanh Nguyen"], marker: "Boom Boom: {Weekday d Mon}", send: true }`
-      (for Curaden / Phinamic: `spaceId: "136d9ce0-ab41-11f0-85e5-53eb7188e8c6"`).
-      Mention only the people who own an item in the ping. Start the message at the `##` title line; the
-      script puts the @mentions first.
-      `retry: true` (Sean's own Webex tab took the connection) → reload and repeat,
-      up to 3 times. `step: "mention"` → repeat without `mention`, message opening
-      with their first names ("Derek, Khanh,"). `alreadyPosted` → today's ping is
-      out, go to step 8.
-   3. Verify: reload, `webex-read.js` with the same `marker`. `markerCount: 1` =
-      posted. Screenshot it. Never resend because the tab looked offline right after
-      sending.
-   4. **Can't post** (no browser reachable, Webex signed out, a sign-in page, three
-      offline retries, any other refusal): stop there. Put the message on the page
-      under "📤 Queued ping", naming the space, add "not sent: {reason}" to the ping
-      history, and give the reason in the run summary and the run log. The page is
-      the only queue: never keep the ping in a local file or outbox, because the
-      next run only looks at the page. If the page already has a queued ping,
-      replace it with today's.
-      **Legacy outbox:** if `.boom-boom-derek/outbox/pending-*.json` files exist (the
-      old, retired PC keep-alive wrote them), move today's message onto the page queue, naming
-      the space this spec's "Channel" rule picks (common chat by default), delete the
-      files, and note it in the run log. Never post from the outbox.
-8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
+7. **Write the ping** as a quick sum-up with the page link (below) and put it in the
+   **Webex outbox** (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`), one row:
+   Title `Boom Boom: {Weekday d Mon}`, the message in the page body (from the `##`
+   title line to the sign-off; the **Message** property gets the first line only),
+   **Space** from "Channel" (`Common chat (BOB App & Admin)` by default, or
+   `Curaden / Phinamic`), **Mentions** only the people who own an item ("Derek La,
+   Khanh Nguyen"), **Marker** `Boom Boom: {Weekday d Mon}`, **Agent**
+   `boom-boom-derek`, **Status** `Queued`, **Expires** today 18:00, **Source** the
+   page. If a row for today exists, replace its body instead of adding a second one.
+   The Webex courier on Sean's PC posts it (`RUNTIME.md` "Webex courier": checks the
+   space for replies first, then posts, verifies with the marker and writes the ping
+   history line).
+   **Run on Sean's PC** ("boom boom" there): the same row, then do the courier's
+   steps 1–2 at once so it goes out now. Never post from old local
+   `.boom-boom-derek/outbox/` files; ignore and delete them.
+8. **Record** the ping in the page history as "queued {HH:MM} for {space}" (the
+   courier changes it to "posted"), update `Last nudged`, `Nudges` and the
    bánh mì count, and list for Sean: Asana subtasks to tick, items handed to him,
    roadmap rows that need his fix.
 9. **Run log**: write one row to the Agent run log (`RUNTIME.md`), also when nothing
@@ -279,23 +263,21 @@ The first trial (9 Oct 2026) is the reference for tone and length.
 
 ## Runtime
 
-Webex web needs a browser with Sean's sign-in, so the agent runs on **Sean's
-computer**, not in the cloud.
+Since 11 Nov the thinking runs in the cloud and only the posting needs Sean's PC
+(IT blocks browser automation on the Curaden account).
 
 | Run | Where | Needs |
 |-----|-------|-------|
-| Scheduled, weekdays 08:45 Zurich | A scheduled task "Boom Boom Derek" in the Claude desktop app on Sean's computer, working in his local `curagents` folder | Computer awake, Claude desktop app open, Sean signed in to `web.webex.com` in the app's built-in browser (once; it persists); Notion, Asana and Atlassian connectors |
-| "boom boom" from Sean | Any Claude desktop session on Sean's computer (built-in browser) | Same |
-| Queued post | The next Webex run on Sean's computer (Webex Sweep 11:40 / 16:40, or the next Boom Boom), `RUNTIME.md` "Webex sign-in" | Same. Posts a "📤 Queued ping" only if no Boom Boom message went out that day, so a ping queued in the morning still goes out the same day |
-| "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes the page and puts the ping under "📤 Queued ping" on it, naming the space. The next Webex run (Webex Sweep or the next morning's Boom Boom) posts it automatically (Sean, 23 Oct: never hand him a ping to paste) |
+| Scheduled, weekdays 08:20 Zurich | Claude Routine "Boom Boom Derek (Curaden)" (`docs/curaden-routines.md`) | Notion, Asana, Atlassian (Jira + Confluence), Google Drive connectors. Writes the page and the outbox row |
+| Posting | The Webex courier on Sean's PC (Personal desktop app), next run 09:02, then 12:02 and 17:02 (`RUNTIME.md` "Webex courier") | PC on, Claude desktop app open, Webex signed in in the built-in browser |
+| "boom boom" from Sean | Any session: in the cloud it refreshes the page and the outbox row; on his PC it also posts at once | Same |
 
-**Missed runs** (computer off or asleep at 08:45): the next run covers everything
-since the last ping. If Monday's rundown was missed, the next run is the rundown.
+**Missed posts** (PC off or Webex signed out): the outbox row waits for the next
+courier run the same day and expires at 18:00; the next morning's run covers
+everything since the last posted ping. If Monday's rundown was missed, the next run is the rundown.
 
-**Scheduled tasks:** set up once with the paste-once prompt in
-[`RUNTIME.md`](../RUNTIME.md) "Scheduled task prompts (PC)". The prompt only
-points at `RUNTIME.md`, so changes merged to this spec reach the next run without
-editing the task.
+**Scheduled run:** the Routine prompt in `docs/curaden-routines.md` only points at
+this spec, so changes merged here reach the next run without editing the Routine.
 
 ## Output Schema
 
@@ -318,7 +300,7 @@ editing the task.
 ## Hard Rules
 
 1. **Read-only** on Jira, Confluence, Asana, the WBS sheet and roadmap rows. Its only
-   writes are the Boom Boom Derek page and one Webex message a day.
+   writes are the Boom Boom Derek page and one Webex outbox row a day (one message).
 2. **Two spaces, one team.** Only the common chat and "Curaden / Phinamic", only
    the Phinamic team's work (Derek La and Khanh by name).
 3. **Partner-safe** and **no swearing or insults**, in any language.

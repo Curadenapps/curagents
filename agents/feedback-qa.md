@@ -10,7 +10,7 @@ model: claude-sonnet-5-5
 tools: Read, Write, Bash, WebFetch, NotionAPI, ConfluenceAPI, JiraAPI, GitHubAPI, AsanaAPI
 trigger:
   - type: schedule
-    cron: "CRON_TZ=Europe/Zurich 40 10 * * 5"   # PC scheduled task "Feedback QA report" (RUNTIME.md); posts on its own (4 Nov, Sean)
+    cron: "CRON_TZ=Europe/Zurich 10 10 * * 5"   # Claude Routine "Feedback QA report (Curaden)"; the Webex courier posts it
     label: weekly-qa-report
   - type: manual
     phrases:
@@ -55,11 +55,14 @@ Execute `skills/feedback-qa/SKILL.md`. Checks, sections and the report
 threshold are in `references/rubric.md`; the "already addressed" proof rules
 are in `references/ledger.md`. Do not restate them here.
 
-## Scheduled run (Fridays 10:40, autonomous)
+## Scheduled run (Fridays 10:10, autonomous)
 
-Like Truth Catcher in Asana, the Friday run doesn't ask: it runs Procedure 1 and, if
-`references/rubric.md` §5 says report, builds the PDF and posts it to the QA space
-itself. Below the threshold it posts nothing and logs `no-op` with what is waiting.
+Like Truth Catcher in Asana, the Friday run doesn't ask: it runs Procedure 1 as a
+cloud Routine and, if `references/rubric.md` §5 says report, builds the PDF and puts
+the post in the **Webex outbox** (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`): Space `Common chat (BOB App &
+Admin)` (the QA space), Marker = the summary's title line, Agent `feedback-qa`,
+Status `Queued`, the summary in the row's body and the PDF uploaded to **Attachment**.
+The Webex courier on Sean's PC posts it with the PDF. Below the threshold it posts nothing and logs `no-op` with what is waiting.
 Full UATs still go to Confluence as in the skill. Never more than one report a week
 from the schedule; "send QA report" from Sean can add one any time.
 

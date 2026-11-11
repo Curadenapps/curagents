@@ -7,8 +7,8 @@ each one where it says, in this order. Each prompt reads the details from this r
 | # | Paste into | Does |
 |---|-----------|------|
 | 1 | **Personal** desktop app, curagents folder, on the PC | Phase 1: saves the PC task files into the repo (PR, not merged) |
-| 2 | **Curaden** claude.ai/code, new session on `Curadenapps/curagents` | Phase 2: the four cloud Routines + registry Started by |
-| 3 | **Curaden** desktop app, curagents folder, on the PC | Phase 2: the four PC tasks + built-in browser/Webex check |
+| 2 | **Curaden** claude.ai/code, new session on `Curadenapps/curagents` | Phase 2: the seven cloud Routines (App Support already exists) + registry Started by |
+| 3 | **Personal** desktop app, curagents folder, on the PC | Phase 2: the Webex courier (the one PC task) + built-in browser/Webex check |
 
 Then Phase 3 (flip **Account** one row at a time) stays with Sean: prompt 2 and 3
 never flip it, so nothing runs twice.
@@ -60,7 +60,7 @@ docs/curaden-routines.md. Don't change any repo file; don't merge or push.
    17835775-46a2-4e51-989d-809d887c4db5) and GitHub (Curadenapps/curagents). Any
    that fails: stop and tell me which connector to add.
 
-2. List the scheduled tasks already on this account. For each of the four below
+2. List the scheduled tasks already on this account. For each of the seven below
    that doesn't exist yet, create it: a fresh session on every run, repository
    Curadenapps/curagents, connectors Notion, Asana, Atlassian, GitHub, and the
    prompt copied word for word from its section in docs/curaden-routines.md.
@@ -69,6 +69,9 @@ docs/curaden-routines.md. Don't change any repo file; don't merge or push.
    - "Roadmap ← Jira sync (Curaden)"     Thursdays 07:30
    - "Agent run log check (Curaden)"     weekdays 10:15
    - "Team update draft (Curaden)"       Thursdays 14:00
+   - "Boom Boom Derek (Curaden)"         weekdays 08:20 (add Google Drive)
+   - "Roadmap watch (Curaden)"           Mondays 07:40
+   - "Feedback QA report (Curaden)"      Fridays 10:10
    ("App Support (Curaden)" already exists since 10 Nov: leave it as it is.)
    If a run needs a separate scheduled task per time, create two with the same
    name plus " (am)" / " (pm)".
@@ -83,42 +86,40 @@ docs/curaden-routines.md. Don't change any repo file; don't merge or push.
    which Account to flip first.
 ```
 
-## 3. PC tasks (Curaden desktop app, PC)
+## 3. Webex courier (Personal desktop app, PC)
 
-Sign in to the desktop app with the **Curaden** account, open the curagents
-folder, and sign in to Webex once in the app's built-in browser (Ctrl+Shift+B shows
-the pane; the sign-in persists across sessions).
+IT blocks browser automation on the Curaden account, so the one Webex task stays on
+**Personal** (11 Nov). In the Personal desktop app, open the curagents folder and
+make sure Webex is signed in in the built-in browser (Ctrl+Shift+B).
 
 ```text
-Migration step 3 of 3 for curagents. This desktop app is on the Curaden AG
-account. In my curagents folder: git fetch origin main; if on main and clean,
-git pull --ff-only, else read files with git show origin/main:<path>. Read
-RUNTIME.md ("PC runs", "Accounts and the switch"), docs/curaden-routines.md
-("PC scheduled tasks") and skills/webex-web/SKILL.md. Don't merge or push.
+Migration step 3 of 3 for curagents, on my Personal desktop app. In my curagents
+folder: git fetch origin main; if on main and clean, git pull --ff-only, else read
+files with git show origin/main:<path>. Read RUNTIME.md ("PC runs" → "Webex
+courier"), docs/curaden-routines.md ("PC scheduled task (Personal desktop app)")
+and skills/webex-web/SKILL.md. Don't merge or push.
 
-1. Check the setup: the built-in browser tools (mcp__Claude_Browser__*) load, Webex
-   web opens in it (preview_start) and is signed in (never type credentials; if it asks to sign in, stop and tell me),
-   and the Notion and Asana connectors work. Anything missing: stop and say what.
+1. Check: the built-in browser tools (mcp__Claude_Browser__*) load, Webex web opens
+   (preview_start) and is signed in (never type credentials; if it asks to sign in,
+   stop and tell me), and the Notion and Asana connectors work.
 
-2. Check the old Personal tasks are known: pc-tasks/README.md lists them. Don't
-   copy their prompts; the new tasks use the shared prompt below.
+2. Create the desktop scheduled task "Webex courier (Personal)", weekdays 08:02,
+   09:02, 12:02, 17:02 Europe/Zurich, with the prompt from docs/curaden-routines.md.
+   If you have no tool for desktop scheduled tasks, give me the name, schedule and
+   prompt to paste in by hand.
 
-3. Create these desktop scheduled tasks (Europe/Zurich), each with the
-   shared PC prompt from docs/curaden-routines.md, {name} filled in:
-   - "Boom Boom Derek (Curaden)"   08:45
-   - "Webex Sweep (Curaden)"       weekdays 11:40 and 16:40
-   - "Roadmap watch (Curaden)"     Mondays 08:00
-   - "Feedback QA report (Curaden)" Fridays 10:40
-   If you have no tool to create desktop scheduled tasks, give me the exact
-   name, time and prompt for each to paste in by hand.
+3. Switch off these Personal tasks if they're on: webex-keepalive,
+   bob-roadmap-dashboard-refresh. Leave boom-boom-derek and bob-roadmap-watch on
+   for now (I switch them off when their Curaden Routines take over).
 
 4. Agent registry (Notion, collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418):
-   set Started by on each matching row to the name above (keep the Personal name
-   after " / " until that copy is off). Leave Account as it is.
+   add a row "Webex courier" (Where PC, Account Personal, Started by "Webex courier
+   (Personal)", Schedule "Weekdays 08:02, 09:02, 12:02, 17:02", Spec "RUNTIME.md ›
+   PC runs › Webex courier") if it's missing.
 
-5. Do one supervised dry check: run "check webex" in dry-run (read the watched
-   spaces, show what Webex Sweep would write, write nothing). Report it with a
-   table of the four tasks and their next run.
+5. Run the courier once now in dry-run: check the sign-in, list what's in the Webex
+   outbox (collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d) and what Webex Sweep
+   would write, and post nothing. Report it.
 ```
 
 ## After the three prompts
