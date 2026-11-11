@@ -21,11 +21,21 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 11 Nov (afternoon): Agent control room
+
+Sean asked to tidy Agents & Other Projects. The Agent registry, Agent run log and Webex
+outbox now sit together on **⚙️ Agent control room** `4157e8aabbb48194bb25e351664b6462`
+(App Hub › Agents & Other Projects), above Agentic Models and Tuft. All `collection://`
+and `view://` IDs are unchanged (each one checked after the move), so no Routine, PC
+task or spec needed a change. `RUNTIME.md` "Where the agent tables live" says so for
+every run. Still open: the Agentic Models page describes the 9 Oct setup (GitHub
+Actions, old broadcast; no Boom Boom, App Support, Market Rollout or courier).
+
 ## 11 Nov (later): cloud thinks, PC posts
 
 IT blocks browser automation on Curaden, so: every scheduled agent is a Curaden
 Routine; Webex posts go through the Notion **Webex outbox**
-(`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`, under Agents & Other Projects);
+(`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`, in the Agent control room);
 the one PC task is the **Webex courier (Personal)** (weekdays 08:02, 09:02, 12:02,
 17:02): sign-in check, post the outbox, Webex Sweep. Prompts: `docs/curaden-routines.md`
 and `docs/migration-mega-prompts.md` (prompt 2 = seven Routines on Curaden, prompt 3 =
@@ -109,7 +119,7 @@ the courier on Personal). Sean runs prompt 2, then prompt 3.
 
 ## Useful IDs
 
-- Agent registry `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418` · Agent run log `collection://9b260587-5c0d-4d90-947e-b6e10ba159df`
+- Agent control room `4157e8aabbb48194bb25e351664b6462`: Agent registry `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418` · Agent run log `collection://9b260587-5c0d-4d90-947e-b6e10ba159df` · Webex outbox `collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`
 - Product Roadmap `collection://2ce24f93-f696-4d3b-98be-462df08c2c29` · Inbox `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db`
 - Markets playbook `4087e8aabbb481e69b5cc1744133076b` · Launch KPIs `40f7e8aabbb48114bdbfe8715c020740`
 - Personal Routines: Truth Catcher `trig_01BxmV4KaG4CPbZMU4GmMHa7`, Jira sync `trig_01EREg8Ra4divTV2Jomidy9g`, Run log check `trig_01AN1dTjvTV3YNhhmLAqV4tL`
