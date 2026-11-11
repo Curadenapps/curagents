@@ -57,7 +57,6 @@ On any invocation, determine trigger type:
 | `user:app support` / `support requests` / `reply to *` / `post the support replies` / `done on *` / `my support requests` | User phrase | app-support (form submissions on the App Tasks board: classify, answer on its own, BOB Admin changes for the owner, dev requests to Jira via In Development, close on the owner's confirm). Also `support faq *`, `teach support: *` |
 | `user:pause App Tasks` | User phrase | Truth Catcher: Sean puts the App Tasks board back in preview (spec "App Tasks board" rollout line + `dream.md` §5) |
 | `schedule:"45 8 * * 1-5"` (Zurich) | Scheduled task "Boom Boom Derek" on Sean's PC (RUNTIME.md) | boom-boom-derek (Monday rundown, Tue–Fri nudges; posts on its own) |
-| `schedule:"5 7-17/2 * * 1-5"` (Zurich) | Scheduled task "Webex keep-alive" on Sean's PC (RUNTIME.md) | keeps the built-in browser's Webex sign-in warm; boom-boom-derek (posts a queued ping, if none went out today) |
 | `user:boom boom` / `boom boom derek` / `boom boom team` / `boom boom phinamic` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
 | `user:delegate it` (after a Boom Boom Derek run) | User phrase | boom-boom-derek: write Derek's closed items to Asana and decisions to Notion, each with its Webex source |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |

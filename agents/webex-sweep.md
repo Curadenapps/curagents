@@ -81,6 +81,9 @@ Direct (1:1) chats are private and never read unless Sean adds one here by name.
 **Meetings:** recorded meetings since the last sweep (Recipe 4 list + summary). It
 takes only Webex's own action items; the full recap page stays meeting-notes' job.
 
+**First:** the Webex sign-in check and any queued Boom Boom ping, as `RUNTIME.md`
+"Webex sign-in" says (there is no keep-alive task any more).
+
 **Window:** from the `When` of the last `webex-sweep` row in the Agent run log to
 now. First run, or no row: the last 3 working days.
 

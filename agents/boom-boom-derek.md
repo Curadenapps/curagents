@@ -227,7 +227,7 @@ One source failing never stops the run: mark it `unavailable` and carry on.
       next run only looks at the page. If the page already has a queued ping,
       replace it with today's.
       **Legacy outbox:** if `.boom-boom-derek/outbox/pending-*.json` files exist (the
-      old PC keep-alive wrote them), move today's message onto the page queue, naming
+      old, retired PC keep-alive wrote them), move today's message onto the page queue, naming
       the space this spec's "Channel" rule picks (common chat by default), delete the
       files, and note it in the run log. Never post from the outbox.
 8. **Record** the ping in the page history, update `Last nudged`, `Nudges` and the
@@ -286,8 +286,8 @@ computer**, not in the cloud.
 |-----|-------|-------|
 | Scheduled, weekdays 08:45 Zurich | A scheduled task "Boom Boom Derek" in the Claude desktop app on Sean's computer, working in his local `curagents` folder | Computer awake, Claude desktop app open, Sean signed in to `web.webex.com` in the app's built-in browser (once; it persists); Notion, Asana and Atlassian connectors |
 | "boom boom" from Sean | Any Claude desktop session on Sean's computer (built-in browser) | Same |
-| Queued post | The scheduled task "Webex keep-alive" on Sean's computer (every 2 hours, `RUNTIME.md`) | Same. Posts a "📤 Queued ping" only if no Boom Boom message went out that day, so a ping queued in the morning still goes out the same day |
-| "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes the page and puts the ping under "📤 Queued ping" on it, naming the space. The next keep-alive run (or the next morning's run) posts it automatically (Sean, 23 Oct: never hand him a ping to paste) |
+| Queued post | The next Webex run on Sean's computer (Webex Sweep 11:40 / 16:40, or the next Boom Boom), `RUNTIME.md` "Webex sign-in" | Same. Posts a "📤 Queued ping" only if no Boom Boom message went out that day, so a ping queued in the morning still goes out the same day |
+| "boom boom" from a cloud session | Claude Code on the web | No browser: refreshes the page and puts the ping under "📤 Queued ping" on it, naming the space. The next Webex run (Webex Sweep or the next morning's Boom Boom) posts it automatically (Sean, 23 Oct: never hand him a ping to paste) |
 
 **Missed runs** (computer off or asleep at 08:45): the next run covers everything
 since the last ping. If Monday's rundown was missed, the next run is the rundown.

@@ -8,7 +8,7 @@ each one where it says, in this order. Each prompt reads the details from this r
 |---|-----------|------|
 | 1 | **Personal** desktop app, curagents folder, on the PC | Phase 1: saves the PC task files into the repo (PR, not merged) |
 | 2 | **Curaden** claude.ai/code, new session on `Curadenapps/curagents` | Phase 2: the four cloud Routines + registry Started by |
-| 3 | **Curaden** desktop app, curagents folder, on the PC | Phase 2: the five PC tasks + built-in browser/Webex check |
+| 3 | **Curaden** desktop app, curagents folder, on the PC | Phase 2: the four PC tasks + built-in browser/Webex check |
 
 Then Phase 3 (flip **Account** one row at a time) stays with Sean: prompt 2 and 3
 never flip it, so nothing runs twice.
@@ -69,6 +69,7 @@ docs/curaden-routines.md. Don't change any repo file; don't merge or push.
    - "Roadmap ← Jira sync (Curaden)"     Thursdays 07:30
    - "Agent run log check (Curaden)"     weekdays 10:15
    - "Team update draft (Curaden)"       Thursdays 14:00
+   ("App Support (Curaden)" already exists since 10 Nov: leave it as it is.)
    If a run needs a separate scheduled task per time, create two with the same
    name plus " (am)" / " (pm)".
 
@@ -104,7 +105,6 @@ RUNTIME.md ("PC runs", "Accounts and the switch"), docs/curaden-routines.md
 
 3. Create these desktop scheduled tasks (Europe/Zurich), each with the
    shared PC prompt from docs/curaden-routines.md, {name} filled in:
-   - "Webex keep-alive (Curaden)"  07:05, then every 2 hours to 17:05
    - "Boom Boom Derek (Curaden)"   08:45
    - "Webex Sweep (Curaden)"       weekdays 11:40 and 16:40
    - "Roadmap watch (Curaden)"     Mondays 08:00
@@ -118,7 +118,7 @@ RUNTIME.md ("PC runs", "Accounts and the switch"), docs/curaden-routines.md
 
 5. Do one supervised dry check: run "check webex" in dry-run (read the watched
    spaces, show what Webex Sweep would write, write nothing). Report it with a
-   table of the five tasks and their next run.
+   table of the four tasks and their next run.
 ```
 
 ## After the three prompts
