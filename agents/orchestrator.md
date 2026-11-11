@@ -60,7 +60,7 @@ On any invocation, determine trigger type:
 | `user:boom boom` / `boom boom derek` / `boom boom team` / `boom boom phinamic` / `check derek` / `derek rundown` / `ping derek` / `what does derek owe` | User phrase | boom-boom-derek (run now) |
 | `user:delegate it` (after a Boom Boom Derek run) | User phrase | boom-boom-derek: write Derek's closed items to Asana and decisions to Notion, each with its Webex source |
 | `user:brand review` / `check approvals` | User phrase | Brand Asset |
-| `user:what needs attention` | User phrase | Swarm (§3a): truth-catcher + brand-asset (check only) + roadmap-watch in parallel |
+| `user:what needs attention` | User phrase | Swarm (§3a): truth-catcher + brand-asset (check only) + roadmap-watch + market-rollout (rollout watch) in parallel |
 | `schedule:"0 7 * * 1-5"` | `figma-diff.yml` (gated) | figma (library diff check) |
 | `webhook:github.pull_request.*` | GitHub webhook | github agent |
 | `webhook:github.push` | GitHub webhook | github agent |
@@ -78,7 +78,7 @@ On any invocation, determine trigger type:
 | `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
 | `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |
 | `user:post the update` / `post it` (after a draft) | User phrase | announcements Step 6 (Webex web, `skills/webex-web`) |
-| `user:rollout status` / `onboard * for *` / `super user for *` / `admin access for *` / `build module *` / `training plan for *` / `partner prep *` / `partner follow-up *` / `audience brief *` / `what can Blanca take` | User phrase | market-rollout (drafts and tracker rows in Notion; Asana only after Sean says go, via asana-maintenance) |
+| `user:rollout status` / `onboard * for *` / `super user for *` / `admin access for *` / `build module *` / `training plan for *` / `partner prep *` / `partner follow-up *` / `audience brief *` / `what can Blanca take` / `rollout watch` / `rock n rollout` | User phrase | market-rollout, signs in Asana as "Rock 'n' Rollout 🎸" (drafts and tracker rows in Notion; on the BOB Market Rollouts board it makes structural edits itself after Sean says go, routine moves via asana-maintenance) |
 | `user:markets update` / `markets monthly` | User phrase | announcements, period `markets` (from Dec 2026) |
 
 When the trigger is ambiguous, ask one clarifying question before routing.
