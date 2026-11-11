@@ -158,6 +158,7 @@ against it (checked 11 Nov: view mode still worked with the allowance used up).
 | Webex outbox | `view://4157e8aa-bbb4-813c-a25e-000c3f1f159d` "Agents: all rows, newest first (don't filter)" |
 | 🚩 Inbox (Tasks & Notes) | `view://4157e8aa-bbb4-815b-b0a6-000cb183ca38` "Agents: all rows, newest first (don't filter)" |
 | Product Roadmap | `view://3f47e8aa-bbb4-818c-a54e-000c04b1a71b` "Agents: all rows (don't filter)" |
+| Education Hub Markets | `view://4157e8aa-bbb4-81a8-ac7d-000ccdcaaf8a` "Agents: all rows (don't filter)"; over 100 rows, so page with `next_cursor` |
 
 The registry's **Last run** rollup comes back as a `rollupResult://` reference, not a
 date, in view mode and in page fetches. For a row's last run, use its **Runs** relation
