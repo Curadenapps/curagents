@@ -73,7 +73,7 @@ On any invocation, determine trigger type:
 | `schedule:"0 8 * * 1"` (Zurich) | PC scheduled task "Roadmap watch" (RUNTIME.md) | roadmap-watch (weekly drift report + App Team summary in Webex, posts on its own) |
 | `schedule:"40 10 * * 5"` (Zurich) | PC scheduled task "Feedback QA report" (RUNTIME.md) | feedback-qa (posts the PDF report to the QA space on its own when the rubric's threshold is met) |
 | `user:roadmap watch` / `check the roadmap` / `roadmap drift` | User phrase | roadmap-watch |
-| `user:check webex` / `webex sweep` / `what's new in webex` · PC scheduled task "Webex Sweep" (weekdays 11:40 + 16:40 Zurich) | User phrase / schedule | webex-sweep |
+| `user:check webex` / `webex sweep` / `what's new in webex` · inside the PC task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02 Zurich) | User phrase / schedule | webex-sweep |
 | `user:triage feedback` / `what should we build next` / `send qa report` | User phrase | feedback-qa |
 | `user:team update` / `weekly update` / `two-week update` / `monthly update` | User phrase | announcements (draft to Notion, wait for "post it") |
 | `user:what happened this week` / `last two weeks` / `this month` | User phrase | announcements (`adhoc`: answer in chat, write nothing) |

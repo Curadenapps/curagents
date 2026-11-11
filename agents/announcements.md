@@ -273,12 +273,21 @@ Create a child page under Team Updates titled
    (noise, personal, already announced, not shareable).
 4. **Last update's "What's next"**: done / still going / dropped.
 5. Status line: `Draft — waiting for Sean` → `Posted {date} to {spaces}`.
+6. One row in the **Webex outbox** (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`): Space `App Team` (or `App Team -
+   Markets`), Marker = the update's title line, Agent `announcements`, Status
+   **`Held`**, Source the draft page, the message in the row's body, the PDF in
+   **Attachment** if one was rendered. Sean approves by ticking **Approved** on that
+   row (or saying "post it"); the Webex courier then posts it.
 
 Clinical or efficacy language in any line: add a `⚠️ Clinical language` callout
 and keep the line out of the Webex message until Legal has approved it
 (`dream.md` §2).
 
-### Step 6 — Post (only on Sean's "post it")
+### Step 6 — Post (only after Sean approves)
+
+Usually the Webex courier does this when Sean ticks **Approved** on the Held outbox
+row; it posts the row's body as it is then, so Sean edits there or on the draft first.
+On "post it" in a session on Sean's PC:
 
 1. Check Webex meeting summaries for the window (above). If a meeting adds
    something, update the Notion draft and tell Sean what changed before posting.
@@ -300,9 +309,10 @@ and keep the line out of the Webex message until Legal has approved it
      Sean the message and PDF to post.
 5. Update the page status line: `Posted {date} to {space}`.
 
-The Claude Routine "Team update draft" (`trig_01Pi2NPoRWRP6MStWHVzzkDm`, Thursday
-14:00 Zurich, connectors: Notion, Asana, Atlassian) stops at Step 5
-and its run summary links the draft. Posting happens on Sean's machine.
+The Claude Routine "Team update draft (Curaden)" (Thursday 14:00 Zurich, connectors:
+Notion, Asana, Atlassian) stops at Step 5 (draft + Held outbox row) and its run
+summary links the draft. Posting happens through the Webex courier after Sean
+approves.
 
 ---
 

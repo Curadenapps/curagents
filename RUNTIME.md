@@ -13,10 +13,13 @@ Where each agent runs, what starts it, and how runs are checked. Agreed with Sea
 | **The run** | A fresh session that reads the specs from `origin/main` and follows them | Automatic |
 | **Checking and fixing** | The Agent run log in Notion, read by the cloud maintenance session every weekday | The cloud session: it fixes specs by PR; the next run picks the fix up |
 
-Why the split: Webex has no connector, so anything that posts to or reads Webex
-needs Sean's Webex sign-in in the Claude desktop app's built-in browser (`skills/webex-web/SKILL.md`), and only a session on his PC has
-it. Everything else (Notion, Asana, Jira, Confluence, GitHub, Drive) has a connector
-and runs more reliably in the cloud, without the PC being on.
+Why the split (11 Nov): Webex and Outlook have no connector we may use, and IT blocks
+browser automation (built-in browser, Claude in Chrome, Remote Control) on the Curaden
+account. So **Curaden runs everything that only needs connectors** (Notion, Asana, Jira,
+Confluence, GitHub, Drive) as cloud Routines, and **one task on the Personal desktop
+app, the Webex courier, does all the Webex work**: it posts what the cloud agents left
+in the Notion **Webex outbox** and reads the watched spaces (Webex Sweep). The PC
+side stays as small as possible, so losing it costs one task, not the system.
 
 ## Accounts and the switch
 
@@ -24,8 +27,8 @@ Sean has two Claude accounts on the same PC (agreed 23 Oct 2026):
 
 | Account | Job | Future |
 |---------|-----|--------|
-| **Curaden** | Runs the automations: cloud Routines and PC scheduled tasks | Stays. Everything durable moves here |
-| **Personal** | Builds: specs, PRs, design, heavy one-off work | Goes away later. Nothing may live only here: its work lands in this repo or Notion |
+| **Curaden** | Runs every automation that only needs connectors, as cloud Routines | Stays. Everything durable lives here |
+| **Personal** | The Webex courier (the one PC task) and anything else that needs a browser (manual "post it", "meeting notes", Outlook web later); building specs and PRs | Kept while IT blocks browser automation on Curaden. Nothing may live only here: its work lands in this repo or Notion |
 
 Both desktop apps read the same task files in `~/.claude/scheduled-tasks/`, but each
 app keeps its own schedule and on/off state, and each account has its own cloud
@@ -61,32 +64,33 @@ The step-by-step runbook is `docs/migration-to-curaden.md`; paste-ready Curaden 
 `docs/curaden-routines.md`. iTOP agent, marketing, website, game design and other
 personal projects stay on Personal; curagents and its automations move.
 
-**Curaden runs everything on a schedule. Personal builds.** The Personal account
-is expected to go within about six months, so from now on:
+**Curaden runs every connector-only schedule. Personal carries Webex.** (Revised
+11 Nov: IT blocks browser automation on Curaden and won't change that.)
 
-- **Curaden** holds every scheduled task and Routine, and the on-request ops runs
-  ("boom boom", "post it", "check webex").
-- **Personal** holds no schedules once the move is done. It is the build and
-  maintenance seat: spec and skill changes by PR, design, analysis, testing a new
-  agent before it gets a schedule on Curaden. Nothing may live only on Personal.
-- Move one item at a time: set it up on Curaden with the `Account: Curaden` prompt,
-  flip **Account** on its Agent registry row, check its next run-log row, then
-  delete the Personal copy (Routines) or switch it off (PC tasks).
+- **Curaden** holds every cloud Routine, including the "thinking" half of the Webex
+  agents: Boom Boom writes its ping, Roadmap watch its summary, Feedback QA its PDF
+  report and the team update its message, each as a row in the Webex outbox.
+- **Personal** holds one scheduled task, the **Webex courier**, plus the on-request
+  browser runs ("post it", "meeting notes"). It also stays the build seat.
+- Move one item at a time: set it up with the `Account:` prompt, flip **Account** on
+  its Agent registry row, check its next run-log row, then delete or switch off the
+  old copy.
 
 | Item | Today | Decision | On Curaden as |
 |------|-------|----------|---------------|
-| Webex Sweep | — | **Keep** (new) | PC task "Webex Sweep (Curaden)", 11:40 + 16:40 |
-| Boom Boom Derek | Personal PC | **Keep, move** | PC task "Boom Boom Derek (Curaden)", 08:45 |
+| Webex courier | — | **New** (11 Nov): the only PC task. Checks the Webex sign-in, posts the outbox, runs Webex Sweep | Personal PC task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 |
+| Webex Sweep | — | **Keep**, inside the courier | Personal PC task "Webex courier (Personal)" (reads at every run) |
+| Boom Boom Derek | Personal PC, 08:45 | **Move to Curaden as a Routine** (11 Nov): refreshes the page and writes the ping to the outbox; the courier posts it | Routine "Boom Boom Derek (Curaden)", weekdays 08:20 |
 | Truth Catcher scan | Personal Routine | **Keep, move** | Routine, 07:58 + 13:58 |
 | Roadmap ← Jira sync | Personal Routine | **Keep, move** | Routine, Thu 07:30 |
 | Agent run log check | Personal Routine (`trig_01AN1dTjvTV3YNhhmLAqV4tL`) | **Keep, move** (it is the monitoring) | Routine, weekdays 10:15 |
-| Team update draft | Missing (Routine gone) | **Keep, recreate** | Routine, Thu 14:00 |
-| Roadmap watch | Personal PC, Mon 08:00 | **Keep on the PC** (4 Nov): it now posts its summary to Webex App Team | PC task "Roadmap watch (Curaden)", Mon 08:00 |
-| Feedback QA report | On request | **New, weekly** (4 Nov): posts on its own when there's enough feedback | PC task "Feedback QA report (Curaden)", Fri 10:40 |
+| Team update draft | Missing (Routine gone) | **Keep, recreate**: drafts in Notion and puts the Webex message in the outbox as Held; Sean ticks Approved | Routine, Thu 14:00 |
+| Roadmap watch | Personal PC, Mon 08:00 | **Move to Curaden as a Routine** (11 Nov): writes the report and puts the App Team summary in the outbox | Routine "Roadmap watch (Curaden)", Mon 07:40 |
+| Feedback QA report | On request | **Weekly on Curaden** (11 Nov): builds the PDF and puts the post (PDF attached) in the outbox when the threshold is met | Routine "Feedback QA report (Curaden)", Fri 10:10 |
 | App Support | — | **New** (10 Nov): answers form submissions on its own, hourly in work hours; bugs and gaps to Jira. Split by owner: Sean's Routine (BOB, Mon–Fri, covers Fabian on Fridays and when his is down) + Fabian's Routine on his own account (the rest, Mon–Thu) | Routine "App Support (Curaden)" `trig_01NzNgUy17FxJiHFc8otT4oS`, created 10 Nov |
 | Roadmap dashboard refresh | Personal PC, 09:15 | **On request** (Sean, 23 Oct): switch its schedule off and run it on click | — |
-| Boom Boom queued | Personal PC, 14:00 | **Retire**: the next Webex run (Webex Sweep, or the next Boom Boom) posts a queued ping (11 Nov) | — |
-| Webex keep-alive | Personal PC, hourly 07–20 | **Retire** (Sean, 11 Nov): it didn't keep Webex signed in. Every Webex run checks the sign-in itself and tells Sean once (see "Webex sign-in" below) | — (switch off the Personal task) |
+| Boom Boom queued | Personal PC, 14:00 | **Retire**: the courier posts the outbox | — |
+| Webex keep-alive | Personal PC, hourly 07–20 | **Retire** (11 Nov): the courier checks the sign-in at every run | — (switch off the Personal task) |
 | Asana ↔ Notion sync | Paused | **Retire**: Webex Sweep now pushes approved inbox rows to Asana; running both would duplicate tasks | — |
 | App team weekly digest | Personal Routine, disabled | **Delete**: replaced by the team update | — |
 | Everything "On request" | — | Stays on request, run from whichever account Sean is in | — |
@@ -95,16 +99,17 @@ is expected to go within about six months, so from now on:
 
 | Agent | Where | Started by | Notes |
 |-------|-------|------------|-------|
-| `boom-boom-derek` | **PC** | Desktop app scheduled task "Boom Boom Derek" (weekdays 08:45 Zurich); "boom boom" any time | Posts to the common chat (QA space) for the Phinamic team, or Curaden / Phinamic for Derek-only items. A ping that can't go out (or a cloud "boom boom") is queued on its Notion page; the next Webex keep-alive posts it |
-| `announcements` (post) | **PC** | Sean's "post it" | Posting stays behind Sean's approval of each draft |
-| `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | The routine `trig_01Pi2NPoRWRP6MStWHVzzkDm` named in the spec no longer appears in the Routines list: recreate it or draft on "team update" |
-| `feedback-qa` (report) | **PC** | Desktop app scheduled task "Feedback QA report" (Fridays 10:40 Zurich); "send QA report" any time | Posts the PDF to the Webex QA space on its own when the rubric's threshold is met; below it, logs `no-op` |
+| `boom-boom-derek` | Cloud + courier | Claude Routine "Boom Boom Derek (Curaden)" (weekdays 08:20 Zurich); "boom boom" any time | Refreshes Derek's page from Notion, Asana, Jira, Confluence, the WBS and the Webex messages Webex Sweep captured; writes the ping to the Webex outbox (common chat by default). The courier posts it at 09:02 |
+| `announcements` (post) | Courier | Sean ticks **Approved** on the Held outbox row (or says "post it") | The courier posts it on its next run |
+| `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | Writes the Notion draft and a Held outbox row |
+| `feedback-qa` (report) | Cloud + courier | Claude Routine "Feedback QA report (Curaden)" (Fri 10:10 Zurich); "send QA report" any time | Builds the PDF in the cloud and puts the post with the PDF attached in the outbox; the courier posts it to the QA space |
 | `meeting-notes` | **PC** | "meeting notes" | Reads Webex meeting summaries and transcripts |
 | `app-support` | Cloud | Claude Routine "App Support (Curaden)" (`trig_01NzNgUy17FxJiHFc8otT4oS`), hourly 07:20–19:20 Zurich Mon–Fri, BOB requests (and Fabian's on Fridays or when his Routine is down); Claude Routine "App Support (Fabian)" on Fabian's account, hourly Mon–Thu, the rest (prompt in `docs/app-support-quickstart.md`) (cron in UTC, so an hour later in summer time); "app support" any time | Asana + Notion connectors. Answers on its own; what it can't answer goes to each owner's "App Support: needs you" task in Asana. Most runs are `no-op` (nothing new). Spec "Scheduled run" |
 | `truth-catcher` | Cloud | Claude Routine "Truth Catcher scan" (`trig_01BxmV4KaG4CPbZMU4GmMHa7`), weekdays 07:58 + 13:58 Zurich | Asana, Notion, GitHub connectors |
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
-| `roadmap-watch` | **PC** | Desktop app scheduled task "Roadmap watch" (Mondays 08:00 Zurich); "roadmap watch" any time | Writes the Notion report, then posts a short summary with the link to Webex App Team |
-| `webex-sweep` | **PC** | Desktop app scheduled task "Webex Sweep" (weekdays 11:40 + 16:40 Zurich); "check webex" any time | Reads the watched Webex spaces and new meeting action items; writes Notion inbox rows, Asana update comments and approved inbox rows to Asana. Never posts in Webex |
+| `roadmap-watch` | Cloud + courier | Claude Routine "Roadmap watch (Curaden)" (Mon 07:40 Zurich); "roadmap watch" any time | Writes the report page and puts the App Team summary in the outbox |
+| Webex courier | **PC (Personal)** | Desktop app scheduled task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 Zurich | The only scheduled PC task: sign-in check, outbox, Webex Sweep ("PC runs" below) |
+| `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and meeting action items; Notion inbox rows, Asana comments, its "Logged from this chat" note |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
@@ -190,71 +195,53 @@ Cloud Routine prompts take the same `Account:` first line.
 
 | Scheduled task | When (Zurich) | `{name}` |
 |----------------|---------------|----------|
-| Boom Boom Derek | Weekdays 08:45 | Boom Boom Derek |
-| Webex Sweep | Weekdays 11:40 and 16:40 | Webex Sweep |
-| Roadmap watch | Mondays 08:00 | Roadmap watch |
-| Feedback QA report | Fridays 10:40 | Feedback QA report |
+| Webex courier (Personal) | Weekdays 08:02, 09:02, 12:02, 17:02 (cron `2 8,9,12,17 * * 1-5`) | Webex courier |
+
+That is the only PC task. Boom Boom Derek, Roadmap watch, Feedback QA report and the
+team update run as cloud Routines on Curaden (`docs/curaden-routines.md`).
 
 ## PC runs
 
 Every PC run reads `RUNTIME.md` and `dream.md` §2–3 first and ends with one row in
 the Agent run log. Runs never edit specs or push.
 
-### Boom Boom Derek
+### Webex courier
 
-Read `skills/webex-web/SKILL.md` and `agents/boom-boom-derek.md`, and follow the
-agent spec exactly: refresh the Boom Boom Derek page, read the common chat, the
-Curaden / Phinamic space and the team's meetings in Webex web, and post today's ping
-(or the page's queued ping) in the space the spec's "Channel" rule names, through
-the desktop app's built-in browser with `scripts/webex-post.js` if the rules say so. If you can't post
-after the skill's retries, log it on the page and in the run log.
+The one scheduled PC task (Personal desktop app, built-in browser). In order:
 
-### Webex sign-in (every Webex run)
-
-There is no keep-alive task any more (retired 11 Nov; the old one is archived in
-`pc-tasks/webex-keepalive/`). Every PC run that uses Webex (Boom Boom Derek, Webex
-Sweep, Roadmap watch, Feedback QA report, manual "post it") does this first:
-
-1. Open the space in the desktop app's built-in browser (`skills/webex-web/SKILL.md`)
-   and check the sign-in (signed-in markers, or the sign-in page). Never type
-   credentials or click sign-in, cookie or consent buttons.
-2. **Signed out:** try Claude in Chrome (the skill's fallback). Neither works: tell
-   Sean once (`PushNotification`: "Webex signed out in Claude's built-in browser.
-   Open Claude desktop, Ctrl+Shift+B, sign in to web.webex.com.") unless a run-log row
-   from the last 4 hours already says "Webex signed out"; put "Webex signed out" in
-   this run's Error; queue what couldn't be posted the way the agent's spec says.
-3. **Signed in and the Boom Boom Derek page has a "📤 Queued ping"** from today with no
-   Boom Boom message posted today: post it first, per `agents/boom-boom-derek.md`
-   step 7 (check it against the space; anything answered gets dropped; the space
-   comes from the spec's "Channel" rule), record it and delete the queued section. A
-   queued ping from an earlier day is stale: delete it and note it. Never post from
-   old local `.boom-boom-derek/outbox/` files; move today's onto the page.
+1. **Sign-in.** Open Webex in the built-in browser (`skills/webex-web/SKILL.md`) and
+   check the sign-in. Never type credentials or click sign-in, cookie or consent
+   buttons. Signed out: try Claude in Chrome (the skill's fallback). Neither works:
+   tell Sean once (`PushNotification`: "Webex signed out in Claude's built-in
+   browser. Open Claude desktop, Ctrl+Shift+B, sign in to web.webex.com.") unless a
+   run-log row from the last 4 hours already says "Webex signed out"; log `partial`
+   with "Webex signed out" and stop. Nothing is lost: the outbox waits.
+2. **Outbox.** Read the Webex outbox (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`). For every row with
+   Status `Queued`, or `Held` with **Approved** ticked, whose **Post after** has passed:
+   - **Expires** passed → Status `Dropped`, Courier note "expired".
+   - Otherwise post it with `scripts/webex-post.js` exactly as the skill's Recipe 1
+     says: the row's **Space** (IDs in the skill), **Mentions**, **Marker**, the message
+     from the row's page body (the **Message** property is only a preview). With an
+     **Attachment**, download it (Notion file URL) and attach it first (Recipe 2).
+     Verify with `webex-read.js` (`markerCount: 1`).
+   - Posted → Status `Posted`, **Posted at** now. Failed after the skill's retries →
+     Status stays `Queued`, Courier note with the reason (3 failed runs → `Failed`).
+   - Boom Boom rows: before posting, check the space for replies since the row was
+     written that answer an item; if one does, set the row to `Held`, Courier note
+     "team replied since; say boom boom to refresh", and tell Sean once.
+   - After a Boom Boom post, add "posted {HH:MM} in {space}" to the ping history on
+     Derek's page. Never post from old local `.boom-boom-derek/outbox/` files.
+3. **Webex Sweep.** Run `agents/webex-sweep.md` as its spec says (window from its last
+   run-log row; inbox rows, Asana comments, approved rows to Asana, its "Logged from
+   this chat" note). A space it can't read → `partial` with the space name.
+4. **Run log.** One row: Agent `webex-courier` (or `other`), Where `PC`, Account
+   `Personal`, Outcome `posted` (anything went out) / `ok` / `partial` / `failed`,
+   Summary "{n} posted, {m} held/expired; sweep: {sweep summary}". Webex Sweep keeps
+   its own `webex-sweep` row.
 
 ### Manual PC runs
 
-For "post it" (announcements), "send QA report" (feedback-qa), "roadmap watch" and "meeting notes",
-start with the paste-once prompt's fetch step, read the agent's spec, and end like
-every PC run (run-log row, no spec edits).
-
-### Webex Sweep
-
-Read `skills/webex-web/SKILL.md` and `agents/webex-sweep.md`, and follow the agent
-spec exactly: read each watched space and the new meeting recaps since the last
-`webex-sweep` row in the Agent run log, write the Notion inbox rows and Asana
-update comments it describes, push approved inbox rows to Asana, and post the
-"Logged from this chat" note in each space it took tickets from (nothing else in
-Webex). A space you can't read after the skill's retries goes in the run log as
-`partial` with its name.
-
-### Roadmap watch
-
-Read `skills/webex-web/SKILL.md` and `agents/roadmap-watch.md` and follow the spec:
-write this week's report page, then post its Step 5 summary to App Team. Live:
-don't ask first.
-
-### Feedback QA report
-
-Read `skills/webex-web/SKILL.md`, `agents/feedback-qa.md` and
-`skills/feedback-qa/SKILL.md` and run Procedure 1 as the spec's "Scheduled run"
-says: report and post only when the rubric's threshold is met, otherwise log
-`no-op` with what is waiting. Live: don't ask first.
+"post it" (posts a Held team-update row now, same as the courier), "send QA report",
+"roadmap watch", "boom boom" and "meeting notes" work from any session on the PC; the
+Webex part follows the courier's steps 1–2. Start with the paste-once prompt's fetch
+step, read the agent's spec, and end like every PC run (run-log row, no spec edits).

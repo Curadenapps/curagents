@@ -78,9 +78,56 @@ Schedule: Thursdays 14:00.
 > if its Account isn't Curaden, log `no-op` and stop.
 > Then draft this week's team update exactly as `agents/announcements.md` describes
 > (weekly; monthly on the last Thursday of the month), Steps 1–5 only: write the
-> Notion draft under Team Updates and stop. Never post to Webex; Sean says "post it"
-> on his PC. Last step, always: one row in the Agent run log (Agent
+> Notion draft under Team Updates and its Held Webex outbox row, and stop. Never post
+> to Webex; Sean approves by ticking Approved on the outbox row and the Webex courier
+> posts it. Last step, always: one row in the Agent run log (Agent
 > `announcements`, Where Cloud, Link = the draft page).
+
+### Boom Boom Derek (Curaden)
+
+Schedule: weekdays 08:20 (the Webex courier posts at 09:02). Connectors: Notion, Asana, Atlassian, GitHub, Google Drive.
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "Boom Boom Derek (Curaden)"; if its Account
+> isn't Curaden, log `no-op` and stop.
+> Then run Boom Boom Derek exactly as `agents/boom-boom-derek.md` describes for a
+> cloud run: refresh the page from Notion, Asana, Jira, Confluence, the WBS and what
+> Webex Sweep captured; if the rules say ping, write it to the Webex outbox (one row,
+> Status Queued). Never post to Webex yourself. Live: don't ask first.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `boom-boom-derek`, Where Cloud, Account Curaden).
+
+### Roadmap watch (Curaden)
+
+Schedule: Mondays 07:40.
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "Roadmap watch (Curaden)"; if its Account
+> isn't Curaden, log `no-op` and stop.
+> Then run the weekly report exactly as `agents/roadmap-watch.md` describes. A cloud
+> run has no local snapshot from last week: use last Monday's report page under
+> Roadmap Reports as the baseline for "Changed" and "Drift". Write the report page and
+> its one Webex outbox row (Step 5); nothing else.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `roadmap-watch`, Where Cloud, Account Curaden).
+
+### Feedback QA report (Curaden)
+
+Schedule: Fridays 10:10.
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "Feedback QA report (Curaden)"; if its Account
+> isn't Curaden, log `no-op` and stop.
+> Then run the spec's "Scheduled run" in `agents/feedback-qa.md` with
+> `skills/feedback-qa/SKILL.md` Procedure 1: report only when the rubric's threshold
+> is met; build the PDF (`node scripts/qa-report.mjs pdf …`) and put the post with the
+> PDF attached in the Webex outbox. Below the threshold, log `no-op` with what is
+> waiting. Never post to Webex yourself.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `feedback-qa`, Where Cloud, Account Curaden).
 
 ### App Support (Curaden)
 
@@ -110,26 +157,27 @@ only. Created 10 Nov 2026 as `trig_01NzNgUy17FxJiHFc8otT4oS`.
 > candidates, voice notes and dev tickets in its body. Use the Asana and Notion
 > connectors; if either is missing, log `failed` with which one.
 
-## PC scheduled tasks (Curaden desktop app)
+## PC scheduled task (Personal desktop app): the Webex courier
 
-On the `curagents` folder, in the **Curaden** desktop app, with Webex signed in
-once in its built-in browser (Ctrl+Shift+B shows the pane; the sign-in persists). One prompt for all, `{name}` from the table:
+IT blocks browser automation on the Curaden account (11 Nov), so the one task that
+needs Webex runs in the **Personal** desktop app on Sean's PC, in the curagents
+folder, with Webex signed in once in its built-in browser (Ctrl+Shift+B shows the
+pane; the sign-in persists).
 
-> Account: Curaden. In my curagents folder run `git fetch origin main`. If the
+- **Name:** `Webex courier (Personal)` · **Schedule:** weekdays 08:02, 09:02, 12:02,
+  17:02 (cron `2 8,9,12,17 * * 1-5`, Europe/Zurich)
+- **Prompt:**
+
+> Account: Personal. In my curagents folder run `git fetch origin main`. If the
 > checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
 > anything and read every file from `origin/main` (`git show origin/main:<path>`).
-> Check the switch as `RUNTIME.md` describes, then do the "{name}" run exactly as
-> `RUNTIME.md` describes under "PC runs". Live: don't ask me first.
+> Check the switch as `RUNTIME.md` describes, then do the "Webex courier" run exactly
+> as `RUNTIME.md` describes under "PC runs". Live: don't ask me first.
 
-| Task name | When | `{name}` |
-|-----------|-----------------|----------|
-| Boom Boom Derek (Curaden) | 08:45 | Boom Boom Derek |
-| Webex Sweep (Curaden) | 11:40 and 16:40 | Webex Sweep |
-| Roadmap watch (Curaden) | Mondays 08:00 | Roadmap watch |
-| Feedback QA report (Curaden) | Fridays 10:40 | Feedback QA report |
-
-Not moved: Webex keep-alive (retired 11 Nov; every Webex run checks the sign-in), Boom Boom queued (the next Webex run posts queued pings) and the Asana ↔ Notion sync (retired), Roadmap
-dashboard refresh (on click), the old App team digest (delete).
+Switch off on the Personal desktop app once the cloud copies run: Boom Boom Derek
+(PC), Roadmap watch (PC), Webex keep-alive (retired), Roadmap dashboard refresh (on
+click). Not moved: Boom Boom queued and the Asana ↔ Notion sync (retired), the old App
+team digest (delete).
 
 ## Jira sync steps
 

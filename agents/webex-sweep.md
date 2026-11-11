@@ -13,7 +13,7 @@ model: claude-sonnet-5-5
 tools: Read, NotionAPI, AsanaAPI, JiraAPI, ClaudeBrowser, ClaudeInChrome
 trigger:
   - type: schedule
-    cron: "CRON_TZ=Europe/Zurich 40 11,16 * * 1-5"   # PC scheduled task "Webex Sweep" (RUNTIME.md)
+    cron: "CRON_TZ=Europe/Zurich 2 8,9,12,17 * * 1-5"   # inside the PC task "Webex courier (Personal)" (RUNTIME.md)
     label: webex-sweep
   - type: manual
     phrases:
@@ -63,7 +63,7 @@ was picked up and can quote the WX- number ("Logged in Webex" below).
 ## Where it runs
 
 On Sean's PC (Webex has no connector; `skills/webex-web/SKILL.md`), as the
-desktop scheduled task "Webex Sweep", weekdays 11:40 and 16:40 Zurich, and on
+Webex courier (the one PC task on the Personal desktop app), weekdays 08:02, 09:02, 12:02 and 17:02 Zurich, and on
 "check webex" any time. A cloud session can't read Webex: it says so and stops.
 
 ## What it reads
@@ -81,8 +81,8 @@ Direct (1:1) chats are private and never read unless Sean adds one here by name.
 **Meetings:** recorded meetings since the last sweep (Recipe 4 list + summary). It
 takes only Webex's own action items; the full recap page stays meeting-notes' job.
 
-**First:** the Webex sign-in check and any queued Boom Boom ping, as `RUNTIME.md`
-"Webex sign-in" says (there is no keep-alive task any more).
+**Runs inside the Webex courier** (`RUNTIME.md` "Webex courier"), after the courier
+has checked the sign-in and posted the outbox.
 
 **Window:** from the `When` of the last `webex-sweep` row in the Agent run log to
 now. First run, or no row: the last 3 working days.
