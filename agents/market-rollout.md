@@ -159,6 +159,23 @@ Each workflow is in the skill with its steps. In short:
   again does nothing. To fix the order: detach (`parent: null`), then attach from the
   last stage to the first, one call per stage. Never put rollout tasks in BOB App.
 
+  **Card owner and description (Sean, 11 Nov 2026):**
+  1. **Assignee** = the market's responsible person. Sean is accountable and stays a
+     follower. Don't write "responsible" or "accountable" on the card: the assignee says it.
+  2. Change the assignee only once the market's collaborator confirms who is responsible,
+     in a comment on the card or to Sean. A contact named in the description isn't enough.
+     No one confirmed yet: the first step is a drafted "who's the key person?" question
+     for Sean to send.
+  3. **Description format:** an H2 heading per section (Goal, Stages, People, Sources, …),
+     points as bullet lists (not indented plain text), and every Notion and Asana link
+     under Sources, none at the top.
+  4. When a comment confirms the person, changes a date or settles an open point, update
+     the description to match.
+
+  Status 11 Nov 2026: USA is assigned to Sarah Jackson (Thomas Niederberger asked her to
+  lead, in a comment on the card). UAE, Italy and Switzerland are in the new format and
+  stay with Sean until each market confirms its responsible person.
+
 ---
 
 ## Run log
