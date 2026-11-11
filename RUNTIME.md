@@ -35,8 +35,9 @@ app keeps its own schedule and on/off state, and each account has its own cloud
 Routines. So a task registered on both accounts would run twice. The switch stops that.
 
 **Agent registry** `49feb8b53b6c41838cf4cb916fcbb205`
-(data source `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418`), under Goals &
-Objectives, next to the Agent run log. One row per agent run, with **Account**
+(data source `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418`), in the
+**Agent control room** next to the Agent run log and the Webex outbox ("Where the agent
+tables live" below). One row per agent run, with **Account**
 (`Curaden`, `Personal`, `Paused`, `On request`), Where, Started by, Schedule, Spec,
 Run log name, and **Last run** (rolled up from the run log). It is the full list of
 what runs where; the table below is the background.
@@ -131,6 +132,21 @@ personal projects stay on Personal; curagents and its automations move.
    logged.
 5. **Read Notion databases in view mode only** (below). Never SQL or rows mode.
 
+## Where the agent tables live
+
+The **Agent registry**, **Agent run log** and **Webex outbox** sit together on the
+Notion page **⚙️ Agent control room** `4157e8aabbb48194bb25e351664b6462` (App Hub ›
+Agents & Other Projects), moved there on 11 Nov 2026. Before that they sat directly on
+Agents & Other Projects; the registry and run log earlier still under Goals & Objectives.
+
+- Every run, on either account (Curaden, Personal, and Fabian's App Support), finds
+  them **by their IDs**: the `collection://` and `view://` IDs in this file. Moving a
+  database in Notion keeps all of them, so the move changed nothing for any run.
+- Never find them by page path or by searching their title, and never create a new
+  registry, run log or outbox because one "isn't where it used to be". If an ID stops
+  resolving, log `failed` with that ID in the Error column and stop.
+- Don't rename, duplicate, delete or move them again without a PR to this section.
+
 ## Reading Notion (view mode only)
 
 Notion's SQL and rows-mode queries share one small hourly allowance across the whole
@@ -167,8 +183,8 @@ date, in view mode and in page fetches. For a row's last run, use its **Runs** r
 ## Agent run log
 
 Notion database **Agent run log** `a4c371ee506c4d0fa5dde1fb11bd2657`
-(data source `collection://9b260587-5c0d-4d90-947e-b6e10ba159df`), under Goals &
-Objectives. One row per run, written as the run's last step:
+(data source `collection://9b260587-5c0d-4d90-947e-b6e10ba159df`), in the
+**Agent control room**. One row per run, written as the run's last step:
 
 | Column | Value |
 |--------|-------|
