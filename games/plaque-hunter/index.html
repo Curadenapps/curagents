@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Plaque Hunter</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="stage" aria-label="The Smile: two arches of teeth with a swarm of sparks"></canvas>
+
+  <section id="title" class="screen">
+    <span class="wordmark" data-wordmark></span>
+    <div class="title-mid">
+      <h1>Plaque<br>Hunter</h1>
+      <p class="lede">Lead the 5,460.</p>
+    </div>
+    <div class="title-bot">
+      <button class="btn reverse lg block" id="btn-start" type="button">Start</button>
+      <p class="label">Two minutes. Twice a day. One thumb.</p>
+    </div>
+  </section>
+
+  <section id="story" class="screen" hidden>
+    <div class="story-top"><span class="wordmark" data-wordmark></span><button class="btn text" id="btn-story-skip" type="button">Skip</button></div>
+    <div class="story-card">
+      <p class="label" id="story-step">1 of 4</p>
+      <h1 id="story-title"></h1>
+      <p class="lede-md" id="story-text"></p>
+      <canvas id="story-art" width="480" height="240"></canvas>
+    </div>
+    <button class="btn lg block" id="btn-story" type="button">Next</button>
+  </section>
+
+  <section id="home" class="screen" hidden>
+    <header class="bar">
+      <span class="wordmark" data-wordmark></span>
+      <div class="chips">
+        <button class="chip" id="chip-rank" type="button" aria-label="Rank"></button>
+        <button class="chip" id="chip-streak" type="button" aria-label="Streak"></button>
+      </div>
+    </header>
+    <div class="home-mid">
+      <p class="label" id="tide-eyebrow"></p>
+      <h1 id="tide-title"></h1>
+      <p class="lede-md" id="tide-sub"></p>
+    </div>
+    <footer class="home-foot">
+      <div class="week" id="week" aria-label="The last seven days"></div>
+      <button class="btn lg block" id="btn-hunt" type="button"></button>
+      <div class="row">
+        <button class="btn ghost" id="btn-practice" type="button">Practice run</button>
+        <button class="btn ghost" id="btn-prime" type="button">Prime time</button>
+      </div>
+    </footer>
+    <nav class="tabs" aria-label="Menu">
+      <button type="button" data-panel="guide"><i data-ic="book"></i><span>Guide</span></button>
+      <button type="button" data-panel="gear"><i data-ic="brush"></i><span>Gear</span></button>
+      <button type="button" data-panel="journal"><i data-ic="calendar"></i><span>Journal</span></button>
+      <button type="button" data-panel="link"><i data-ic="link"></i><span>App link</span></button>
+      <button type="button" data-panel="settings"><i data-ic="settings"></i><span>Settings</span></button>
+    </nav>
+  </section>
+
+  <section id="hud" class="screen" hidden>
+    <div class="hud-bar top">
+      <div class="hud-top">
+        <button class="round" id="btn-pause" type="button" aria-label="Pause"><i data-ic="pause"></i></button>
+        <div class="hud-zone">
+          <h2 id="zone-name">Top right</h2>
+          <div class="pips" id="pips"><span class="badge">Outside</span><span class="badge">Inside</span><span class="badge">Chewing</span></div>
+        </div>
+        <div class="jar" id="jar" aria-label="Plaqlings caught"><i data-ic="bug"></i><b id="jar-n">0</b></div>
+      </div>
+      <div class="clock">
+        <div class="track"><i id="clock-fill"></i><span></span><span></span><span></span></div>
+        <b id="clock-text">2:00</b>
+      </div>
+    </div>
+    <div class="hud-bar bot">
+      <div class="together">
+        <span class="label grey">Together</span>
+        <div class="track"><i id="tog-fill"></i></div>
+      </div>
+      <button class="hydro" id="btn-hydro" type="button" disabled aria-label="Hydro wave"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="ring-bg"/><circle cx="22" cy="22" r="19" class="ring" id="hydro-ring"/></svg><span>Hydro</span></button>
+    </div>
+  </section>
+
+  <section id="primehud" class="screen" hidden>
+    <div class="hud-bar top">
+      <div class="hud-top">
+        <button class="round" id="btn-prime-quit" type="button" aria-label="Leave Prime time"><i data-ic="close"></i></button>
+        <div class="hud-zone">
+          <h2>Prime time</h2>
+          <p class="lede-sm" id="prime-count">0 of 8 gaps</p>
+        </div>
+        <div class="jar"><i data-ic="bug"></i><b id="prime-jar">0</b></div>
+      </div>
+    </div>
+    <div class="hud-bar bot prime-bot">
+      <p class="lede-sm" id="prime-hint"></p>
+      <div class="quiver" id="quiver"></div>
+    </div>
+  </section>
+
+  <div id="countdown" hidden><span id="countdown-n">3</span><p class="label">Brush in hand?</p></div>
+  <div id="banner" hidden><b id="banner-title"></b><span id="banner-sub"></span></div>
+  <div id="toast" role="status" hidden></div>
+
+  <section id="pause" class="modal" hidden>
+    <div class="modal-card">
+      <h2>Paused</h2>
+      <p class="lede-sm">The tide waits. Your brush can too.</p>
+      <button class="btn" id="btn-resume" type="button">Keep hunting</button>
+      <button class="btn ghost" id="btn-quit" type="button">End this hunt</button>
+    </div>
+  </section>
+
+  <section id="results" class="sheet" hidden>
+    <div class="sheet-body" id="results-body"></div>
+  </section>
+
+  <section id="panel" class="sheet" hidden>
+    <header class="sheet-head">
+      <div><p class="label" id="panel-eyebrow">Plaque Hunter</p><h1 id="panel-title"></h1></div>
+      <button class="round" id="btn-panel-close" type="button" aria-label="Close"><i data-ic="close"></i></button>
+    </header>
+    <div class="sheet-body" id="panel-body"></div>
+  </section>
+</div>
+<script src="src/config.js"></script>
+<script src="src/store.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/world.js"></script>
+<script src="src/art.js"></script>
+<script src="src/hunt.js"></script>
+<script src="src/ui.js"></script>
+<script src="src/main.js"></script>
+<!-- Icons: Lucide, as the design system specifies. Built-in stroke glyphs stand in until (or unless) it loads. -->
+<script async src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js" onload="window.PH && PH.UI && PH.UI.lucide()"></script>
+</body>
+</html>
