@@ -14,7 +14,8 @@ run writes a run-log row, then delete the Personal copy (Routines) or switch it 
 Create each as a Claude Routine from a session on the Curaden account:
 
 - **Repository:** `Curadenapps/curagents`
-- **Connectors:** Notion, Asana, Atlassian, GitHub (Google Drive only where noted)
+- **Connectors:** Notion, Asana, Atlassian, GitHub. No Google Drive: the WBS is in
+  Notion and doesn't change (Sean, 11 Nov)
 - **Fires:** a fresh session each time
 - **Time zone:** Europe/Zurich
 
@@ -85,7 +86,7 @@ Schedule: Thursdays 14:00.
 
 ### Boom Boom Derek (Curaden)
 
-Schedule: weekdays 08:20 (the Webex courier posts at 09:02). Connectors: Notion, Asana, Atlassian, GitHub, Google Drive.
+Schedule: weekdays 08:20 (the Webex courier posts at 09:02). Connectors: Notion, Asana, Atlassian, GitHub.
 
 > Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
 > `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
@@ -192,8 +193,9 @@ Moved here from the Personal Routine's prompt so the steps live in the repo.
 2. **Pull the roadmap:** Notion data source
    `collection://2ce24f93-f696-4d3b-98be-462df08c2c29` ("Product Roadmap": BOB and
    the Curaprox app, split by `Product` — "BOB" / "Curaprox App" / "Shared"; empty
-   means BOB), including rows with Status Cut. If the SQL quota is used up, use
-   view mode (`view://0958c452-8904-400a-9d41-995792d6e069`) and page fetches. Key
+   means BOB), including rows with Status Cut. Read it in view mode on
+   `view://3f47e8aa-bbb4-818c-a54e-000c04b1a71b` ("Agents: all rows (don't filter)")
+   plus page fetches, never SQL (`RUNTIME.md` "Reading Notion"). Key
    properties: "Jira Key" for exact-match sync; Status Not Started / In Progress /
    In Review / Done / Needs refinement / Cut; Module and Product (use only existing
    options, spelled exactly).

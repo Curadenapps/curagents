@@ -47,7 +47,7 @@ curagents folder):
 ## Phase 2: set up on Curaden
 
 1. **Claude account (Curaden AG):** connect Notion, Asana, Atlassian (Jira +
-   Confluence), GitHub (with access to `Curadenapps/curagents`), Google Drive, and
+   Confluence), GitHub (with access to `Curadenapps/curagents`), and
    Figma and Webflow if those agents are used. Fireflies only if meeting-notes'
    fallback is wanted.
 2. **Desktop app:** the Webex courier runs in the **Personal** desktop app (IT blocks

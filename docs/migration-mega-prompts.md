@@ -69,7 +69,7 @@ docs/curaden-routines.md. Don't change any repo file; don't merge or push.
    - "Roadmap ← Jira sync (Curaden)"     Thursdays 07:30
    - "Agent run log check (Curaden)"     weekdays 10:15
    - "Team update draft (Curaden)"       Thursdays 14:00
-   - "Boom Boom Derek (Curaden)"         weekdays 08:20 (add Google Drive)
+   - "Boom Boom Derek (Curaden)"         weekdays 08:20
    - "Roadmap watch (Curaden)"           Mondays 07:40
    - "Feedback QA report (Curaden)"      Fridays 10:10
    ("App Support (Curaden)" already exists since 10 Nov: leave it as it is.)
