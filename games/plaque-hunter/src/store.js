@@ -9,7 +9,8 @@
   function fresh() {
     return {
       v: 1, created: Date.now(), offset: 0,
-      shine: 0, runs: 0, lastRunAt: 0, lastQuads: [0, 0, 0, 0],
+      shine: 0, bank: 0, runs: 0, lastRunAt: 0, lastQuads: [0, 0, 0, 0],
+      kit: { fil: 0, soft: 0, glide: 0, focus: 0 }, mastery: { brush: 0, idb: 0, tools: 0 }, missions: {}, deck: PH.START_DECK.slice(),
       days: {}, streak: { count: 0, best: 0, shields: 0, lastDay: null },
       guide: {}, badges: {}, primeDays: 0,
       gear: { skin: 'blue', brushStart: Date.now() },
@@ -33,7 +34,7 @@
     const d = read();
     if (d && d.v === 1) {
       S.data = Object.assign(base, d);
-      for (const k of ['streak', 'gear', 'settings', 'link']) S.data[k] = Object.assign(fresh()[k], d[k] || {});
+      for (const k of ['streak', 'gear', 'settings', 'link', 'kit', 'mastery']) S.data[k] = Object.assign(fresh()[k], d[k] || {});
     } else S.data = base;
   };
   S.reset = function () { S.data = fresh(); S.save(); };
@@ -86,7 +87,14 @@
     const out = { newSpecies: [], newBadges: [], rankUp: null, usedShield: false, gainedShield: false, streak: 0, firstOfTide: false };
     const before = S.rank().index;
     for (const id in res.caught) { if (!d.guide[id]) out.newSpecies.push(PH.SPECIES_BY_ID[id]); d.guide[id] = (d.guide[id] || 0) + res.caught[id]; }
-    d.shine += res.shine; d.runs++;
+    d.shine += res.shine; d.bank += res.shine; d.runs++;
+    for (const k in res.xp) d.mastery[k] += res.xp[k];
+    if (res.mission) {
+      const m = (d.missions[res.mission] = d.missions[res.mission] || { stars: 0, best: 0 });
+      out.missionBest = res.shine > m.best; m.stars = Math.max(m.stars, res.stars); m.best = Math.max(m.best, res.shine);
+      if (Object.values(d.missions).filter((x) => x.stars > 0).length >= 3) award('call3', out.newBadges);
+      if (PH.MISSIONS.every((x) => (d.missions[x.id] || {}).stars === 3)) award('callAll', out.newBadges);
+    }
     if (!res.practice) {
       const rec = (d.days[day] = d.days[day] || {});
       out.firstOfTide = !rec[slot];
@@ -102,6 +110,7 @@
         st.best = Math.max(st.best, st.count);
       }
       d.lastRunAt = now; d.lastQuads = res.quads.slice();
+      if (res.gapsTotal && res.gapsDone / res.gapsTotal >= 0.75) { if (!rec.prime) { rec.prime = 1; d.primeDays++; S.emit('interdental.completed', { gaps: res.gapsDone, of: res.gapsTotal }); } award('prime', out.newBadges); if (d.primeDays >= 7) award('prime7', out.newBadges); }
       if (rec.am && rec.pm) award('both', out.newBadges);
       const h = new Date(now).getHours();
       if (h >= 4 && h < 7) award('early', out.newBadges);
@@ -124,17 +133,16 @@
     return out;
   };
 
-  S.recordPrime = function (gaps, caught, shine) {
-    const d = S.data, day = S.dayKey(S.now());
-    const out = { newSpecies: [], newBadges: [] };
-    const rec = (d.days[day] = d.days[day] || {});
-    if (!rec.prime) { rec.prime = 1; d.primeDays++; }
-    if (caught) { if (!d.guide.gapper) out.newSpecies.push(PH.SPECIES_BY_ID.gapper); d.guide.gapper = (d.guide.gapper || 0) + caught; }
-    d.shine += shine;
-    award('prime', out.newBadges);
-    if (d.primeDays >= 7) award('prime7', out.newBadges);
-    S.save();
-    S.emit('interdental.completed', { gaps, points: shine });
+  S.callOpen = (m) => !m.from.length || m.from.some((id) => (S.data.missions[id] || {}).stars > 0);
+  S.addCard = function (id) { if (S.data.deck.length >= PH.DECK_MAX) return false; S.data.deck.push(id); S.save(); S.emit('kit.card', { card: id }); return true; };
+  S.missionStars = () => Object.values(S.data.missions).reduce((n, m) => n + m.stars, 0);
+  S.masteryLevel = (id) => Math.floor(Math.sqrt(S.data.mastery[id] / 40));
+  S.upgrade = function (id) {
+    const d = S.data, lvl = d.kit[id], cost = PH.kitCost(lvl), out = [];
+    if (lvl >= PH.KIT_MAX || d.bank < cost) return null;
+    d.bank -= cost; d.kit[id] = lvl + 1;
+    if (d.kit[id] >= PH.KIT_MAX) award('kit5', out);
+    S.save(); S.emit('kit.upgraded', { item: id, level: d.kit[id] });
     return out;
   };
 

@@ -82,7 +82,17 @@
     if (id === 'stickler') for (const dx of [-0.55, 0, 0.5]) { ctx.beginPath(); ctx.ellipse(dx, 0.98 + Math.abs(Math.sin(t * 1.5 + dx * 4)) * 0.18, 0.2, 0.3, 0, 0, TAU); ctx.fill(); ctx.stroke(); }
     if (id === 'filmo') { ctx.beginPath(); ctx.moveTo(0, -0.95); ctx.quadraticCurveTo(0.05, -1.35, 0.32 + wob, -1.45); ctx.stroke(); ctx.beginPath(); ctx.arc(0.36 + wob, -1.48, 0.15, 0, TAU); ctx.fill(); ctx.stroke(); }
     if (id === 'glimmer') { ctx.beginPath(); ctx.moveTo(0, -0.95); ctx.lineTo(0, -1.3); ctx.stroke(); Art.sparkle(ctx, 0, -1.6, 0.34, t * 2, 1, C.blue); ctx.fillStyle = col; }
-    body(); ctx.fillStyle = col; ctx.fill(); ctx.strokeStyle = line; ctx.lineWidth = 0.1; ctx.stroke();
+    if (id === 'wirewalker') for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * 0.3, -0.9); ctx.quadraticCurveTo(s * 0.5, -1.5, s * 0.95, -1.45); ctx.stroke(); ctx.beginPath(); ctx.arc(s * 0.98, -1.45, 0.12, 0, TAU); ctx.fill(); ctx.stroke(); }
+    if (id === 'troll') for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(s * 0.95, -0.25, 0.3, 0.42, s * 0.5, 0, TAU); ctx.fill(); ctx.stroke(); }
+    body(); ctx.fillStyle = col; ctx.fill();
+    // stepped shading: a darker crescent low on the right, one glint high on the left
+    ctx.save(); body(); ctx.clip(); ctx.fillStyle = id === 'glimmer' || id === 'tot' || id === 'speckle' ? C.blue40 : C.blue; ctx.globalAlpha *= id === 'lurker' ? 0 : 0.2;
+    ctx.beginPath(); ctx.rect(-2, -2, 4, 4); ctx.ellipse(-0.3, -0.32, 1.0, 1.0, 0, 0, TAU); ctx.fill('evenodd'); ctx.restore();
+    ctx.fillStyle = C.white; ctx.globalAlpha *= 0.75; ctx.beginPath(); ctx.ellipse(-0.5, -0.56, 0.2, 0.11, -0.7, 0, TAU); ctx.fill(); ctx.globalAlpha = o.alpha != null ? o.alpha : 1;
+    if (o.rim) { ctx.save(); body(); ctx.clip(); ctx.fillStyle = C.white; ctx.globalAlpha *= 0.55 * o.rim.a; ctx.beginPath(); ctx.rect(-2, -2, 4, 4); ctx.ellipse(-o.rim.x * 0.3, -o.rim.y * 0.3, 1.0, 1.0, 0, 0, TAU); ctx.fill('evenodd'); ctx.restore(); }
+    body(); ctx.strokeStyle = line; ctx.lineWidth = 0.1; ctx.stroke();
+    if (id === 'wirewalker') { ctx.strokeStyle = C.blue; ctx.lineWidth = 0.09; for (const dy of [0.45, 0.68]) { ctx.beginPath(); ctx.moveTo(-0.75, dy); ctx.quadraticCurveTo(0, dy + 0.14, 0.75, dy); ctx.stroke(); } }
+    if (id === 'troll') { ctx.fillStyle = C.white; ctx.strokeStyle = line; ctx.lineWidth = 0.06; for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * 0.3, 0.52); ctx.lineTo(s * 0.2, 0.16); ctx.lineTo(s * 0.1, 0.52); ctx.closePath(); ctx.fill(); ctx.stroke(); } }
     // on-the-body bits
     if (id === 'imp') { ctx.fillStyle = C.white; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(Math.cos(i * 1.9) * 0.62, 0.42 + Math.sin(i * 2.7) * 0.3, 0.07, 0, TAU); ctx.fill(); } }
     if (id === 'speckle') { ctx.fillStyle = C.blue; for (const p of [[-0.55, 0.42], [0.5, 0.48], [0, 0.66]]) { ctx.beginPath(); ctx.arc(p[0], p[1], 0.06, 0, TAU); ctx.fill(); } }
@@ -93,7 +103,7 @@
     if (id === 'nightcap') { ctx.fillStyle = C.white; ctx.beginPath(); ctx.moveTo(-0.72, -0.62); ctx.quadraticCurveTo(0.1, -1.7, 1.05, -1.0 + wob * 2); ctx.quadraticCurveTo(0.5, -1.0, 0.72, -0.62); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = C.yellow; ctx.beginPath(); ctx.arc(1.08, -0.98 + wob * 2, 0.17, 0, TAU); ctx.fill(); ctx.stroke(); }
     // face
     const ex = id === 'gapper' ? 0.26 : 0.36, ey = id === 'mole' ? 0.04 : -0.12, er = id === 'speckle' ? 0.3 : 0.27;
-    const sleepy = id === 'yawnster' || o.asleep, ink = id === 'tot' ? C.grey : id === 'nightcap' || id === 'mole' || id === 'imp' ? C.white : C.blue;
+    const sleepy = id === 'yawnster' || o.asleep || o.stun, ink = id === 'tot' ? C.grey : id === 'nightcap' || id === 'mole' || id === 'imp' || id === 'lurker' ? C.white : C.blue;
     for (const s of [-1, 1]) {
       if (sleepy) { ctx.strokeStyle = C.blue; ctx.lineWidth = 0.1; ctx.beginPath(); ctx.arc(s * ex, ey, 0.2, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke(); continue; }
       ctx.fillStyle = C.white; ctx.strokeStyle = line; ctx.lineWidth = 0.06; ctx.beginPath(); ctx.arc(s * ex, ey, er, 0, TAU); ctx.fill(); ctx.stroke();
@@ -125,6 +135,8 @@
     ctx.beginPath(); ctx.moveTo(hx0 - 4, y - hh * 0.3); ctx.lineTo(hx0 + w * 0.12, y - hh * 0.5); ctx.lineTo(hx1 - hh * 0.5, y - hh * 0.5); ctx.arc(hx1 - hh * 0.5, y, hh * 0.5, -Math.PI / 2, Math.PI / 2); ctx.lineTo(hx0 + w * 0.12, y + hh * 0.5); ctx.lineTo(hx0 - 4, y + hh * 0.3); ctx.closePath(); ctx.fill();
     ctx.fillStyle = C.white; ctx.globalAlpha = 0.28; ctx.fillRect(hx0 + w * 0.12, y - hh * 0.18, hx1 - hx0 - w * 0.12 - hh * 0.5, hh * 0.36); ctx.globalAlpha = 1;
   };
+  // Swarm colours for a Curaprox Blue backdrop.
+  Art.onDark = (skin) => [C.white, C.sky, skin.colors[0] === C.blue ? C.blue20 : skin.colors[0]];
   // A Prime in world units, pointing along (dx,dy) with its tip at (x,y).
   Art.prime = function (ctx, x, y, dx, dy, len, color) {
     const bx = x - dx * len, by = y - dy * len;

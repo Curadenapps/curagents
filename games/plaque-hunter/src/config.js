@@ -1,12 +1,13 @@
 /* Plaque Hunter — content and tuning. Everything a designer would want to change lives here. */
 (function () {
   const PH = (window.PH = window.PH || {});
-  PH.VERSION = '0.1.0';
+  PH.VERSION = '0.2.0';
 
   // The CURAPROX palette, from the Curaprox Apps Design System (tokens.json). No other hue is used anywhere.
   PH.C = {
     blue: '#003DA5', blueDk: '#002E7D', blue80: '#3364B7', blue60: '#668BC9', blue40: '#99B1DB', blue20: '#CCD8ED',
     white: '#FFFFFF', bg: '#EDEDED', bg2: '#EAF0FA', grey: '#706F6F', soft: '#9D9D9C', rule: '#D8DFED',
+    ink: '#0A1F44', ink2: '#132B57', // the system's dark surfaces: the world inside the mouth
     sky: '#8BB8E8', yellow: '#FCE300', orange: '#FF8200', orchid: '#F277C6', cerise: '#E31C79',
     gum: '#F9BBE3', gumLight: '#FCDDF1', // Orchid Pink tints (50% and 25% on white)
   };
@@ -27,7 +28,10 @@
     { id: 'imp', name: 'Sugar Imp', color: '#E31C79', rarity: 'Uncommon', where: 'After sugar rain', line: 'Arrives with the sweets and runs laps, leaving film behind it.' },
     { id: 'yawnster', name: 'Yawnster', color: '#8BB8E8', rarity: 'Uncommon', where: 'Morning tide only', line: 'Moved in overnight. Still half asleep when the morning tide comes.' },
     { id: 'nightcap', name: 'Nightcap', color: '#3364B7', rarity: 'Uncommon', where: 'Evening tide only', line: 'Turns up at bedtime hoping everyone is too tired to hunt.' },
-    { id: 'gapper', name: 'Gapper', color: '#99B1DB', rarity: 'Uncommon', where: 'Between teeth, in Prime time', line: 'Lives where the 5,460 cannot reach. Only a Prime gets through.' },
+    { id: 'gapper', name: 'Gapper', color: '#99B1DB', rarity: 'Uncommon', where: 'Between two teeth', line: 'Lives where the 5,460 cannot reach. Only a Prime gets through.' },
+    { id: 'wirewalker', name: 'Wire Walker', color: '#8BB8E8', rarity: 'Uncommon', where: 'On braces', line: 'Treats a bracket like a balcony. Hold still and the swarm focuses it out.' },
+    { id: 'troll', name: 'Bridge Troll', color: '#668BC9', rarity: 'Rare', where: 'Under a bridge', line: 'Lives under the bridge and charges no toll. A Prime slid underneath moves it on.' },
+    { id: 'lurker', name: 'Pit Lurker', color: '#003DA5', rarity: 'Special', where: 'In a hole, after a check-up', line: 'Sits in a hole and feeds the film around it. It only leaves when the hole is fixed.' },
     { id: 'glimmer', name: 'Glimmer', color: '#FFFFFF', rarity: 'Rare', where: 'On a 3-day streak', line: 'Only shows itself to hunters who keep coming back.' },
     { id: 'goldie', name: 'Goldie', color: '#FCE300', rarity: 'Rare', where: 'On a 7-day streak', line: 'A whole week of tides. Goldie is impressed, and caught.' },
     { id: 'tot', name: 'Tartar Tot', color: '#EDEDED', rarity: 'Special', where: 'Stays put until a check-up', line: 'Hardened and going nowhere. The 5,460 cannot move it. Your dental pro can.' },
@@ -49,19 +53,16 @@
     { id: 'ink', name: 'Ink', colors: ['#0A1F44', '#003DA5', '#8BB8E8'], handle: '#0A1F44', rank: 5 },
   ];
 
-  // Interdental "Primes": three sizes, told apart by number and by a palette colour (`ink` is the label colour on it).
-  // Placeholder coding: swap for the real CPS prime sizes and colours when the plan link is built.
-  PH.PRIMES = [
-    { id: '06', color: '#8BB8E8', ink: '#003DA5' }, { id: '07', color: '#E31C79', ink: '#FFFFFF' }, { id: '09', color: '#FF8200', ink: '#003DA5' },
-  ];
-
   PH.BADGES = [
     { id: 'first', name: 'First tide', how: 'Finish your first hunt' },
     { id: 'both', name: 'Both tides', how: 'Hunt morning and evening on the same day' },
     { id: 'soft', name: 'Soft touch', how: 'Keep the swarm together 90% of a hunt' },
     { id: 'gleam', name: 'Full gleam', how: 'Finish a hunt 98% clean' },
-    { id: 'prime', name: 'Prime time', how: 'Finish a Prime time round' },
-    { id: 'prime7', name: 'Gap keeper', how: 'Prime time on 7 different days' },
+    { id: 'prime', name: 'Gap minder', how: 'Clear three quarters of the gaps in a tide hunt' },
+    { id: 'prime7', name: 'Gap keeper', how: 'Do that on 7 different days' },
+    { id: 'call3', name: 'House calls', how: 'Earn a star in 3 house calls' },
+    { id: 'callAll', name: 'On call', how: 'Three stars in every house call' },
+    { id: 'kit5', name: 'Fully kitted', how: 'Take one piece of kit to level 5' },
     { id: 's3', name: '3-day streak', how: 'Hunt 3 days in a row' },
     { id: 's7', name: 'One full week', how: 'Hunt 7 days in a row' },
     { id: 's14', name: 'Fortnight', how: 'Hunt 14 days in a row' },
@@ -80,12 +81,51 @@
     'Small circles reach more than long scrubs.',
     'Outside, inside, chewing. Same order every time, so nothing gets skipped.',
     'The back pearls are the easiest to forget. Molar Moles count on it.',
-    'Gappers only move for a Prime. Once a day is plenty.',
+    'Gappers only move for a Prime. In and out, gently, once a day.',
+    'Hold still on a tricky spot and the swarm tightens to a single tuft.',
     'A brush gets tired after about three months. So does a swarm.',
   ];
 
+  // Kit you carry, as cards. A hand of three is dealt at every pass; playing one costs a charge.
+  // Charges come back at each pass and with every third catch. Win a hunt with two stars to add a card to the deck.
+  PH.CARDS = [
+    { id: 'rinse', name: 'Rinse blast', product: 'Mouthwash', icon: 'drops', text: 'Tap a spot. The splash loosens sticky film and dazes Plaqlings.' },
+    { id: 'pulse', name: 'Sonic pulse', product: 'Hydrosonic', icon: 'waves', text: 'A pulse rolls across the whole side and loosens sticky film.' },
+    { id: 'foam', name: 'Foam up', product: 'Toothpaste', icon: 'sparkles', text: 'For 6 seconds the swarm lifts film twice as fast.' },
+    { id: 'single', name: 'Single tuft', product: 'CS single', icon: 'cross', text: 'For 6 seconds the swarm stays focused while it moves.' },
+    { id: 'primes', name: 'Prime pack', product: 'CPS prime', icon: 'sides', text: 'For 8 seconds a gap clears in one gentle stroke.' },
+    { id: 'soft', name: 'Soft guard', product: 'CS 5460', icon: 'feather', text: 'For 8 seconds the swarm cannot scatter and sore gums stay calm.' },
+  ];
+  PH.CARDS_BY_ID = Object.fromEntries(PH.CARDS.map((c) => [c.id, c]));
+  PH.START_DECK = ['rinse', 'rinse', 'pulse', 'foam', 'single'];
+  PH.DECK_MAX = 12;
+
+  // Standing upgrades, bought with shine. Levels 0 to 5.
+  PH.KIT = [
+    { id: 'fil', name: 'CS 5460 filaments', what: 'More of the swarm lifting film at once.' },
+    { id: 'soft', name: 'Soft touch', what: 'The swarm holds together at higher speed.' },
+    { id: 'glide', name: 'CPS prime glide', what: 'A Prime clears a gap in fewer strokes.' },
+    { id: 'focus', name: 'CS single focus', what: 'Hold still and the swarm tightens to a single tuft sooner.' },
+  ];
+  PH.KIT_MAX = 5;
+  PH.kitCost = (lvl) => 250 * (lvl + 1) * (lvl + 1);
+  PH.MASTERY = [{ id: 'brush', name: 'Brushing' }, { id: 'idb', name: 'Interdental' }, { id: 'tools', name: 'Kit work' }];
+
+  // House calls: other mouths, each with its own trouble, laid out as a route. A call opens once any call it leads `from` has a star.
+  // feats are per quadrant (0 top right, 1 top left, 2 bottom left, 3 bottom right); 'all' applies to every side.
+  PH.MISSIONS = [
+    { id: 'rounds', name: 'First rounds', who: 'A quiet mouth', blurb: 'Plain teeth and fresh film. Learn the swarm, the gaps and the focus.', zones: [0, 3], feats: {}, row: 0, from: [] },
+    { id: 'sam', name: 'Sweet tooth', who: 'Sam', blurb: 'Sugar rain on every side, and Sugar Imps running laps.', zones: [1, 2], feats: { all: ['sugar'] }, row: 1, from: ['rounds'] },
+    { id: 'mila', name: 'Braces', who: 'Mila', blurb: 'Film hides round every bracket. Hold still there and the swarm focuses.', zones: [0, 1], feats: { 0: ['braces'], 1: ['braces'] }, row: 1, from: ['rounds'] },
+    { id: 'noor', name: 'Sore gums', who: 'Noor', blurb: 'A tender gumline. Go slowly there, or it flinches.', zones: [3, 2], feats: { 3: ['sore', 'sore'], 2: ['sore', 'sore'] }, row: 2, from: ['sam', 'mila'] },
+    { id: 'otto', name: 'The bridge', who: 'Otto', blurb: 'A bridge and a crown. Something lives under the bridge.', zones: [0, 3], feats: { 0: ['bridge'], 3: ['crown', 'bridge'] }, row: 2, from: ['sam', 'mila'] },
+    { id: 'jo', name: 'The hole', who: 'Jo', blurb: 'A hole keeps feeding film. Clean round it. Fixing it is a check-up job.', zones: [2, 3], feats: { 2: ['hole'], 3: ['hole', 'sore'] }, row: 3, from: ['noor', 'otto'] },
+    { id: 'ravi', name: 'Wisdom', who: 'Ravi', blurb: 'Half-hidden back teeth. Only a focused swarm gets in.', zones: [1, 2], feats: { 1: ['wisdom'], 2: ['wisdom', 'crown'] }, row: 3, from: ['noor', 'otto'] },
+    { id: 'house', name: 'Full house', who: 'Everything at once', blurb: 'Braces, a bridge, a hole and sore gums, on all four sides.', zones: [0, 1, 2, 3], feats: { 0: ['braces'], 1: ['bridge', 'sore'], 2: ['hole', 'wisdom'], 3: ['crown', 'sore'] }, row: 4, from: ['jo', 'ravi'] },
+  ];
+
   PH.TUNE = {
-    zoneSecs: 30, shortZoneSecs: 10, swarm: 420,
+    zoneSecs: 30, shortZoneSecs: 12, swarm: 420,
     vGentle: 24, vFast: 60,          // leader speed (world units/s) where the swarm starts and finishes scattering
     autoAfter: 1.6,                  // seconds without touch before Fila leads
     autoPower: 0.6, autoPowerEasy: 0.95,

@@ -50,14 +50,11 @@
     <footer class="home-foot">
       <div class="week" id="week" aria-label="The last seven days"></div>
       <button class="btn lg block" id="btn-hunt" type="button"></button>
-      <div class="row">
-        <button class="btn ghost" id="btn-practice" type="button">Practice run</button>
-        <button class="btn ghost" id="btn-prime" type="button">Prime time</button>
-      </div>
+      <button class="btn ghost block" id="btn-calls" type="button">House calls</button>
     </footer>
     <nav class="tabs" aria-label="Menu">
       <button type="button" data-panel="guide"><i data-ic="book"></i><span>Guide</span></button>
-      <button type="button" data-panel="gear"><i data-ic="brush"></i><span>Gear</span></button>
+      <button type="button" data-panel="gear"><i data-ic="brush"></i><span>Kit</span></button>
       <button type="button" data-panel="journal"><i data-ic="calendar"></i><span>Journal</span></button>
       <button type="button" data-panel="link"><i data-ic="link"></i><span>App link</span></button>
       <button type="button" data-panel="settings"><i data-ic="settings"></i><span>Settings</span></button>
@@ -75,33 +72,17 @@
         <div class="jar" id="jar" aria-label="Plaqlings caught"><i data-ic="bug"></i><b id="jar-n">0</b></div>
       </div>
       <div class="clock">
-        <div class="track"><i id="clock-fill"></i><span></span><span></span><span></span></div>
+        <div class="track"><i id="clock-fill"></i><div id="clock-marks"></div></div>
         <b id="clock-text">2:00</b>
       </div>
     </div>
     <div class="hud-bar bot">
-      <div class="together">
-        <span class="label grey">Together</span>
-        <div class="track"><i id="tog-fill"></i></div>
+      <div class="meters">
+        <div class="together"><span class="label">Together</span><div class="track"><i id="tog-fill"></i></div></div>
+        <div class="kv"><span class="label">Gaps</span><b id="gaps-n">0 of 0</b></div>
+        <div class="kv"><span class="label">Charge</span><span class="charges" id="charges"></span></div>
       </div>
-      <button class="hydro" id="btn-hydro" type="button" disabled aria-label="Hydro wave"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="ring-bg"/><circle cx="22" cy="22" r="19" class="ring" id="hydro-ring"/></svg><span>Hydro</span></button>
-    </div>
-  </section>
-
-  <section id="primehud" class="screen" hidden>
-    <div class="hud-bar top">
-      <div class="hud-top">
-        <button class="round" id="btn-prime-quit" type="button" aria-label="Leave Prime time"><i data-ic="close"></i></button>
-        <div class="hud-zone">
-          <h2>Prime time</h2>
-          <p class="lede-sm" id="prime-count">0 of 8 gaps</p>
-        </div>
-        <div class="jar"><i data-ic="bug"></i><b id="prime-jar">0</b></div>
-      </div>
-    </div>
-    <div class="hud-bar bot prime-bot">
-      <p class="lede-sm" id="prime-hint"></p>
-      <div class="quiver" id="quiver"></div>
+      <div class="hand" id="hand" aria-label="Your kit cards"></div>
     </div>
   </section>
 
@@ -135,6 +116,7 @@
 <script src="src/audio.js"></script>
 <script src="src/world.js"></script>
 <script src="src/art.js"></script>
+<script src="src/strip.js"></script>
 <script src="src/hunt.js"></script>
 <script src="src/ui.js"></script>
 <script src="src/main.js"></script>
