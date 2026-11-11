@@ -85,8 +85,8 @@ is expected to go within about six months, so from now on:
 | Feedback QA report | On request | **New, weekly** (4 Nov): posts on its own when there's enough feedback | PC task "Feedback QA report (Curaden)", Fri 10:40 |
 | App Support | — | **New** (10 Nov): answers form submissions on its own, hourly in work hours; bugs and gaps to Jira. Split by owner: Sean's Routine (BOB, Mon–Fri, covers Fabian on Fridays and when his is down) + Fabian's Routine on his own account (the rest, Mon–Thu) | Routine "App Support (Curaden)" `trig_01NzNgUy17FxJiHFc8otT4oS`, created 10 Nov |
 | Roadmap dashboard refresh | Personal PC, 09:15 | **On request** (Sean, 23 Oct): switch its schedule off and run it on click | — |
-| Boom Boom queued | Personal PC, 14:00 | **Retire**: the Webex keep-alive posts queued pings now (28 Oct) | — |
-| Webex keep-alive | Personal PC, hourly 07–20 | **Every 2 hours**, weekdays 07:05–17:05 (28 Oct). It runs in the desktop app's built-in browser, a separate browser from Sean's Chrome, so it no longer knocks his own Webex tab offline. It keeps the sign-in warm, tells Sean once when Webex is signed out, and posts a queued Boom Boom ping | PC task "Webex keep-alive (Curaden)", `5 7-17/2 * * 1-5` |
+| Boom Boom queued | Personal PC, 14:00 | **Retire**: the next Webex run (Webex Sweep, or the next Boom Boom) posts a queued ping (11 Nov) | — |
+| Webex keep-alive | Personal PC, hourly 07–20 | **Retire** (Sean, 11 Nov): it didn't keep Webex signed in. Every Webex run checks the sign-in itself and tells Sean once (see "Webex sign-in" below) | — (switch off the Personal task) |
 | Asana ↔ Notion sync | Paused | **Retire**: Webex Sweep now pushes approved inbox rows to Asana; running both would duplicate tasks | — |
 | App team weekly digest | Personal Routine, disabled | **Delete**: replaced by the team update | — |
 | Everything "On request" | — | Stays on request, run from whichever account Sean is in | — |
@@ -96,7 +96,6 @@ is expected to go within about six months, so from now on:
 | Agent | Where | Started by | Notes |
 |-------|-------|------------|-------|
 | `boom-boom-derek` | **PC** | Desktop app scheduled task "Boom Boom Derek" (weekdays 08:45 Zurich); "boom boom" any time | Posts to the common chat (QA space) for the Phinamic team, or Curaden / Phinamic for Derek-only items. A ping that can't go out (or a cloud "boom boom") is queued on its Notion page; the next Webex keep-alive posts it |
-| `webex-keepalive` | **PC** | Desktop app scheduled task "Webex keep-alive" (weekdays 07:05, then every 2 hours to 17:05) | Keeps Webex signed in in the built-in browser, tells Sean when it isn't, posts the Boom Boom page's queued ping. One run-log row per run |
 | `announcements` (post) | **PC** | Sean's "post it" | Posting stays behind Sean's approval of each draft |
 | `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | The routine `trig_01Pi2NPoRWRP6MStWHVzzkDm` named in the spec no longer appears in the Routines list: recreate it or draft on "team update" |
 | `feedback-qa` (report) | **PC** | Desktop app scheduled task "Feedback QA report" (Fridays 10:40 Zurich); "send QA report" any time | Posts the PDF to the Webex QA space on its own when the rubric's threshold is met; below it, logs `no-op` |
@@ -192,7 +191,6 @@ Cloud Routine prompts take the same `Account:` first line.
 | Scheduled task | When (Zurich) | `{name}` |
 |----------------|---------------|----------|
 | Boom Boom Derek | Weekdays 08:45 | Boom Boom Derek |
-| Webex keep-alive | Weekdays 07:05, then every 2 hours to 17:05 | Webex keep-alive |
 | Webex Sweep | Weekdays 11:40 and 16:40 | Webex Sweep |
 | Roadmap watch | Mondays 08:00 | Roadmap watch |
 | Feedback QA report | Fridays 10:40 | Feedback QA report |
@@ -211,34 +209,26 @@ Curaden / Phinamic space and the team's meetings in Webex web, and post today's 
 the desktop app's built-in browser with `scripts/webex-post.js` if the rules say so. If you can't post
 after the skill's retries, log it on the page and in the run log.
 
-### Webex keep-alive
+### Webex sign-in (every Webex run)
 
-Steps that ran on the Personal PC are archived in `pc-tasks/webex-keepalive/SKILL.md`;
-this section is what runs now. Quick and quiet: it runs every 2 hours.
+There is no keep-alive task any more (retired 11 Nov; the old one is archived in
+`pc-tasks/webex-keepalive/`). Every PC run that uses Webex (Boom Boom Derek, Webex
+Sweep, Roadmap watch, Feedback QA report, manual "post it") does this first:
 
-1. Open Curaden / Phinamic in the desktop app's built-in browser (`preview_start`,
-   or `navigate` to reload if the pane is open; `skills/webex-web/SKILL.md`). No
-   built-in browser: log `failed` and stop (never fall back to Chrome here).
-2. Signed in or out: the sign-in check in the archived steps (step 2). Never type
+1. Open the space in the desktop app's built-in browser (`skills/webex-web/SKILL.md`)
+   and check the sign-in (signed-in markers, or the sign-in page). Never type
    credentials or click sign-in, cookie or consent buttons.
-3. **Signed out:** tell Sean (`PushNotification`: "Webex signed out in Claude's
-   built-in browser. Open Claude desktop, Ctrl+Shift+B, sign in to web.webex.com.")
-   unless a keep-alive row in the Agent run log from the last 4 hours already says
-   "signed out". Log `partial` with "signed out", stop.
-4. **Signed in:** open the Boom Boom Derek page. No "📤 Queued ping", or a Boom Boom
-   message already posted today (ping history): log `ok` ("kept alive") and stop.
-   Otherwise follow "Workflow" step 7 of `agents/boom-boom-derek.md`: check the queued
-   ping against the space (anything already answered there gets dropped; if the team
-   replied in a way that changes it, leave it queued and tell Sean), post it in the
-   space the queued section names, record it in the ping history and delete the
-   queued section. A queued ping from an earlier day is stale: delete it and note it.
-   Old local `.boom-boom-derek/outbox/` files: don't post from them; move today's onto
-   the page as `agents/boom-boom-derek.md` step 7.4 says. The space always comes from
-   the spec's "Channel" rule (common chat by default), never from an old prompt.
-5. **Run log, every run:** one row, Agent `webex-keepalive`, Where `PC`, Outcome `ok`
-   ("signed in, kept alive" or "signed in, queued ping posted {HH:MM}"), `partial`
-   ("signed out") or `failed` (no built-in browser). The run-log check uses these rows
-   to see whether Webex was signed in before Boom Boom and Webex Sweep ran.
+2. **Signed out:** try Claude in Chrome (the skill's fallback). Neither works: tell
+   Sean once (`PushNotification`: "Webex signed out in Claude's built-in browser.
+   Open Claude desktop, Ctrl+Shift+B, sign in to web.webex.com.") unless a run-log row
+   from the last 4 hours already says "Webex signed out"; put "Webex signed out" in
+   this run's Error; queue what couldn't be posted the way the agent's spec says.
+3. **Signed in and the Boom Boom Derek page has a "📤 Queued ping"** from today with no
+   Boom Boom message posted today: post it first, per `agents/boom-boom-derek.md`
+   step 7 (check it against the space; anything answered gets dropped; the space
+   comes from the spec's "Channel" rule), record it and delete the queued section. A
+   queued ping from an earlier day is stale: delete it and note it. Never post from
+   old local `.boom-boom-derek/outbox/` files; move today's onto the page.
 
 ### Manual PC runs
 

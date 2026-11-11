@@ -123,13 +123,12 @@ once in its built-in browser (Ctrl+Shift+B shows the pane; the sign-in persists)
 
 | Task name | When | `{name}` |
 |-----------|-----------------|----------|
-| Webex keep-alive (Curaden) | 07:05, then every 2 hours to 17:05 (`5 7-17/2 * * 1-5`) | Webex keep-alive |
 | Boom Boom Derek (Curaden) | 08:45 | Boom Boom Derek |
 | Webex Sweep (Curaden) | 11:40 and 16:40 | Webex Sweep |
 | Roadmap watch (Curaden) | Mondays 08:00 | Roadmap watch |
 | Feedback QA report (Curaden) | Fridays 10:40 | Feedback QA report |
 
-Not moved: Boom Boom queued (the keep-alive posts queued pings) and the Asana ↔ Notion sync (retired), Roadmap
+Not moved: Webex keep-alive (retired 11 Nov; every Webex run checks the sign-in), Boom Boom queued (the next Webex run posts queued pings) and the Asana ↔ Notion sync (retired), Roadmap
 dashboard refresh (on click), the old App team digest (delete).
 
 ## Jira sync steps

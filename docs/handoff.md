@@ -21,6 +21,16 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 11 Nov
+
+- **Jira works again** (BA visible, no reconnect needed). BA-12 and BA-263 are still
+  To Do: the BA workflow only allows To Do → In Progress, so Sean or Derek closes them.
+- **Webex keep-alive retired** (Sean): every Webex run checks the sign-in itself, tells
+  Sean once when signed out and posts a queued Boom Boom ping (`RUNTIME.md` "Webex
+  sign-in"). Switch off the Personal keep-alive task.
+- **Migration started.** App Support already runs on Curaden (10 Nov). Next: prompts 2
+  and 3, then Phase 3 one switch a day (`docs/migration-to-curaden.md`).
+
 ## Synced 10 Nov
 
 - **Jira guard** is now a shared rule in `dream.md` §2: 0 issues for BA or a 404 on a

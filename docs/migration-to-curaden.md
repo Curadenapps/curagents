@@ -54,17 +54,21 @@ curagents folder):
    Webex once in the app's **built-in browser** (Ctrl+Shift+B; it persists).
 3. **Routines:** create the four from `docs/curaden-routines.md` (Truth Catcher
    scan, Roadmap ← Jira sync, Agent run log check, Team update draft).
-4. **PC tasks:** create the five from `docs/curaden-routines.md` (Webex keep-alive
-   every 2 hours 07:05–17:05, Boom Boom Derek 08:45, Webex Sweep 11:40 + 16:40,
+4. **PC tasks:** create the four from `docs/curaden-routines.md` (Boom Boom Derek 08:45, Webex Sweep 11:40 + 16:40,
    Roadmap watch Mon 08:00, Feedback QA report Fri 10:40), names ending
    "(Curaden)".
 5. **Registry:** for each one, set **Started by** to its exact Curaden name.
 
 ## Phase 3: switch over, one at a time
 
-For each item, in this order (least risky first): Roadmap watch → Agent run log
-check → Team update draft → Jira sync → Truth Catcher → Webex keep-alive → Boom
-Boom Derek → Webex Sweep.
+Status 11 Nov: Phase 1 done (#44). App Support already runs on Curaden (created
+10 Nov). Everything else still runs on Personal. Started 11 Nov (Sean): run prompts
+2 and 3 today, then switch in this order (least risky first), one a day:
+
+Agent run log check → Team update draft (new, nothing to switch off) → Jira sync →
+Truth Catcher → Roadmap watch → Boom Boom Derek → Webex Sweep and Feedback QA report
+(new on Curaden, nothing to switch off). The Personal Webex keep-alive is retired:
+just switch it off.
 
 1. Flip **Account** to `Curaden` on its registry row.
 2. Wait for its next run: one run-log row from Curaden, and a `no-op` "switch:
