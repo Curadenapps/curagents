@@ -23,7 +23,7 @@ The following skills are available and will auto-load based on trigger phrases:
 
 - **`skills/feedback-qa/SKILL.md`** — Feedback QA: Notion inbox → checks → PDF report to the Webex QA space (+ Confluence for full UATs)
 - **`skills/curaden-communications/SKILL.md`** — RevolveNote sync, Jira-Notion BOB sync, Meeting Notes (Webex → Notion). The BOB weekly broadcast moved to `agents/announcements.md`
-- **`skills/market-rollout/SKILL.md`** — Market rollout (USA, CH, UAE, Japan, Italy): audiences, onboarding plans, Admin Console super users, training modules, partner prep and follow-ups. Drafts and tracks in Notion; Sean sends, approves and grants
+- **`skills/market-rollout/SKILL.md`** — Market rollout (UAE first, Apr 2027; then Italy, Slovenia, South Africa, USA, Japan; board BOB Market Rollouts): audiences, onboarding plans, Admin Console super users, training modules, partner prep and follow-ups. Drafts and tracks in Notion; Sean sends, approves and grants
 - **`skills/webex-web/SKILL.md`** — The only way to work in Webex: post (with @mentions, files), read spaces, read meetings (AI summary, action items, transcript, recording). Webex web on Sean's sign-in in the Claude desktop app's built-in browser (Claude in Chrome as fallback); no bot tokens. Load it before any Webex step
 
 Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own reference files as needed.
@@ -55,7 +55,7 @@ rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 - [`agents/feedback-qa.md`](agents/feedback-qa.md) — Feedback QA: reads the Notion inbox, posts the PDF report to the Webex QA space on its own every Friday when there's enough; Confluence for full UATs
 - [`agents/announcements.md`](agents/announcements.md) — Team update: week / two weeks / month across every tool → Notion draft → Webex after approval
 - [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) — Boom Boom Derek: Truth Catcher for the Phinamic team (Derek La and Khanh); autonomous, funny-but-clear pings in the Webex common chat (QA space) or "Curaden / Phinamic", details on its Notion page
-- [`agents/market-rollout.md`](agents/market-rollout.md) — Market Rollout: Sean's rollout partner for BOB (then the Curaprox app) in the USA, Switzerland, UAE, Japan and Italy; onboarding tracker, super users, training modules, HQ ↔ partner rhythm. Manual only
+- [`agents/market-rollout.md`](agents/market-rollout.md) — Market Rollout: Sean's rollout partner for BOB (then the Curaprox app) in the rollout markets; owns the BOB Market Rollouts board's structure (asana-maintenance does routine moves); onboarding tracker, super users, training modules, HQ ↔ partner rhythm. Manual only
 - [`agents/app-support.md`](agents/app-support.md) — App Support: answers "App Requests & Feedback" form submissions on the App Tasks board on its own, hourly in work hours, from the product FAQs and `docs/app-support-faq.md` (signed as automated, @mentioning the submitter's guest follower); owners (BOB → Sean, rest → Fabian) get the changes and anything it can't answer; bugs and product gaps go to Jira via In Development. Fabian's setup: [`docs/app-support-quickstart.md`](docs/app-support-quickstart.md). Mailboxes support@ / info@bobscore.com planned, pending an IT-approved mail connector
 - [`agents/webex-sweep.md`](agents/webex-sweep.md) — Webex Sweep: reads the watched Webex spaces and meeting action items; new asks into the Notion inbox, updates onto Asana tasks, approved rows to Asana; posts one "logged" note per space in Webex
 

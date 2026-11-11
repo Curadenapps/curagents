@@ -19,7 +19,7 @@ trigger:
       mode: poll
       max_events: 100
   - type: agent_call
-    from: ["bob-brand-asset", "curaden-orchestrator"]
+    from: ["bob-brand-asset", "curaden-orchestrator", "market-rollout"]
     actions: ["post_audit_comment", "move_task", "post_update_snippet", "create_task"]
   - type: manual
     phrases:
@@ -49,6 +49,12 @@ responsibilities:
 
 This agent also handles comment-write requests from other agents (Brand Asset
 audit trail, Orchestrator summaries).
+
+**BOB Market Rollouts board (`1220436356920176`).** Routine hygiene only: move a
+market card to the next stage column on a directive, set the Status field, post
+update snippets and audit comments, flag cards with no owner or overdue milestones.
+Cards, milestones, dates, followers, dependencies and descriptions belong to
+`market-rollout` (its spec, Rules → Board upkeep); hand those requests to it.
 
 ---
 

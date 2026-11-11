@@ -46,7 +46,7 @@ memory:
     - "notion: rows in Training modules (Status Draft or HQ check only) and their pages"
     - "notion: rows in Onboarding tracker"
     - "notion: draft pages under Market Rollout Academy 4087e8aabbb481df9fa3c1662efbbe6a (agendas, follow-ups, message drafts)"
-    - "asana: only through asana-maintenance, only after Sean says go"
+    - "asana: board BOB Market Rollouts 1220436356920176 only, structural edits only, only after Sean says go (see Rules, Board upkeep)"
 idempotency_key: "market-rollout:{workflow}:{market}:{YYYY-MM-DD}"
 dry_run: false  # writes only drafts and tracker rows in Notion; nothing leaves Curaden without Sean
 output:
@@ -123,8 +123,10 @@ Each workflow is in the skill with its steps. In short:
 - **Sean sends, approves and grants.** The agent never sends an email or a Webex
   message, never posts, never creates accounts or enters credentials, and never
   grants Admin Console access. It drafts the request; Sean or Phinamic acts.
-- **Asana only through asana-maintenance, only after Sean says go.** Proposed tasks
-  are listed in the result first. New tasks go as subtasks of the market's stage milestone
+- **Asana only after Sean says go.** Proposed changes are listed in the result first.
+  On the BOB Market Rollouts board this agent makes the structural edits itself (see
+  Board upkeep); routine moves and comments go to asana-maintenance. Anything outside
+  that board goes through asana-maintenance. New tasks go as subtasks of the market's stage milestone
   on the BOB Market Rollouts board (never the BOB App project), assigned to Sean (or Blanca, only if Sean names her for that task).
 - **Modules stop at `HQ check`.** Only Sean (or the owner he names) moves a module to
   `Ready`. A module with clinical or efficacy wording gets **Clinical wording** ticked
@@ -143,6 +145,19 @@ Each workflow is in the skill with its steps. In short:
   and never passwords, personal phone numbers or patient data.
 - **Unknowns stay visible.** Anything not confirmed is written as `[confirm: …]`, in
   the market page's style, and listed in `for_sean`.
+
+- **Board upkeep (BOB Market Rollouts `1220436356920176`), split with asana-maintenance.**
+
+  | This agent (after Sean's go) | asana-maintenance (on a directive) |
+  |---|---|
+  | New market card (name = market only, Country field, due = launch), parked cards | Move a card to the next stage column when Sean or this agent says the stage is done |
+  | Stage milestones: Stage 0–4, "BOB rollout [market] finished" (also in the Rollout milestones column, due ≈ launch + 90 days), Stage 6 Aftercare | Set the Status field (In Process / Action needed on us / in another team) |
+  | Due dates, followers, dependencies to other boards (referral, Shopify), card descriptions | Update snippets and audit comments on cards |
+  | Keep the card and the Notion market page / Market rollout system in step | Flag a card with no owner or an overdue milestone |
+
+  Asana quirk: attaching a subtask puts it at the top, and setting the same parent
+  again does nothing. To fix the order: detach (`parent: null`), then attach from the
+  last stage to the first, one call per stage. Never put rollout tasks in BOB App.
 
 ---
 
