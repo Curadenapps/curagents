@@ -128,7 +128,12 @@ Both can run App Support from their own Claude (setup:
 | **Fabian Jöhl** | Everything else (Curaprox app, iTOP, Admin Panel, HubSpot, vouchers, general) | `1196321462158324` | Fabian (the system named) | Mon–Thu |
 | **Janine** (mail review, added 12 Nov) | Not a form owner. Reviews and sends the mail drafts from info@bobscore.com, support@bobscore.com and curaprox.app@curaden.com ("Mailboxes" below) | [look up in Asana by name] | — | [confirm] |
 
-Fabian and Janine work alongside each other: Fabian keeps the non-BOB form requests, his Routine and voice file; Janine only adds the mailbox review. Nothing of Fabian's is reassigned.
+Fabian and Janine work alongside each other (Sean, 12 Nov): **Fabian handles the main
+(form) requests** that aren't BOB, with his Routine and voice file as they are;
+**Janine handles the mailbox requests**. Once Janine has done her **Super User
+training** (Admin Console super-user path, `skills/market-rollout/references/onboarding-path.md`),
+she and Fabian split the non-BOB form tasks too; until then nothing of Fabian's is
+reassigned. When the training is done, Sean changes this paragraph by PR with the split.
 
 - **Same agent, the owner's voice** (Sean, 10 Nov 2026). Both Routines run this one
   spec with the same mechanisms. Each writes in the voice of the account it posts
