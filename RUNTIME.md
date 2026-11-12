@@ -111,7 +111,7 @@ personal projects stay on Personal; curagents and its automations move.
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
 | `roadmap-watch` | Cloud + courier | Claude Routine "Roadmap watch (Curaden)" (Mon 07:40 Zurich); "roadmap watch" any time | Writes the report page and puts the App Team summary in the outbox |
 | Webex courier | **PC (Personal)** | Desktop app scheduled task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 Zurich | The only scheduled PC task: sign-in check, outbox, Webex Sweep ("PC runs" below) |
-| `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and meeting action items; Notion inbox rows, Asana comments, its "Logged from this chat" note |
+| `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and meeting action items; hidden Notion log rows, triage tasks in BOB App › Webex inbox, Asana comments, a "New in Jira" note in the common chat |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
@@ -289,8 +289,9 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
    - After a Boom Boom post, add "posted {HH:MM} in {space}" to the ping history on
      Derek's page. Never post from old local `.boom-boom-derek/outbox/` files.
 3. **Webex Sweep.** Run `agents/webex-sweep.md` as its spec says (window from its last
-   run-log row; inbox rows, Asana comments, approved rows to Asana, its "Logged from
-   this chat" note). A space it can't read → `partial` with the space name.
+   run-log row; hidden Notion log rows, triage tasks in BOB App › Webex inbox, Asana
+   comments, its "New in Jira" note in the common chat). A space it can't read →
+   `partial` with the space name.
 4. **Run log.** One row: Agent `webex-courier` (or `other`), Where `PC`, Account
    `Personal`, Outcome `posted` (anything went out) / `ok` / `partial` / `failed`,
    Summary "{n} posted, {m} held/expired; sweep: {sweep summary}". Webex Sweep keeps

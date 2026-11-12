@@ -94,7 +94,7 @@ the base64 of `https://conv-a.wbx2.com/conversation/api/v1/conversations/{id}`.
 |-------|----|---------|
 | Curaden / Phinamic | `136d9ce0-ab41-11f0-85e5-53eb7188e8c6` | boom-boom-derek (Derek-only pings), announcements (tests) |
 | The common chat: "Curaden / Phinamic — BOB App & Admin" (Webex's name; older specs call it the QA space) | `644fd150-f1e6-11f0-886e-874a9ad69e32` | boom-boom-derek (team pings, from 23 Oct), feedback-qa reports |
-| App Team | look up by exact name | announcements (weekly, monthly) |
+| App Team | `67b0cb50-ee87-11ef-9c93-5b02170b5869` (or by exact name) | announcements (weekly, monthly), webex-sweep (reads) |
 | App Team - Markets | look up by exact name | announcements (Markets edition, from Dec 2026) |
 
 Curaden / Phinamic segment:
@@ -243,5 +243,5 @@ the agent's spec says what may leave Notion.
 | [feedback-qa](../../agents/feedback-qa.md) | Queues the QA report (+ PDF) for the QA space in the outbox every Friday 10:10 when the threshold is met |
 | [roadmap-watch](../../agents/roadmap-watch.md) | Queues the Monday summary with the report link for App Team in the outbox |
 | Webex courier (`RUNTIME.md`) | The only scheduled poster: sign-in check, posts the outbox, runs Webex Sweep |
-| [webex-sweep](../../agents/webex-sweep.md) | Reads App Team, the QA space and Curaden / Phinamic, plus new meeting recaps (action items only). Posts one "Logged from this chat" note per space per run |
+| [webex-sweep](../../agents/webex-sweep.md) | Reads App Team, the QA space and Curaden / Phinamic, plus new meeting recaps (action items only). Posts only a "New in Jira" note in the common chat when triage items became Jira tickets |
 | Any new agent | Load this skill; add its spaces to the table above |
