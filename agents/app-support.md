@@ -129,7 +129,7 @@ Both can run App Support from their own Claude (setup:
 |-------|----------|-----------|-------------------------------------------|--------------|
 | **Sean Dunne** | Anything about BOB (app, web, BOB Admin, BOB accounts, practices) | `1207214370347608` | Sean (BOB Admin) | Mon–Fri |
 | **Fabian Jöhl** | Everything else (Curaprox app, iTOP, Admin Panel, HubSpot, vouchers, general) | `1196321462158324` | Fabian (the system named) | Mon–Thu |
-| **Janine** (mail review, added 12 Nov) | Not a form owner. Reviews and sends the mail drafts from info@bobscore.com, support@bobscore.com and curaden.apps@curaden.ch ("Mailboxes" below) | [look up in Asana by name] | — | [confirm] |
+| **Janine** (mail review, added 12 Nov) | Not a form owner. Reviews and sends the mail drafts from info@bobscore.com, support@bobscore.com and curaden.apps@curaden.ch ("Mailboxes" below) | `1198201784164499` (janine.simone@curaden.ch) | — | [confirm] |
 
 Fabian and Janine work alongside each other (Sean, 12 Nov): **Fabian handles the main
 (form) requests** that aren't BOB, with his Routine and voice file as they are;
@@ -597,7 +597,8 @@ What it does with mail, with the same rules as the Asana replies:
    - the matching **template** (T1–T4, or T5 for a whole partner team), adapted, never
      pasted as it is;
    - **Notion links one by one** from section 4, never a placeholder, and never the
-     internal pages it lists. Note in the task that workspace links only open for
+     internal pages it lists (the partner admin pages only go to the market's
+     Subsidiary/Partner admin person). Note in the task that workspace links only open for
      guests;
    - the **email voice** in section 5: short, the way in rather than the gate, English
      unless the sender wrote in German and Sean or Janine asked for German (formal

@@ -24,7 +24,7 @@
 
 | Topic | Use this | Don't use |
 |---|---|---|
-| App name in the stores | **Curaprox BOB** | "BOB Score" (the old legacy listing) or "BOB App" when telling people what to search for |
+| App name in the stores | **Curaprox - BOB** (Sean, 12 Nov) | "BOB Score" (the old legacy listing) or "BOB App" when telling people what to search for |
 | iPad app | https://apps.apple.com/mt/app/curaprox-bob/id6803331174?platform=ipad | Legacy `id1475084115` |
 | Android app | https://play.google.com/store/apps/details?id=ag.curaden.bob | Legacy `ag.medicloud.bob.app` |
 | Web app (live since 6 Nov 2026) | https://bobscore.app | |
@@ -34,7 +34,7 @@
 | Device minimums | iPadOS 15.1 or Android 7.0 or later, a tablet in landscape. Web on bobscore.app | "Phone works" (not until the mobile release, 14 Dec 2026) |
 | IT problems or bugs | **The in-app App Request form:** your name (top right) → Help & Support | An email to Sean |
 | Support email (public, Sean 12 Nov) | BOB: **info@bobscore.com**. Curaprox app: **curaden.apps@curaden.ch**. support@bobscore.com sends the password emails and is watched, but isn't given out | info@curaprox.app (replaced) |
-| Who to contact (markets and partners) | **Sean and Janine Simone** (address in Outlook) | Sabina Floridia is no longer the contact for BOB. Don't explain why, just route to Sean and Janine |
+| Who to contact (markets and partners) | **Sean and Janine Simone** (janine.simone@curaden.ch) | Sabina Floridia is no longer the contact for BOB. Don't explain why, just route to Sean and Janine |
 
 **How sign-up works:**
 1. A 4-step form.
@@ -201,7 +201,8 @@ person is, and links the BOB Academy page "Partner onboarding: BOB setup and tra
 **Before linking, always tell Sean:**
 - These are workspace links. They only open for people who are Notion guests, or if the pages are published.
 - **BOB Kit is internal.** It still says the new app "goes live in October", points to the legacy page, and has internal sections (Legal concerns, Known gaps, Technical, Figma). If that shouldn't go out, share only the how-to pages.
-- Don't send internal pages to externals: Approving a Practice, Country Admin Structure, Data protection, Legacy Sign-Up, Goals & Objectives.
+- **Partner and subsidiary admin pages** (Sean, 12 Nov): Approving a Practice, Country Admin Structure and Data protection are for the people with a Subsidiary/Partner admin account (the one Admin Console person per market). Link them to those people, never to practices, coaches or individuals. This is new: check the change log for how the admin-account pages are developing before linking.
+- Never send these to anyone outside Curaden: Legacy Sign-Up, Goals & Objectives, BOB Kit's internal sections.
 
 ---
 
