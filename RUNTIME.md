@@ -35,8 +35,9 @@ app keeps its own schedule and on/off state, and each account has its own cloud
 Routines. So a task registered on both accounts would run twice. The switch stops that.
 
 **Agent registry** `49feb8b53b6c41838cf4cb916fcbb205`
-(data source `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418`), under Goals &
-Objectives, next to the Agent run log. One row per agent run, with **Account**
+(data source `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418`), in the
+**Agent control room** next to the Agent run log and the Webex outbox ("Where the agent
+tables live" below). One row per agent run, with **Account**
 (`Curaden`, `Personal`, `Paused`, `On request`), Where, Started by, Schedule, Spec,
 Run log name, and **Last run** (rolled up from the run log). It is the full list of
 what runs where; the table below is the background.
@@ -110,7 +111,7 @@ personal projects stay on Personal; curagents and its automations move.
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
 | `roadmap-watch` | Cloud + courier | Claude Routine "Roadmap watch (Curaden)" (Mon 07:40 Zurich); "roadmap watch" any time | Writes the report page and puts the App Team summary in the outbox |
 | Webex courier | **PC (Personal)** | Desktop app scheduled task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 Zurich | The only scheduled PC task: sign-in check, outbox, Webex Sweep ("PC runs" below) |
-| `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and meeting action items; Notion inbox rows, Asana comments, its "Logged from this chat" note |
+| `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and meeting action items; hidden Notion log rows, triage tasks in BOB App › Webex inbox, Asana comments, a "New in Jira" note in the common chat |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
@@ -130,6 +131,21 @@ personal projects stay on Personal; curagents and its automations move.
 4. **Never type credentials.** A sign-in prompt is a failed run with the reason
    logged.
 5. **Read Notion databases in view mode only** (below). Never SQL or rows mode.
+
+## Where the agent tables live
+
+The **Agent registry**, **Agent run log** and **Webex outbox** sit together on the
+Notion page **⚙️ Agent control room** `4157e8aabbb48194bb25e351664b6462` (App Hub ›
+Agents & Other Projects), moved there on 11 Nov 2026. Before that they sat directly on
+Agents & Other Projects; the registry and run log earlier still under Goals & Objectives.
+
+- Every run, on either account (Curaden, Personal, and Fabian's App Support), finds
+  them **by their IDs**: the `collection://` and `view://` IDs in this file. Moving a
+  database in Notion keeps all of them, so the move changed nothing for any run.
+- Never find them by page path or by searching their title, and never create a new
+  registry, run log or outbox because one "isn't where it used to be". If an ID stops
+  resolving, log `failed` with that ID in the Error column and stop.
+- Don't rename, duplicate, delete or move them again without a PR to this section.
 
 ## Reading Notion (view mode only)
 
@@ -167,8 +183,8 @@ date, in view mode and in page fetches. For a row's last run, use its **Runs** r
 ## Agent run log
 
 Notion database **Agent run log** `a4c371ee506c4d0fa5dde1fb11bd2657`
-(data source `collection://9b260587-5c0d-4d90-947e-b6e10ba159df`), under Goals &
-Objectives. One row per run, written as the run's last step:
+(data source `collection://9b260587-5c0d-4d90-947e-b6e10ba159df`), in the
+**Agent control room**. One row per run, written as the run's last step:
 
 | Column | Value |
 |--------|-------|
@@ -273,8 +289,9 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
    - After a Boom Boom post, add "posted {HH:MM} in {space}" to the ping history on
      Derek's page. Never post from old local `.boom-boom-derek/outbox/` files.
 3. **Webex Sweep.** Run `agents/webex-sweep.md` as its spec says (window from its last
-   run-log row; inbox rows, Asana comments, approved rows to Asana, its "Logged from
-   this chat" note). A space it can't read → `partial` with the space name.
+   run-log row; hidden Notion log rows, triage tasks in BOB App › Webex inbox, Asana
+   comments, its "New in Jira" note in the common chat). A space it can't read →
+   `partial` with the space name.
 4. **Run log.** One row: Agent `webex-courier` (or `other`), Where `PC`, Account
    `Personal`, Outcome `posted` (anything went out) / `ok` / `partial` / `failed`,
    Summary "{n} posted, {m} held/expired; sweep: {sweep summary}". Webex Sweep keeps
