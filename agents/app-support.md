@@ -30,6 +30,7 @@ trigger:
       - "support faq {question}"     # answer a question from the FAQs, for Sean, Fabian or a market
       - "add that to the support faq"  # Sean or Fabian: learn the reply just posted (PR to docs/app-support-faq.md)
       - "teach support: {question} → {answer}"
+      - "support playbook: {rule}"   # Sean: add or change a rule in docs/app-support-playbook.md (PR)
       - "app support"
       - "support requests"
       - "check support requests"
@@ -48,6 +49,7 @@ memory:
     - dream.md
     - SCOPE.md
     - docs/app-support-faq.md   # what App Support has learned that the product FAQs don't cover
+    - docs/app-support-playbook.md   # Sean's BOB support playbook: facts, recurring request types, email templates, docs to link, email voice, known issues, learned from sent mail
     - docs/app-support-voice-sean.md     # how Sean's Routine writes
     - docs/app-support-voice-fabian.md   # how Fabian's Routine writes
     - "notion: the product FAQs, read-only: BOB — FAQ 3217e8aabbb480289be7f8bbf6260528 (source of the curaprox-apps.com FAQ), Curaprox — FAQ 2e77e8aabbb4809699f8ca3225f4a310, IDB & BOB FAQs 2e77e8aabbb480ea8059c06f022526f8, Curaden — FAQ 2e77e8aabbb48099b047df4e620a272b, and the How-To Documents they link (index: BOB Kit 1fb7e8aabbb480d29c88cbd43aaee5fc)"
@@ -90,7 +92,8 @@ output:
     voice_notes: "array of {owner: Sean|Fabian, pattern, source_task_link} (no requester details)"
     faq_page_gaps: "array of {faq_page, question, suggestion} for Sean to add to the public FAQ"
     operator: "sean|fabian|routine"
-    mail: "array of {mailbox, thread_link, class, draft_ready} (empty until the mail connector is approved)"
+    mail: "array of {mailbox, thread_link, class, playbook_type, template, draft_ready} (empty until the Outlook MCP is connected)"
+    mail_learning: "array of {thread_link, request_type, what_draft_did, what_was_sent, rule} (anonymised; see 'Learning from sent mail')"
 ---
 
 # App Support: answering the people who use the apps
@@ -440,7 +443,10 @@ start coming in.
 
 **Answering.** For every request, and for "support faq {question}":
 
-1. Match the question to an entry in the product FAQs, then in the learned FAQ. Match on
+1. Check the playbook's facts (`docs/app-support-playbook.md` section 1) and known
+   issues (section 6) first, and its recurring request types (section 2): if the request
+   is one of them, follow Sean's call there. Then match the question to an entry in the
+   product FAQs, then in the learned FAQ. Match on
    meaning, not words: "change address of my practice" is the "practice details" entry.
    A request in another language matches the same entries.
 2. **Found**: build the reply from that entry's facts and wording (adapted to the
@@ -582,15 +588,53 @@ What it does with mail, with the same rules as the Asana replies:
    App Support then fills that task with the same fields as the form (Application: BOB
    for info@ and support@, Curaprox app for curaden.apps@; Request Type; the thread
    link), and the classify, owner, subtask, closing and dev hand-off rules above apply.
-3. **Draft** the reply in the same mailbox's Drafts, signed for email ("Kind regards,"
-   and Janine's name and title, my-writing-style; ask her for the exact title), and link
-   the draft on the task. It never asks for passwords and never writes patient data;
-   if a sender includes patient data, the task says so without copying it.
+3. **Draft** the reply in the same mailbox's Drafts, from the playbook
+   (`docs/app-support-playbook.md`):
+   - the **facts** in section 1 (store name, links, sign-up steps, public addresses,
+     contacts), never older wording from Notion or the website that clashes with them;
+   - the **request type** in section 2, and Sean's call for it (e.g. give an individual
+     the way in, don't turn them down);
+   - the matching **template** (T1–T4, or T5 for a whole partner team), adapted, never
+     pasted as it is;
+   - **Notion links one by one** from section 4, never a placeholder, and never the
+     internal pages it lists. Note in the task that workspace links only open for
+     guests;
+   - the **email voice** in section 5: short, the way in rather than the gate, English
+     unless the sender wrote in German and Sean or Janine asked for German (formal
+     "Sie"), one exclamation mark at most, no bold in the email.
+   Sign it for the person who'll send it ("Kind regards," then their name and title:
+   Sean's is in the playbook, ask Janine for hers). Link the draft on the task. It never
+   asks for passwords and never writes patient data; if a sender includes patient data,
+   the task says so without copying it. A request the playbook doesn't cover and no FAQ
+   answers gets no draft: the task says "no source" and Janine or Sean answers it.
 4. **Send** only on Janine's explicit "send" for that draft.
    Mail is never sent on its own: "What it posts on its own" covers Asana replies only.
 
 Mail stays in the mailbox. Names, addresses and message text never go into Notion,
 Webex, GitHub, run logs or the result JSON; those use thread links only.
+
+### Learning from sent mail (the loop)
+
+Every draft teaches the next one, the same way owner edits teach the Asana replies
+("FAQ: answering and getting smarter"):
+
+1. **Compare.** On each run, for every draft App Support made that has since been sent
+   (same thread, in Sent), compare the sent text with the draft. No change: nothing to
+   learn. Discarded and rewritten from scratch: treat the whole sent mail as the answer.
+2. **Record.** For each real change (a fact corrected, a section cut, a different
+   template, a softer or shorter line, a link added), write one **`mail_learning`**
+   candidate into the run's Agent run log row: the request type, what the draft did,
+   what was sent instead, and the rule in one generic sentence. Anonymised: no names,
+   addresses, practices or message text, only the thread link. A new fact also becomes
+   an FAQ candidate, and a voice habit a voice note for the sender.
+3. **Fold in.** The weekday maintenance session adds candidates to section 8 of the
+   playbook by PR. When the same correction shows up **twice**, it rewrites the rule
+   in sections 1–5 instead (and drops the section 8 lines), so the playbook itself
+   changes, not just its log. A request that has come in **three times** and isn't in
+   section 2 gets a new request type there, with the sent replies as its template.
+4. **Wins.** Sean's direct edits to the playbook, or "support playbook: …" in a
+   session, always win over learned entries. A learned entry that clashes with a
+   product FAQ goes to Sean, not into the playbook.
 
 ## Rules
 
