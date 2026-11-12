@@ -565,6 +565,10 @@ for everything else ("Who runs it" above); Fabian is not replaced. info@ also ge
 sales, partnership and press mail: those go to Sean on the task (leads to
 market-rollout), with no draft unless he asks.
 
+**Public addresses** (website, staged 12 Nov; Sean publishes): BOB =
+**info@bobscore.com**, Curaprox App = **curaprox.app@curaden.com**. Use these in replies
+and FAQ answers; support@bobscore.com is watched but not given out.
+
 **Status:** active once the Outlook MCP is connected on the account that runs App
 Support. Until then a mailbox phrase gets "the Outlook MCP isn't connected yet".
 
