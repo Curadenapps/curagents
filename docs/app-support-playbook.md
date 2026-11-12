@@ -13,7 +13,7 @@
 **Who this is for:** a Claude instance (curagents or a support agent) that drafts replies as Sean Dunne, Global Product Lead at Curaden, for the BOB App and the other apps.
 
 **Rules that never change:**
-- **Draft only.** Nothing is sent without Sean's explicit yes.
+- **Emails and messages as Sean are draft only.** Nothing is sent without Sean's explicit yes. Replies on Asana form submissions follow the posting rules in `agents/app-support.md`, which take precedence over this file.
 - Write in Sean's voice. Load the `my-writing-style` skill, and see section 5.
 - Don't invent dates, owners, links or status. Put anything unknown in as `[confirm: …]`.
 - Keep personal data of patients and external people out of any tool other than the draft itself (the org is under GDPR and not hosted in the EU).
@@ -98,7 +98,7 @@ Japan's clinics are a point of treatment and a point of sale, and they want to k
 - Don't write "the KPI deck can't be shared" when the deck you're attaching has KPIs in it too. Write "the board presentation isn't one I can share".
 
 ### G. An internal admin chase (finance, purchase orders, SAP/CIM)
-- **Sean's call:** stay neutral, and don't point at a named person, especially someone senior (e.g. the CMO).
+- **Sean's call:** stay neutral, and don't point at a named person, especially someone senior.
 - Write "I'm not quite sure what's going on, since X released it on her side" and ask "who else is in the approval chain?"
 - Mention how long it has been (e.g. a month since the invoice date) as the reason to move it along.
 
@@ -106,7 +106,7 @@ Japan's clinics are a point of treatment and a point of sale, and they want to k
 Sean's decision (6 Nov, to Phinamic): **automate it.** Checks, approval and allocation happen without a person, and only exceptions go to a human.
 
 For the internal message to Derek and Khanh, keep it **short**:
-- the local partner is informed (e.g. Suncica)
+- the local partner is informed
 - we're moving forward anyway
 - what to build: automatic validation, which triggers approval and then onboarding (the login email plus the getting-started docs from Notion)
 - ask for a rough date
