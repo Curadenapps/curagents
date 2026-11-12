@@ -169,8 +169,8 @@ already been said, so nothing is repeated.
    issues and troubleshooting" sat overdue and untouched since 30 Sep and was missed.)
    Then take the App Tasks board `1200298616652229` with the scope in "App Tasks board"
    (fetch `created_at`, `created_by`, `notes`, custom fields and section). Drop tasks
-   already taken from BOB App. Drop every BOB App task in the section **Webex inbox**
-   (or named `[Webex] …` in Backlog): that is Webex Sweep's triage queue, items Sean
+   already taken from BOB App. Drop every BOB App task in the section **Webex Inbox**
+   (`1220482901563173`; any case of the name) (or named `[Webex] …` in Backlog): that is Webex Sweep's triage queue, items Sean
    hasn't decided on yet, so they may not be tasks at all (12 Nov). Once Sean moves one
    out, it's judged like any other task.
 3. **History**: read each task's stories in one batched call (comments, section, due-date

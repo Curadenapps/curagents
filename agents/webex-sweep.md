@@ -165,9 +165,10 @@ Fingerprint: `webex:{space id or meeting id}:{author}:{YYYY-MM-DD HH:mm}:{first 
 
 Through `asana-maintenance`, one task per item that needs doing:
 
-- **Where:** BOB App board `1204489225205419`, section **Webex inbox** (look it up by
-  exact name). Missing: put it in Backlog with the name prefixed `[Webex] `, and say
-  "Webex inbox section missing" in the run log.
+- **Where:** BOB App board `1204489225205419`, section **Webex Inbox**
+  (`1220482901563173`, added by Sean 12 Nov). If that gid is gone, look the section up
+  by name, ignoring case. Missing: put it in Backlog with the name prefixed
+  `[Webex] `, and say "Webex inbox section missing" in the run log.
 - **Name:** the log row's title, verb first, no prefixes or ticket numbers.
 - **Assignee, due date, followers:** none. Sean assigns when he triages; no
   notifications per task.
