@@ -1,5 +1,13 @@
 # BOB support playbook (for a support agent)
 
+> **How App Support uses this file** (added 12 Nov 2026): this is the source for every
+> **email** reply (the mailboxes in `agents/app-support.md`, "Mailboxes") and for the
+> recurring request types in section 2, on the form tasks as well. Facts in section 1
+> win over anything older in Notion. The voice rules in section 5 apply to email;
+> Asana replies keep `docs/app-support-voice-sean.md` (short, with the automated
+> sign-off). Section 8 grows from Sean's and Janine's edits to drafts ("Learning from
+> sent mail" in the spec). Edit it by PR; the next run uses it.
+
 **Built from:** the emails Sean answered between 4 and 12 Nov 2026, and the corrections he made to the drafts. The corrections are the most useful part, because they show where a default draft goes wrong.
 
 **Who this is for:** a Claude instance (curagents or a support agent) that drafts replies as Sean Dunne, Global Product Lead at Curaden, for the BOB App and the other apps.
@@ -16,7 +24,7 @@
 
 | Topic | Use this | Don't use |
 |---|---|---|
-| App name in the stores | **Curaprox BOB** | "BOB Score" (the old legacy listing) or "BOB App" when telling people what to search for |
+| App name in the stores | **Curaprox - BOB** (Sean, 12 Nov) | "BOB Score" (the old legacy listing) or "BOB App" when telling people what to search for |
 | iPad app | https://apps.apple.com/mt/app/curaprox-bob/id6803331174?platform=ipad | Legacy `id1475084115` |
 | Android app | https://play.google.com/store/apps/details?id=ag.curaden.bob | Legacy `ag.medicloud.bob.app` |
 | Web app (live since 6 Nov 2026) | https://bobscore.app | |
@@ -25,8 +33,8 @@
 | Sign-up form | https://curaprox-apps.com/contact-form | |
 | Device minimums | iPadOS 15.1 or Android 7.0 or later, a tablet in landscape. Web on bobscore.app | "Phone works" (not until the mobile release, 14 Dec 2026) |
 | IT problems or bugs | **The in-app App Request form:** your name (top right) → Help & Support | An email to Sean |
-| Support email | support@bobscore.com (it sends the password emails) | info@curaprox.app and info@bobscore.com also appear in docs and on the site. `[confirm]` with Sean before quoting one as official |
-| Who to contact (markets and partners) | **Sean and Janine Simone** | Sabina Floridia is no longer the contact for BOB. Don't explain why, just route to Sean and Janine |
+| Support email (public, Sean 12 Nov) | BOB: **info@bobscore.com**. Curaprox app: **curaden.apps@curaden.ch**. support@bobscore.com sends the password emails and is watched, but isn't given out | info@curaprox.app (replaced) |
+| Who to contact (markets and partners) | **Sean and Janine Simone** (janine.simone@curaden.ch) | Sabina Floridia is no longer the contact for BOB. Don't explain why, just route to Sean and Janine |
 
 **How sign-up works:**
 1. A 4-step form.
@@ -161,6 +169,12 @@ Sean rejected the long version.
 >
 > Let me know if anything doesn't work!
 
+**T5. Partner or market onboarding (getting a whole team set up)**: use the Notion
+template "Template — Partner onboarding email" (`4107e8aabbb48125b595c2d72a33ff7d`,
+Curaden App Hub → Templates). It asks who should get BOB and who the one Admin Console
+person is, and links the BOB Academy page "Partner onboarding: BOB setup and training"
+(`4107e8aabbb481c9a15fe680c321efd2`). First sent to Curaden Czech on 6 Nov.
+
 **Sign-off (emails):**
 > Kind regards,
 > Sean Dunne
@@ -187,7 +201,8 @@ Sean rejected the long version.
 **Before linking, always tell Sean:**
 - These are workspace links. They only open for people who are Notion guests, or if the pages are published.
 - **BOB Kit is internal.** It still says the new app "goes live in October", points to the legacy page, and has internal sections (Legal concerns, Known gaps, Technical, Figma). If that shouldn't go out, share only the how-to pages.
-- Don't send internal pages to externals: Approving a Practice, Country Admin Structure, Data protection, Legacy Sign-Up, Goals & Objectives.
+- **Partner and subsidiary admin pages** (Sean, 12 Nov): Approving a Practice, Country Admin Structure and Data protection are for the people with a Subsidiary/Partner admin account (the one Admin Console person per market). Link them to those people, never to practices, coaches or individuals. This is new: check the change log for how the admin-account pages are developing before linking.
+- Never send these to anyone outside Curaden: Legacy Sign-Up, Goals & Objectives, BOB Kit's internal sections.
 
 ---
 
@@ -213,7 +228,7 @@ Sean rejected the long version.
 | The acknowledgement email is mistaken for the login | The login comes in a second email after approval | |
 | The Main BOB User has no login | They need to be added as a coach | |
 | The FAQ says to search "BOB Score" | Send the direct store links instead | FAQ and Webflow need fixing |
-| Two different support emails in the docs | `[confirm]` which one with Sean | |
+| Two different support emails in the docs | Settled 12 Nov: info@bobscore.com (BOB) and curaden.apps@curaden.ch (Curaprox app). Docs that still say support@ or info@curaprox.app need fixing | Sean (website, FAQ) |
 | The Approve button needs a training date first (an old checklist item) | This is internal. Don't mention it to practices | Proposed to move it after approval |
 | The browser pane blocks *.bobscore.app and curaprox-apps.com for Claude | Agents can't check the console or app live, so ask Sean for screenshots | Org admin |
 
@@ -223,6 +238,19 @@ Sean rejected the long version.
 
 - Onboarding concept (sign-up → automatic approval → welcome → in-app checklist): `Projects\BOB Onboarding\CONCEPT.md`
 - Docs revamp plan and findings: `Projects\BOB Docs Revamp\PLAN.md`, `FINDINGS.md`
-- Phinamic status (daily, local only): `.boom-boom-derek/YYYY-MM-DD.md`
-- Voice: `docs/app-support-voice-sean.md`, plus the `my-writing-style` and `curaden-comms` skills
-- Learned answers: `docs/app-support-faq.md`
+- Phinamic status (daily): `dev\curagents\.boom-boom-derek\YYYY-MM-DD.md`
+- Voice: the `my-writing-style` and `curaden-comms` skills
+
+---
+
+## 8. Learned from sent mail
+
+The weekday maintenance session adds entries here by PR from the run log's
+`mail_learning` candidates: what Sean or Janine changed in a draft before sending it.
+One line each, generic, no names or addresses. When an entry contradicts a section
+above, the section is updated instead and the entry dropped.
+
+| Date | Request type | What the draft did | What was sent instead | Rule |
+|------|--------------|--------------------|-----------------------|------|
+| 4–12 Nov 2026 | Sections 2 and 5 above | | | Seeded from Sean's corrections that week |
+
