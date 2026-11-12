@@ -13,7 +13,7 @@ description: >
   Development on the BOB App board so the Asana-to-Jira sync creates the issue.
   Sean or Fabian can also run it from their own Claude. Agreed 12 Nov: the support
   mailboxes (info@bobscore.com and support@bobscore.com for BOB,
-  curaprox.app@curaden.com for the Curaprox app) come in through the Outlook MCP and
+  curaden.apps@curaden.ch for the Curaprox app) come in through the Outlook MCP and
   land as tasks on the same board; Janine reviews and sends the mail drafts. Active
   once the Outlook MCP is connected.
 model: claude-sonnet-5-5
@@ -41,7 +41,7 @@ trigger:
       - "my support requests"        # Fabian or Sean: only the requests they own
       # Active once the Outlook MCP is connected (see "Mailboxes"):
       - "check the support mailbox"
-      - "draft replies for info@ / support@ / curaprox.app@"
+      - "draft replies for info@ / support@ / curaden.apps@"
       - "send {email draft}"
 memory:
   read:
@@ -66,7 +66,7 @@ memory:
     - "asana (through asana-maintenance): one dev ticket in BOB App 1204489225205419 per bug or product gap, moved to In Development 1213787653843309 so the Asana-to-Jira sync creates the Jira issue; linked both ways"
     - "asana (through asana-maintenance): one standing 'App Support: needs you ({Owner})' task per owner, outside any project, with one subtask per held request (see 'Scheduled run')"
     - "notion: FAQ candidates and voice notes in the body of its own Agent run log row (anonymised); the maintenance session folds them into docs/app-support-faq.md and the owner's voice file by PR"
-    - "mail via the Outlook MCP (active once connected): new threads in info@bobscore.com, support@bobscore.com and curaprox.app@curaden.com become tasks on the App Tasks board; reply drafts in the same mailbox; sent only on Janine's 'send'"
+    - "mail via the Outlook MCP (active once connected): new threads in info@bobscore.com, support@bobscore.com and curaden.apps@curaden.ch become tasks on the App Tasks board; reply drafts in the same mailbox; sent only on Janine's 'send'"
 idempotency_key: "app-support:{task_gid}:{latest_story_gid}"
 dry_run: false  # live and autonomous since 10 Nov 2026 (Sean); see "What it posts on its own"
 output:
@@ -126,7 +126,7 @@ Both can run App Support from their own Claude (setup:
 |-------|----------|-----------|-------------------------------------------|--------------|
 | **Sean Dunne** | Anything about BOB (app, web, BOB Admin, BOB accounts, practices) | `1207214370347608` | Sean (BOB Admin) | Mon–Fri |
 | **Fabian Jöhl** | Everything else (Curaprox app, iTOP, Admin Panel, HubSpot, vouchers, general) | `1196321462158324` | Fabian (the system named) | Mon–Thu |
-| **Janine** (mail review, added 12 Nov) | Not a form owner. Reviews and sends the mail drafts from info@bobscore.com, support@bobscore.com and curaprox.app@curaden.com ("Mailboxes" below) | [look up in Asana by name] | — | [confirm] |
+| **Janine** (mail review, added 12 Nov) | Not a form owner. Reviews and sends the mail drafts from info@bobscore.com, support@bobscore.com and curaden.apps@curaden.ch ("Mailboxes" below) | [look up in Asana by name] | — | [confirm] |
 
 Fabian and Janine work alongside each other (Sean, 12 Nov): **Fabian handles the main
 (form) requests** that aren't BOB, with his Routine and voice file as they are;
@@ -549,14 +549,14 @@ type back under approval, he lists it here by PR and App Support holds it instea
 |----------------------------|-------|
 | (none) | |
 
-## Mailboxes: info@ / support@bobscore.com and curaprox.app@curaden.com (agreed 12 Nov)
+## Mailboxes: info@ / support@bobscore.com and curaden.apps@curaden.ch (agreed 12 Nov)
 
 **The structure (Sean, 12 Nov 2026).** Three inputs, one triage list, people send:
 
 | Input | How it reaches the board |
 |-------|--------------------------|
 | **info@bobscore.com** (BOB mailbox, the address on the website) and **support@bobscore.com** (also watched) | Claude reads them through the **Outlook MCP** and creates a task on the App Tasks, Requests & Feedback board (`1200298616652229`) |
-| **curaprox.app@curaden.com** (Curaprox app mailbox; replaces info@curaprox.app) | Same: Outlook MCP → task on the same board |
+| **curaden.apps@curaden.ch** (Curaprox app mailbox; replaces info@curaprox.app) | Same: Outlook MCP → task on the same board |
 | The Asana form "App Requests & Feedback" | Already creates tasks on the board directly; no change |
 
 **Who reviews what (Sean, 12 Nov):** **Janine** reviews and sends the mail drafts
@@ -566,7 +566,7 @@ sales, partnership and press mail: those go to Sean on the task (leads to
 market-rollout), with no draft unless he asks.
 
 **Public addresses** (website, staged 12 Nov; Sean publishes): BOB =
-**info@bobscore.com**, Curaprox App = **curaprox.app@curaden.com**. Use these in replies
+**info@bobscore.com**, Curaprox App = **curaden.apps@curaden.ch**. Use these in replies
 and FAQ answers; support@bobscore.com is watched but not given out.
 
 **Status:** active once the Outlook MCP is connected on the account that runs App
@@ -576,10 +576,12 @@ What it does with mail, with the same rules as the Asana replies:
 
 1. **Read** new threads in both mailboxes since the last run. Leave newsletters,
    auto-replies and delivery notices alone.
-2. **Create one task per thread** on the App Tasks board, with the same fields as the
-   form (Application: BOB for info@ and support@, Curaprox app for curaprox.app@; Request Type;
-   the thread link). The board stays the one triage list; classify, owner, subtask,
-   closing and dev hand-off rules above apply as for form tasks.
+2. **Prepare, don't file** (Sean, 12 Nov): for each thread, classify it and draft the
+   reply (step 3). **Janine** checks the mailbox requests and adds a task to the App
+   Tasks board only when one is needed (a change to make, a dev ticket, a follow-up);
+   App Support then fills that task with the same fields as the form (Application: BOB
+   for info@ and support@, Curaprox app for curaden.apps@; Request Type; the thread
+   link), and the classify, owner, subtask, closing and dev hand-off rules above apply.
 3. **Draft** the reply in the same mailbox's Drafts, signed for email ("Kind regards,"
    and Janine's name and title, my-writing-style; ask her for the exact title), and link
    the draft on the task. It never asks for passwords and never writes patient data;

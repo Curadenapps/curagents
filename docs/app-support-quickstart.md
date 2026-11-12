@@ -139,7 +139,7 @@ twice.
   Development so Phinamic gets it in Jira. Sean sees each one in the run log, and Truth
   Catcher flags any that aren't on the roadmap.
 - **Mailboxes** info@bobscore.com and support@bobscore.com (BOB) and
-  curaprox.app@curaden.com (Curaprox app), agreed 12 Nov: App Support reads them
+  curaden.apps@curaden.ch (Curaprox app), agreed 12 Nov: App Support reads them
   through the Outlook MCP, makes a task on the App Tasks board for each thread and
   drafts the reply; Janine reviews and sends. Form requests stay with Sean (BOB) and
   you (the rest). Not active until the Outlook MCP is connected.
