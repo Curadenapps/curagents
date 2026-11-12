@@ -40,15 +40,19 @@ Aftercare: support and feedback routes handed over, monthly check-in.
 
 | Wave | Market | Launch | Finished | What decides it |
 |------|--------|--------|----------|-----------------|
-| 1 | UAE | Apr 2027 | Jul 2027 | Fewest open issues; first live treatment plan |
+| 1 | UAE | Apr 2027 (MVP) | Sep 2027 | Fewest open issues. MVP at launch (BOB without the treatment plan); full loop after treatment plan live 25 Jun and Shopify checkout 6 Aug 2027; referral MVP via Referral Rock |
+| 1 | Switzerland | May 2027 | Sep 2027 | A month after the UAE; Higi Berchtold. Shopify CH, loop after 6 Aug 2027 |
 | 2 | Italy | Jul 2027 | Oct 2027 | Step by step with keen practices, no full pilot |
 | 2 | Slovenia | Aug 2027, maybe earlier | Nov 2027 | Treatment plan, new Curaprox app. On hold: don't engage yet |
 | 2 | South Africa | Aug 2027, maybe earlier | Nov 2027 | Treatment plan, new Curaprox app. On hold: don't engage yet |
 | 3 | USA | Aug–Sep 2027 | Dec 2027 | Compliance (HIPAA, BAAs) |
 | 3 | Japan | Aug–Sep 2027 | Dec 2027 | Compliance (APPI, entrustment, hosting) |
-| — | Switzerland | Not set (card placeholder 31 Aug 2027) | — | Higi Berchtold added to the board 11 Nov |
 | — | Germany | Parked: self-service only | — | Curaden Germany emails practices, they sign up themselves; no HQ stages |
 | — | Brazil | Parked | — | Bandwidth |
+
+All dates are planned and expected to move (Sean, 11 Nov 2026). Milestones count from launch
+(L): Kickoff L − 3 months, Set-up L − 6 weeks, Train L − 2 weeks, First clinics L + 4 weeks,
+Loop on after its build dependencies, Aftercare = finished + 1 month.
 
 Retired: the "Apr–Aug 2027 window (CH, DE, UAE, BR, USA, JP)" and the Italy Milan pilot
 before it. The official launch (place and date open) is no longer a gate for Italy.
@@ -75,7 +79,7 @@ The old G0–G3 gate GIDs below are the Stage 0, 2, 4 and finished milestones.
 | What | Value |
 |------|-------|
 | Market page | `4087e8aabbb481d095aeed1a527b90ce` |
-| Rollout task | `1219988896626071` (due 31 Aug 2027, placeholder: no launch month yet) |
+| Rollout task | `1219988896626071` (launch 31 May 2027, finished 30 Sep 2027) |
 | Admin super user + training (Gate 1) | `1219988896625886` |
 | Gate milestones | G0 `1219988845355015` · G1 `1219988845415037` · G2 `1219988866039606` · G3 `1219988823955256` |
 | Owner | Higi Berchtold (Curaden Switzerland), on the board since 11 Nov 2026 |
@@ -88,7 +92,7 @@ The old G0–G3 gate GIDs below are the Stage 0, 2, 4 and finished milestones.
 | What | Value |
 |------|-------|
 | Market page | `1f57e8aabbb48089b2f3d1694ac2a233` (2025 set-up kept below the 2027 write-up) |
-| Rollout task | `1219988713564244` (launch 30 Apr 2027, finished 31 Jul 2027) |
+| Rollout task | `1219988713564244` (launch 30 Apr 2027 as MVP, finished 30 Sep 2027) |
 | Admin super user + training (Gate 1) | `1219988824523488` |
 | Gate milestones | G0 `1219988677897951` · G1 `1219988678420967` · G2 `1219988727889801` · G3 `1219988728598252` |
 | Owner | Angela Couto (market lead), Omar Abu Al Alla; kickoff 12 Nov 2026 |
