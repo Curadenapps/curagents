@@ -11,9 +11,10 @@ description: >
   Fabian for the rest) exactly what to change, and closes the task once they
   confirm. Bugs and product gaps go to Jira as one ticket, moved to In
   Development on the BOB App board so the Asana-to-Jira sync creates the issue.
-  Sean or Fabian can also run it from their own Claude. Planned, not active:
-  the same work for emails to support@bobscore.com and info@bobscore.com, once IT
-  approves a mail connector.
+  Sean or Fabian can also run it from their own Claude. Agreed 12 Nov: the two
+  support mailboxes (support@bobscore.com for BOB, curaprox.app@curaden.com for the
+  Curaprox app) come in through the Outlook MCP and land as tasks on the same board;
+  Sean and Janine review and send. Active once the Outlook MCP is connected.
 model: claude-sonnet-5-5
 tools: Read, AsanaAPI, NotionAPI
 trigger:
@@ -37,9 +38,9 @@ trigger:
       - "post the support replies"   # the owner posts the held replies they've ticked
       - "done on {asana task link}"  # the owner confirms the change is made; closes the loop
       - "my support requests"        # Fabian or Sean: only the requests they own
-      # Planned, only once IT approves a mail connector (see "Mailboxes"):
+      # Active once the Outlook MCP is connected (see "Mailboxes"):
       - "check the support mailbox"
-      - "draft replies for support@ / info@"
+      - "draft replies for support@ / curaprox.app@"
       - "send {email draft}"
 memory:
   read:
@@ -64,7 +65,7 @@ memory:
     - "asana (through asana-maintenance): one dev ticket in BOB App 1204489225205419 per bug or product gap, moved to In Development 1213787653843309 so the Asana-to-Jira sync creates the Jira issue; linked both ways"
     - "asana (through asana-maintenance): one standing 'App Support: needs you ({Owner})' task per owner, outside any project, with one subtask per held request (see 'Scheduled run')"
     - "notion: FAQ candidates and voice notes in the body of its own Agent run log row (anonymised); the maintenance session folds them into docs/app-support-faq.md and the owner's voice file by PR"
-    - "mail (planned, disabled until IT approves a connector): reply drafts in support@bobscore.com and info@bobscore.com; sent only on the owner's 'send'"
+    - "mail via the Outlook MCP (active once connected): new threads in support@bobscore.com and curaprox.app@curaden.com become tasks on the App Tasks board; reply drafts in the same mailbox; sent only on the owner's 'send'"
 idempotency_key: "app-support:{task_gid}:{latest_story_gid}"
 dry_run: false  # live and autonomous since 10 Nov 2026 (Sean); see "What it posts on its own"
 output:
@@ -539,31 +540,39 @@ type back under approval, he lists it here by PR and App Support holds it instea
 |----------------------------|-------|
 | (none) | |
 
-## Mailboxes: support@ and info@bobscore.com (planned, not active)
+## Mailboxes: support@bobscore.com and curaprox.app@curaden.com (agreed 12 Nov)
 
-**Status: disabled.** This needs a mail connector (MCP) for the bobscore.com mailboxes
-that Curaden IT has approved. Until then App Support doesn't read or write email, and a
-mailbox phrase gets the answer "the mail connector isn't approved yet". When IT
-approves one, Sean changes this status line by PR and names the connector here.
+**The structure (Sean, 12 Nov 2026).** Three inputs, one triage list, people send:
 
-What it will do then, with the same rules as the Asana replies:
+| Input | How it reaches the board |
+|-------|--------------------------|
+| **support@bobscore.com** (BOB support mailbox) | Claude reads it through the **Outlook MCP** and creates a task on the App Tasks, Requests & Feedback board (`1200298616652229`) |
+| **curaprox.app@curaden.com** (Curaprox app mailbox; replaces info@curaprox.app) | Same: Outlook MCP → task on the same board |
+| The Asana form "App Requests & Feedback" | Already creates tasks on the board directly; no change |
 
-1. **Read** new threads in **support@bobscore.com** and **info@bobscore.com** since the
-   last run. Leave newsletters, auto-replies and delivery notices alone.
-2. **Classify** each one the same way (support, dev, feedback, spam) and pick the owner
-   (BOB → Sean, everything else → Fabian). info@ also gets sales, partnership and press
-   mail: those go to Sean in the summary (leads to market-rollout), with no draft unless
-   he asks.
+**Sean and Janine** review the tasks, edit the drafts and send the replies.
+[confirm: Sean — does Janine replace Fabian as the owner of everything that isn't BOB,
+or does Fabian stay owner with Janine as a second reviewer? "Who runs it" and the
+Routine split above still say Fabian until Sean answers.]
+
+**Status:** active once the Outlook MCP is connected on the account that runs App
+Support. Until then a mailbox phrase gets "the Outlook MCP isn't connected yet".
+info@bobscore.com is no longer a support mailbox.
+
+What it does with mail, with the same rules as the Asana replies:
+
+1. **Read** new threads in both mailboxes since the last run. Leave newsletters,
+   auto-replies and delivery notices alone.
+2. **Create one task per thread** on the App Tasks board, with the same fields as the
+   form (Application: BOB for support@, Curaprox app for curaprox.app@; Request Type;
+   the thread link). The board stays the one triage list; classify, owner, subtask,
+   closing and dev hand-off rules above apply as for form tasks.
 3. **Draft** the reply in the same mailbox's Drafts, in the owner's voice, signed for
-   email ("Kind regards," and the owner's name and title, my-writing-style). It never
-   asks for passwords and never writes patient data; if a sender includes patient
-   data, the summary tells the owner.
-4. **Send** only on the owner's explicit "send" for that draft. Email has no
-   auto-send: "What it posts on its own" covers Asana replies only, until Sean
-   adds an email column by PR.
-5. **Track** anything that needs a change or a dev ticket: propose a task on the App
-   Tasks board with the same fields as the form (owner approves), so one board holds
-   every open request. The subtask, closing and dev hand-off rules above then apply.
+   email ("Kind regards," and the owner's name and title, my-writing-style), and link
+   the draft on the task. It never asks for passwords and never writes patient data;
+   if a sender includes patient data, the task says so without copying it.
+4. **Send** only on the owner's explicit "send" for that draft (Sean or Janine).
+   Mail is never sent on its own: "What it posts on its own" covers Asana replies only.
 
 Mail stays in the mailbox. Names, addresses and message text never go into Notion,
 Webex, GitHub, run logs or the result JSON; those use thread links only.

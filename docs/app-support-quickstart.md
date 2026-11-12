@@ -138,6 +138,7 @@ twice.
 - **Bugs and product gaps** become one Jira-ready ticket in BOB App, moved to In
   Development so Phinamic gets it in Jira. Sean sees each one in the run log, and Truth
   Catcher flags any that aren't on the roadmap.
-- **Mailboxes** support@bobscore.com and info@bobscore.com: planned. App Support will
-  draft (and, on your "send", send) replies there once Curaden IT approves a mail
-  connector. Until then it doesn't touch email.
+- **Mailboxes** support@bobscore.com (BOB) and curaprox.app@curaden.com (Curaprox app),
+  agreed 12 Nov: App Support reads them through the Outlook MCP, makes a task on the
+  App Tasks board for each thread and drafts the reply; Sean and Janine send it. Not
+  active until the Outlook MCP is connected.
