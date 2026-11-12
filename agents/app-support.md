@@ -48,6 +48,7 @@ memory:
     - docs/app-support-faq.md   # what App Support has learned that the product FAQs don't cover
     - docs/app-support-voice-sean.md     # how Sean's Routine writes
     - docs/app-support-voice-fabian.md   # how Fabian's Routine writes
+    - docs/app-support-playbook.md       # recurring BOB request types, facts, templates and Sean's corrections (Nov 2026)
     - "notion: the product FAQs, read-only: BOB — FAQ 3217e8aabbb480289be7f8bbf6260528 (source of the curaprox-apps.com FAQ), Curaprox — FAQ 2e77e8aabbb4809699f8ca3225f4a310, IDB & BOB FAQs 2e77e8aabbb480ea8059c06f022526f8, Curaden — FAQ 2e77e8aabbb48099b047df4e620a272b, and the How-To Documents they link (index: BOB Kit 1fb7e8aabbb480d29c88cbd43aaee5fc)"
     - "web: curaprox-apps.com app pages (public FAQ, e.g. https://curaprox-apps.com/app-pages/bob-app), read-only, the link a reply gives"
     - agents/truth-catcher.md   # "App Tasks board": sections, working days, what it already watches
