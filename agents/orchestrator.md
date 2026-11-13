@@ -280,6 +280,24 @@ again), adding a dated line to Notes. Never more than one open row per Source ID
 CRITICAL items also go at the top of the current report with `🔴 CRITICAL`; they are
 never suppressed or deferred.
 
+### Open vs handled (every writer follows this)
+
+The Inbox's first tab, **📥 Open**, shows only rows that still need something; Sean
+looks there. A row leaves Open the moment it is handled, so Open stays short and an
+empty Open means the agents are keeping up. The **✅ Handled: last 7 days** tab is the
+proof they are working.
+
+| Status | Open? | Set by |
+|--------|-------|--------|
+| `new` | Open | Any writer when it logs the row |
+| `task`, `approved` | Open | Retired pipeline; no agent writes them any more. A row with an Asana link in either is really `pushed` |
+| `pushed` | Handled | Webex Sweep, as soon as the item's Asana triage task exists (the task is the open item from then on, in Asana) |
+| `reference` | Handled | Webex Sweep for decisions and threads answered in the chat; feedback-qa when it claims a `manual` row as feedback; the agent that raised a flag, or Sean, once it's resolved |
+| `skip` | Handled | Sean dropping it; Webex Sweep when Sean completes or deletes its triage task |
+
+No row may sit in `new` once its work is somewhere else: every writer moves its own
+rows out of `new` in the same run that handles them.
+
 ---
 
 ## 6. Check-up (answered by the orchestrator itself)
@@ -299,7 +317,7 @@ paused, not missed.
 Read the Inbox view `view://4157e8aa-bbb4-815b-b0a6-000cb183ca38` (newest first; stop
 at the window, 7 days by default) and report:
 
-1. **Needs a look:** rows with Status `new`. By Source: `agent` → the flag itself;
+1. **Open:** rows with Status `new` (and legacy `task`/`approved`). By Source: `agent` → the flag itself;
    `manual` → feedback Feedback QA hasn't picked up yet; `webex`/`meeting` → Webex
    Sweep logged it but made no triage task (a stuck sweep: name the row).
 2. **Went to Asana:** `pushed` rows with their Asana links, and how many of those tasks
@@ -310,9 +328,9 @@ at the window, 7 days by default) and report:
 5. **Hygiene:** `pushed` rows without an Asana link, rows without Captured at, test
    rows. Report them; never delete rows (Sean decides).
 
-Sean's own views on the database: "🔎 Check-up: last 7 days" (also on the Agent control
-room page), "⚠️ Needs a look (Status new)" and "🗂️ Decisions & answers". The agents keep
-using the unfiltered "Agents: …" view.
+Sean's own views on the database: "📥 Open" (the first tab, also on the Agent control
+room page as "Inbox: open"), "✅ Handled: last 7 days", "🤖 Agent flags" and
+"🗂️ Decisions & answers". The agents keep using the unfiltered "Agents: …" view.
 
 ---
 

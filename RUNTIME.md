@@ -148,8 +148,9 @@ Agents & Other Projects; the registry and run log earlier still under Goals & Ob
 - Don't rename, duplicate, delete or move them again without a PR to this section.
 
 The **🚩 Inbox** (`collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db`) lives elsewhere
-in the workspace but shows on the control room page as the linked view "Inbox check-up:
-last 7 days" (13 Nov). It is the check-up log: one row per item the agents captured or
+in the workspace but shows on the control room page as the linked view "Inbox: open"
+(13 Nov): only rows still open (Status `new`); handled rows show in the Inbox's
+"✅ Handled: last 7 days" tab. It is the check-up log: one row per item the agents captured or
 flagged (Webex Sweep's log, feedback for feedback-qa, and Source `agent` rows for what
 needs Sean; `agents/orchestrator.md` §5). Same rules: found by ID, never recreated.
 

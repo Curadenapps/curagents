@@ -62,8 +62,11 @@ feedback-qa) work from what was actually said.
 **How it flows (12 Nov, Sean):**
 
 1. **Log everything.** Every item goes into the Notion 🚩 Inbox, the check-up log
-   (13 Nov): Sean looks there to see what the sweep heard and where each item went
-   ("🔎 Check-up: last 7 days" view), not to triage. Triage stays in Asana.
+   (13 Nov): Sean looks there to see what the sweep heard and where each item went,
+   not to triage. Triage stays in Asana. A row is in the Inbox's **📥 Open** tab only
+   while it is `new`; set it to `pushed` the moment its triage task exists, or
+   `reference` when nothing needs doing, so Open only shows what is really pending
+   (`agents/orchestrator.md` §5 "Open vs handled").
 2. **Capture less.** One item per topic, not per message; chatter and things already
    answered in the chat never become tasks ("Capture less" below).
 3. **Sean reviews in Asana.** Each item that needs doing becomes one task in the BOB
