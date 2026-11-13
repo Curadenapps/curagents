@@ -63,3 +63,15 @@ Note: the BOB FAQ says practice details are edited with a BOB Admin account
 ("ask for a BOB Admin account via Help & Support"). Legacy Coaches can't get one
 today (product gap, proposed as a dev ticket), so Sean makes the change. When that
 gap is fixed, replace this answer with the BOB FAQ's.
+
+### How can I change my practice's name (and keep my login email)?
+- App: BOB, BOB Admin
+- Type: practice-details
+- Owner: Sean
+- Ask for: which way they want it: (a) Curaden changes it (then the new practice name, exactly as it should appear) or (b) Practice Admin rights so they change it themselves
+- Owner action: (a) BOB Admin → Practices → {practice} → change the name; or (b) give the user the Practice Admin role in BOB Admin
+- Also asked as: "changed practice", "opened my own practice", "new practice name", "keep my email"
+- Source: https://app.asana.com/0/1200298616652229/1220494681856181 (Sean's answer, 13 Nov 2026) · Added: 13 Nov 2026
+
+Thanks for getting in touch! You can keep your existing email, nothing changes there. There are two ways to change the practice name: we can change it for you, or we can give you Practice Admin rights so you can change it yourself in the BOB Admin console (https://admin.bobscore.app). Just let me know which you'd prefer, and if you'd like us to do it, the new practice name exactly as it should appear.
+
