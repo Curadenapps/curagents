@@ -6,5 +6,5 @@ disallowedTools: Bash
 ---
 
 Read `dream.md` §2–3, load the my-writing-style skill, then follow `agents/app-support.md` exactly ("What it posts on its own": replies go out on their own) and `SCOPE.md`.
-Asana writes go through asana-maintenance only. Never edit BOB Admin, handle passwords, write patient data, put an email address in a comment, or invite anyone to Asana.
+Asana writes go through asana-maintenance only. Never edit BOB Admin, handle passwords, write patient data, put an email address in a comment, or invite anyone beyond the one form task (step 1.3: always untick "Also invite to project").
 Return only the result JSON defined in `agents/app-support.md` (output schema), using task links only and no names or emails.

@@ -65,7 +65,7 @@ memory:
     - "notion: Curaden Education Hub Markets (collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce, view mode on view://4157e8aa-bbb4-81a8-ac7d-000ccdcaaf8a) and the Commercial Manager and Local Partners pages it links, read-only, to find the local contact for a requester's country"
   write:
     - "asana (through asana-maintenance): reply comments on form submissions, @mentioning the submitter's guest follower"
-    - "asana (through asana-maintenance): add the submitter as a follower by user gid when they're already in Asana (step 1); a brand-new guest is invited by the owner, never by App Support"
+    - "asana (through asana-maintenance): add the submitter as a follower by user gid when they're already in Asana (step 1); a brand-new guest is invited to that one task only, through the Asana web app when the run has a signed-in browser, otherwise by the owner from an Invite subtask"
     - "asana (through asana-maintenance): one '{Owner}: change in {system}' subtask per resolved request, assigned to the owner"
     - "asana (through asana-maintenance): section move Backlog/Refinement → Awaiting Feedback after a question; mark complete after the owner confirms"
     - "asana (through asana-maintenance): one dev ticket in BOB App 1204489225205419 per bug or product gap, moved to In Development 1213787653843309 so the Asana-to-Jira sync creates the Jira issue; linked both ways"
@@ -235,8 +235,25 @@ notes. Work down this list and stop at the first that gives a user gid:
    they exist. Add that gid as a follower (`update_tasks` → `add_followers: [gid]`),
    then mention them.
 3. **New to Asana.** The Asana connector **cannot invite someone new**: `add_followers`
-   with an email returns "Not a valid actor ID" (tested 12 and 13 Nov 2026), and App
-   Support never invites outside people itself. The owner does it in one click, so:
+   (or `assignee`) with an email returns "Not a valid actor ID", and an @mention tag
+   needs a user gid (tested 12 and 13 Nov 2026). Only the Asana web app can invite.
+
+   **Runs with a browser signed in to Asana** (Sean's or Fabian's own session with
+   Claude in Chrome; Sean approved this on 13 Nov 2026): post the reply first (below),
+   then invite through the comment box, which also posts the @mention line:
+   1. Open the form task in the browser (if Asana bounces to "Opening link in Asana…",
+      click "open this link in your browser").
+   2. In the comment box type the greeting, then `@` and the form email exactly, wait
+      for "Invite '{email}' via email" and pick it.
+   3. In the Invite box, **untick "Also invite to App Tasks, Requests & Feedback
+      project"** (Asana ticks it by default; check that the checkbox reads unchecked
+      before going on), then Send invitation.
+   4. Finish the line ("…, I've answered your request just above. Reply here and I'll
+      see it." plus the sign-off on the same line) and post it.
+   5. Check with `get_task` that the follower now matches the form email and that the
+      project's members didn't change.
+
+   **Cloud Routines** (no browser) can't invite, so the owner does it in one click:
    - **Post the reply anyway, in this run** (step 3), greeting by first name with no
      @mention. It waits on the task for them.
    - Hold an **`Invite: {form task title}`** subtask for the owner ("Scheduled run"
