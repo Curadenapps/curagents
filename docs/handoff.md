@@ -21,6 +21,28 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 13 Nov: the Inbox is the check-up log
+
+Sean: the 🚩 Inbox wasn't used. It is now where he checks up on what the agents picked
+up (`dream.md` §5 decision 1): Webex Sweep's item log, feedback for feedback-qa, and
+Source `agent` rows for whatever needs him (orchestrator escalations, run-log check
+findings). Done in Notion on 13 Nov: Source option `agent`, a database description,
+the view "🔎 Check-up: last 7 days", "Triage queue" renamed "⚠️ Needs a look (Status
+new)", "Reference" renamed "🗂️ Decisions & answers", and a linked check-up view on the
+Agent control room page. The orchestrator spec was brought up to date (schedules,
+outbox, live state from Notion instead of `dream.md` §4).
+
+Still open:
+- Old views "Awaiting approval" (Status `task`) and "Tickets by Kind" belong to the
+  retired pipeline; Sean decides whether to delete them.
+- Test and junk rows (two "[LIVE TEST] integration row", the "QA 29 Sep" heuristic
+  row, May–July rows with titles like "s" and "Hi All,"): Sean decides whether to
+  delete them; agents never delete Inbox rows.
+- The Agent run log's **Agent** select may lack `orchestrator` and `run-log-check`;
+  rows use `other` until Sean adds them.
+- First Curaden "Agent run log check" after the merge: check it writes an Inbox row
+  instead of only a chat message when something is wrong.
+
 ## 11 Nov (afternoon): Agent control room
 
 Sean asked to tidy Agents & Other Projects. The Agent registry, Agent run log and Webex
@@ -120,7 +142,7 @@ the courier on Personal). Sean runs prompt 2, then prompt 3.
 ## Useful IDs
 
 - Agent control room `4157e8aabbb48194bb25e351664b6462`: Agent registry `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418` · Agent run log `collection://9b260587-5c0d-4d90-947e-b6e10ba159df` · Webex outbox `collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`
-- Product Roadmap `collection://2ce24f93-f696-4d3b-98be-462df08c2c29` · Inbox `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db`
+- Product Roadmap `collection://2ce24f93-f696-4d3b-98be-462df08c2c29` · Inbox `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db` (Sean's check-up view `view://4177e8aa-bbb4-8111-848f-000ce8c2e1f6`)
 - Markets playbook `4087e8aabbb481e69b5cc1744133076b` · Launch KPIs `40f7e8aabbb48114bdbfe8715c020740`
 - Personal Routines: Truth Catcher `trig_01BxmV4KaG4CPbZMU4GmMHa7`, Jira sync `trig_01EREg8Ra4divTV2Jomidy9g`, Run log check `trig_01AN1dTjvTV3YNhhmLAqV4tL`
 - Jira cloudId `17835775-46a2-4e51-989d-809d887c4db5` (project BA) · Asana BOB App `1204489225205419`, App Tasks `1200298616652229`, Sean `1207214370347608`

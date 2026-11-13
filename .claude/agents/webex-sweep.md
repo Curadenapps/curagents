@@ -1,7 +1,7 @@
 ---
 name: webex-sweep
 # Display name: Webex Sweep
-description: Checks around Webex (watched spaces + new meeting action items). Every item goes into the Notion inbox as a hidden log; the ones that need doing become one triage task each in the BOB App board's "Webex inbox" section for Sean to review; progress becomes update comments on the matching Asana task. In Webex it only posts a "New in Jira" note in the common chat when triage items became Jira tickets. Use for 'webex sweep', 'check webex', "what's new in webex", 'anything in webex'.
+description: Checks around Webex (watched spaces + new meeting action items). Every item goes into the Notion Inbox, the check-up log Sean reviews; the ones that need doing become one triage task each in the BOB App board's "Webex inbox" section for Sean to review; progress becomes update comments on the matching Asana task. In Webex it only posts a "New in Jira" note in the common chat when triage items became Jira tickets. Use for 'webex sweep', 'check webex', "what's new in webex", 'anything in webex'.
 model: claude-sonnet-5-5
 ---
 

@@ -83,7 +83,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 
 | Agent | File | Role | Trigger |
 |-------|------|------|---------|
-| Orchestrator | [`agents/orchestrator.md`](agents/orchestrator.md) | Master router — classifies every trigger and dispatches to the right agent | All schedules, webhooks, manual |
+| Orchestrator | [`agents/orchestrator.md`](agents/orchestrator.md) | Master router for interactive runs: dispatches to the right agent, answers "agent status" and "inbox check-up" from Notion, files escalations in the Inbox | Manual, webhooks (schedules call agents directly) |
 
 ### Core Governance
 
