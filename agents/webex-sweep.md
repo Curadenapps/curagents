@@ -4,7 +4,7 @@ name: webex-sweep
 description: >
   Checks around Webex a few times a day so nothing said there gets lost. Reads the
   watched spaces and new meeting recaps in Webex web (Sean's sign-in, desktop app's
-  built-in browser). Every item goes into the Notion inbox as a hidden log; the ones
+  built-in browser). Every item goes into the Notion Inbox, the check-up log; the ones
   that need doing become one triage task each in the BOB App board's "Webex inbox"
   section, where Sean reviews them (12 Nov, Sean). Progress on existing work becomes
   a short update comment on the matching Asana task. In Webex it posts only one
@@ -32,7 +32,7 @@ memory:
     - "asana: BOB App board 1204489225205419, section 'Webex inbox' (the triage queue) and In Development"
     - "jira: project BA, issues created since the last 'New in Jira' note (to find the keys of triage tasks Sean sent to In Development)"
   write:
-    - "notion: Tasks & Notes inbox (the hidden log: one row per item, Asana link and Status kept in step with the triage task)"
+    - "notion: 🚩 Inbox (the check-up log: one row per item, Asana link and Status kept in step with the triage task)"
     - "asana: one triage task per item in BOB App › Webex inbox, update comments on existing tasks, all through asana-maintenance"
     - "webex: one \"New in Jira\" note in the common chat (644fd150) per run, only when Webex items became Jira tickets since the last note (skills/webex-web, scripts/webex-post.js)"
     - "notion: one Agent run log row per run"
@@ -61,8 +61,12 @@ feedback-qa) work from what was actually said.
 
 **How it flows (12 Nov, Sean):**
 
-1. **Capture quietly.** Every item goes into the Notion inbox: the hidden log and
-   fallback. Nobody reviews it there.
+1. **Log everything.** Every item goes into the Notion 🚩 Inbox, the check-up log
+   (13 Nov): Sean looks there to see what the sweep heard and where each item went,
+   not to triage. Triage stays in Asana. A row is in the Inbox's **📥 Open** tab only
+   while it is `new`; set it to `pushed` the moment its triage task exists, or
+   `reference` when nothing needs doing, so Open only shows what is really pending
+   (`agents/orchestrator.md` §5 "Open vs handled").
 2. **Capture less.** One item per topic, not per message; chatter and things already
    answered in the chat never become tasks ("Capture less" below).
 3. **Sean reviews in Asana.** Each item that needs doing becomes one task in the BOB
@@ -132,7 +136,7 @@ day, not twenty.
 - Never more than one triage task per topic per day; when in doubt, add to the
   existing one.
 
-### Log row (Notion Tasks & Notes, the hidden log)
+### Log row (Notion 🚩 Inbox, the check-up log)
 
 | Property | Value |
 |----------|-------|
@@ -295,6 +299,11 @@ The only Webex post the sweep makes. Each run, after the triage step:
   flag them under "What" with ⚠️.
 - Can't read a space (offline after 3 tries, signed out): log `partial` with the
   space name; don't guess its content.
+- **Stuck rows.** A row the sweep writes stays `new` only until its triage task
+  exists. A `new` webex/meeting row older than one run means a step failed: fix it
+  on the next run (create the task or set `reference`), and say so in the run log.
+- **Never delete Inbox rows**, and never touch rows with Source `agent` or `manual`
+  (those belong to the agents' flags and to feedback-qa).
 
 ## Run log
 
