@@ -4,10 +4,10 @@ description: >
   End-user support for requests sent through the Asana form "App Requests &
   Feedback", which land on the App Tasks, Requests & Feedback board. Classifies
   each new submission (support Curaden can resolve, bug or product gap for
-  Phinamic, or feedback) and answers it on its own, hourly in work hours, in the
-  owner's voice with a short "automated" sign-off, @mentioning the submitter's guest
-  follower so they get the email (and getting the owner to invite them when they
-  aren't in Asana yet). Every submission gets a reply in the run that finds it.
+  Phinamic, or feedback) and writes the reply on the task, hourly in work hours, in
+  the owner's voice with a short "automated" sign-off. Every submission gets a
+  reply written in the run that finds it; the owner checks it and invites the
+  submitter to read it (13 Nov 2026: nothing reaches a requester unchecked).
   Answers come from the product FAQs, the learned FAQ and playbook, and what Sean,
   Fabian and Phinamic already said on the board, in Jira and in Notion; it asks
   only for what's needed, tells the owner (Sean for BOB,
@@ -64,8 +64,8 @@ memory:
     - "notion: Product Roadmap 751b6071283e43e8b1a91054319e0db6, read-only (to answer 'is it planned' without promising dates)"
     - "notion: Curaden Education Hub Markets (collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce, view mode on view://4157e8aa-bbb4-81a8-ac7d-000ccdcaaf8a) and the Commercial Manager and Local Partners pages it links, read-only, to find the local contact for a requester's country"
   write:
-    - "asana (through asana-maintenance): reply comments on form submissions, @mentioning the submitter's guest follower"
-    - "asana (through asana-maintenance): add the submitter as a follower by user gid when they're already in Asana (step 1); a brand-new guest is invited to that one task only, through the Asana web app when the run has a signed-in browser, otherwise by the owner from an Invite subtask"
+    - "asana (through asana-maintenance): reply comments on form submissions the submitter doesn't follow yet; once the owner has added them, one @mention line pointing to it (step 1)"
+    - "asana (through asana-maintenance): one 'Review: {title}' subtask per reply for the owner, who checks it and adds the submitter to that one task to send it; App Support never adds followers or invites anyone itself"
     - "asana (through asana-maintenance): one '{Owner}: change in {system}' subtask per resolved request, assigned to the owner"
     - "asana (through asana-maintenance): section move Backlog/Refinement → Awaiting Feedback after a question; mark complete after the owner confirms"
     - "asana (through asana-maintenance): one dev ticket in BOB App 1204489225205419 per bug or product gap, moved to In Development 1213787653843309 so the Asana-to-Jira sync creates the Jira issue; linked both ways"
@@ -73,7 +73,7 @@ memory:
     - "notion: FAQ candidates and voice notes in the body of its own Agent run log row (anonymised); the maintenance session folds them into docs/app-support-faq.md and the owner's voice file by PR"
     - "mail (planned, disabled until IT approves a connector): reply drafts in support@bobscore.com and info@bobscore.com; sent only on the owner's 'send'"
 idempotency_key: "app-support:{task_gid}:{latest_story_gid}"
-dry_run: false  # live and autonomous since 10 Nov 2026 (Sean); see "What it posts on its own"
+dry_run: false  # writes on its own; since 13 Nov 2026 the owner checks every reply before it reaches a requester (see "What it posts on its own")
 output:
   schema:
     agent: app-support
@@ -84,7 +84,7 @@ output:
     errors: array
     summary: string
     new_requests: "array of {task_link, class: support|dev|feedback|spam, type, application, app_country}"
-    held_for_owner: "array of {task_link, owner, reason: invite|no-source|patient-data|spam|unsure|other-app|local-contact, subtask_link}"
+    held_for_owner: "array of {task_link, owner, reason: review|no-source|patient-data|spam|unsure|other-app|local-contact, subtask_link}"
     posted: "array of {task_link, type, story_gid}"
     changes_for_sean: "array of {task_link, subtask_link, where_in_bob_admin, exact_change}"
     dev_tickets: "array of {task_link, ticket_link, title, kind: bug|gap, new_or_linked}"
@@ -92,7 +92,7 @@ output:
     answered_from: "array of {task_link, source: notion-faq|learned-faq|playbook|board-history|jira|notion|new, faq_ref}"
     local_contacts: "array of {task_link, country, commercial_manager_page, partner_page, confirm_needed: bool} (Notion links only, no names or emails)"
     faq_candidates: "array of {question, answer, source_task_link, why: new|owner-edit|owner-reply|board-history|faq-gap} (anonymised)"
-    mentions: "array of {task_link, how: follower|existing-user|after-invite|none-yet}"
+    mentions: "array of {task_link, how: after-owner-added|held-draft-posted|waiting-for-owner}"
     voice_notes: "array of {owner: Sean|Fabian, pattern, source_task_link} (no requester details)"
     faq_page_gaps: "array of {faq_page, question, suggestion} for Sean to add to the public FAQ"
     operator: "sean|fabian|routine"
@@ -113,8 +113,8 @@ App Support closes that loop:
 
 1. picks up each new form submission,
 2. decides what kind of request it is,
-3. answers the submitter on the task, on its own, so they get the email (hourly in
-   work hours, so nobody waits much more than an hour),
+3. writes the answer on the task (hourly in work hours); the owner checks it and adds
+   the submitter, and the next run @mentions them so they get the email,
 4. when they answer, tells the owner exactly what to change (BOB Admin for Sean), and
 5. closes the task once the owner says it's done, and
 6. sends bugs and product gaps straight to Jira for Phinamic.
@@ -188,8 +188,9 @@ details himself.
 
 - **Class**: support, type `practice-details`, plus a product gap (legacy Coaches can't
   become Practice Admin or edit practice info).
-- **Reply** (posted on its own by Sean's Routine in Sean's voice, @mentioning the submitter's guest follower):
-  > Hi @Name, thanks for getting in touch!
+- **Reply** (written on the task by Sean's Routine in Sean's voice; Sean checks it on
+  the "Review" subtask, adds the submitter, and the next run @mentions them):
+  > Hi Name, thanks for getting in touch!
   >
   > At the moment your account can't edit the practice details, so I'll update the address for you. Could you reply here with the new practice address (street and number, postcode, city and country)?
   >
@@ -223,50 +224,48 @@ System`, `Area`, `Describe your request`. The custom fields `App Country`,
 `Application(s)`, `Request Type` and `🚦 Priority` hold the same data and win when they
 differ (someone may have corrected them).
 
-**Reach the submitter: find who to @mention.** A comment only emails the submitter if
-they follow the task, and the @mention is what makes the email say "you were
-mentioned". The form doesn't add them as a follower. The email address is in the
-notes. Work down this list and stop at the first that gives a user gid:
+**Reach the submitter: the owner validates, then invites.** Since 13 Nov 2026
+(Sean: "we need to validate"), App Support writes the reply but **nothing it writes
+reaches a requester until the owner has checked it**. The owner then decides whether
+to invite the requester to read it. This keeps runs cheap (no browser, no invite
+logic) and every answer is checked by a person while the agent is still being
+validated. A comment only emails the people following the task, and the form doesn't
+add the submitter as a follower, so:
 
-1. **Already a follower.** Fetch the task's `followers` with `followers.email` and pick
-   the one whose email matches (case-insensitive).
-2. **Already in Asana** (a guest from an earlier request, like `1220394042360388` in
-   the worked example). `get_user` with the email as `user_id` returns their gid when
-   they exist. Add that gid as a follower (`update_tasks` → `add_followers: [gid]`),
-   then mention them.
-3. **New to Asana.** The Asana connector **cannot invite someone new**: `add_followers`
-   (or `assignee`) with an email returns "Not a valid actor ID", and an @mention tag
-   needs a user gid (tested 12 and 13 Nov 2026). Only the Asana web app can invite.
+1. **The submitter doesn't follow the task** (the usual case for a new submission).
+   - **Post the reply on the form task now** (step 3), greeting by first name with
+     no @mention and no email address. Only the team sees it: the submitter can't
+     until they're added.
+   - **Hold a `Review: {form task title}` subtask** for the owner ("Scheduled run"
+     step 5). Notes: the form task link, the submitter's email (it stays on this
+     private task, never in a comment), what the reply was based on, and:
+     "Read the reply on the task. Wrong? Edit or delete the comment (it's posted from
+     your account). **To send it**: the + next to the member avatars (top right) →
+     type the email → **untick 'Also invite to App Tasks, Requests & Feedback
+     project'** → Send invitation (someone already in Asana is just added). **Not
+     sending**: comment 'skip'." Unticking matters: otherwise they'd see the whole
+     board, with other people's requests.
+   - **Next runs**: as soon as a follower matches the form email (case-insensitive,
+     `followers.email`) and App Support hasn't @mentioned them yet, post one short
+     line in the voice: "Hi @{first name}, I've answered your request just above.
+     Reply here and I'll see it." plus the sign-off. That line is what emails them.
+     Then comment "Done: sent" on the Review subtask and tick it. If the owner deleted
+     the reply and wrote their own, post nothing: comment "Done: owner replied" and
+     tick it. "skip": comment "Done: skipped" and tick it; the form task stays as it
+     is for the owner.
+2. **The submitter already follows the task** (a follow-up in an ongoing
+   conversation, or someone the owner added earlier). A comment would email them
+   straight away, so **don't post it**. Put the draft in a `Review: {form task title}`
+   subtask above a line `---`. The owner edits it if needed and ticks the subtask; the
+   next run posts it @mentioning them (`<a data-asana-gid="{gid}"/>`) and comments
+   "Posted: {story link}" (the held-reply flow in "Scheduled run" step 5).
 
-   **Runs with a browser signed in to Asana** (Sean's or Fabian's own session with
-   Claude in Chrome; Sean approved this on 13 Nov 2026): post the reply first (below),
-   then invite through the comment box, which also posts the @mention line:
-   1. Open the form task in the browser (if Asana bounces to "Opening link in Asana…",
-      click "open this link in your browser").
-   2. In the comment box type the greeting, then `@` and the form email exactly, wait
-      for "Invite '{email}' via email" and pick it.
-   3. In the Invite box, **untick "Also invite to App Tasks, Requests & Feedback
-      project"** (Asana ticks it by default; check that the checkbox reads unchecked
-      before going on), then Send invitation.
-   4. Finish the line ("…, I've answered your request just above. Reply here and I'll
-      see it." plus the sign-off on the same line) and post it.
-   5. Check with `get_task` that the follower now matches the form email and that the
-      project's members didn't change.
-
-   **Cloud Routines** (no browser) can't invite, so the owner does it in one click:
-   - **Post the reply anyway, in this run** (step 3), greeting by first name with no
-     @mention. It waits on the task for them.
-   - Hold an **`Invite: {form task title}`** subtask for the owner ("Scheduled run"
-     step 5), with these notes: "Open the form task → the + next to the member avatars
-     (top right) → type {email from the form} → **untick 'Also invite to App Tasks,
-     Requests & Feedback project'** → Send invitation. That's all; the next run
-     @mentions them." Unticking matters: otherwise they'd see the whole board, with
-     other people's requests.
-   - **Next runs**: as soon as a follower matches the form email and App Support hasn't
-     @mentioned them yet, post one short line in the voice: "Hi @{first name}, I've
-     answered your request just above. Reply here and I'll see it." plus the sign-off.
-     That line is what sends them the email. Then tick the Invite subtask with
-     "Done: invited". If they replied already, skip the line.
+App Support never adds or invites anyone itself: no `add_followers`, no browser
+invites. Adding the submitter is the owner's OK to send. (The Asana connector can't
+invite someone new anyway: `add_followers` with an email returns "Not a valid actor
+ID", tested 12 and 13 Nov 2026.) If the owner asks in a session with a signed-in
+browser ("invite them"), the same steps apply: the comment box, `@` and the email,
+"Invite '{email}' via email", **untick "Also invite to project"**, Send invitation.
 
 The follower's display name can be short or partial ("Ma"), so the greeting uses the
 first name from the `Name` field instead.
@@ -349,8 +348,8 @@ They're in the repo so every cloud run has them. Write in the language of the re
 
 A reply:
 
-1. Opens with the voice file's greeting, @mentioning the guest follower (Name is the
-   first name from the form).
+1. Opens with the voice file's greeting and the first name from the form (an
+   @mention only when the draft is posted to someone already following, step 1.2).
 2. Says plainly what's possible today ("At the moment your account can't edit the
    practice details, so I'll update the address for you.").
 3. Asks **only** for what's needed to resolve it, listed in one sentence, or gives the
@@ -361,9 +360,10 @@ A reply:
    People must know they're talking to an automated assistant (EU AI Act transparency
    rules).
 
-**Every submission gets a reply in the run that finds it.** Not finding the
-submitter's follower (step 1) and not finding an answer are never reasons to stay
-silent. Only spam and patient data are (step 2 and "Never" below).
+**Every submission gets a reply written in the run that finds it** (posted on the
+task, or held as a draft when the submitter already follows it: step 1). Not finding
+an answer is never a reason to skip it. Only spam and patient data are (step 2 and
+"Never" below). The owner's check (step 1) decides whether it reaches the submitter.
 
 **Where the answer comes from: research before replying.** Never answer from memory,
 and never stop at the first source that comes up empty. Work through all of these,
@@ -423,9 +423,11 @@ for Sean.
 - make clinical, efficacy or medical claims (`dream.md` §2).
 
 **Posting.** In rich text (`html_text`), through asana-maintenance, from the run's
-Asana account: `<body>Hi <a data-asana-gid="{follower_gid}"/>, {rest of the voice
-file's greeting}…</body>`, with the sign-off above. Use the gid from step 1 and
-nothing else in the tag. With no gid yet (step 1.3): `<body>Hi {first name}, …</body>`.
+Asana account: `<body>Hi {first name}, {rest of the voice file's greeting}…</body>`,
+with the sign-off above. A held draft the owner approved for someone already following
+(step 1.2), and the pointer line after the owner adds them (step 1.1), use
+`<a data-asana-gid="{follower_gid}"/>` in place of the first name, with that gid and
+nothing else in the tag.
 After a question, move the task from **Inbox** or **Refinement (WIP)** to **Awaiting
 Feedback**; leave any other section alone. (The board's sections: Inbox, Refinement
 (WIP), Awaiting Feedback, Development, Review for Deployment, Ready for Deployment,
@@ -436,13 +438,14 @@ French, Spanish and Portuguese use the formal address (Sie, Lei, vous, usted, o
 senhor / a senhora), even when the request is informal.
 
 **No answer.** After 5 working days in Awaiting Feedback with no reply, one gentle
-reminder (same rules). After that App Support stops; Truth Catcher's "Awaiting feedback
+reminder, held as a Review draft like any message to someone following (step 1.2). After that App Support stops; Truth Catcher's "Awaiting feedback
 too long" check asks the assignee whether to chase or close.
 
 ## 4. When the submitter answers
 
 App Support reads the new comment from the guest follower and checks it has everything
-asked for. If something's missing, it asks once for just that piece.
+asked for. If something's missing, it asks once for just that piece, as a Review
+draft for the owner (step 1.2: the submitter follows the task now).
 
 When it's complete, App Support **doesn't change anything in BOB or any other system
 itself**. It creates one subtask on the form task, assigned to the owner, named
@@ -463,7 +466,8 @@ edited in BOB Admin), it says so and proposes a dev ticket instead.
 the subtask, App Support:
 
 1. posts one short reply to the submitter that it's done ("All done, @Name: your
-   practice address is now {city} in BOB. Let me know if anything still looks wrong!"),
+   practice address is now {city} in BOB. Let me know if anything still looks wrong!").
+   The owner's "done" is their OK for this one line, so it isn't held,
 2. marks the form task complete, and moves it to Done if it sat in Backlog, Refinement
    or Awaiting Feedback. A task in Development, Review or Ready for Deployment stays
    where it is (it's tracking dev work); App Support only lists it for the owner.
@@ -586,19 +590,22 @@ connectors), one per owner ("Two Routines, split by owner"). A request that land
    Read Notion in view mode only (`RUNTIME.md` "Reading Notion"): this Routine runs
    every hour, so SQL here would use up the workspace's query allowance.
 2. **Pick up and classify** new form submissions and new stories (steps 1–2), plus
-   form tasks whose submitter has just become a follower but hasn't been @mentioned
-   yet (step 1.3), and form tasks with no App Support reply yet, however old (a
+   form tasks whose submitter the owner has just added but who hasn't been @mentioned
+   yet (step 1.1), and form tasks with no App Support reply yet, however old (a
    submission an earlier run held without replying gets its reply now). Nothing
    new since the last run: log `no-op` and stop (most hourly runs end here).
-3. **Answer** every request on its own (step 3, research first), handle replies from
-   submitters (step 4), send dev requests to Jira (step 5), post the @mention line for
-   newly invited submitters (step 1.3), and close tasks the owner confirmed. If the
-   owner already replied by hand on a form task, don't reply on top of it: learn from
-   it (step 6) and only make sure the submitter is reached (step 1).
+3. **Write the answer** to every request (step 3, research first) and hold it for
+   review (step 1), handle replies from submitters (step 4), send dev requests to Jira
+   (step 5), post the @mention line for submitters the owner added (step 1.1), and
+   close tasks the owner confirmed. If the owner already replied by hand on a form
+   task, don't reply on top of it: learn from it (step 6).
 4. **Post the held replies the owner ticked** (below).
-5. **Hold for the owner** what App Support can't do or mustn't answer alone. The
-   reply to the submitter still goes out in every case except spam and patient data:
-   - `invite`: the submitter is new to Asana (step 1.3). Subtask "Invite: {title}";
+5. **Hold for the owner**: every reply (step 1), plus what App Support can't do or
+   mustn't answer alone. A reply is still written in every case except spam and
+   patient data:
+   - `review`: every reply waits for the owner's check (step 1). Subtask
+     "Review: {title}". When another reason applies too, it goes in the same
+     subtask's notes, not a second subtask;
    - `no-source`: nothing in any source answered it (step 3);
    - patient data in the request, spam, a dev request outside Phinamic's apps, a
      request for the local team ("Local contact": the subtask names the contact), or
@@ -631,25 +638,33 @@ connectors), one per owner ("Two Routines, split by owner"). A request that land
 
 Fabian's working days apply: no new subtasks or @mentions for him Friday to Sunday.
 On a Friday, Sean's Routine still answers Fabian's requests, but anything it holds for
-him or any change he has to make waits on his "needs you" task until Monday; the
-submitter already has a reply. Change subtasks for Fabian are created on Friday
+him or any change he has to make waits on his "needs you" task until Monday. Change subtasks for Fabian are created on Friday
 without an assignee and assigned to him on Monday's first run. The one exception is
-an `Invite` subtask on a Friday: it goes to **Sean**, because the submitter would
+a `Review` subtask on a Friday: it goes to **Sean**, because the submitter would
 otherwise wait until Monday to hear anything.
 
 ## What it posts on its own
 
-Live since 10 Nov 2026 (Sean: "everything auto"). App Support posts every reply,
-reminder, closing note and follower add itself, and sends bugs and product gaps to
-Jira. It holds for the owner only the cases in "Scheduled run" step 5.
+Since 13 Nov 2026 (Sean: "we need to validate"), **nothing App Support writes
+reaches a requester until the owner has checked it** (step 1). On its own it:
+
+- writes every reply as a comment on a form task the submitter doesn't follow yet
+  (only the team sees it), with a Review subtask for the owner;
+- posts the @mention pointer line once the owner has added the submitter;
+- posts a held draft the owner ticked, and the "All done" line after the owner's
+  "done";
+- sends bugs and product gaps to Jira (10 Nov 2026, unchanged).
+
+It never adds a follower or invites anyone. From 10 to 13 Nov 2026 replies went out
+unchecked ("everything auto"); Sean brings that back for a request type by listing it
+below by PR once its answers have proven right.
 
 The hard rules still apply to every post, automated or not: never a password, code or
 login link, never patient data, never an email address, never a date or feature
-promise, never a clinical claim, always the voice file's "(automated)" sign-off. If Sean wants a
-type back under approval, he lists it here by PR and App Support holds it instead:
+promise, never a clinical claim, always the voice file's "(automated)" sign-off.
 
-| Held for the owner as well | Since |
-|----------------------------|-------|
+| Sent without the owner's check | Since |
+|--------------------------------|-------|
 | (none) | |
 
 ## Mailboxes: support@ and info@bobscore.com (planned, not active)

@@ -3,9 +3,10 @@
 App Support answers the people who send requests through the Asana form "App
 Requests & Feedback". It runs on its own in the cloud every hour (07:20 to 19:20
 Zurich), reads each new submission on **App Tasks, Requests & Feedback**, and
-answers the submitter on the task, in the owner's own voice, with a short sign-off
-saying it was sent by their support assistant (automated). Bugs and product gaps go
-straight to Jira.
+writes the answer on the task, in the owner's own voice, with a short sign-off
+saying it was sent by their support assistant (automated). The submitter only sees it
+once the owner has checked it and added them (since 13 Nov 2026). Bugs and product
+gaps go straight to Jira.
 
 Requests are split by owner:
 
@@ -21,19 +22,27 @@ The full rules are in [`agents/app-support.md`](../agents/app-support.md).
 
 ## What you do (all in Asana, nothing to install)
 
-1. **Make the changes.** When a submitter sends the details App Support asked for, you
+1. **Check each reply and send it.** Your task **"App Support: needs you (Fabian)"**
+   (in My Tasks, not on the board, so submitters never see it) gets a
+   **"Review: {title}"** subtask for every reply. Open the form task and read the
+   reply (only the team can see it so far). Wrong? Edit or delete the comment. To send
+   it: the **+** next to the member avatars (top right) → type the email from the
+   subtask → **untick "Also invite to App Tasks, Requests & Feedback project"** → Send
+   invitation. The next hourly run @mentions them, which emails them, and ticks the
+   subtask. Not sending: comment **"skip"**. When the submitter already follows the
+   task, the reply is in the subtask above a `---` line instead: fix it if needed and
+   **tick it**, and the next run posts it.
+2. **Make the changes.** When a submitter sends the details App Support asked for, you
    get a subtask on the form task, "Fabian: change in {system}", with the exact change.
    Make it, tick the subtask, and App Support tells the submitter and closes the task.
-2. **Answer what it can't.** Your task **"App Support: needs you (Fabian)"** (in My
-   Tasks, not on the board, so submitters never see it) gets one subtask per request
-   it held back: no answer in the FAQs, patient data, spam, or something it wasn't
-   sure about. The submitter has already been told the team will get back to them.
-   For each one, either:
+3. **Answer what it can't.** The same task also gets a subtask for anything it
+   couldn't answer alone: no answer anywhere, patient data, spam, or something it
+   wasn't sure about. For each one, either:
    - write or fix the reply above the `---` line in the subtask's notes and **tick
      it**: the next hourly run posts it; or
    - reply on the form task yourself; or
    - comment **"skip"**.
-3. **Correct it when it's wrong.** Reply on the form task with the right answer. App
+4. **Correct it when it's wrong.** Reply on the form task with the right answer. App
    Support learns from your correction, and from how you word it.
 
 ## Your voice
@@ -81,8 +90,8 @@ whenever yours is off, Sean's Routine covers your requests, so nothing waits for
 > This Routine handles Fabian's requests only (everything that isn't BOB); leave BOB
 > requests alone. Write every reply in Fabian's voice exactly as
 > `docs/app-support-voice-fabian.md` says, with its sign-off. Do the run exactly as
-> `agents/app-support.md` "Scheduled run" describes: answer every request on its own
-> from the FAQs;
+> `agents/app-support.md` "Scheduled run" describes: write the answer to every
+> request after researching it, and hold it on a Review subtask for Fabian;
 > send Curaprox app bugs and product gaps to Jira by moving one ticket into In
 > Development on BOB App; hold only what the spec says for Fabian's "App Support:
 > needs you" task; post the held replies Fabian ticked; record anonymised FAQ
