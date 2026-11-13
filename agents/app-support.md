@@ -226,6 +226,28 @@ If no follower matches, the reply can't reach them. App Support adds the email f
 the notes as a follower (Asana invites them as a guest on this task only), then
 replies. Only the address the submitter typed into the form, never another one.
 
+**When the follower can't be added** (seen 12–13 Nov: the Asana connector rejects an
+email as a follower, "Not a valid actor ID"): the reply still gets written, the same
+run. App Support:
+1. holds it on the owner's "needs you" subtask with the reply ready to paste, and
+   the one step the owner has to do first, in the subtask's first line: "Add
+   {email from the form} as a follower on the task (Followers → + → paste the
+   address), then tick this." The address stays in Asana, as everywhere else.
+2. On the next run after the owner ticks it, finds the new follower, posts the reply
+   @mentioning them, and moves the task to Awaiting Feedback (step 3).
+3. Never posts the reply without a matching follower, and never retries the follower
+   add more than once per task. It reports the blocker once per run, not once per task.
+4. Uses the one standing "needs you" task per owner. If a second one exists, it moves
+   its subtasks to the first, marks the second complete and says so in the summary.
+Once mail is connected ("Mailboxes"), an email reply from the matching mailbox is the
+fallback instead, under the same "send" rule.
+
+**Jira issues on form tasks aren't App Support's.** An Asana rule on the board can
+attach a Jira issue (BA-…) to a form task when it arrives. App Support never treats
+that as a dev hand-off: it classifies and answers as usual, and only its own step 5
+dev ticket in BOB App counts. It lists any form task with a Jira attachment in
+`errors` for Sean, once.
+
 **Every comment on a form task emails the guest follower.** So App Support writes only
 requester-facing replies as comments. Notes for the owner go in subtasks or in the run
 summary, never as task comments.
