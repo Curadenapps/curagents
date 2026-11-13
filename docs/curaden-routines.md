@@ -67,7 +67,9 @@ Schedule: weekdays 10:15.
 > the Agent registry for what was due. If a spec, skill or script is wrong, fix it
 > in a PR on `Curadenapps/curagents` and merge it once it's clean. If it's the PC
 > (asleep, desktop app closed, Webex signed out), tell Sean exactly what to fix.
-> Tick Reviewed on every row you looked at. Nothing wrong: no message.
+> "Tell Sean" means one row in the Notion 🚩 Inbox with Source `agent`, as
+> `RUNTIME.md` "Monitoring" describes (one open row per issue); do the Inbox check
+> there too. Tick Reviewed on every row you looked at. Nothing wrong: no message.
 
 ### Team update draft (Curaden)
 
