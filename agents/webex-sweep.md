@@ -254,10 +254,12 @@ The only Webex post the sweep makes. Each run, after the triage step:
    3 days whose summary is the task name.
 2. **Post one note** in the common chat (`644fd150-f1e6-11f0-886e-874a9ad69e32`),
    only if there is at least one new key, with `scripts/webex-post.js`,
-   `marker: "Webex Sweep: Jira {YYYY-MM-DD HH:mm}"`, `send: true`, no @mentions
+   `marker: "New in Jira from the chat ({D Mon}, {HH:mm})"` (the heading line as
+   the note shows it, without the bold, so the marker is in the message as
+   `webex-post.js` requires), `send: true`, no @mentions
    (Jira already tells the assignee):
 
-   > 🛠️ **New in Jira from the chat** ({D Mon})
+   > 🛠️ **New in Jira from the chat** ({D Mon}, {HH:mm})
    > - BA-{n} {Jira summary} ({Jira assignee, or "unassigned"})
    >
    > Details are in the tickets.
