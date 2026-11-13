@@ -34,10 +34,12 @@ outbox, live state from Notion instead of `dream.md` §4).
 
 Still open:
 - Old views "Awaiting approval" (Status `task`) and "Tickets by Kind" belong to the
-  retired pipeline; Sean decides whether to delete them.
-- Test and junk rows (two "[LIVE TEST] integration row", the "QA 29 Sep" heuristic
-  row, May–July rows with titles like "s" and "Hi All,"): Sean decides whether to
-  delete them; agents never delete Inbox rows.
+  retired pipeline. Sean said delete them (13 Nov), but the Notion connector can't
+  delete views: Sean removes them in Notion (right-click the view tab → Delete).
+- Test and junk rows: moved to Trash on 13 Nov at Sean's request (the "QA 29 Sep"
+  heuristic row, "s", "Hi All,", and the duplicate "- We have to start updating…";
+  the two "[LIVE TEST]" rows were already in Trash). Restorable from Notion Trash.
+  Agents still never delete Inbox rows on their own.
 - The Agent run log's **Agent** select may lack `orchestrator` and `run-log-check`;
   rows use `other` until Sean adds them.
 - First Curaden "Agent run log check" after the merge: check it writes an Inbox row
