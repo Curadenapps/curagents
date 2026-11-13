@@ -1,4 +1,22 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__Notion__notion-fetch",
+      "mcp__Notion__notion-search",
+      "mcp__Notion__notion-query-data-sources",
+      "mcp__Notion__notion-update-page",
+      "mcp__Notion__notion-create-pages",
+      "mcp__Notion__notion-create-comment",
+      "mcp__Notion__notion-get-comments",
+      "mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-fetch",
+      "mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-search",
+      "mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-query-data-sources",
+      "mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-update-page",
+      "mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-pages",
+      "mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-create-comment",
+      "mcp__58bd2daa-0ddc-4a1b-943b-fea8681cc8c6__notion-get-comments"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
