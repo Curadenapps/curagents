@@ -41,7 +41,7 @@ Database **🚩 Inbox** (the check-up log, formerly "Tasks & Notes"):
 or rows mode (`RUNTIME.md` "Reading Notion").
 
 This database is shared with Webex Sweep (Source `webex`/`meeting`: new → pushed,
-reference or skip) and with the agents' flags for Sean (Source `agent`). Its `Status`
+info only or skip) and with the agents' flags for Sean (Source `agent`). Its `Status`
 column belongs to them. Skip `agent` rows entirely (no QA value). This skill tracks
 its own progress in the **QA** column instead:
 
@@ -58,7 +58,7 @@ body (paste as much raw text as you like), and set `Source`. For a full UAT,
 also set **QA = uat** and put the build or version in the title.
 
 Status rule: when the agent claims a row whose `Status` is `new` as feedback,
-it sets `Status = reference` so the task pipeline does not push it to Asana.
+it sets `Status = info only` so the task pipeline does not push it to Asana.
 It never changes any other `Status` value.
 
 ---

@@ -31,7 +31,7 @@ memory:
     - skills/uat/references/uat-log.md
     - "notion: Tasks & Notes (collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db), view mode on view://4157e8aa-bbb4-815b-b0a6-000cb183ca38, never SQL (RUNTIME.md 'Reading Notion')"
   write:
-    - "notion: Tasks & Notes — QA column; Status new → reference for claimed feedback only"
+    - "notion: Tasks & Notes — QA column; Status new → info only for claimed feedback only"
     - ".feedback/reports/ (gitignored)"
     - "webex: QA space 644fd150-f1e6-11f0-886e-874a9ad69e32 only, via Webex web (skills/webex-web)"
     - "confluence: child pages of BOB App UAT (1933795), full UATs only"
@@ -71,7 +71,7 @@ from the schedule; "send QA report" from Sean can add one any time.
 - The Webex QA space (`644fd150-f1e6-11f0-886e-874a9ad69e32`) is the only chat a
   report goes to, posted through Webex web per `skills/webex-web/SKILL.md` (the
   `spaceId` check refuses any other space); never post reports anywhere else.
-- Never change the inbox `Status` column except `new` → `reference` on rows
+- Never change the inbox `Status` column except `new` → `info only` on rows
   claimed as feedback. The rest of that column belongs to the task pipeline.
 - Publish to Confluence only when a row has QA = `uat` (set by a human).
 - No "already addressed" without a ledger source link. No guessed versions or dates.
