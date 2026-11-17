@@ -243,5 +243,5 @@ the agent's spec says what may leave Notion.
 | [feedback-qa](../../agents/feedback-qa.md) | Queues the QA report (+ PDF) for the QA space in the outbox every Friday 10:10 when the threshold is met |
 | [roadmap-watch](../../agents/roadmap-watch.md) | Queues the Monday summary with the report link for App Team in the outbox |
 | Webex courier (`RUNTIME.md`) | The only scheduled poster: sign-in check, posts the outbox, runs Webex Sweep |
-| [webex-sweep](../../agents/webex-sweep.md) | Reads App Team, the QA space and Curaden / Phinamic, plus new meeting recaps (action items only). Posts only a "New in Jira" note in the common chat when triage items became Jira tickets |
+| [webex-sweep](../../agents/webex-sweep.md) | Reads App Team, the QA space and Curaden / Phinamic, plus new meeting recaps (summary, action items and the full transcript). Posts only a "New in Jira" note in the common chat when triage items became Jira tickets |
 | Any new agent | Load this skill; add its spaces to the table above |
