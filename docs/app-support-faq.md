@@ -60,6 +60,67 @@ you. Could you reply here with the new practice address (street and number, post
 city and country)? Let me know and I'll change it in BOB for you.
 
 Note: the BOB FAQ says practice details are edited with a BOB Admin account
-("ask for a BOB Admin account via Help & Support"). Legacy Coaches can't get one
-today (product gap, proposed as a dev ticket), so Sean makes the change. When that
-gap is fixed, replace this answer with the BOB FAQ's.
+("ask for a BOB Admin account via Help & Support"). Phinamic (Derek La on BA-325,
+10 Nov 2026) says Practice Admins can't open BOB Admin, so don't offer a practice BOB
+Admin access or "Practice Admin rights to change it yourself". Sean makes the change
+in BOB Admin. On BA-325 Sean left the user as a Coach ("the permissions are the
+same"). The FAQ line is listed for Sean to correct.
+
+### How can I change my practice's name and keep my email address?
+- App: BOB, BOB Admin
+- Type: practice-details
+- Owner: Sean
+- Ask for: the new practice name exactly as it should appear
+- Owner action: BOB Admin → Practices → {practice} → Name: replace with the new name
+- Also asked as: "Practice name change", "I opened my own practice", "new practice"
+- Source: https://app.asana.com/0/1200298616652229/1220494681856181, https://app.asana.com/0/1200298616652229/1220394967220814 (BA-325) · Added: 13 Nov 2026
+
+Your email stays the same, nothing changes there. Could you reply here with the new
+practice name, exactly as it should appear in BOB? I'll change it for you.
+
+Note: if they've moved to a different practice that's already on BOB (rather than
+renaming theirs), coaches linked to more than one practice switch by tapping the
+practice name at the top of the app (BOB FAQ). Ask which it is when the request is
+unclear. Whether a practice can get BOB Admin access to do this themselves is
+`[confirm: Sean]` (see the entry above).
+
+### How do I activate or register for the BOB app? I never got a login.
+- App: BOB
+- Type: login
+- Owner: Sean
+- Ask for: whether they've filled in the sign-up form, and with which email address
+- Owner action: check BOB Admin → Practices → Pending for the practice; approve, or
+  ask Phinamic to check the request if nothing is there
+- Also asked as: "activate my app", "Gostaria de ativar a minha aplicação", "no
+  confirmation email", "user activation", "wo kann man sich registrieren" (BOB)
+- Source: https://app.asana.com/0/1200298616652229/1212815355013182 (CA20-3403),
+  BOB — FAQ "How do I sign up" and "I signed up but haven't received any emails" · Added: 13 Nov 2026
+
+There's no separate activation step: the practice signs up once on the form
+(https://curaprox-apps.com/contact-form). Once it's approved, which takes up to 24
+hours, each coach gets their own login by email from support@bobscore.com. The first
+email you get is only an acknowledgement, with no login in it. If nothing has arrived,
+please check your spam folder first. If you've already signed up, reply here with the
+email address you used and I'll check it for you.
+
+Note: on CA20-3403 (Jan 2026) Phinamic found "no actual request was made": the form
+hadn't really been submitted. So the first question is always whether they finished
+the form, and with which address. A Main BOB User gets no app login unless they also
+added themselves as a coach (playbook §1).
+
+### Where do I register for the Curaprox app?
+- App: Curaprox app
+- Type: how-to
+- Owner: Fabian
+- Ask for: nothing, unless it isn't clear whether they mean the Curaprox app or BOB
+- Owner action: none
+- Also asked as: "Wo kann man sich registrieren", "sign up", "create an account"
+- Source: Curaprox — FAQ "Do I need to create an account" and "In which countries" · https://app.asana.com/0/1200298616652229/1220507710177511 · Added: 13 Nov 2026
+
+You don't need an account to use the Curaprox app's content. You only sign up, in the
+app itself, if you want to track your progress or collect points. The app is
+available today in South Africa, Slovenia and the United Arab Emirates. If your
+country isn't listed, it hasn't launched there yet, so access may be limited for now.
+
+Note: if the person is a dentist or hygienist, they probably mean BOB: give the BOB
+sign-up answer above instead, or ask which app they mean.
