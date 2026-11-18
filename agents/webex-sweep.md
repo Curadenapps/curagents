@@ -259,6 +259,14 @@ away, so a second run can't create it twice.
 | Assigns it (himself, Fabian, anyone) and moves it to To-Do or Backlog | An internal task; Truth Catcher treats it like any other BOB App task from then on |
 | Completes or deletes it in Webex inbox | Dropped |
 
+**Screenshots go on before the move.** The "BOB App Development Task Trigger" rule copies
+the Asana task's files to the new Jira issue ("Attach files from the Asana task", Sean,
+18 Nov 2026), but only the files already on the task when it moves to In Development; it
+runs once, and moving a task out and back in makes a duplicate Jira issue. When the chat
+item has a screenshot or file, the triage task says so in its first line
+("📎 Screenshot in the chat: attach before moving to In Development") with the message
+link, since the Asana connector can't upload files.
+
 **Keep the log in step:** each run, for log rows with an `Asana link` from the last
 14 days, read the task: completed or deleted while still in Webex inbox → Status
 `skip`; moved to In Development → Kind `Development`. Nothing else.
