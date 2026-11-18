@@ -3,8 +3,9 @@ name: webex-sweep
 # Display name: Webex Sweep
 description: >
   Checks around Webex a few times a day so nothing said there gets lost. Reads the
-  watched spaces and new meeting recaps in Webex web (Sean's sign-in, desktop app's
-  built-in browser). Every item goes into the Notion inbox as a hidden log; the ones
+  watched spaces and new meeting recaps (AI summary, action items and the full
+  transcript) in Webex web (Sean's sign-in, desktop app's
+  built-in browser). Every item goes into the Notion Inbox, the check-up log; the ones
   that need doing become one triage task each in the BOB App board's "Webex inbox"
   section, where Sean reviews them (12 Nov, Sean). Progress on existing work becomes
   a short update comment on the matching Asana task. In Webex it posts only one
@@ -32,7 +33,7 @@ memory:
     - "asana: BOB App board 1204489225205419, section 'Webex inbox' (the triage queue) and In Development"
     - "jira: project BA, issues created since the last 'New in Jira' note (to find the keys of triage tasks Sean sent to In Development)"
   write:
-    - "notion: Tasks & Notes inbox (the hidden log: one row per item, Asana link and Status kept in step with the triage task)"
+    - "notion: 🚩 Inbox (the check-up log: one row per item, Asana link and Status kept in step with the triage task)"
     - "asana: one triage task per item in BOB App › Webex inbox, update comments on existing tasks, all through asana-maintenance"
     - "webex: one \"New in Jira\" note in the common chat (644fd150) per run, only when Webex items became Jira tickets since the last note (skills/webex-web, scripts/webex-post.js)"
     - "notion: one Agent run log row per run"
@@ -42,7 +43,8 @@ output:
   schema:
     window: "{since, until}"
     spaces_read: "string[] (with message counts)"
-    meetings_read: "string[]"
+    meetings_read: "string[] (title + start; summary and transcript read)"
+    meetings_pending: "string[] (no summary or transcript yet; next run)"
     log_rows_created: "array of {title, status, notion_url}"
     triage_tasks_created: "array of {title, route, task_url}"
     asana_updates: "array of {task, comment_url}"
@@ -61,8 +63,12 @@ feedback-qa) work from what was actually said.
 
 **How it flows (12 Nov, Sean):**
 
-1. **Capture quietly.** Every item goes into the Notion inbox: the hidden log and
-   fallback. Nobody reviews it there.
+1. **Log everything.** Every item goes into the Notion 🚩 Inbox, the check-up log
+   (13 Nov): Sean looks there to see what the sweep heard and where each item went,
+   not to triage. Triage stays in Asana. A row is in the Inbox's **📥 Open** tab only
+   while it is `new`; set it to `pushed` the moment its triage task exists, or
+   `reference` when nothing needs doing, so Open only shows what is really pending
+   (`agents/orchestrator.md` §5 "Open vs handled").
 2. **Capture less.** One item per topic, not per message; chatter and things already
    answered in the chat never become tasks ("Capture less" below).
 3. **Sean reviews in Asana.** Each item that needs doing becomes one task in the BOB
@@ -90,8 +96,10 @@ Webex courier (the one PC task on the Personal desktop app), weekdays 08:02, 09:
 
 Direct (1:1) chats are private and never read unless Sean adds one here by name.
 
-**Meetings:** recorded meetings since the last sweep (Recipe 4 list + summary). It
-takes only Webex's own action items; the full recap page stays meeting-notes' job.
+**Meetings:** every recorded meeting not read by an earlier sweep (step 7 below):
+Webex's AI summary and action items **and the full transcript** (Recipe 4, steps 1–3). The
+transcript is where most of what Webex's summary drops is said ("Meetings: summary
+and transcript" below). The full recap page stays meeting-notes' job.
 
 **Runs inside the Webex courier** (`RUNTIME.md` "Webex courier"), after the courier
 has checked the sign-in and posted the outbox.
@@ -113,6 +121,46 @@ until the window's start is loaded) and put it in one bucket:
 | **Feedback** | A user or tester saying how the app behaves | Yes, `new`, `QA` empty so feedback-qa picks it up | Only when it's a concrete bug or ask |
 | **Chatter** | Thanks, emojis, jokes, scheduling, small talk, venting, our own agents' posts | No | No |
 
+### Meetings: summary and transcript
+
+Webex's action items catch only part of a meeting (17 Nov: the BOB Weekly and Decom
+action items missed a decision against Arabic, a paid-services check for Fabian, a
+question for dental professionals, Derek's Boom Boom / daily-report proposal, the
+shutdown date and four mobile QA defects). So for each meeting in the window:
+
+1. **Summary + action items** (`{ action: "summary" }`). Each action item is a
+   candidate item, bucketed like a message.
+2. **Transcript, every part** (`{ action: "transcript", part: n }` up to `parts`).
+   Read it for the same buckets as a chat: asks, commitments (with dates), updates on
+   existing work, decisions, and concrete defects someone points at. Skip what the
+   action items already cover, and skip chatter (most of a call).
+3. **Merge before writing.** One item per topic across both sources: a transcript
+   detail about an action item (a date, an extra defect, who agreed) goes into that
+   item's Notes or its task's "From the chat", not a second item.
+4. **Decisions go to Notion.** Each decision or working agreement is a log row
+   `reference`; when it changes how the team works or what is in scope, set Kind
+   `Notion` and end the Notes with "Candidate for {page}" (the scope page, a how-to,
+   the decision log). The sweep doesn't edit those pages; Sean or meeting-notes does.
+   Scope or date changes on launch items still become a triage task (Guardrails).
+5. **Quote with timestamps.** Notes and task quotes use `{Speaker} [m:ss]: "…"`.
+   The transcript is speech-to-text: names and product terms come out wrong
+   ("Bob" = BOB, "Coura"/"Crowbox"/"Propox" = Curaprox, "Coraline"/"creating" = the
+   Curaden app, "Yadpo" = Yotpo). Fix them in the title and your own words, keep the
+   quote as said, and never record a decision from the transcript alone when the
+   speakers clearly hadn't settled it (log it as an open question instead).
+6. **Links and IDs.** Source link: the meeting's `/transcript` URL for items found
+   only there, `/summary` otherwise. Fingerprint: the meeting id, the speaker, the
+   meeting start plus the timestamp (`YYYY-MM-DD HH:mm`), and the first 40
+   characters of the line. Task footer: "Captured by Webex Sweep (automated, from the
+   transcript)".
+7. **Which meetings, and not ready yet.** List recaps from the last 2 working days
+   and skip any meeting a previous `webex-sweep` row's Summary names as "read" (the
+   Summary lists each meeting read, by title and start time). A meeting that just
+   ended may have no AI summary or transcript yet: skip it, name it as "pending" in
+   the Summary, and the next run reads it.
+8. **A long call is still a handful of items.** Aim for 3–6 triage tasks per hour of
+   meeting at most; the rest is comments on existing tasks and `reference` rows.
+
 ### Capture less
 
 Sean reviews every triage task, so each one has to be worth a look. Aim for a few a
@@ -132,14 +180,14 @@ day, not twenty.
 - Never more than one triage task per topic per day; when in doubt, add to the
   existing one.
 
-### Log row (Notion Tasks & Notes, the hidden log)
+### Log row (Notion 🚩 Inbox, the check-up log)
 
 | Property | Value |
 |----------|-------|
 | Title | Short, verb first: "Send Derek the Tuft test accounts" |
-| Source | `webex` (or `meeting` for meeting action items) |
+| Source | `webex` (or `meeting` for meeting action items and transcripts) |
 | Source ID | The fingerprint of the item's first message (below). Check it first: if a row has it, skip |
-| Source link | The space link (`https://web.webex.com/spaces/{segment}`) or the meeting summary URL |
+| Source link | The space link (`https://web.webex.com/spaces/{segment}`), or the meeting's `/summary` URL (`/transcript` for items found only in the transcript) |
 | Captured at | The first message's date and time |
 | Status | `new`; `pushed` once its triage task exists; `reference` for decisions and threads answered in the chat |
 | Kind | Suggested route (table below) |
@@ -295,12 +343,20 @@ The only Webex post the sweep makes. Each run, after the triage step:
   flag them under "What" with ⚠️.
 - Can't read a space (offline after 3 tries, signed out): log `partial` with the
   space name; don't guess its content.
+- **Stuck rows.** A row the sweep writes stays `new` only until its triage task
+  exists. A `new` webex/meeting row older than one run means a step failed: fix it
+  on the next run (create the task or set `reference`), and say so in the run log.
+- **Never delete Inbox rows**, and never touch rows with Source `agent` or `manual`
+  (those belong to the agents' flags and to feedback-qa).
 
 ## Run log
 
 Last step of every run: one row in the Agent run log (`RUNTIME.md`), Agent
 `webex-sweep`, Where `PC`, Outcome `ok` (rows, tasks or comments written), `no-op`
-(nothing new), `partial` or `failed`. Summary: "{n} messages in {spaces}; {a} log
-rows, {t} triage tasks ({d} Development, {e} Asana, {f} Notion suggested), {b} Asana
-updates, {j} tickets in the Jira note; Webex inbox: {open} open". Its `When` is where the
-next sweep starts.
+(nothing new), `partial` or `failed`. Summary: "{n} messages in {spaces}; meetings
+read (summary + transcript): {title HH:mm, …}; pending: {title HH:mm, …}; {a} log
+rows ({x} from transcripts), {t} triage tasks ({d} Development, {e} Asana, {f} Notion
+suggested), {b} Asana updates, {j} tickets in the Jira note; Webex inbox: {open} open".
+Its `When` is where the next sweep's chat window starts. A transcript that can't be
+read (`transcript data not found`, sign-in prompt) → `partial`, with the meeting
+named under "pending".

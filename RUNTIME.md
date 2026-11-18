@@ -89,11 +89,11 @@ personal projects stay on Personal; curagents and its automations move.
 | Team update draft | Missing (Routine gone) | **Keep, recreate**: drafts in Notion and puts the Webex message in the outbox as Held; Sean ticks Approved | Routine, Thu 14:00 |
 | Roadmap watch | Personal PC, Mon 08:00 | **Move to Curaden as a Routine** (11 Nov): writes the report and puts the App Team summary in the outbox | Routine "Roadmap watch (Curaden)", Mon 07:40 |
 | Feedback QA report | On request | **Weekly on Curaden** (11 Nov): builds the PDF and puts the post (PDF attached) in the outbox when the threshold is met | Routine "Feedback QA report (Curaden)", Fri 10:10 |
-| App Support | — | **New** (10 Nov): answers form submissions on its own, hourly in work hours; bugs and gaps to Jira. Split by owner: Sean's Routine (BOB, Mon–Fri, covers Fabian on Fridays and when his is down) + Fabian's Routine on his own account (the rest, Mon–Thu) | Routine "App Support (Curaden)" `trig_01NzNgUy17FxJiHFc8otT4oS`, created 10 Nov |
+| App Support | — | **New** (10 Nov): answers form submissions on its own, hourly in work hours; bugs and gaps to Jira. Since 18 Nov Fabian owns every request: his Routine on his own account (Mon–Thu) plus his PC task "App Support invites (Fabian)" that adds approved requesters; Sean's Routine only covers (Fridays, or when Fabian's is down) | Routine "App Support (Curaden)" `trig_01NzNgUy17FxJiHFc8otT4oS`, created 10 Nov |
 | Roadmap dashboard refresh | Personal PC, 09:15 | **On request** (Sean, 23 Oct): switch its schedule off and run it on click | — |
 | Boom Boom queued | Personal PC, 14:00 | **Retire**: the courier posts the outbox | — |
 | Webex keep-alive | Personal PC, hourly 07–20 | **Retire** (11 Nov): the courier checks the sign-in at every run | — (switch off the Personal task) |
-| Asana ↔ Notion sync | Paused | **Retire**: Webex Sweep now pushes approved inbox rows to Asana; running both would duplicate tasks | — |
+| Asana ↔ Notion sync | Paused | **Retire**: Webex Sweep makes the Asana triage tasks itself; running both would duplicate tasks | — |
 | App team weekly digest | Personal Routine, disabled | **Delete**: replaced by the team update | — |
 | Everything "On request" | — | Stays on request, run from whichever account Sean is in | — |
 
@@ -106,12 +106,12 @@ personal projects stay on Personal; curagents and its automations move.
 | `announcements` (draft) | Cloud | Claude Routine "Team update draft" (Thu 14:00 Zurich) | Writes the Notion draft and a Held outbox row |
 | `feedback-qa` (report) | Cloud + courier | Claude Routine "Feedback QA report (Curaden)" (Fri 10:10 Zurich); "send QA report" any time | Builds the PDF in the cloud and puts the post with the PDF attached in the outbox; the courier posts it to the QA space |
 | `meeting-notes` | **PC** | "meeting notes" | Reads Webex meeting summaries and transcripts |
-| `app-support` | Cloud | Claude Routine "App Support (Curaden)" (`trig_01NzNgUy17FxJiHFc8otT4oS`), hourly 07:20–19:20 Zurich Mon–Fri, BOB requests (and Fabian's on Fridays or when his Routine is down); Claude Routine "App Support (Fabian)" on Fabian's account, hourly Mon–Thu, the rest (prompt in `docs/app-support-quickstart.md`) (cron in UTC, so an hour later in summer time); "app support" any time | Asana + Notion connectors. Answers on its own; what it can't answer goes to each owner's "App Support: needs you" task in Asana. Most runs are `no-op` (nothing new). Spec "Scheduled run" |
+| `app-support` | Cloud | Claude Routine "App Support (Curaden)" (`trig_01NzNgUy17FxJiHFc8otT4oS`), hourly 07:20–19:20 Zurich Mon–Fri, cover only (Fridays, or when Fabian's Routine is down); Claude Routine "App Support (Fabian)" on Fabian's account, hourly Mon–Thu, every request; desktop task "App Support invites (Fabian)" on Fabian's PC, 09:10/13:10/16:10 Mon–Thu (setup in `docs/app-support-quickstart.md`) (cron in UTC, so an hour later in summer time); "app support" any time | Asana + Notion connectors. Answers on its own; what it can't answer goes to each owner's "App Support: needs you" task in Asana. Most runs are `no-op` (nothing new). Spec "Scheduled run" |
 | `truth-catcher` | Cloud | Claude Routine "Truth Catcher scan" (`trig_01BxmV4KaG4CPbZMU4GmMHa7`), weekdays 07:58 + 13:58 Zurich | Asana, Notion, GitHub connectors |
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
 | `roadmap-watch` | Cloud + courier | Claude Routine "Roadmap watch (Curaden)" (Mon 07:40 Zurich); "roadmap watch" any time | Writes the report page and puts the App Team summary in the outbox |
 | Webex courier | **PC (Personal)** | Desktop app scheduled task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 Zurich | The only scheduled PC task: sign-in check, outbox, Webex Sweep ("PC runs" below) |
-| `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and meeting action items; hidden Notion log rows, triage tasks in BOB App › Webex inbox, Asana comments, a "New in Jira" note in the common chat |
+| `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and new meetings (summary, action items, transcript); Inbox log rows (the check-up log), triage tasks in BOB App › Webex inbox, Asana comments, a "New in Jira" note in the common chat |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
@@ -146,6 +146,13 @@ Agents & Other Projects; the registry and run log earlier still under Goals & Ob
   registry, run log or outbox because one "isn't where it used to be". If an ID stops
   resolving, log `failed` with that ID in the Error column and stop.
 - Don't rename, duplicate, delete or move them again without a PR to this section.
+
+The **🚩 Inbox** (`collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db`) lives elsewhere
+in the workspace but shows on the control room page as the linked view "Inbox: open"
+(13 Nov): only rows still open (Status `new`); handled rows show in the Inbox's
+"✅ Handled: last 7 days" tab. It is the check-up log: one row per item the agents captured or
+flagged (Webex Sweep's log, feedback for feedback-qa, and Source `agent` rows for what
+needs Sean; `agents/orchestrator.md` §5). Same rules: found by ID, never recreated.
 
 ## Reading Notion (view mode only)
 
@@ -226,8 +233,18 @@ weekday at 10:15 Zurich:
   wrong (`agents/app-support.md`, "FAQ: answering and getting smarter"). Fold their
   **voice notes** into the "Learned" section of that owner's voice file
   (`docs/app-support-voice-sean.md` / `-fabian.md`) in the same PR.
+- **Inbox check** (the 🚩 Inbox, view mode, last 7 days): a `new` row with Source
+  `webex`/`meeting` older than one courier run is a stuck sweep (fix the spec or tell
+  Sean); `pushed` rows without an Asana link; open `agent` rows older than 5 working
+  days get one dated "still open" line in Notes, no new row.
+- **Telling Sean** means one Inbox row with Source `agent`, Requester `run-log-check`
+  (`agents/orchestrator.md` §5: one open row per issue, Source ID
+  `agent:run-log-check:{agent or task}:{reason}`), not only the session's chat, which
+  nobody reads for a cloud Routine. A PR it opened goes in the row's Source link.
+  When the cause is gone (the run worked again), set the row to `reference` with a
+  dated line.
 - Tick **Reviewed** on every row it has looked at.
-- Nothing wrong: no message.
+- Nothing wrong: no message and no Inbox row.
 
 ## Scheduled task prompts (PC)
 
@@ -289,7 +306,7 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
    - After a Boom Boom post, add "posted {HH:MM} in {space}" to the ping history on
      Derek's page. Never post from old local `.boom-boom-derek/outbox/` files.
 3. **Webex Sweep.** Run `agents/webex-sweep.md` as its spec says (window from its last
-   run-log row; hidden Notion log rows, triage tasks in BOB App › Webex inbox, Asana
+   run-log row; Inbox log rows, triage tasks in BOB App › Webex inbox, Asana
    comments, its "New in Jira" note in the common chat). A space it can't read →
    `partial` with the space name.
 4. **Run log.** One row: Agent `webex-courier` (or `other`), Where `PC`, Account
