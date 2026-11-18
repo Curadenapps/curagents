@@ -93,6 +93,8 @@ output:
     local_contacts: "array of {task_link, country, commercial_manager_page, partner_page, confirm_needed: bool} (Notion links only, no names or emails)"
     faq_candidates: "array of {question, answer, source_task_link, why: new|owner-edit|owner-reply|board-history|faq-gap} (anonymised)"
     mentions: "array of {task_link, how: after-owner-added|held-draft-posted|waiting-for-owner}"
+    routes: "array of {task_link, route: email|asana, why}"
+    replies_in: "array of {task_link, source: email|web|mobile} (how each submitter reply reached the task: the story's `source`)"
     voice_notes: "array of {owner: Sean|Fabian, pattern, source_task_link} (no requester details)"
     faq_page_gaps: "array of {faq_page, question, suggestion} for Sean to add to the public FAQ"
     operator: "sean|fabian|routine"
@@ -259,6 +261,38 @@ add the submitter as a follower, so:
    subtask above a line `---`. The owner edits it if needed and ticks the subtask; the
    next run posts it @mentioning them (`<a data-asana-gid="{gid}"/>`) and comments
    "Posted: {story link}" (the held-reply flow in "Scheduled run" step 5).
+
+**Email or Asana: pick the route per request** (Sean, 18 Nov 2026). Not everyone
+wants to open Asana, and inviting everyone isn't worth it for a one-line answer.
+So App Support picks one of two routes and writes it at the top of the Review
+subtask (`Route: email` or `Route: Asana`, with the reason in a few words). The
+owner can switch it.
+
+- **The test: does the reply ask them for something?** No (a how-to, a link, where
+  to register, "it's not in your country yet") → **email**. Yes (details for a
+  change, which account, a screenshot), or it's a bug, a practice or account change
+  or anything that needs tracking → **Asana** (steps 1.1 and 1.2 above).
+- **Email route.** Don't post the reply on the form task. Put a ready-to-send email
+  in the Review subtask above `---`:
+  - To: the email from the form. From: the app's mailbox in Outlook (BOB:
+    support@bobscore.com; Curaprox app: curaprox.app@curaden.com).
+  - Subject: "{App}: {form task title}", in the request's language.
+  - Body: the same reply in the voice, but signed for email (the voice file's
+    greeting, then "Kind regards," and the owner's name), with one line saying it
+    was prepared with the help of the support assistant.
+
+  The owner copies it into a new email in Outlook, edits it if needed, sends it,
+  and ticks the subtask. The next run comments "Answered by email ({date})" on the
+  form task (only the team follows it) and completes it. If the submitter writes
+  back by email, the owner carries on in Outlook; if it turns into a change or a
+  bug, the owner adds them to the task and it continues on the Asana route.
+- **Asana route.** As above: the reply goes on the task, the owner checks it and
+  adds the submitter, and the next run @mentions them.
+- **Learning how people reply.** For every submitter comment, note its story
+  `source` in `replies_in`. `email` means they answered the Asana notification by
+  email without opening Asana; `web` or `mobile` means they opened it. After a few
+  weeks this shows whether the Asana route works for people who don't want to log
+  in.
 
 App Support never adds or invites anyone itself: no `add_followers`, no browser
 invites. Adding the submitter is the owner's OK to send. (The Asana connector can't
@@ -604,7 +638,7 @@ connectors), one per owner ("Two Routines, split by owner"). A request that land
    mustn't answer alone. A reply is still written in every case except spam and
    patient data:
    - `review`: every reply waits for the owner's check (step 1). Subtask
-     "Review: {title}". When another reason applies too, it goes in the same
+     "Review: {title}", starting with `Route: email` or `Route: Asana`. When another reason applies too, it goes in the same
      subtask's notes, not a second subtask;
    - `no-source`: nothing in any source answered it (step 3);
    - patient data in the request, spam, a dev request outside Phinamic's apps, a
@@ -648,8 +682,9 @@ otherwise wait until Monday to hear anything.
 Since 13 Nov 2026 (Sean: "we need to validate"), **nothing App Support writes
 reaches a requester until the owner has checked it** (step 1). On its own it:
 
-- writes every reply as a comment on a form task the submitter doesn't follow yet
-  (only the team sees it), with a Review subtask for the owner;
+- writes every reply, with a Review subtask for the owner: on the Asana route as a
+  comment on a form task the submitter doesn't follow yet (only the team sees it), on
+  the email route as a ready email in the subtask that the owner sends from Outlook;
 - posts the @mention pointer line once the owner has added the submitter;
 - posts a held draft the owner ticked, and the "All done" line after the owner's
   "done";

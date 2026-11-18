@@ -24,7 +24,11 @@ The full rules are in [`agents/app-support.md`](../agents/app-support.md).
 
 1. **Check each reply and send it.** Your task **"App Support: needs you (Fabian)"**
    (in My Tasks, not on the board, so submitters never see it) gets a
-   **"Review: {title}"** subtask for every reply. Open the form task and read the
+   **"Review: {title}"** subtask for every reply. Its first line says the route.
+   **Route: email** (a one-off answer): copy the email in the subtask into a new mail
+   from curaprox.app@curaden.com in Outlook, send it, and tick the subtask; App
+   Support notes it on the task and closes it. **Route: Asana** (needs an answer back
+   or a change): open the form task and read the
    reply (only the team can see it so far). Wrong? Edit or delete the comment. To send
    it: the **+** next to the member avatars (top right) → type the email from the
    subtask → **untick "Also invite to App Tasks, Requests & Feedback project"** → Send
