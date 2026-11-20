@@ -238,8 +238,10 @@ person is, and links the BOB Academy page "Partner onboarding: BOB setup and tra
 
 - Onboarding concept (sign-up → automatic approval → welcome → in-app checklist): `Projects\BOB Onboarding\CONCEPT.md`
 - Docs revamp plan and findings: `Projects\BOB Docs Revamp\PLAN.md`, `FINDINGS.md`
-- Phinamic status (daily): `dev\curagents\.boom-boom-derek\YYYY-MM-DD.md`
-- Voice: the `my-writing-style` and `curaden-comms` skills
+- Phinamic status (daily, local only): `.boom-boom-derek/YYYY-MM-DD.md`
+- Voice: `docs/app-support-voice-sean.md`, plus the `my-writing-style` and `curaden-comms` skills
+- Learned answers: `docs/app-support-faq.md`
+- Copy-and-paste replies for people (same wording): Notion Knowledge Wiki → Support `3287e8aabbb480b79f16f460a1c35a00`
 
 ---
 
