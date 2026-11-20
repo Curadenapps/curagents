@@ -273,8 +273,8 @@ comments). Link to those instead of copying them.
 | Source link | The run-log row, Asana task, PR or page it is about |
 | Notes | One or two lines: what happened, what Sean can do, the agent's exact error if any |
 
-Sean closes it by setting Status to `reference` (seen, keep) or `skip` (drop). The agent
-that raised it may set `reference` itself when the cause is gone (e.g. Jira answers
+Sean closes it by setting Status to `done` (fixed), `info only` (seen, nothing to do) or `skip` (drop). The agent
+that raised it may set `info only` itself when the cause is gone (e.g. Jira answers
 again), adding a dated line to Notes. Never more than one open row per Source ID.
 
 CRITICAL items also go at the top of the current report with `🔴 CRITICAL`; they are
@@ -284,16 +284,16 @@ never suppressed or deferred.
 
 The Inbox's first tab, **📥 Open**, shows only rows that still need something; Sean
 looks there. A row leaves Open the moment it is handled, so Open stays short and an
-empty Open means the agents are keeping up. The **✅ Handled: last 7 days** tab is the
+empty Open means the agents are keeping up. The **✅ Handled: last 30 days** tab is the
 proof they are working.
 
 | Status | Open? | Set by |
 |--------|-------|--------|
 | `new` | Open | Any writer when it logs the row |
-| `task`, `approved` | Open | Retired pipeline; no agent writes them any more. A row with an Asana link in either is really `pushed` |
 | `pushed` | Handled | Webex Sweep, as soon as the item's Asana triage task exists (the task is the open item from then on, in Asana) |
-| `reference` | Handled | Webex Sweep for decisions and threads answered in the chat; feedback-qa when it claims a `manual` row as feedback; the agent that raised a flag, or Sean, once it's resolved |
-| `skip` | Handled | Sean dropping it; Webex Sweep when Sean completes or deletes its triage task |
+| `info only` | Handled | Webex Sweep for decisions and threads answered in the chat; feedback-qa when it claims a `manual` row as feedback; the agent that raised a flag, or Sean, once it's resolved |
+| `done` | Handled | Webex Sweep when the row's Asana task is completed (wherever it was completed) |
+| `skip` | Handled | Sean dropping it; Webex Sweep when the row's Asana task is deleted |
 
 No row may sit in `new` once its work is somewhere else: every writer moves its own
 rows out of `new` in the same run that handles them.
@@ -317,20 +317,22 @@ paused, not missed.
 Read the Inbox view `view://4157e8aa-bbb4-815b-b0a6-000cb183ca38` (newest first; stop
 at the window, 7 days by default) and report:
 
-1. **Open:** rows with Status `new` (and legacy `task`/`approved`). By Source: `agent` → the flag itself;
+1. **Open:** rows with Status `new`. By Source: `agent` → the flag itself;
    `manual` → feedback Feedback QA hasn't picked up yet; `webex`/`meeting` → Webex
    Sweep logged it but made no triage task (a stuck sweep: name the row).
-2. **Went to Asana:** `pushed` rows with their Asana links, and how many of those tasks
+2. **Closed:** `done` rows (their Asana task was completed), one line each.
+3. **Went to Asana:** `pushed` rows with their Asana links, and how many of those tasks
    Sean has already triaged (moved out of Webex inbox) vs still waiting there.
-3. **Decisions and answers:** `reference` rows from Webex and meetings, one line each.
+4. **Decisions and answers:** `info only` rows from Webex and meetings, one line each.
    These are the decisions said in chat; announcements and meeting-notes can use them.
-4. **Dropped:** count of `skip` rows.
-5. **Hygiene:** `pushed` rows without an Asana link, rows without Captured at, test
+5. **Dropped:** count of `skip` rows.
+6. **Hygiene:** `pushed` rows without an Asana link, rows without Captured at, test
    rows. Report them; never delete rows (Sean decides).
 
-Sean's own views on the database: "📥 Open" (the first tab, also on the Agent control
-room page as "Inbox: open"), "✅ Handled: last 7 days", "🤖 Agent flags" and
-"🗂️ Decisions & answers". The agents keep using the unfiltered "Agents: …" view.
+Sean's views on the database (16 Nov: two, nothing else): "📥 Open" (the first tab,
+also on the Agent control room page as "Inbox: open") and "✅ Handled: last 30 days",
+grouped by Status (pushed, done, info only, skip). The agents use the unfiltered
+"⚙️ All rows (agents use this, don't filter)" view.
 
 ---
 
