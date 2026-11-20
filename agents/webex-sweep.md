@@ -67,7 +67,7 @@ feedback-qa) work from what was actually said.
    (13 Nov): Sean looks there to see what the sweep heard and where each item went,
    not to triage. Triage stays in Asana. A row is in the Inbox's **📥 Open** tab only
    while it is `new`; set it to `pushed` the moment its triage task exists, or
-   `reference` when nothing needs doing, so Open only shows what is really pending
+   `info only` when nothing needs doing, so Open only shows what is really pending
    (`agents/orchestrator.md` §5 "Open vs handled").
 2. **Capture less.** One item per topic, not per message; chatter and things already
    answered in the chat never become tasks ("Capture less" below).
@@ -117,7 +117,7 @@ until the window's start is loaded) and put it in one bucket:
 | **Ask** | Someone asks us (Sean, the app team) or Phinamic to do, check, decide or send something | Yes, `new` | Yes |
 | **Commitment** | Someone says they will do something, ideally with a date ("I'll fix it by Fri") | Yes, `new` | Yes |
 | **Update** | Progress on work that already exists: done, shipped, blocked, delayed, new date, a BA key | Only if no task matches | No: comment on the matching Asana task ("Updates" below). No match → treat as an Ask |
-| **Decision** | "We agreed / let's go with / we won't" | Yes, `reference` | No |
+| **Decision** | "We agreed / let's go with / we won't" | Yes, `info only` | No |
 | **Feedback** | A user or tester saying how the app behaves | Yes, `new`, `QA` empty so feedback-qa picks it up | Only when it's a concrete bug or ask |
 | **Chatter** | Thanks, emojis, jokes, scheduling, small talk, venting, our own agents' posts | No | No |
 
@@ -138,7 +138,7 @@ shutdown date and four mobile QA defects). So for each meeting in the window:
    detail about an action item (a date, an extra defect, who agreed) goes into that
    item's Notes or its task's "From the chat", not a second item.
 4. **Decisions go to Notion.** Each decision or working agreement is a log row
-   `reference`; when it changes how the team works or what is in scope, set Kind
+   `info only`; when it changes how the team works or what is in scope, set Kind
    `Notion` and end the Notes with "Candidate for {page}" (the scope page, a how-to,
    the decision log). The sweep doesn't edit those pages; Sean or meeting-notes does.
    Scope or date changes on launch items still become a triage task (Guardrails).
@@ -159,7 +159,7 @@ shutdown date and four mobile QA defects). So for each meeting in the window:
    ended may have no AI summary or transcript yet: skip it, name it as "pending" in
    the Summary, and the next run reads it.
 8. **A long call is still a handful of items.** Aim for 3–6 triage tasks per hour of
-   meeting at most; the rest is comments on existing tasks and `reference` rows.
+   meeting at most; the rest is comments on existing tasks and `info only` rows.
 
 ### Capture less
 
@@ -172,7 +172,7 @@ day, not twenty.
   is about the same thing, add the news as a comment there ("Updates" below)
   instead of a new task.
 - **Answered in the chat?** Asked and answered (or done) within the window: log row
-  `reference`, no task.
+  `info only`, no task.
 - **Sean thinking out loud** (a gripe, an idea with no ask, "I'm lost") is not an
   item unless he asks someone to do something or says he will.
 - **Small things stay small:** a quick answer, a click, a yes/no is still one task,
@@ -189,7 +189,7 @@ day, not twenty.
 | Source ID | The fingerprint of the item's first message (below). Check it first: if a row has it, skip |
 | Source link | The space link (`https://web.webex.com/spaces/{segment}`), or the meeting's `/summary` URL (`/transcript` for items found only in the transcript) |
 | Captured at | The first message's date and time |
-| Status | `new`; `pushed` once its triage task exists; `reference` for decisions and threads answered in the chat |
+| Status | `new`; `pushed` once its triage task exists; `info only` for decisions and threads answered in the chat |
 | Kind | Suggested route (table below) |
 | Requester | Who asked or said it (Webex display name) |
 | Owner | Who it's on, only if the message says so (a name, or "Curaden" / "Phinamic"); else empty |
@@ -257,11 +257,21 @@ away, so a second run can't create it twice.
 |------|--------|
 | Moves it to **In Development** | The BOB App rule "BOB App Development Task Trigger" creates the Jira BA issue and the Jira rule assigns Derek; the sweep then notes it in Webex ("New in Jira" below) |
 | Assigns it (himself, Fabian, anyone) and moves it to To-Do or Backlog | An internal task; Truth Catcher treats it like any other BOB App task from then on |
-| Completes or deletes it in Webex inbox | Dropped |
+| Completes it (anywhere) | Its Inbox row becomes `done` |
+| Deletes it | Its Inbox row becomes `skip` (dropped) |
 
-**Keep the log in step:** each run, for log rows with an `Asana link` from the last
-14 days, read the task: completed or deleted while still in Webex inbox → Status
-`skip`; moved to In Development → Kind `Development`. Nothing else.
+**Screenshots go on before the move.** The "BOB App Development Task Trigger" rule copies
+the Asana task's files to the new Jira issue ("Attach files from the Asana task", Sean,
+18 Nov 2026), but only the files already on the task when it moves to In Development; it
+runs once, and moving a task out and back in makes a duplicate Jira issue. When the chat
+item has a screenshot or file, the triage task says so in its first line
+("📎 Screenshot in the chat: attach before moving to In Development") with the message
+link, since the Asana connector can't upload files.
+
+**Keep the log in step:** each run, for every log row with Status `pushed` and an
+`Asana link`, read the task: **completed → Status `done`** (wherever it was completed,
+so Sean sees what got closed); deleted or not found → `skip`; moved to In Development →
+Kind `Development` (still `pushed` until completed). Nothing else.
 
 ### Updates on existing work
 
@@ -286,7 +296,7 @@ Rows marked `task` (older meeting items) are waiting for Sean; leave them.
 Log rows from before 12 Nov with Source `webex`/`meeting`, Status `new` or
 `approved` and no `Asana link`: check each against "Capture less". The ones that pass
 become triage tasks (merge rows about the same topic into one task, and link every
-merged row to it); the rest become `reference`. Then complete the old
+merged row to it); the rest become `info only`. Then complete the old
 `Triage Webex inbox (…)` task (assigned to Sean, no project) with the comment
 "Replaced by the Webex inbox section on BOB App (12 Nov)." The sweep doesn't
 create or update that task again.
@@ -345,7 +355,7 @@ The only Webex post the sweep makes. Each run, after the triage step:
   space name; don't guess its content.
 - **Stuck rows.** A row the sweep writes stays `new` only until its triage task
   exists. A `new` webex/meeting row older than one run means a step failed: fix it
-  on the next run (create the task or set `reference`), and say so in the run log.
+  on the next run (create the task or set `info only`), and say so in the run log.
 - **Never delete Inbox rows**, and never touch rows with Source `agent` or `manual`
   (those belong to the agents' flags and to feedback-qa).
 
