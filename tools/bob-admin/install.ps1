@@ -1,10 +1,11 @@
 <#
 .SYNOPSIS
-  Install (or update) the bob-admin CLI for the current Windows user.
+  Install (or update) the bob-admin and bob-qa CLIs for the current Windows user.
 
 .DESCRIPTION
   Creates a private Python environment in %USERPROFILE%\.bob-admin\venv,
-  installs bob-admin into it, and puts a small bob-admin.cmd in
+  installs bob-admin (and bob-qa, the BOB web app QA CLI) into it, and puts
+  bob-admin.cmd and bob-qa.cmd in
   %USERPROFILE%\.bob-admin\bin. Run it again any time to update.
 
   From a curagents checkout it installs that checkout. Anywhere else (or with
@@ -62,6 +63,9 @@ if ((Test-Path (Join-Path $Local "setup.py")) -and -not $FromGitHub) {
 # 4. Shim on a stable path
 $exe = Join-Path $Venv "Scripts\bob-admin.exe"
 Set-Content -Path (Join-Path $Bin "bob-admin.cmd") -Encoding ascii -Value "@echo off`r`n`"$exe`" %*"
+# bob-qa (BOB web app QA) ships in the same package
+$qaExe = Join-Path $Venv "Scripts\bob-qa.exe"
+Set-Content -Path (Join-Path $Bin "bob-qa.cmd") -Encoding ascii -Value "@echo off`r`n`"$qaExe`" %*"
 
 # 5. PATH
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -80,3 +84,4 @@ if ($AddToPath -and -not $onPath) {
 & $exe --help | Select-Object -First 3
 Write-Host ""
 Write-Host "Done. Next: bob-admin auth login   (test)   or   bob-admin --env prod auth login"
+Write-Host "BOB web app QA: bob-qa auth login   (your coach login on test), then: bob-qa qa run smoke"
