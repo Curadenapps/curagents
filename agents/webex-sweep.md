@@ -260,6 +260,14 @@ away, so a second run can't create it twice.
 | Completes it (anywhere) | Its Inbox row becomes `done` |
 | Deletes it | Its Inbox row becomes `skip` (dropped) |
 
+**Screenshots go on before the move.** The "BOB App Development Task Trigger" rule copies
+the Asana task's files to the new Jira issue ("Attach files from the Asana task", Sean,
+18 Nov 2026), but only the files already on the task when it moves to In Development; it
+runs once, and moving a task out and back in makes a duplicate Jira issue. When the chat
+item has a screenshot or file, the triage task says so in its first line
+("📎 Screenshot in the chat: attach before moving to In Development") with the message
+link, since the Asana connector can't upload files.
+
 **Keep the log in step:** each run, for every log row with Status `pushed` and an
 `Asana link`, read the task: **completed → Status `done`** (wherever it was completed,
 so Sean sees what got closed); deleted or not found → `skip`; moved to In Development →
