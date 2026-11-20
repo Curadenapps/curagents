@@ -33,8 +33,8 @@
 | Sign-up form | https://curaprox-apps.com/contact-form | |
 | Device minimums | iPadOS 15.1 or Android 7.0 or later, a tablet in landscape. Web on bobscore.app | "Phone works" (not until the mobile release, 14 Dec 2026) |
 | IT problems or bugs | **The in-app App Request form:** your name (top right) → Help & Support | An email to Sean |
-| Support email (public, Sean 12 Nov) | BOB: **info@bobscore.com**. Curaprox app: **curaden.apps@curaden.ch**. support@bobscore.com sends the password emails and is watched, but isn't given out | info@curaprox.app (replaced) |
-| Who to contact (markets and partners) | **Sean and Janine Simone** (janine.simone@curaden.ch) | Sabina Floridia is no longer the contact for BOB. Don't explain why, just route to Sean and Janine |
+| Support email (public, Sean 12 Nov) | BOB: **info@bobscore.com**. Curaprox app: **curaden.apps@curaden.ch**. support@bobscore.com only sends the password emails; don't give it out | info@curaprox.app (replaced) |
+| Who to contact (markets and partners) | **Sean and Janine Simone** | Sabina Floridia is no longer the contact for BOB. Don't explain why, just route to Sean and Janine |
 
 **How sign-up works:**
 1. A 4-step form.
@@ -171,11 +171,11 @@ Sean rejected the long version.
 
 **T5. Partner or market onboarding (getting a whole team set up)**: use the Notion
 template "Template — Partner onboarding email" (`4107e8aabbb48125b595c2d72a33ff7d`,
-Curaden App Hub → Templates). It asks who should get BOB and who the one Admin Console
+Curaden App Hub → Templates). It asks who should get BOB and who the one BOB Admin
 person is, and links the BOB Academy page "Partner onboarding: BOB setup and training"
 (`4107e8aabbb481c9a15fe680c321efd2`). First sent to Curaden Czech on 6 Nov.
 
-**Greeting and sign-off (Sean, 13 Nov):** emails start "Hey there!" and have no sign-off, because the Outlook signature adds it. The "Dear Dr. [name]" / "Hi [name]" openings in T1–T4 above are older; use "Hey there!". The signature reads:
+**Greeting and sign-off (Sean, 13 Nov):** emails start "Hey there!" and have no sign-off, because the Outlook signature adds it. The "Dear Dr. [name]" / "Hi [name]" openings in T1–T4 above are older; use "Hey there!".
 
 **Signature (added by Outlook, don't type it):**
 > Kind regards,
@@ -203,8 +203,8 @@ person is, and links the BOB Academy page "Partner onboarding: BOB setup and tra
 **Before linking, always tell Sean:**
 - These are workspace links. They only open for people who are Notion guests, or if the pages are published.
 - **BOB Kit is internal.** It still says the new app "goes live in October", points to the legacy page, and has internal sections (Legal concerns, Known gaps, Technical, Figma). If that shouldn't go out, share only the how-to pages.
-- **Partner and subsidiary admin pages** (Sean, 12 Nov): Approving a Practice, Country Admin Structure and Data protection are for the people with a Subsidiary/Partner admin account (the one Admin Console person per market). Link them to those people, never to practices, coaches or individuals. This is new: check the change log for how the admin-account pages are developing before linking.
-- Never send these to anyone outside Curaden: Legacy Sign-Up, Goals & Objectives, BOB Kit's internal sections.
+- **Partner and subsidiary admin pages** (Sean, 12 Nov): "BOB Admin: Approve a practice", Country Admin Structure and Data protection are for the people with a Subsidiary/Partner admin account (the one BOB Admin person per market). Link them to those people, never to practices, coaches or individuals.
+- Never send these to anyone outside Curaden: Goals & Objectives, BOB Kit's internal sections.
 
 ---
 

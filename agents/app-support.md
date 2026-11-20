@@ -543,8 +543,14 @@ then:
    line, who's affected (role, app, country), steps to reproduce or the user story,
    the expected result, and the form task link. No requester name or email, no patient
    data.
-5. **Create it in BOB App and move it to In Development** (`1213787653843309`) through
-   asana-maintenance. Link the two tasks (the form task link in the ticket's notes, the
+5. **Create it in BOB App To-Do, attach the screenshots, then move it to In
+   Development** (`1213787653843309`) through asana-maintenance. The Asana rule copies
+   the task's files to Jira ("Attach files from the Asana task", Sean, 18 Nov 2026), but
+   only the ones already on the task at the moment of the move; it runs once, and moving
+   a task out and back in makes a duplicate Jira issue. The Asana connector can't upload
+   files, so when a screenshot can't be attached, the ticket stays in To-Do with
+   "Screenshot to attach before moving" as its first line and goes on Sean's list
+   instead of being moved. Link the two tasks (the form task link in the ticket's notes, the
    ticket as a dependency of the form task), never in a form-task comment, so the
    submitter isn't emailed about internals.
 6. **Tell the submitter** in one reply: "Thanks, this looks like something our
