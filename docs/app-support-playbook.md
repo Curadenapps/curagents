@@ -175,7 +175,9 @@ Curaden App Hub → Templates). It asks who should get BOB and who the one Admin
 person is, and links the BOB Academy page "Partner onboarding: BOB setup and training"
 (`4107e8aabbb481c9a15fe680c321efd2`). First sent to Curaden Czech on 6 Nov.
 
-**Sign-off (emails):**
+**Greeting and sign-off (Sean, 13 Nov):** emails start "Hey there!" and have no sign-off, because the Outlook signature adds it. The "Dear Dr. [name]" / "Hi [name]" openings in T1–T4 above are older; use "Hey there!". The signature reads:
+
+**Signature (added by Outlook, don't type it):**
 > Kind regards,
 > Sean Dunne
 > Global Digital Products Manager Apps

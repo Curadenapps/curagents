@@ -24,8 +24,8 @@ this file any time; the next run uses it.
 
 This file is the voice for Asana replies. For email (the mailboxes), use section 5 of
 [`docs/app-support-playbook.md`](app-support-playbook.md): Sean's corrections from his
-own mail, the "Kind regards" sign-off with his name and title, and no automated
-sign-off line unless Sean adds one.
+own mail. Emails start "Hey there!" and have no sign-off: the mailbox's Outlook
+signature adds it (Sean, 13 Nov).
 
 ## Sign-off (always, on its own line)
 
