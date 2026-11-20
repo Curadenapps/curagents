@@ -191,7 +191,10 @@ details himself.
   > — Sent by Sean's support assistant (automated). Reply here and I'll see it.
 - **When he replies**: a subtask for Sean, "Sean: change in BOB Admin": *BOB Admin →
   Practices → {practice} → Address: replace with {street and number}, {postcode},
-  {city}, {country}.*
+  {city}, {country}.* Plus the same change as one `bob-admin` line Sean can run on
+  his PC instead (`skills/bob-admin`): `bob-admin --env prod --dry-run practices
+  update {practice id} --street "…" --zip "…" --city "…"` (prod writes need his
+  unlock; he drops `--dry-run` once it looks right).
 - **When Sean marks the subtask done**: a short "All done" reply to the submitter,
   then the task is marked complete.
 - **The gap**: one dev ticket ("Let legacy Coaches become Practice Admin and edit

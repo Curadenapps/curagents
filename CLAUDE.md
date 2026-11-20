@@ -26,6 +26,8 @@ The following skills are available and will auto-load based on trigger phrases:
 - **`skills/market-rollout/SKILL.md`** — Market rollout (UAE first, Apr 2027; then Italy, Slovenia, South Africa, USA, Japan; board BOB Market Rollouts): audiences, onboarding plans, Admin Console super users, training modules, partner prep and follow-ups. Drafts and tracks in Notion; Sean sends, approves and grants
 - **`skills/webex-web/SKILL.md`** — The only way to work in Webex: post (with @mentions, files), read spaces, read meetings (AI summary, action items, transcript, recording). Webex web on Sean's sign-in in the Claude desktop app's built-in browser (Claude in Chrome as fallback); no bot tokens. Load it before any Webex step
 
+- **`skills/bob-admin/SKILL.md`** — BOB Admin through the `bob-admin` CLI (`tools/bob-admin/`, CLI-Anything format, built from the platform's OpenAPI spec): reports and exports, users and Super Users, roles, practice approvals and staff, products, news, subsidiaries, partner API tokens, and every API endpoint via `call` (chainable: `--all`, `--fields`, `--ids`, `-`). Test or prod; PC only, on the person's own sign-in; writes need a yes, prod writes locked
+
 Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own reference files as needed.
 
 ## Agents

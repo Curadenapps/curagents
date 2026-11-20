@@ -98,6 +98,7 @@ Everything follows `skills/market-rollout/SKILL.md`. Read it before any workflow
 | HQ ↔ partner rhythm, who does what, Blanca | `skills/market-rollout/references/hq-partner-rhythm.md` |
 | Market Rollout Academy (module DB, tracker) | Notion `4087e8aabbb481df9fa3c1662efbbe6a` |
 | Partner onboarding page and email template (one flow for every partner) | Notion `4107e8aabbb481c9a15fe680c321efd2`, `4107e8aabbb48125b595c2d72a33ff7d` |
+| BOB Admin live data (subsidiaries, partner admins, practices and usage per market) | `bob-admin` CLI, `skills/bob-admin/SKILL.md`. PC only, on Sean's sign-in; reads only from this agent |
 
 ---
 
@@ -110,7 +111,7 @@ Each workflow is in the skill with its steps. In short:
 | "rollout status [market or all]" | Read the market page, the rollout task and its gates, the tracker and the module DB; say where the market is, what is blocked, Sean's next three actions and what Blanca could take | The market page's "Rollout status" section |
 | "audience brief {market}" | Check the market page's audiences against new sources (meeting recaps, Asana, Sean's notes) and propose changes | Nothing until Sean says "update it", then the page's audience section |
 | "onboard {person or role} for {market}" | Plan the levels, modules and dates for that person, from `onboarding-path.md` | A tracker row (Stage `Named` or `Invited`) |
-| "super user for {market}" / "admin access for {person}" | Super-user pack: access request to Phinamic as a draft, training plan (M1), certification checklist | Tracker row (Admin access `To request`) and a draft page |
+| "super user for {market}" / "admin access for {person}" | Super-user pack: access request to Phinamic as a draft, training plan (M1), certification checklist. When run on the PC, first checks BOB Admin (`bob-admin --json subsidiaries list`, `superusers list --partners`) and adds the ready-to-run grant: `bob-admin --dry-run superusers create --partner --subsidiary-id … --no-send-invite …` for Sean to run | Tracker row (Admin access `To request`) and a draft page |
 | "build module {topic}" | Draft a module from the template, for the audience and markets asked | A Training modules row and page, Status `Draft` |
 | "training plan for {market}" | Which modules, in what order, for which people, in which language, by which date | A draft page under the Academy |
 | "partner prep {market}" | Agenda, pre-read from the market page and tracker, open asks on both sides | A draft page under the Academy |
@@ -125,7 +126,8 @@ Each workflow is in the skill with its steps. In short:
 
 - **Sean sends, approves and grants.** The agent never sends an email or a Webex
   message, never posts, never creates accounts or enters credentials, and never
-  grants Admin Console access. It drafts the request; Sean or Phinamic acts.
+  grants Admin Console access. It drafts the request (and, on the PC, the exact
+  `bob-admin` command as a dry run); Sean or Phinamic acts.
 - **Asana only after Sean says go.** Proposed changes are listed in the result first.
   On the BOB Market Rollouts board this agent makes the structural edits itself (see
   Board upkeep); routine moves and comments go to asana-maintenance. Anything outside

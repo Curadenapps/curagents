@@ -71,6 +71,7 @@ comes from Notion instead of `dream.md` §4, and escalations go to the Inbox.
 | `triage feedback` / `what should we build next` / `send qa report` | feedback-qa |
 | `meeting notes` / `summarise meeting` / `webex recap` / `log the webex meeting` / `fetch from fireflies` | meeting-notes (PC; Webex Meeting recap via `skills/webex-web`, Fireflies or paste as fallbacks) |
 | `rollout status` / `onboard * for *` / `super user for *` / `admin access for *` / `build module *` / `training plan for *` / `partner prep *` / `partner follow-up *` / `audience brief *` / `what can Blanca take` / `rollout watch` / `rock n rollout` | market-rollout (signs in Asana as "Rock 'n' Rollout 🎸"; structural board edits only after Sean says go) |
+| `bob admin *` / `admin console *` / `pending registrations` / `approve practice *` / `reject practice *` / `create super user *` / `add a coach *` / `practice usage` / `export bob scores` / `admin report *` / `post news in the app` | Orchestrator itself with `skills/bob-admin` (the `bob-admin` CLI). PC only: it runs on Sean's own sign-in. Reads straight away; every write as `--dry-run` first, sent only after Sean's yes for that action; prod writes stay locked unless Sean unlocks his shell |
 | `sync revolvenote` / `push revolvenote` | curaden-communications › revolvenote-sync |
 | `sync BOB` / `sync jira` | curaden-communications › jira-notion-bob-sync |
 | `brand review` / `check approvals` | brand-asset |
