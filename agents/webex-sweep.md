@@ -8,7 +8,9 @@ description: >
   built-in browser). Every item goes into the Notion Inbox, the check-up log; the ones
   that need doing become one triage task each in the BOB App board's "Webex inbox"
   section, where Sean reviews them (12 Nov, Sean). Progress on existing work becomes
-  a short update comment on the matching Asana task. In Webex it posts only one
+  a short update comment on the matching Asana task. Chases ("chase X for Y",
+  "waiting on Z's input") don't become triage tasks: they go on one "Pings to send"
+  reminder for Sean, with who to ping and how (20 Nov, Sean). In Webex it posts only one
   "New in Jira" note in the common chat, when items Sean sent to In Development have
   become Jira tickets; nothing else.
 model: claude-sonnet-5-5
@@ -47,6 +49,7 @@ output:
     meetings_pending: "string[] (no summary or transcript yet; next run)"
     log_rows_created: "array of {title, status, notion_url}"
     triage_tasks_created: "array of {title, route, task_url}"
+    pings_listed: "array of {title, who, route} on the Pings to send reminder"
     asana_updates: "array of {task, comment_url}"
     jira_noted: "array of {key, title}"
     skipped: "count, with reasons (chatter, already captured, answered in the chat, private)"
@@ -116,6 +119,7 @@ until the window's start is loaded) and put it in one bucket:
 |--------|-----------|------------------|---------------------|
 | **Ask** | Someone asks us (Sean, the app team) or Phinamic to do, check, decide or send something | Yes, `new` | Yes |
 | **Commitment** | Someone says they will do something, ideally with a date ("I'll fix it by Fri") | Yes, `new` | Yes |
+| **Chase** | All it takes is a nudge: someone else owes an input, answer or file ("chase Paul for the UAE proposal", "waiting on Derek's daily report", "remind X") | Yes, `new`, Kind `Ping` | No: a line on the Pings to send reminder ("Pings" below) |
 | **Update** | Progress on work that already exists: done, shipped, blocked, delayed, new date, a BA key | Only if no task matches | No: comment on the matching Asana task ("Updates" below). No match → treat as an Ask |
 | **Decision** | "We agreed / let's go with / we won't" | Yes, `info only` | No |
 | **Feedback** | A user or tester saying how the app behaves | Yes, `new`, `QA` empty so feedback-qa picks it up | Only when it's a concrete bug or ask |
@@ -206,6 +210,7 @@ day, not twenty.
 | `Development` | Code or app change: a bug, a feature, a build, anything Phinamic builds (Jira BA) | "BPE back button doesn't work", "add a search bar to Assign practice" |
 | `Asana task` | Team or ops work, no code: send, organise, decide, check, answer, brief | "send Derek the Tuft accounts", "clean up the support mailbox" |
 | `Notion` | A page or document to write or update in Notion: how-to, scope, recap | "write the BOB Admin roles doc" |
+| `Ping` | A chase: someone else owes the input and a nudge is all it takes. No triage task ("Pings" below) | "chase the UAE, US and Japan inputs", "get Derek's answer on the CLI" |
 
 Fingerprint: `webex:{space id or meeting id}:{author}:{YYYY-MM-DD HH:mm}:{first 40 characters of the text}`.
 
@@ -273,7 +278,46 @@ link, since the Asana connector can't upload files.
 so Sean sees what got closed); deleted or not found → `skip`; moved to In Development →
 Kind `Development` (still `pushed` until completed). Nothing else.
 
-### Updates on existing work
+### Pings (a reminder, not a triage task)
+
+A chase is not work for us, so it doesn't need a ticket (20 Nov, Sean). It needs the
+right person or agent nudged, and Sean reminded that the nudge is due. If chasing
+needs real work from us first (write the proposal, decide, prepare a file), it is an
+Ask instead.
+
+**Who pings** (the suggested route, by who owes it):
+
+| Owes it | Route | How Sean triggers it |
+|---------|-------|----------------------|
+| Phinamic (Derek La, Khanh) | Boom Boom Derek: its next ping covers it | "boom boom" |
+| Someone at Curaden with an Asana task on it | Truth Catcher: comments on that task in Sean's voice | "truth catcher" |
+| A market partner (UAE, USA, Japan, Italy, …) | Market Rollout: drafts the follow-up | "partner follow-up {market}" |
+| Anyone else | A ready-to-send line for Sean (Webex or an @mention on their Asana task) | Sean sends it |
+
+**The reminder:** one Asana task, **"Pings to send (Webex Sweep)"**, in BOB App ›
+Webex inbox, assigned to Sean, no due date, through `asana-maintenance`. Each run
+rewrites its description to list every open ping, oldest first:
+
+```html
+<body>
+<h2>Pings to send</h2>
+<ul>
+<li><strong>{Who}</strong>: {what they owe}, asked by {name} {D Mon} · <em>{route}</em><br/>Ready to send: "{one plain line}" · <a href="{source link}">chat</a></li>
+</ul>
+<hr/>
+Say "pinged {who}" or run the route; Webex Sweep (automated) clears a line when the input arrives.
+</body>
+```
+
+No comment or @mention per ping (one reminder, no noise). Write the reminder's link to
+each ping row's `Asana link`; the row stays `new`, so it also shows in the Inbox's
+📥 Open tab until the ping is done.
+
+**Clearing a ping:** row → `done` and its line goes when the input arrives in Webex
+(an Update that matches it), Sean says it's pinged or sent, or Sean completes the
+reminder task (that clears every line on it; the next new ping creates a fresh
+reminder). The sweep never sends pings itself and never runs the other agents.
+
 
 Match on, in order: a BA key or Asana link in the message; then open triage tasks in
 Webex inbox; then open task names on the BOB App board (`1204489225205419`) and the
@@ -290,6 +334,15 @@ assignee or section; the comment carries the news and Truth Catcher picks it up 
 its next scan.
 
 Rows marked `task` (older meeting items) are waiting for Sean; leave them.
+
+### Chases already in Webex inbox (one-off, 20 Nov)
+
+Open triage tasks that are only a chase (for example "Chase the UAE, US and Japan
+inputs" and "Get Derek's answer: can the BOB Admin CLI be used on PROD…"): add each
+to the Pings to send reminder, set its row's Kind to `Ping` and Status to `new` with
+the reminder as `Asana link`, and complete the triage task with the comment "Moved to
+Pings to send (no ticket needed for a chase, Sean 20 Nov)." Leave anything that also
+needs a decision or work from us as it is.
 
 ### First run under these rules (one-off)
 
@@ -354,7 +407,7 @@ The only Webex post the sweep makes. Each run, after the triage step:
 - Can't read a space (offline after 3 tries, signed out): log `partial` with the
   space name; don't guess its content.
 - **Stuck rows.** A row the sweep writes stays `new` only until its triage task
-  exists. A `new` webex/meeting row older than one run means a step failed: fix it
+  exists (Kind `Ping` rows stay `new` until the ping is done; they are not stuck). A `new` webex/meeting row older than one run means a step failed: fix it
   on the next run (create the task or set `info only`), and say so in the run log.
 - **Never delete Inbox rows**, and never touch rows with Source `agent` or `manual`
   (those belong to the agents' flags and to feedback-qa).
@@ -366,7 +419,7 @@ Last step of every run: one row in the Agent run log (`RUNTIME.md`), Agent
 (nothing new), `partial` or `failed`. Summary: "{n} messages in {spaces}; meetings
 read (summary + transcript): {title HH:mm, …}; pending: {title HH:mm, …}; {a} log
 rows ({x} from transcripts), {t} triage tasks ({d} Development, {e} Asana, {f} Notion
-suggested), {b} Asana updates, {j} tickets in the Jira note; Webex inbox: {open} open".
+suggested), {p} pings on the reminder, {b} Asana updates, {j} tickets in the Jira note; Webex inbox: {open} open".
 Its `When` is where the next sweep's chat window starts. A transcript that can't be
 read (`transcript data not found`, sign-in prompt) → `partial`, with the meeting
 named under "pending".
