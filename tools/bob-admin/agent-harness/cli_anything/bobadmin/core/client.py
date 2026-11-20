@@ -67,14 +67,17 @@ class Session:
     access_token: str | None = None
     refresh_token: str | None = None
     user: dict[str, Any] = field(default_factory=dict)
+    # File name prefix: bob-admin keeps "session-<env>.json", bob-qa "qa-session-<env>.json",
+    # so the two CLIs can be signed in as different people at the same time.
+    name: str = "session"
 
     @property
     def path(self) -> Path:
-        return config_dir() / f"session-{self.env}.json"
+        return config_dir() / f"{self.name}-{self.env}.json"
 
     @classmethod
-    def load(cls, env: str) -> "Session":
-        s = cls(env=env)
+    def load(cls, env: str, name: str = "session") -> "Session":
+        s = cls(env=env, name=name)
         if s.path.exists():
             data = json.loads(s.path.read_text(encoding="utf8"))
             s.access_token = data.get("accessToken")
@@ -126,11 +129,13 @@ class Request:
 
 
 class Client:
-    def __init__(self, env: str = DEFAULT_ENV, lang: str | None = None, http: requests.Session | None = None):
+    def __init__(self, env: str = DEFAULT_ENV, lang: str | None = None, http: requests.Session | None = None,
+                 session_name: str = "session", cli_name: str = "bob-admin"):
         self.env = env
         self.base = resolve_api_url(env)
         self.lang = lang
-        self.session = Session.load(env)
+        self.cli_name = cli_name
+        self.session = Session.load(env, session_name)
         self.http = http or requests.Session()
 
     # ---- safety -------------------------------------------------------
@@ -189,13 +194,13 @@ class Client:
         if req.is_write:
             self.check_write_allowed()
         if auth and not self.session.access_token:
-            raise BobAdminError(f"Not signed in to {self.env}. Run: bob-admin --env {self.env} auth login")
+            raise BobAdminError(f"Not signed in to {self.env}. Run: {self.cli_name} --env {self.env} auth login")
         r = self._send(req, auth=auth)
         if r.status_code == 401 and auth and self.refresh():
             r = self._send(req, auth=auth)
         if r.status_code == 401 and auth:
             raise BobAdminError(
-                f"Session for {self.env} expired. Run: bob-admin --env {self.env} auth login", 401, _json(r)
+                f"Session for {self.env} expired. Run: {self.cli_name} --env {self.env} auth login", 401, _json(r)
             )
         if not r.ok:
             payload = _json(r)

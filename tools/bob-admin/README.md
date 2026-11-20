@@ -19,6 +19,10 @@ The production admin makes exactly the same API calls as test (checked 18 Nov
 | `test` (default) | admin-test.bobscore.app | phinamic-api.quanht.site/api/v1 |
 | `prod` | admin.bobscore.app | api.bobscore.app/api/v1 |
 
+**bob-qa** ships in the same package: QA scenarios for the clinician web app
+(test.bobscore.app) on a coach's sign-in, writes on test only. See
+[`agent-harness/cli_anything/bobqa/README.md`](agent-harness/cli_anything/bobqa/README.md).
+
 ## Install
 
 **Windows (Sean, Fabian):** one script. It puts bob-admin in
