@@ -1,5 +1,13 @@
 # BOB support playbook (for a support agent)
 
+> **How App Support uses this file** (added 12 Nov 2026): this is the source for every
+> **email** reply (the mailboxes in `agents/app-support.md`, "Mailboxes") and for the
+> recurring request types in section 2, on the form tasks as well. Facts in section 1
+> win over anything older in Notion. The voice rules in section 5 apply to email;
+> Asana replies keep `docs/app-support-voice-sean.md` (short, with the automated
+> sign-off). Section 8 grows from Sean's and Janine's edits to drafts ("Learning from
+> sent mail" in the spec). Edit it by PR; the next run uses it.
+
 **Built from:** the emails Sean answered between 4 and 12 Nov 2026, and the corrections he made to the drafts. The corrections are the most useful part, because they show where a default draft goes wrong.
 
 **Who this is for:** a Claude instance (curagents or a support agent) that drafts replies as Sean Dunne, Global Product Lead at Curaden, for the BOB App and the other apps.
@@ -167,7 +175,9 @@ Curaden App Hub → Templates). It asks who should get BOB and who the one BOB A
 person is, and links the BOB Academy page "Partner onboarding: BOB setup and training"
 (`4107e8aabbb481c9a15fe680c321efd2`). First sent to Curaden Czech on 6 Nov.
 
-**Sign-off (emails):**
+**Greeting and sign-off (Sean, 13 Nov):** emails start "Hey there!" and have no sign-off, because the Outlook signature adds it. The "Dear Dr. [name]" / "Hi [name]" openings in T1–T4 above are older; use "Hey there!".
+
+**Signature (added by Outlook, don't type it):**
 > Kind regards,
 > Sean Dunne
 > Global Digital Products Manager Apps
@@ -233,3 +243,18 @@ person is, and links the BOB Academy page "Partner onboarding: BOB setup and tra
 - Phinamic status (daily, local only): `.boom-boom-derek/YYYY-MM-DD.md`
 - Voice: `docs/app-support-voice-sean.md`, plus the `my-writing-style` and `curaden-comms` skills
 - Learned answers: `docs/app-support-faq.md`
+- Copy-and-paste replies for people (same wording): Notion Knowledge Wiki → Support `3287e8aabbb480b79f16f460a1c35a00`
+
+---
+
+## 8. Learned from sent mail
+
+The weekday maintenance session adds entries here by PR from the run log's
+`mail_learning` candidates: what Sean or Janine changed in a draft before sending it.
+One line each, generic, no names or addresses. When an entry contradicts a section
+above, the section is updated instead and the entry dropped.
+
+| Date | Request type | What the draft did | What was sent instead | Rule |
+|------|--------------|--------------------|-----------------------|------|
+| 4–12 Nov 2026 | Sections 2 and 5 above | | | Seeded from Sean's corrections that week |
+

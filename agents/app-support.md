@@ -34,6 +34,7 @@ trigger:
       - "support faq {question}"     # answer a question from the FAQs, for Sean, Fabian or a market
       - "add that to the support faq"  # Sean or Fabian: learn the reply just posted (PR to docs/app-support-faq.md)
       - "teach support: {question} → {answer}"
+      - "support playbook: {rule}"   # Sean: add or change a rule in docs/app-support-playbook.md (PR)
       - "app support"
       - "support requests"
       - "check support requests"
@@ -103,7 +104,8 @@ output:
     voice_notes: "array of {owner: Sean|Fabian, pattern, source_task_link} (no requester details)"
     faq_page_gaps: "array of {faq_page, question, suggestion} for Sean to add to the public FAQ"
     operator: "sean|fabian|routine"
-    mail: "array of {mailbox, thread_link, class, draft_ready} (empty until the mail connector is approved)"
+    mail: "array of {mailbox, thread_link, class, playbook_type, draft_ready} (empty until the mail connector is approved)"
+    mail_learning: "array of {thread_link_or_task_link, request_type, what_draft_did, what_was_sent, rule} (anonymised; see 'Learning from sent mail')"
 ---
 
 # App Support: answering the people who use the apps
@@ -286,11 +288,13 @@ owner can switch it.
 - **Email route.** Don't post the reply on the form task. Put a ready-to-send email
   in the Review subtask above `---`:
   - To: the email from the form. From: the app's mailbox in Outlook (BOB:
-    support@bobscore.com; Curaprox app: curaprox.app@curaden.com).
+    support@bobscore.com; Curaprox app: curaden.apps@curaden.ch, Sean 12 Nov).
   - Subject: "{App}: {form task title}", in the request's language.
-  - Body: the same reply in the voice, but signed for email (the voice file's
-    greeting, then "Kind regards," and the owner's name), with one line saying it
-    was prepared with the help of the support assistant.
+  - Body: starts "Hey there!" and has no sign-off, because the mailbox's Outlook
+    signature adds it (Sean, 13 Nov). Wording from the playbook and the Notion
+    Support replies page (Knowledge Wiki → Support `3287e8aabbb480b79f16f460a1c35a00`,
+    the same replies the team copies by hand), adapted to the request, with one line
+    saying it was prepared with the help of the support assistant.
 
   The owner copies it into a new email in Outlook, edits it if needed, sends it,
   and ticks the subtask. The next run comments "Answered by email ({date})" on the
@@ -572,8 +576,9 @@ start coming in.
 
 **Answering.** For every request, and for "support faq {question}":
 
-1. Match the question to an entry in the product FAQs, then in the learned FAQ and the
-   playbook. Match on meaning, not words: "change address of my practice" is the
+1. Match the question to an entry in the product FAQs, then in the learned FAQ, the
+   playbook (its facts in section 1 win over older Notion wording) and the Notion
+   Support replies page (Knowledge Wiki → Support `3287e8aabbb480b79f16f460a1c35a00`). Match on meaning, not words: "change address of my practice" is the
    "practice details" entry. A request in another language matches the same entries.
 2. **Then check the board history, Jira and Notion anyway** (step 3, sources 3–5), in
    case something newer changed the answer.
@@ -766,7 +771,7 @@ promise, never a clinical claim, always the voice file's "(automated)" sign-off.
 |--------------------------------|-------|
 | (none) | |
 
-## Mailboxes: support@ and info@bobscore.com (planned, not active)
+## Mailboxes: info@ / support@bobscore.com and curaden.apps@curaden.ch (planned, not active)
 
 **Status: disabled.** This needs a mail connector (MCP) for the bobscore.com mailboxes
 that Curaden IT has approved. Until then App Support doesn't read or write email, and a
@@ -775,16 +780,20 @@ approves one, Sean changes this status line by PR and names the connector here.
 
 What it will do then, with the same rules as the Asana replies:
 
-1. **Read** new threads in **support@bobscore.com** and **info@bobscore.com** since the
-   last run. Leave newsletters, auto-replies and delivery notices alone.
+1. **Read** new threads in **info@bobscore.com** and **support@bobscore.com** (BOB) and
+   **curaden.apps@curaden.ch** (Curaprox app) since the last run. Leave newsletters, auto-replies and delivery notices alone.
 2. **Classify** each one the same way (support, dev, feedback, spam) and pick the owner
    (Fabian, Sean covering). info@ also gets sales, partnership and press
    mail: those go to Sean in the summary (leads to market-rollout), with no draft unless
    he asks.
-3. **Draft** the reply in the same mailbox's Drafts, in the owner's voice, signed for
-   email ("Kind regards," and the owner's name and title, my-writing-style). It never
-   asks for passwords and never writes patient data; if a sender includes patient
-   data, the summary tells the owner.
+3. **Draft** the reply in the same mailbox's Drafts, from the playbook
+   (`docs/app-support-playbook.md`): its facts (section 1), the request type and
+   Sean's call for it (section 2), the matching template (section 3, adapted, never
+   pasted as it is), Notion links one by one and never the internal pages (section 4),
+   and the email voice (section 5). Start "Hey there!" with no sign-off (the Outlook
+   signature adds it). A request no playbook, FAQ or Support reply covers gets no
+   draft: the summary says "no source". It never asks for passwords and never writes
+   patient data; if a sender includes patient data, the summary tells the owner.
 4. **Send** only on the owner's explicit "send" for that draft. Email has no
    auto-send: "What it posts on its own" covers Asana replies only, until Sean
    adds an email column by PR.
@@ -794,6 +803,29 @@ What it will do then, with the same rules as the Asana replies:
 
 Mail stays in the mailbox. Names, addresses and message text never go into Notion,
 Webex, GitHub, run logs or the result JSON; those use thread links only.
+
+### Learning from sent mail
+
+Every email draft teaches the next one, the way owner edits teach the Asana replies.
+This covers the email route's drafts in Review subtasks today and the mailbox drafts
+once mail is connected.
+
+1. **Compare.** For each draft App Support wrote that the owner has since sent
+   (email route: the Review subtask is ticked and the owner pasted what they sent, or
+   the mailbox's Sent folder once connected), compare the sent text with the draft.
+   No change: nothing to learn.
+2. **Record.** For each real change (a fact corrected, a section cut, another template,
+   a shorter line, a link added), write one anonymised `mail_learning` candidate into
+   the run's Agent run log row: request type, what the draft did, what was sent, and
+   the rule in one sentence. A new fact is also an FAQ candidate; a voice habit is a
+   voice note.
+3. **Fold in.** The weekday maintenance session adds candidates to section 8 of
+   `docs/app-support-playbook.md` by PR. The same correction twice rewrites the rule
+   in sections 1–5 instead; a request type that comes in three times and isn't in
+   section 2 gets its own entry. A change to a reply the team copies by hand also goes
+   to the Notion Support replies page, so both stay word for word the same.
+4. **Wins.** Sean's direct edits to the playbook, or "support playbook: …" in a
+   session, beat learned entries. A clash with a product FAQ goes to Sean.
 
 ## Rules
 

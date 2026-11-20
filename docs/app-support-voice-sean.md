@@ -20,6 +20,13 @@ this file any time; the next run uses it.
   for any inconvenience").
 - In the language of the request; English when unclear.
 
+## Email is different
+
+This file is the voice for Asana replies. For email (the mailboxes), use section 5 of
+[`docs/app-support-playbook.md`](app-support-playbook.md): Sean's corrections from his
+own mail. Emails start "Hey there!" and have no sign-off: the mailbox's Outlook
+signature adds it (Sean, 13 Nov).
+
 ## Sign-off (always, on its own line)
 
 > — Sent by Sean's support assistant (automated). Reply here and I'll see it.
