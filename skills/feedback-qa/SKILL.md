@@ -35,14 +35,15 @@ Read before every run:
 
 ## Inbox (Notion)
 
-Database **Tasks & Notes** (under Inbox):
+Database **🚩 Inbox** (the check-up log, formerly "Tasks & Notes"):
 `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db`. Read it in view mode on
 `view://4157e8aa-bbb4-815b-b0a6-000cb183ca38` and filter the rows yourself; never SQL
 or rows mode (`RUNTIME.md` "Reading Notion").
 
-This database is shared with the Webex/meeting task pipeline. Its `Status`
-column (new → task → approved → pushed) belongs to that pipeline. This skill
-tracks its own progress in the **QA** column instead:
+This database is shared with Webex Sweep (Source `webex`/`meeting`: new → pushed,
+info only or skip) and with the agents' flags for Sean (Source `agent`). Its `Status`
+column belongs to them. Skip `agent` rows entirely (no QA value). This skill tracks
+its own progress in the **QA** column instead:
 
 | QA value | Set by | Meaning |
 |----------|--------|---------|
@@ -57,7 +58,7 @@ body (paste as much raw text as you like), and set `Source`. For a full UAT,
 also set **QA = uat** and put the build or version in the title.
 
 Status rule: when the agent claims a row whose `Status` is `new` as feedback,
-it sets `Status = reference` so the task pipeline does not push it to Asana.
+it sets `Status = info only` so the task pipeline does not push it to Asana.
 It never changes any other `Status` value.
 
 ---

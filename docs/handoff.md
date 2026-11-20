@@ -21,11 +21,48 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 13 Nov: the Inbox is the check-up log
+
+Sean: the 🚩 Inbox wasn't used. It is now where he checks up on what the agents picked
+up (`dream.md` §5 decision 1): Webex Sweep's item log, feedback for feedback-qa, and
+Source `agent` rows for whatever needs him (orchestrator escalations, run-log check
+findings). Done in Notion on 13 Nov: Source option `agent`, a database description,
+the first tab "📥 Open" (only Status `new`: pushed, answered and dropped rows are
+hidden, as Sean asked), "✅ Handled: last 7 days" (proof the agents work), "🤖 Agent
+flags", "🗂️ Decisions & answers", and the linked view "Inbox: open" on the Agent
+control room page. The one old `task` row (Blanca catch-up, already in Asana) was set
+to `pushed`. The orchestrator spec was brought up to date (schedules,
+outbox, live state from Notion instead of `dream.md` §4).
+
+Still open:
+- Old views "Awaiting approval" (Status `task`) and "Tickets by Kind" belong to the
+  retired pipeline. Sean said delete them (13 Nov), but the Notion connector can't
+  delete views: Sean removes them in Notion (right-click the view tab → Delete).
+- Test and junk rows: moved to Trash on 13 Nov at Sean's request (the "QA 29 Sep"
+  heuristic row, "s", "Hi All,", and the duplicate "- We have to start updating…";
+  the two "[LIVE TEST]" rows were already in Trash; "Hello Sean" and "Morning hommies"
+followed at Sean's request). Restorable from Notion Trash.
+  Agents still never delete Inbox rows on their own.
+- The Agent run log's **Agent** select may lack `orchestrator` and `run-log-check`;
+  rows use `other` until Sean adds them.
+- First Curaden "Agent run log check" after the merge: check it writes an Inbox row
+  instead of only a chat message when something is wrong.
+
+## 11 Nov (afternoon): Agent control room
+
+Sean asked to tidy Agents & Other Projects. The Agent registry, Agent run log and Webex
+outbox now sit together on **⚙️ Agent control room** `4157e8aabbb48194bb25e351664b6462`
+(App Hub › Agents & Other Projects), above Agentic Models and Tuft. All `collection://`
+and `view://` IDs are unchanged (each one checked after the move), so no Routine, PC
+task or spec needed a change. `RUNTIME.md` "Where the agent tables live" says so for
+every run. Still open: the Agentic Models page describes the 9 Oct setup (GitHub
+Actions, old broadcast; no Boom Boom, App Support, Market Rollout or courier).
+
 ## 11 Nov (later): cloud thinks, PC posts
 
 IT blocks browser automation on Curaden, so: every scheduled agent is a Curaden
 Routine; Webex posts go through the Notion **Webex outbox**
-(`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`, under Agents & Other Projects);
+(`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`, in the Agent control room);
 the one PC task is the **Webex courier (Personal)** (weekdays 08:02, 09:02, 12:02,
 17:02): sign-in check, post the outbox, Webex Sweep. Prompts: `docs/curaden-routines.md`
 and `docs/migration-mega-prompts.md` (prompt 2 = seven Routines on Curaden, prompt 3 =
@@ -98,9 +135,9 @@ the courier on Personal). Sean runs prompt 2, then prompt 3.
 
 | # | What | Why | Where |
 |---|------|-----|-------|
-| 1 | **App Support** is replaced by the 10 Nov spec (#58) and made autonomous by #59: answers on its own hourly 07:20–19:20 weekdays (Routine `trig_01NzNgUy17FxJiHFc8otT4oS`, Curaden), learns into `docs/app-support-faq.md`, sends bugs and gaps to Jira via In Development. Close PR #53 once #58 merges. Then: check the first live runs in the run log, write `skills/dev-triage/SKILL.md` (the spec inlines its rules until then), and walk Fabian through `docs/app-support-quickstart.md`. Mail (support@ / info@bobscore.com) waits for IT to approve a mail connector: then fill in the spec's "Mailboxes" status line | #53's email-draft model was superseded by Sean's 10 Nov brief | `agents/app-support.md`, `skills/dev-triage/` |
+| 1 | **App Support** is replaced by the 10 Nov spec (#58) and made autonomous by #59: answers on its own hourly 07:20–19:20 weekdays (Routine `trig_01NzNgUy17FxJiHFc8otT4oS`, Curaden), learns into `docs/app-support-faq.md`, sends bugs and gaps to Jira via In Development. Close PR #53 once #58 merges. Then: check the first live runs in the run log, write `skills/dev-triage/SKILL.md` (the spec inlines its rules until then), and walk Fabian through `docs/app-support-quickstart.md`. **13 Nov:** Sean put a check back in ("we need to validate"): App Support writes every reply on the task, where only the team sees it, and holds a `Review` subtask; the owner edits it if needed and adds the submitter (untick "Also invite to project") to send it, and the next run @mentions them. It never invites or adds followers itself (the connector can't invite new guests anyway). **18 Nov:** each reply now picks a route: one-off answers go by email (the owner sends the ready email from Outlook), anything that needs an answer back stays on the Asana route; runs log whether submitters reply by email or in Asana (`replies_in`) to see if the Asana route works for people who don't log in. **18 Nov:** Fabian owns every request, BOB included, and deploys it on his side (Sean: "I cannot handle this many agents"): his Routine plus a PC task "App Support invites (Fabian)" that adds requesters once he ticks their Review subtask (Claude in Chrome). Sean's Routine only covers Fridays and outages. Setup is one prompt in `docs/app-support-quickstart.md`. Open: does Fabian have BOB Admin access (else BOB Admin change subtasks go back to Sean)? It also researches the board history, Jira BA and Notion before replying, and learns from owner replies. Mail (support@ / info@bobscore.com) waits for IT to approve a mail connector: then fill in the spec's "Mailboxes" status line | #53's email-draft model was superseded by Sean's 10 Nov brief | `agents/app-support.md`, `skills/dev-triage/` |
 | 3 | Webex sign-out keeps happening even with a keep-alive. After the PC task is updated, check a week of `webex-keepalive` rows: if it still drops daily, make Claude in Chrome an accepted fallback for scheduled runs (not an error) and say so in the skill | Built-in browser signed out most days; Chrome fallback did the work | `skills/webex-web/SKILL.md`, `RUNTIME.md` |
-| 4 | Webex Sweep's "Logged from this chat" note is one message per space. If people find it noisy, add thread replies to `scripts/webex-post.js` (no thread support today) | #52 shipped the simpler version | `scripts/webex-post.js`, `agents/webex-sweep.md` |
+| 4 | Webex Sweep triage moved to Asana (12 Nov): Sean adds the section **Webex inbox** on the BOB App board once (no API tool creates sections). Until then the sweep files triage tasks in Backlog with a `[Webex] ` prefix and says so in its run-log row. After the first run, check that the open WX rows became a few merged tasks, not twenty | Sean: review in Asana, fewer items, Webex only for Jira tickets | `agents/webex-sweep.md` |
 | 5 | Run-log rows from Truth Catcher say Account `unknown`: the Personal routine prompt names no account. Fixed by the Curaden prompt; no action on Personal (its prompt can only be edited from its own session) | Monitoring | `docs/curaden-routines.md` |
 | 6 | The Personal "Agent run log check" prompt only expects Truth Catcher and Boom Boom, so it won't flag missed Webex Sweep / team update / Jira sync runs. Fixed by the Curaden version (reads the registry) | Monitoring gap until migration | `docs/curaden-routines.md` |
 | 7 | Sean's PC checkout of curagents isn't on `main` (Boom Boom logs it daily). Runs read `origin/main` so it's safe; tidy it when on the PC | Noise in run logs | PC |
@@ -109,8 +146,8 @@ the courier on Personal). Sean runs prompt 2, then prompt 3.
 
 ## Useful IDs
 
-- Agent registry `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418` · Agent run log `collection://9b260587-5c0d-4d90-947e-b6e10ba159df`
-- Product Roadmap `collection://2ce24f93-f696-4d3b-98be-462df08c2c29` · Inbox `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db`
+- Agent control room `4157e8aabbb48194bb25e351664b6462`: Agent registry `collection://ca4bcf81-b541-49e6-9da5-1fc8bfd38418` · Agent run log `collection://9b260587-5c0d-4d90-947e-b6e10ba159df` · Webex outbox `collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`
+- Product Roadmap `collection://2ce24f93-f696-4d3b-98be-462df08c2c29` · Inbox `collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db` (📥 Open `view://35a7e8aa-bbb4-81b0-ad04-000ce39a2df1`, ✅ Handled `view://4177e8aa-bbb4-8111-848f-000ce8c2e1f6`)
 - Markets playbook `4087e8aabbb481e69b5cc1744133076b` · Launch KPIs `40f7e8aabbb48114bdbfe8715c020740`
 - Personal Routines: Truth Catcher `trig_01BxmV4KaG4CPbZMU4GmMHa7`, Jira sync `trig_01EREg8Ra4divTV2Jomidy9g`, Run log check `trig_01AN1dTjvTV3YNhhmLAqV4tL`
 - Jira cloudId `17835775-46a2-4e51-989d-809d887c4db5` (project BA) · Asana BOB App `1204489225205419`, App Tasks `1200298616652229`, Sean `1207214370347608`
