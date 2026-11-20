@@ -210,7 +210,12 @@ details himself.
   > — Sent by Sean's support assistant (automated). Reply here and I'll see it.
 - **When he replies**: a subtask for Sean, "Sean: change in BOB Admin": *BOB Admin →
   Practices → {practice} → Address: replace with {street and number}, {postcode},
-  {city}, {country}.*
+  {city}, {country}.* Plus the same change as one `bob-admin` line the owner
+  (today Fabian, or Sean when covering) can run on their own PC and sign-in
+  instead (`skills/bob-admin`): `bob-admin --env prod --dry-run practices update
+  {practice id} --street "…" --zip "…" --city "…"` (prod writes need their own
+  unlock; they drop `--dry-run` once it looks right). Every change task gets this
+  line when the change is something `bob-admin` can do.
 - **When Sean marks the subtask done**: a short "All done" reply to the submitter,
   then the task is marked complete.
 - **The gap**: one dev ticket ("Let legacy Coaches become Practice Admin and edit

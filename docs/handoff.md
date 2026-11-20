@@ -21,6 +21,35 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 18 Nov: bob-admin CLI for BOB Admin
+
+Sean asked for a CLI-Anything CLI for BOB Admin (reports, users, Super Users,
+permissions, approvals, products, news, integrations). Built in `tools/bob-admin/`
+from the platform API's own OpenAPI spec (141 endpoints, published on the test API's
+Swagger page; prod hides it). Skill: `skills/bob-admin/SKILL.md`. Defaults to test
+(admin-test.bobscore.app → API on `phinamic-api.quanht.site`); prod writes are
+locked behind `BOB_ADMIN_PROD_WRITES=1`. Sean signed in on test (Super User
+account) and every read command answered; a live write cycle on test (draft news:
+create, read, edit, delete) worked and left nothing behind.
+
+20 Nov (Sean: "make it for prod, really extensive, share with Phinamic and
+Fabian, give it to the agents"): the prod admin makes the same API calls as test,
+so it works on prod as-is; `call` adds 140 generated commands (every endpoint);
+`--all` / `--fields` / `--ids` / `-` chain commands; `install.ps1` installs it
+per user (`%USERPROFILE%\.bob-admin`, `-AddToPath`), pip/pipx from GitHub for
+Phinamic. Wired in: orchestrator route (PC only), market-rollout (reads + a
+dry-run grant command for Sean), app-support (owner's change task carries the
+`bob-admin` line), `RUNTIME.md` row. 53 unit tests pass.
+
+Still open:
+- Sean: `bob-admin --env prod auth login`, then a read-only prod pass.
+- Fabian: run `install.ps1 -AddToPath` and sign in with his own admin account.
+- Live writes in the other areas on test, one at a time with Sean's yes.
+- Ask Phinamic: is the test API meant to sit on `quanht.site`? Can prod publish
+  its spec, or offer a scoped admin token so automations needn't sign in as a
+  person? Their planned MCP can use this CLI's command map as its scope.
+- Later: a CLI for the BOB web app itself (QA), separate piece of work.
+
 ## 13 Nov: the Inbox is the check-up log
 
 Sean: the 🚩 Inbox wasn't used. It is now where he checks up on what the agents picked
