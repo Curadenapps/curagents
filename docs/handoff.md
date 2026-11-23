@@ -1,4 +1,4 @@
-# Handoff: state of curagents (5 Nov 2026)
+# Handoff: state of curagents (5 Nov 2026, latest section 23 Nov)
 
 Read this after `CLAUDE.md`, `RUNTIME.md` and `dream.md` when you pick up maintenance
 in a new session. Update it (or delete the lines that are done) by PR whenever you
@@ -20,6 +20,39 @@ finish one of the items, so the next session starts from the truth.
   be off).
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
+
+## 23 Nov: product overviews and the BOB App / Curaprox App pages
+
+Done (all with Sean's OK):
+- **Two overview decks** (EN, HTML + PDF), committed to `main` of the local
+  App Website repo (`773ac12`, `0f62876`):
+  - `Marketing/presentations/bob-overview`: Curaprox - BOB, 16 slides. Screens from
+    the current build with test data anonymised, the chair screens in a real
+    iPad Pro 11 frame.
+  - `Marketing/presentations/curaprox-app-overview`: the Curaprox app and the
+    treatment plan, 14 slides. Concept screens from the patient loop prototype
+    (made-up names) in a real iPhone 18 Pro frame.
+  - DE and IT versions are parked (Sean: "can wait for another time").
+- **Notion hub pages revamped:**
+  - **BOB App** (`1f37e8aabbb480efb62ac97d457cdf94`): "Today: live and in use in
+    practices", the deck, key facts, what's next, getting started, a roadmap
+    timeline filtered to BOB, boards.
+  - **Curaprox App** (`1f37e8aabbb4800fa12fcc02fce98c69`): "The future: just about
+    to start" (the 20 Nov direction), the deck, what's next, the current app's facts
+    (maintenance), boards, and the old pre-merge roadmap view in a toggle.
+  - A synced "Two apps, one loop" box sits on both (original on BOB App).
+  - **App Overview** (`3957e8aabbb48098816df88ccd47f083`) only links to both pages.
+  - "What is the Curaprox App" has a box on top: live today and staying like this
+    for now, what's coming, and that how the two come together is still open.
+
+Open:
+- The [VERIFY] lists in both decks' `HANDOFF.md` (e.g. the concept screens still
+  show the BOB logo, the final patient sign-in flow, the Curaprox app support
+  channel once the plan is live).
+- After any deck change: rebuild, then re-upload the PDF on its hub page.
+- The session that switched the BOB mark to blue on curaprox-apps.com was archived
+  before it reported back. It had published the blue mark; the coat-badge photo
+  on the BOB pages was still open.
 
 ## 20–23 Nov: BOB Direction and the website
 
