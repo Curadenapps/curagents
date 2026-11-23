@@ -163,7 +163,7 @@ Open for Sean:
       mail connector IT hasn't approved yet.
     - #78 is closed, not merged.
     - #81: a draft (Webex Sweep marker).
-    - #88 (bob-admin CLI) and #89 (bob-qa CLI): open since 20 Nov, for review.
+    - #88 (bob-admin CLI) and #89 (bob-qa CLI): merged 23 Nov.
     - #69 (rollout dates v2): open since 12 Nov.
     - #66 (Market Rollout Academy → BOB Academy) and #71 (Plaque Hunter game): drafts.
 12. Earlier items:
@@ -192,14 +192,19 @@ Phinamic. Wired in: orchestrator route (PC only), market-rollout (reads + a
 dry-run grant command for Sean), app-support (owner's change task carries the
 `bob-admin` line), `RUNTIME.md` row. 53 unit tests pass.
 
+23 Nov: #88 merged, then #89 (`bob-qa`, the CLI for the BOB web app, for QA).
+Sean signed in on prod (Super User) and a read-only pass answered on every read
+command (practices, users, Super Users, subsidiaries, products, tabs, BOB values,
+news, integrations, tickets, templates, all eight reports); nothing written, prod
+writes still locked. Sean's install had no `-AddToPath`, so `bob-admin` wasn't
+found by name: run the installer with `-AddToPath` and open a new terminal.
+
 Still open:
-- Sean: `bob-admin --env prod auth login`, then a read-only prod pass.
 - Fabian: run `install.ps1 -AddToPath` and sign in with his own admin account.
 - Live writes in the other areas on test, one at a time with Sean's yes.
 - Ask Phinamic: is the test API meant to sit on `quanht.site`? Can prod publish
   its spec, or offer a scoped admin token so automations needn't sign in as a
   person? Their planned MCP can use this CLI's command map as its scope.
-- Later: a CLI for the BOB web app itself (QA), separate piece of work.
 
 ## 13 Nov: the Inbox is the check-up log
 
