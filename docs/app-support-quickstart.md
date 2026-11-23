@@ -170,5 +170,6 @@ twice.
   requester once they're added. Keep internal notes in subtasks.
 - **Bugs and product gaps** become one Jira-ready ticket in BOB App, moved to In
   Development so Phinamic gets it in Jira.
-- **Mailboxes** support@bobscore.com and curaprox.app@curaden.com: App Support doesn't
+- **Mailboxes** info@bobscore.com (support@bobscore.com is only the system sender) and
+  curaden.apps@curaden.ch: App Support doesn't
   read or send email. IT decided against an Outlook connector for now (17 Nov).

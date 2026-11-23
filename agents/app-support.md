@@ -57,7 +57,7 @@ memory:
     - docs/app-support-voice-sean.md     # how Sean's Routine writes
     - docs/app-support-voice-fabian.md   # how Fabian's Routine writes
     - docs/app-support-playbook.md       # recurring BOB request types, facts, templates and Sean's corrections (Nov 2026)
-    - "notion: the product FAQs, read-only: BOB — FAQ 3217e8aabbb480289be7f8bbf6260528 (source of the curaprox-apps.com FAQ), Curaprox — FAQ 2e77e8aabbb4809699f8ca3225f4a310, IDB & BOB FAQs 2e77e8aabbb480ea8059c06f022526f8, Curaden — FAQ 2e77e8aabbb48099b047df4e620a272b, and the How-To Documents they link (index: BOB Kit 1fb7e8aabbb480d29c88cbd43aaee5fc)"
+    - "notion: the product FAQs, read-only: BOB: FAQ 3217e8aabbb480289be7f8bbf6260528 (source of the curaprox-apps.com FAQ), Curaprox — FAQ 2e77e8aabbb4809699f8ca3225f4a310, Curaden — FAQ 2e77e8aabbb48099b047df4e620a272b, and the How-To Documents they link (index: BOB Kit 1fb7e8aabbb480d29c88cbd43aaee5fc; interdental brush facts: How to BOB 3087e8aabbb480b48701f105c7d932c0, "Using interdental brushes"). Never cite a page that is in Notion's Trash: the IDB & BOB FAQs, System Requirements, Legacy Sign-Up and Mobile User Guide were archived on 18 Nov"
     - "web: curaprox-apps.com app pages (public FAQ, e.g. https://curaprox-apps.com/app-pages/bob-app), read-only, the link a reply gives"
     - agents/truth-catcher.md   # "App Tasks board": sections, working days, what it already watches
     - "skill: dev-triage (skills/dev-triage/SKILL.md) when present; until then the 'Dev hand-off' rules below"
@@ -288,7 +288,8 @@ owner can switch it.
 - **Email route.** Don't post the reply on the form task. Put a ready-to-send email
   in the Review subtask above `---`:
   - To: the email from the form. From: the app's mailbox in Outlook (BOB:
-    support@bobscore.com; Curaprox app: curaden.apps@curaden.ch, Sean 12 Nov).
+    info@bobscore.com; Curaprox app: curaden.apps@curaden.ch; settled 12 Nov, see the
+    playbook's facts table).
   - Subject: "{App}: {form task title}", in the request's language.
   - Body: starts "Hey there!" and has no sign-off, because the mailbox's Outlook
     signature adds it (Sean, 13 Nov). Wording from the playbook and the Notion
@@ -418,8 +419,8 @@ and never stop at the first source that comes up empty. Work through all of thes
 and use what the newest, most authoritative source says (details in "FAQ: answering
 and getting smarter"):
 
-1. **The product FAQs in Notion** (BOB — FAQ, Curaprox — FAQ, IDB & BOB FAQs,
-   Curaden — FAQ) and the How-To pages they link. They're what Curaden tells users,
+1. **The product FAQs in Notion** (BOB: FAQ, Curaprox — FAQ, Curaden — FAQ; interdental
+   brushes: How to BOB) and the How-To pages they link. They're what Curaden tells users,
    so the reply uses their facts and on-screen paths word for word.
 2. **The learned FAQ**, [`docs/app-support-faq.md`](../docs/app-support-faq.md), and
    **the playbook**, [`docs/app-support-playbook.md`](../docs/app-support-playbook.md):
