@@ -28,6 +28,7 @@ The following skills are available and will auto-load based on trigger phrases:
 
 - **`skills/bob-admin/SKILL.md`** — BOB Admin through the `bob-admin` CLI (`tools/bob-admin/`, CLI-Anything format, built from the platform's OpenAPI spec): reports and exports, users and Super Users, roles, practice approvals and staff, products, news, subsidiaries, partner API tokens, and every API endpoint via `call` (chainable: `--all`, `--fields`, `--ids`, `-`). Test or prod; PC only, on the person's own sign-in; writes need a yes, prod writes locked
 - **`skills/bob-qa/SKILL.md`** — QA of the BOB web app (test.bobscore.app) through the `bob-qa` CLI (ships with bob-admin in `tools/bob-admin/`): `qa run smoke` (read-only) and `qa run coach-loop` (QA-TEST patient, temporary-patient score, assign session, score email to the QA inbox, cleanup) with a pass / fail report, plus the calls the coach app makes. Writes on test only, after a yes; Sean's own coach sign-in; PC only
+- **`skills/yogurt/SKILL.md`** — Any Webex call recorded on the PC with Yogurt (open-source local notetaker, no bot in the call): space and 1:1 calls, video chats, partner meetings, meetings Webex didn't record. Agents read transcripts and summaries through Yogurt's local MCP server (`mcp__yogurt__*`, read-only); setup with `scripts/setup-yogurt.ps1`. PC only; people record, agents only read
 
 Trigger phrases are defined in each SKILL.md frontmatter. Skills load their own reference files as needed.
 

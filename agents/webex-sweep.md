@@ -28,6 +28,8 @@ memory:
   read:
     - dream.md
     - skills/webex-web/SKILL.md
+    - skills/yogurt/SKILL.md
+    - "yogurt (local MCP, read-only, when reachable on this PC): Webex calls recorded since the window's start"
     - "notion: Agent run log (last webex-sweep row = where the last sweep stopped), view mode on the newest-first view, never SQL (RUNTIME.md 'Reading Notion')"
     - "notion: Tasks & Notes inbox collection://35a7e8aa-bbb4-8126-9b9b-000b4b0a44db (Source ID = dedupe key), view mode on view://4157e8aa-bbb4-815b-b0a6-000cb183ca38, never SQL (RUNTIME.md 'Reading Notion')"
     - "asana: BOB App board 1204489225205419, section 'Webex inbox' (the triage queue) and In Development"
@@ -45,6 +47,7 @@ output:
     spaces_read: "string[] (with message counts)"
     meetings_read: "string[] (title + start; summary and transcript read)"
     meetings_pending: "string[] (no summary or transcript yet; next run)"
+    yogurt_calls_read: "string[] (title + start; Webex calls recorded locally in Yogurt; empty when Yogurt isn't reachable)"
     log_rows_created: "array of {title, status, notion_url}"
     triage_tasks_created: "array of {title, route, task_url}"
     asana_updates: "array of {task, comment_url}"
@@ -160,6 +163,34 @@ shutdown date and four mobile QA defects). So for each meeting in the window:
    the Summary, and the next run reads it.
 8. **A long call is still a handful of items.** Aim for 3–6 triage tasks per hour of
    meeting at most; the rest is comments on existing tasks and `info only` rows.
+
+### Calls recorded in Yogurt
+
+Most Webex calls (space calls, video chats, partner meetings, meetings recorded
+without the AI assistant) never get a Webex summary. When they were recorded on this
+PC with Yogurt (`skills/yogurt/SKILL.md`), the sweep reads them too. Only when the
+`yogurt` MCP server is reachable; if not, skip this part without failing the run.
+
+1. **Which calls.** `list_meetings`, keep those that started inside the window and are
+   Webex calls (`app` is `Webex`, or the calendar event has a `webex.com` link), and
+   skip any a previous `webex-sweep` row's Summary names under "Yogurt read".
+   **1:1 calls are private:** read one only when the person is named here (add by PR,
+   like the watched spaces; none yet). So today only
+   calls with three or more attendees, or with a Curaden space or meeting name in the
+   title, are read.
+2. **Same meeting in Webex?** If Webex also has an AI summary for it (same title and
+   start within 10 minutes), the Webex steps above lead; use Yogurt's transcript only
+   for what Webex missed, and log nothing twice.
+3. **Read it.** `get_meeting` (Yogurt's summary and the person's own notes) and
+   `get_transcript` `{ format: "text" }`. Treat it like a Webex transcript: same
+   buckets, same merging, same quote format `{Speaker} [m:ss]: "…"`. The other side
+   is often "Them" on Windows: name the speaker from context and the attendees, or
+   write "(speaker unclear)".
+4. **Links and IDs.** Source `meeting`; Source link empty (Yogurt has no shareable
+   link) and the Notes start with "From a local Yogurt recording: {title}, {start}".
+   Fingerprint: `webex:yogurt:{meeting id}:{speaker}:{YYYY-MM-DD HH:mm}:{first 40
+   characters}`. Task footer: "Captured by Webex Sweep (automated, from a local
+   recording)".
 
 ### Capture less
 
@@ -366,7 +397,8 @@ The only Webex post the sweep makes. Each run, after the triage step:
 Last step of every run: one row in the Agent run log (`RUNTIME.md`), Agent
 `webex-sweep`, Where `PC`, Outcome `ok` (rows, tasks or comments written), `no-op`
 (nothing new), `partial` or `failed`. Summary: "{n} messages in {spaces}; meetings
-read (summary + transcript): {title HH:mm, …}; pending: {title HH:mm, …}; {a} log
+read (summary + transcript): {title HH:mm, …}; pending: {title HH:mm, …}; Yogurt
+read: {title HH:mm, …} (or "Yogurt not reachable"); {a} log
 rows ({x} from transcripts), {t} triage tasks ({d} Development, {e} Asana, {f} Notion
 suggested), {b} Asana updates, {j} tickets in the Jira note; Webex inbox: {open} open".
 Its `When` is where the next sweep's chat window starts. A transcript that can't be

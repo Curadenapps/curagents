@@ -42,7 +42,16 @@
       "mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__searchJiraIssuesUsingJql",
       "mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__getVisibleJiraProjects",
       "mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__getConfluencePage",
-      "mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__searchConfluenceUsingCql"
+      "mcp__cba144a5-138f-455b-8987-f84b72c3c4e9__searchConfluenceUsingCql",
+      "mcp__yogurt__list_meetings",
+      "mcp__yogurt__get_meeting",
+      "mcp__yogurt__get_transcript",
+      "mcp__yogurt__search",
+      "mcp__yogurt__list_people",
+      "mcp__yogurt__list_folders",
+      "mcp__yogurt__upcoming_meetings",
+      "mcp__yogurt__calendar_day",
+      "mcp__yogurt__export_meeting"
     ]
   },
   "hooks": {
