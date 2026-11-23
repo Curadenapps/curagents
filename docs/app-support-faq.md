@@ -9,9 +9,9 @@ smarter".
 
 | FAQ (Notion) | Covers | Public version |
 |--------------|--------|----------------|
-| BOB — FAQ `3217e8aabbb480289be7f8bbf6260528` | Sign-up, devices, sessions, patients, users, settings, support routes | https://curaprox-apps.com/app-pages/bob-app (can lag behind Notion) |
+| BOB: FAQ `3217e8aabbb480289be7f8bbf6260528` | Sign-up, devices, sessions, patients, users, settings, support routes | https://curaprox-apps.com/app-pages/bob-app (can lag behind Notion) |
 | Curaprox — FAQ `2e77e8aabbb4809699f8ca3225f4a310` | Curaprox app (patient app) | curaprox-apps.com app page |
-| IDB & BOB FAQs `2e77e8aabbb480ea8059c06f022526f8` | Interdental brushes and BOB | |
+| How to BOB `3087e8aabbb480b48701f105c7d932c0` | Interdental brushes ("Using interdental brushes"; the old IDB & BOB FAQs page was archived 18 Nov) | |
 | Curaden — FAQ `2e77e8aabbb48099b047df4e620a272b` | Curaden general | |
 
 How-To pages for each are indexed in BOB Kit `1fb7e8aabbb480d29c88cbd43aaee5fc`.
