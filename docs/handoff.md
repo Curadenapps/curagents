@@ -21,6 +21,41 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 20–23 Nov: BOB Direction and the website
+
+Done:
+- **BOB Direction** (Sean approved 20 Nov): the synced block on 🎯 Goals & Objectives
+  (`29b7e8aabbb48021ba93e6ad24b3b577`, shown in the BOB Kit) now says:
+  - BOB is the core product, on the clinician side.
+  - The Curaprox app goes ahead as the patient's treatment-plan app. Nothing is
+    folded into BOB, and the Product Roadmap rows stay as they are.
+  - BOB is for every clinician and taught through iTOP; iTOP isn't required.
+  - Still no medical device and no PMS.
+  The same iTOP line is on "What is the BOB App?" and "BOB: FAQ".
+- **Website** (curaprox-apps.com, published 23 Nov): the English, German and Italian
+  BOB app pages (`/app-pages/bob-app`, `/de/bob-app`, `/it/bob-app`) match the Notion
+  "BOB: FAQ":
+  - the iTOP line
+  - "Curaprox - BOB" in the stores
+  - the phone version on 14 Dec
+  - Portuguese (Brazil)
+  - users and practice details managed by the Practice Admin in BOB Admin
+  - info@bobscore.com
+  - Trend / First vs latest
+  - assigning anonymous sessions
+  The German and Italian feature sections and screenshots were brought up to the
+  English page. The FAQ schema on the English page (what Google shows) matches too.
+  The old Help & Support screenshot is gone.
+- **Scheduled tasks on this PC:** `bob-roadmap-watch`, `asana-notion-sync` and
+  `bob-roadmap-dashboard-refresh` are disabled (checked 23 Nov).
+
+Website gaps left:
+- the German and Italian pages have no "Open web app" buttons and no FAQ schema
+- the German and Italian app labels used on the website weren't checked against the
+  app: "Patientendetails anzeigen", "Patient zuweisen", "Visualizza dettagli
+  paziente", "Assegna al paziente"
+- the image alt texts on the German and Italian pages are still in English
+
 ## 18–20 Nov: Curaden switch, merges, BOB Kit and how-tos
 
 The "Where things stand" list above dates from 5 Nov. On scheduling, this section and
@@ -54,8 +89,8 @@ Done:
   database.
 
 Open for Sean:
-1. Switch off the Personal PC tasks boom-boom-derek and bob-roadmap-watch. Until
-   then, Roadmap watch may write its report twice.
+1. Switch off the Personal PC task boom-boom-derek. It isn't in this PC's task list
+   (23 Nov), so check the other account's PC. bob-roadmap-watch is already off.
 2. Live build audit of bobscore.app / admin.bobscore.app (running locally on the PC):
    apply its findings. The how-tos were written from Notion, not checked against the
    build.
@@ -65,10 +100,9 @@ Open for Sean:
    - publish the External pages as a read-only site (recommended now)
    - guest-invite Janine, Fabian and Blanca
    - move the App Hub to a Curaden workspace (raise with IT)
-4. Comparing BOB Scores: restore the deleted page, or add a "Compare scores" section
-   to "BOB: Patient record and progress".
-5. Website FAQ (Webflow) needs the same updates: info@, users managed in BOB Admin,
-   the store name, and the phone date of 14 Dec.
+4. ~~Comparing BOB Scores~~: closed 20 Nov. Step 5 of "BOB: Patient record and
+   progress" covers it, with a Compare BOB Score clip.
+5. ~~Website FAQ (Webflow)~~: done 23 Nov (see 20–23 Nov).
 6. The Legacy walkthrough video went to Trash with the Legacy page. Restore it if
    wanted.
 7. The Audience of "BOB Admin: Approve a practice" is still Internal. Should it be
@@ -80,10 +114,15 @@ Open for Sean:
    - how Reject works
    - the phone minimum versions
    - the "BOB Admin access: None" label on Practice Admins
-10. Open PRs from other sessions:
-    - #77 (mailbox flow): outdated, close it.
-    - #78 (a Jira link on a form task isn't a dev hand-off): merge it.
+10. Open PRs from other sessions (as of 23 Nov):
+    - #77 (App Support email drafts, learning from sent mail): draft. It was rebuilt on
+      20 Nov on top of #79 and #80, so review it rather than close it. It needs the
+      mail connector IT hasn't approved yet.
+    - #78 is closed, not merged.
     - #81: a draft (Webex Sweep marker).
+    - #88 (bob-admin CLI) and #89 (bob-qa CLI): open since 20 Nov, for review.
+    - #69 (rollout dates v2): open since 12 Nov.
+    - #66 (Market Rollout Academy → BOB Academy) and #71 (Plaque Hunter game): drafts.
 11. Earlier items:
     - tick Approved on the 5–12 Nov team update
     - decide on the external Task and Note Pipeline (it needs the Inbox statuses
