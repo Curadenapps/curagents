@@ -21,6 +21,75 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 18–20 Nov: Curaden switch, merges, BOB Kit and how-tos
+
+The "Where things stand" list above dates from 5 Nov. On scheduling, this section and
+the Notion Agent registry take precedence over it.
+
+Done:
+- **Agent registry:** Truth Catcher, Boom Boom Derek, Roadmap watch, Roadmap ← Jira
+  sync and the Agent run log check are now Account = Curaden. These Personal cloud
+  Routines are disabled: `trig_01BxmV4KaG4CPbZMU4GmMHa7` (Truth Catcher),
+  `trig_01EREg8Ra4divTV2Jomidy9g` (Jira sync) and `trig_01AN1dTjvTV3YNhhmLAqV4tL`
+  (run-log check). The Webex courier and Webex Sweep stay on Personal (PC, built-in
+  browser).
+- **Merged:**
+  - #83: Inbox statuses `info only` and `done`.
+  - #80: App Support playbook with info@bobscore.com + curaden.apps@curaden.ch,
+    "Curaprox - BOB", the T5 partner onboarding template and the support-flow diagram.
+  - #87: #85 rebased (attach screenshots before moving to In Development). #85 is
+    closed.
+- **BOB Kit** (`1fb7e8aabbb480d29c88cbd43aaee5fc`): restructured. The Legal toggle
+  and Sabina were removed (Sean).
+- **How-tos:**
+  - Approve a practice is merged with the Subsidiary approval section.
+  - System Requirements is merged into "BOB: Get access and devices".
+  - Roles and permissions is the single roles reference.
+  - Moved to Trash: System Requirements, Legacy Sign-Up, Mobile User Guide and
+    IDB & BOB FAQs. Its clinical IDB facts moved into How to BOB.
+  - 12 pages renamed "BOB: …" / "BOB Admin: …".
+  - support@ became info@bobscore.com.
+  - Practice Admin manages coaches.
+- **Analytics page:** a BOB Admin section and the "BOB Admin — Monthly market stats"
+  database.
+
+Open for Sean:
+1. Switch off the Personal PC tasks boom-boom-derek and bob-roadmap-watch. Until
+   then, Roadmap watch may write its report twice.
+2. Live build audit of bobscore.app / admin.bobscore.app (running locally on the PC):
+   apply its findings. The how-tos were written from Notion, not checked against the
+   build.
+3. Access: the Notion workspace has only Sean (personal account) and integrations, so
+   partners can't open the Kit or Academy pages unless they're published or shared by
+   link. The options are:
+   - publish the External pages as a read-only site (recommended now)
+   - guest-invite Janine, Fabian and Blanca
+   - move the App Hub to a Curaden workspace (raise with IT)
+4. Comparing BOB Scores: restore the deleted page, or add a "Compare scores" section
+   to "BOB: Patient record and progress".
+5. Website FAQ (Webflow) needs the same updates: info@, users managed in BOB Admin,
+   the store name, and the phone date of 14 Dec.
+6. The Legacy walkthrough video went to Trash with the Legacy page. Restore it if
+   wanted.
+7. The Audience of "BOB Admin: Approve a practice" is still Internal. Should it be
+   External?
+8. Check the score band labels in How to BOB (no inflammation / mild / moderate /
+   severe) with Tino.
+9. Questions for Phinamic:
+   - when the approval checklist becomes optional
+   - how Reject works
+   - the phone minimum versions
+   - the "BOB Admin access: None" label on Practice Admins
+10. Open PRs from other sessions:
+    - #77 (mailbox flow): outdated, close it.
+    - #78 (a Jira link on a form task isn't a dev hand-off): merge it.
+    - #81: a draft (Webex Sweep marker).
+11. Earlier items:
+    - tick Approved on the 5–12 Nov team update
+    - decide on the external Task and Note Pipeline (it needs the Inbox statuses
+      `task`/`approved` kept)
+    - the duplicate App Support "needs you" task 1220619032608553
+
 ## 13 Nov: the Inbox is the check-up log
 
 Sean: the 🚩 Inbox wasn't used. It is now where he checks up on what the agents picked
