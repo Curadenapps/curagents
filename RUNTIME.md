@@ -297,7 +297,10 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
      says: the row's **Space** (IDs in the skill), **Mentions**, **Marker**, the message
      from the row's page body (the **Message** property is only a preview). With an
      **Attachment**, download it (Notion file URL) and attach it first (Recipe 2).
-     Verify with `webex-read.js` (`markerCount: 1`).
+     Verify with `webex-read.js` (`markerCount: 1`). The Marker must appear word for
+     word (same case) in the message; an agent writing a row copies it from the
+     message's first line. If it doesn't, use the message's first line as the marker
+     and say so in the Courier note.
    - Posted → Status `Posted`, **Posted at** now. Failed after the skill's retries →
      Status stays `Queued`, Courier note with the reason (3 failed runs → `Failed`).
    - Boom Boom rows: before posting, check the space for replies since the row was
