@@ -271,10 +271,20 @@ def _json(r: requests.Response) -> Any:
 
 
 def _error_message(payload: Any) -> str | None:
-    if isinstance(payload, dict):
-        m = payload.get("message") or payload.get("error") or payload.get("detail")
-        if isinstance(m, list):
-            return "; ".join(map(str, m))
-        if m:
-            return str(m)
-    return None
+    if not isinstance(payload, dict):
+        return None
+    m = payload.get("message") or payload.get("error") or payload.get("detail")
+    if isinstance(m, list):
+        m = "; ".join(map(str, m))
+    # Validation failures (422) say only "Unprocessable Entity Exception" in `message`;
+    # the useful part is `errors`, e.g. {"identity": "invalidCredentials"}.
+    errors = payload.get("errors")
+    if isinstance(errors, dict) and errors:
+        detail = ", ".join(f"{k}: {'; '.join(map(str, v)) if isinstance(v, list) else v}" for k, v in errors.items())
+    elif isinstance(errors, list) and errors:
+        detail = "; ".join(map(str, errors))
+    else:
+        detail = None
+    if m and detail:
+        return f"{m} ({detail})"
+    return str(m) if m else detail

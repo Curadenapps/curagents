@@ -21,6 +21,15 @@ powershell -ExecutionPolicy Bypass -File .\tools\bob-admin\install.ps1 -AddToPat
 
 That installs both `bob-admin` and `bob-qa` (`%USERPROFILE%\.bob-admin\bin\bob-qa.cmd`).
 
+**"bob-qa is not recognized"?** The folder isn't on your PATH yet. Either run it
+by its full path:
+
+```powershell
+& "$env:USERPROFILE\.bob-admin\bin\bob-qa.cmd" auth status
+```
+
+or run the installer again with `-AddToPath` and open a new terminal.
+
 ## First run
 
 ```powershell

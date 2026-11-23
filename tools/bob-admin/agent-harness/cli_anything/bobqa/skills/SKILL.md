@@ -21,6 +21,13 @@ a **coach** on test. README: `tools/bob-admin/agent-harness/cli_anything/bobqa/R
 It runs on a **PC with a signed-in person** (Sean or Fabian). Cloud Routines have
 no sign-in; they can only suggest the command.
 
+If `bob-qa` isn't found, it isn't on PATH yet: call it as
+`& "$env:USERPROFILE\.bob-admin\bin\bob-qa.cmd" ...` (PowerShell), or have the
+person run `tools\bob-admin\install.ps1 -AddToPath` and open a new terminal.
+
+On test, Sean signs in with the shared test admin account (a Super User who
+coaches test practice 56); his own email has no account on test.
+
 ## Rules for agents
 
 1. **Always pass `--json`.** `qa run` exits 0 when every step passed, 1 otherwise;

@@ -174,6 +174,18 @@ def test_error_message_surfaces(http):
         Client("test").call(Request("GET", "/users"))
 
 
+def test_validation_errors_detail_surfaces(http):
+    # A wrong password answers 422 with the reason only in `errors` (seen live on test, 23 Nov 2026).
+    http.queue.append(FakeResponse(422, {"status": 422, "message": "Unprocessable Entity Exception",
+                                         "errors": {"identity": "invalidCredentials"}}))
+    with pytest.raises(BobAdminError, match=r"Unprocessable Entity Exception \(identity: invalidCredentials\)"):
+        Client("test").login("someone@example.com", "wrong")
+    http.queue.append(FakeResponse(422, {"errors": {"email": ["must be an email", "is required"]}}))
+    signed_in()
+    with pytest.raises(BobAdminError, match="email: must be an email; is required"):
+        Client("test").call(Request("POST", "/users", body={}))
+
+
 # ---------------------------------------------------------------- CLI
 @pytest.mark.parametrize("group", ["auth", "users", "superusers", "practices", "subsidiaries", "products",
                                    "news", "assets", "integrations", "reports", "tickets", "templates", "ops"])
