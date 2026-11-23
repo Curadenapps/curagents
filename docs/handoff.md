@@ -1,4 +1,4 @@
-# Handoff: state of curagents (5 Nov 2026)
+# Handoff: state of curagents (5 Nov 2026, latest section 23 Nov)
 
 Read this after `CLAUDE.md`, `RUNTIME.md` and `dream.md` when you pick up maintenance
 in a new session. Update it (or delete the lines that are done) by PR whenever you
@@ -20,6 +20,186 @@ finish one of the items, so the next session starts from the truth.
   be off).
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
+
+## 23 Nov: product overviews and the BOB App / Curaprox App pages
+
+Done (all with Sean's OK):
+- **Two overview decks** (EN, HTML + PDF), committed to `main` of the local
+  App Website repo (`773ac12`, `0f62876`):
+  - `Marketing/presentations/bob-overview`: Curaprox - BOB, 16 slides. Screens from
+    the current build with test data anonymised, the chair screens in a real
+    iPad Pro 11 frame.
+  - `Marketing/presentations/curaprox-app-overview`: the Curaprox app and the
+    treatment plan, 14 slides. Concept screens from the patient loop prototype
+    (made-up names) in a real iPhone 18 Pro frame.
+  - DE and IT versions are parked (Sean: "can wait for another time").
+- **Notion hub pages revamped:**
+  - **BOB App** (`1f37e8aabbb480efb62ac97d457cdf94`): "Today: live and in use in
+    practices", the deck, key facts, what's next, getting started, a roadmap
+    timeline filtered to BOB, boards.
+  - **Curaprox App** (`1f37e8aabbb4800fa12fcc02fce98c69`): "The future: just about
+    to start" (the 20 Nov direction), the deck, what's next, the current app's facts
+    (maintenance), boards, and the old pre-merge roadmap view in a toggle.
+  - A synced "Two apps, one loop" box sits on both (original on BOB App).
+  - **App Overview** (`3957e8aabbb48098816df88ccd47f083`) only links to both pages.
+  - "What is the Curaprox App" has a box on top: live today and staying like this
+    for now, what's coming, and that how the two come together is still open.
+
+Open:
+- The [VERIFY] lists in both decks' `HANDOFF.md` (e.g. the concept screens still
+  show the BOB logo, the final patient sign-in flow, the Curaprox app support
+  channel once the plan is live).
+- After any deck change: rebuild, then re-upload the PDF on its hub page.
+- The session that switched the BOB mark to blue on curaprox-apps.com was archived
+  before it reported back. It had published the blue mark; the coat-badge photo
+  on the BOB pages was still open.
+
+## 20–23 Nov: BOB Direction and the website
+
+Done:
+- **BOB Direction** (Sean approved 20 Nov): the synced block on 🎯 Goals & Objectives
+  (`29b7e8aabbb48021ba93e6ad24b3b577`, shown in the BOB Kit) now says:
+  - BOB is the core product, on the clinician side.
+  - The Curaprox app goes ahead as the patient's treatment-plan app. Nothing is
+    folded into BOB, and the Product Roadmap rows stay as they are.
+  - BOB is for every clinician and taught through iTOP; iTOP isn't required.
+  - Still no medical device and no PMS.
+  The same iTOP line is on "What is the BOB App?" and "BOB: FAQ".
+- **Website** (curaprox-apps.com, published 23 Nov): the English, German and Italian
+  BOB app pages (`/app-pages/bob-app`, `/de/bob-app`, `/it/bob-app`) match the Notion
+  "BOB: FAQ":
+  - the iTOP line
+  - "Curaprox - BOB" in the stores
+  - the phone version on 14 Dec
+  - Portuguese (Brazil)
+  - users and practice details managed by the Practice Admin in BOB Admin
+  - info@bobscore.com
+  - Trend / First vs latest
+  - assigning anonymous sessions
+  The German and Italian feature sections and screenshots were brought up to the
+  English page. The FAQ schema on the English page (what Google shows) matches too.
+  The old Help & Support screenshot is gone.
+- **Scheduled tasks on this PC:** `bob-roadmap-watch`, `asana-notion-sync` and
+  `bob-roadmap-dashboard-refresh` are disabled (checked 23 Nov).
+
+Website gaps left:
+- the German and Italian pages have no "Open web app" buttons and no FAQ schema
+- the German and Italian app labels used on the website weren't checked against the
+  app: "Patientendetails anzeigen", "Patient zuweisen", "Visualizza dettagli
+  paziente", "Assegna al paziente"
+- the image alt texts on the German and Italian pages are still in English
+
+## 18–20 Nov: Curaden switch, merges, BOB Kit and how-tos
+
+The "Where things stand" list above dates from 5 Nov. On scheduling, this section and
+the Notion Agent registry take precedence over it.
+
+Done:
+- **Agent registry:** Truth Catcher, Boom Boom Derek, Roadmap watch, Roadmap ← Jira
+  sync and the Agent run log check are now Account = Curaden. These Personal cloud
+  Routines are disabled: `trig_01BxmV4KaG4CPbZMU4GmMHa7` (Truth Catcher),
+  `trig_01EREg8Ra4divTV2Jomidy9g` (Jira sync) and `trig_01AN1dTjvTV3YNhhmLAqV4tL`
+  (run-log check). The Webex courier and Webex Sweep stay on Personal (PC, built-in
+  browser).
+- **Merged:**
+  - #83: Inbox statuses `info only` and `done`.
+  - #80: App Support playbook with info@bobscore.com + curaden.apps@curaden.ch,
+    "Curaprox - BOB", the T5 partner onboarding template and the support-flow diagram.
+  - #87: #85 rebased (attach screenshots before moving to In Development). #85 is
+    closed.
+- **BOB Kit** (`1fb7e8aabbb480d29c88cbd43aaee5fc`): restructured. The Legal toggle
+  and Sabina were removed (Sean).
+- **How-tos:**
+  - Approve a practice is merged with the Subsidiary approval section.
+  - System Requirements is merged into "BOB: Get access and devices".
+  - Roles and permissions is the single roles reference.
+  - Moved to Trash: System Requirements, Legacy Sign-Up, Mobile User Guide and
+    IDB & BOB FAQs. Its clinical IDB facts moved into How to BOB.
+  - 12 pages renamed "BOB: …" / "BOB Admin: …".
+  - support@ became info@bobscore.com.
+  - Practice Admin manages coaches.
+- **Analytics page:** a BOB Admin section and the "BOB Admin — Monthly market stats"
+  database.
+
+Open for Sean:
+1. Switch off the Personal PC task boom-boom-derek. It isn't in this PC's task list
+   (23 Nov), so check the other account's PC. bob-roadmap-watch is already off.
+2. Live build audit of bobscore.app / admin.bobscore.app (running locally on the PC):
+   apply its findings. The how-tos were written from Notion, not checked against the
+   build.
+3. Access: the Notion workspace has only Sean (personal account) and integrations, so
+   partners can't open the Kit or Academy pages unless they're published or shared by
+   link. The options are:
+   - publish the External pages as a read-only site (recommended now)
+   - guest-invite Janine, Fabian and Blanca
+   - move the App Hub to a Curaden workspace (raise with IT)
+4. ~~Comparing BOB Scores~~: closed 20 Nov. Step 5 of "BOB: Patient record and
+   progress" covers it, with a Compare BOB Score clip.
+5. ~~Website FAQ (Webflow)~~: done 23 Nov (see 20–23 Nov).
+6. The Legacy walkthrough video went to Trash with the Legacy page. Restore it if
+   wanted.
+7. The Audience of "BOB Admin: Approve a practice" is still Internal. Should it be
+   External?
+8. Check the score band labels in How to BOB (no inflammation / mild / moderate /
+   severe) with Tino.
+9. Questions for Phinamic:
+   - when the approval checklist becomes optional
+   - how Reject works
+   - the phone minimum versions
+   - the "BOB Admin access: None" label on Practice Admins
+   These are queued in the Webex outbox for the common chat (23 Nov).
+10. **Automatic practice approval (BA-324): coming soon, no date yet.** Sean decided on
+    10 Nov to fully automate it (Suncica didn't answer): checks, approval and allocation
+    to the market's subsidiary without a person, only exceptions to the subsidiary. It
+    needs the IDB office / kit / training date checklist moved after approval, an
+    exceptions queue and a decision log (`Projects\BOB Onboarding\CONCEPT.md` Stage 3).
+    Marked 23 Nov on the roadmap row (renamed, P1, Admin Overhaul, Phase 1) and on
+    "BOB Admin: Approve a practice". Still open: the Jira title says "agree the approval
+    logic with Suncica", and Phinamic owes the plan and date. When it ships, rewrite
+    Approve a practice, the Subsidiary guide and the BOB Academy approval module.
+11. Open PRs from other sessions (as of 23 Nov):
+    - #77 (App Support email drafts, learning from sent mail): draft. It was rebuilt on
+      20 Nov on top of #79 and #80, so review it rather than close it. It needs the
+      mail connector IT hasn't approved yet.
+    - #78 is closed, not merged.
+    - #81: a draft (Webex Sweep marker).
+    - #88 (bob-admin CLI) and #89 (bob-qa CLI): open since 20 Nov, for review.
+    - #69 (rollout dates v2): open since 12 Nov.
+    - #66 (Market Rollout Academy → BOB Academy) and #71 (Plaque Hunter game): drafts.
+12. Earlier items:
+    - tick Approved on the 5–12 Nov team update
+    - decide on the external Task and Note Pipeline (it needs the Inbox statuses
+      `task`/`approved` kept)
+    - the duplicate App Support "needs you" task 1220619032608553
+
+## 18 Nov: bob-admin CLI for BOB Admin
+
+Sean asked for a CLI-Anything CLI for BOB Admin (reports, users, Super Users,
+permissions, approvals, products, news, integrations). Built in `tools/bob-admin/`
+from the platform API's own OpenAPI spec (141 endpoints, published on the test API's
+Swagger page; prod hides it). Skill: `skills/bob-admin/SKILL.md`. Defaults to test
+(admin-test.bobscore.app → API on `phinamic-api.quanht.site`); prod writes are
+locked behind `BOB_ADMIN_PROD_WRITES=1`. Sean signed in on test (Super User
+account) and every read command answered; a live write cycle on test (draft news:
+create, read, edit, delete) worked and left nothing behind.
+
+20 Nov (Sean: "make it for prod, really extensive, share with Phinamic and
+Fabian, give it to the agents"): the prod admin makes the same API calls as test,
+so it works on prod as-is; `call` adds 140 generated commands (every endpoint);
+`--all` / `--fields` / `--ids` / `-` chain commands; `install.ps1` installs it
+per user (`%USERPROFILE%\.bob-admin`, `-AddToPath`), pip/pipx from GitHub for
+Phinamic. Wired in: orchestrator route (PC only), market-rollout (reads + a
+dry-run grant command for Sean), app-support (owner's change task carries the
+`bob-admin` line), `RUNTIME.md` row. 53 unit tests pass.
+
+Still open:
+- Sean: `bob-admin --env prod auth login`, then a read-only prod pass.
+- Fabian: run `install.ps1 -AddToPath` and sign in with his own admin account.
+- Live writes in the other areas on test, one at a time with Sean's yes.
+- Ask Phinamic: is the test API meant to sit on `quanht.site`? Can prod publish
+  its spec, or offer a scoped admin token so automations needn't sign in as a
+  person? Their planned MCP can use this CLI's command map as its scope.
+- Later: a CLI for the BOB web app itself (QA), separate piece of work.
 
 ## 13 Nov: the Inbox is the check-up log
 

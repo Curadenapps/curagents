@@ -112,6 +112,7 @@ personal projects stay on Personal; curagents and its automations move.
 | `roadmap-watch` | Cloud + courier | Claude Routine "Roadmap watch (Curaden)" (Mon 07:40 Zurich); "roadmap watch" any time | Writes the report page and puts the App Team summary in the outbox |
 | Webex courier | **PC (Personal)** | Desktop app scheduled task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 Zurich | The only scheduled PC task: sign-in check, outbox, Webex Sweep ("PC runs" below) |
 | `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and new meetings (summary, action items, transcript); Inbox log rows (the check-up log), triage tasks in BOB App › Webex inbox, Asana comments, a "New in Jira" note in the common chat |
+| `bob-admin` CLI (BOB Admin) | **PC** | "bob admin …", "pending registrations", "create super user …" (`skills/bob-admin`) | Runs on the signed-in user's own session in `%USERPROFILE%\.bob-admin` (Sean or Fabian, each their own login). Not for cloud Routines: they have no sign-in. Writes only after a yes per action; prod writes locked by default |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
@@ -297,7 +298,10 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
      says: the row's **Space** (IDs in the skill), **Mentions**, **Marker**, the message
      from the row's page body (the **Message** property is only a preview). With an
      **Attachment**, download it (Notion file URL) and attach it first (Recipe 2).
-     Verify with `webex-read.js` (`markerCount: 1`).
+     Verify with `webex-read.js` (`markerCount: 1`). The Marker must appear word for
+     word (same case) in the message; an agent writing a row copies it from the
+     message's first line. If it doesn't, use the message's first line as the marker
+     and say so in the Courier note.
    - Posted → Status `Posted`, **Posted at** now. Failed after the skill's retries →
      Status stays `Queued`, Courier note with the reason (3 failed runs → `Failed`).
    - Boom Boom rows: before posting, check the space for replies since the row was
