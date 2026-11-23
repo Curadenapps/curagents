@@ -180,19 +180,18 @@ person is, and links the BOB Academy page "Partner onboarding: BOB setup and tra
 |---|---|
 | BOB Kit (overview) | https://app.notion.com/p/1fb7e8aabbb480d29c88cbd43aaee5fc |
 | What is the BOB App? | https://app.notion.com/p/1f97e8aabbb48055882ac604b449dda3 |
-| Platform Access (tablet and web) | https://app.notion.com/p/2387e8aabbb4807a9839d24689c55a61 |
-| System Requirements | https://app.notion.com/p/3c77e8aabbb4808a9ff9ca117e4453b8 |
-| Practice Sign-Up | https://app.notion.com/p/3c67e8aabbb4808fbfe4c6ced9df12e5 |
-| Running a BOB Index | https://app.notion.com/p/3c67e8aabbb48033bf88d6f284a9f321 |
-| Running a BPE Screening | https://app.notion.com/p/3c67e8aabbb48094afa8ef2bafe80364 |
-| Patient record and progress | https://app.notion.com/p/3c67e8aabbb480fca2d3e1874dda2efa |
-| Anonymous sessions (good for demos) | https://app.notion.com/p/4107e8aabbb4815e8a29e5ec41dd895a |
-| How to BOB (the clinical technique) | https://app.notion.com/p/3087e8aabbb480b48701f105c7d932c0 |
-| FAQ | https://app.notion.com/p/3217e8aabbb480289be7f8bbf6260528 |
+| BOB: Get access and devices (install, login, requirements) | https://app.notion.com/p/2387e8aabbb4807a9839d24689c55a61 |
+| BOB: Register a practice | https://app.notion.com/p/3c67e8aabbb4808fbfe4c6ced9df12e5 |
+| BOB: Run a BOB Index | https://app.notion.com/p/3c67e8aabbb48033bf88d6f284a9f321 |
+| BOB: Run a BPE screening | https://app.notion.com/p/3c67e8aabbb48094afa8ef2bafe80364 |
+| BOB: Patient record and progress | https://app.notion.com/p/3c67e8aabbb480fca2d3e1874dda2efa |
+| BOB: Run an anonymous session (good for demos) | https://app.notion.com/p/4107e8aabbb4815e8a29e5ec41dd895a |
+| How to BOB (the clinical technique, using interdental brushes) | https://app.notion.com/p/3087e8aabbb480b48701f105c7d932c0 |
+| BOB: FAQ | https://app.notion.com/p/3217e8aabbb480289be7f8bbf6260528 |
 
 **Before linking, always tell Sean:**
 - These are workspace links. They only open for people who are Notion guests, or if the pages are published.
-- **BOB Kit is internal.** It still says the new app "goes live in October", points to the legacy page, and has internal sections (Legal concerns, Known gaps, Technical, Figma). If that shouldn't go out, share only the how-to pages.
+- **BOB Kit is internal.** It has internal sections (Direction, Known gaps, Technical, Figma, Who to ask). If that shouldn't go out, share only the how-to pages. Check the page's Audience in the How-To Documents database first: only External pages go to partners or practices.
 - **Partner and subsidiary admin pages** (Sean, 12 Nov): "BOB Admin: Approve a practice", Country Admin Structure and Data protection are for the people with a Subsidiary/Partner admin account (the one BOB Admin person per market). Link them to those people, never to practices, coaches or individuals.
 - Never send these to anyone outside Curaden: Goals & Objectives, BOB Kit's internal sections.
 
