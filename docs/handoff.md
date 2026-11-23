@@ -114,7 +114,17 @@ Open for Sean:
    - how Reject works
    - the phone minimum versions
    - the "BOB Admin access: None" label on Practice Admins
-10. Open PRs from other sessions (as of 23 Nov):
+   These are queued in the Webex outbox for the common chat (23 Nov).
+10. **Automatic practice approval (BA-324): coming soon, no date yet.** Sean decided on
+    10 Nov to fully automate it (Suncica didn't answer): checks, approval and allocation
+    to the market's subsidiary without a person, only exceptions to the subsidiary. It
+    needs the IDB office / kit / training date checklist moved after approval, an
+    exceptions queue and a decision log (`Projects\BOB Onboarding\CONCEPT.md` Stage 3).
+    Marked 23 Nov on the roadmap row (renamed, P1, Admin Overhaul, Phase 1) and on
+    "BOB Admin: Approve a practice". Still open: the Jira title says "agree the approval
+    logic with Suncica", and Phinamic owes the plan and date. When it ships, rewrite
+    Approve a practice, the Subsidiary guide and the BOB Academy approval module.
+11. Open PRs from other sessions (as of 23 Nov):
     - #77 (App Support email drafts, learning from sent mail): draft. It was rebuilt on
       20 Nov on top of #79 and #80, so review it rather than close it. It needs the
       mail connector IT hasn't approved yet.
@@ -123,7 +133,7 @@ Open for Sean:
     - #88 (bob-admin CLI) and #89 (bob-qa CLI): open since 20 Nov, for review.
     - #69 (rollout dates v2): open since 12 Nov.
     - #66 (Market Rollout Academy → BOB Academy) and #71 (Plaque Hunter game): drafts.
-11. Earlier items:
+12. Earlier items:
     - tick Approved on the 5–12 Nov team update
     - decide on the external Task and Note Pipeline (it needs the Inbox statuses
       `task`/`approved` kept)
