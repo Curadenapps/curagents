@@ -48,7 +48,7 @@ Config details for each procedure: [`skills/curaden-communications/references/`]
 
 ### `market-rollout` → [`skills/market-rollout/SKILL.md`](skills/market-rollout/SKILL.md)
 
-Rollout support for the 2027 markets: UAE (Apr 2027), Italy (Jul), Slovenia and South Africa (Aug, on hold), USA and Japan (Aug–Sep); Switzerland undated, Germany self-service, Brazil parked. Calendar and stages live on the Notion Market rollout system page; to-dos on the Asana board BOB Market Rollouts. Used by the
+Rollout support for the 2027 markets: UAE (Apr 2027) and Switzerland, the main market (May, waiting on Higi); then Slovenia and South Africa (Aug, on hold), USA and Japan (Sep); Germany self-service, Italy and Brazil parked. Calendar and stages live on the Notion Market rollout system page; to-dos on the Asana board BOB Market Rollouts. Used by the
 `market-rollout` agent; Notion home is the Market Rollout Academy (training modules +
 onboarding tracker).
 
@@ -104,7 +104,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
 | Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | PC task Mon 08:00 (report + App Team summary in Webex) + manual "roadmap watch" |
-| Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in USA, CH, UAE, Japan, Italy: audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
+| Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in UAE, CH, Slovenia, South Africa, USA, Japan (Italy parked): audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
 | App Support | [`agents/app-support.md`](agents/app-support.md) | Writes the answer to every "App Requests & Feedback" form submission (signed as automated) from the product FAQs and what it has learned; the owner checks it and adds the submitter to send it (since 13 Nov), hands Fabian (owner of every request since 18 Nov; Sean covers) the exact change and anything it can't answer, closes on their confirm; bugs and product gaps to Jira via In Development. Fabian can run it too ([`docs/app-support-quickstart.md`](docs/app-support-quickstart.md)). Mailboxes support@ / info@bobscore.com planned, pending IT | Claude Routine hourly 07:20–19:20 weekdays (Curaden) + manual "app support" |
 | Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
 

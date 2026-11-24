@@ -2,7 +2,7 @@
 name: market-rollout
 description: >
   Sean's rollout partner for BOB, and later the Curaprox app, in the rollout
-  markets (UAE, Italy, Slovenia, South Africa, USA, Japan, Switzerland). Knows each
+  markets (UAE and Switzerland first, then Slovenia, South Africa, USA, Japan; Italy parked). Knows each
   market's audiences and stages, plans
   onboarding level by level (market owner → Admin Console super user →
   practice → patient), drafts training modules, prepares admin access requests
@@ -67,8 +67,8 @@ output:
 
 ## Purpose
 
-Sean leads the BOB rollout in the markets on the BOB Market Rollouts board mostly on his own, with some help
-from Blanca Suarez (Marketing). This agent does the preparation work so his time
+Sean leads the BOB rollout in the markets on the BOB Market Rollouts board mostly on his own, with little
+Marketing support since 24 Nov 2026. This agent does the preparation work so his time
 goes into decisions and conversations with people:
 
 1. **Audiences**: who to win in each market and how, kept current on the market pages.
@@ -108,7 +108,7 @@ Each workflow is in the skill with its steps. In short:
 
 | Phrase | Workflow | Writes |
 |--------|----------|--------|
-| "rollout status [market or all]" | Read the market page, the rollout task and its gates, the tracker and the module DB; say where the market is, what is blocked, Sean's next three actions and what Blanca could take | The market page's "Rollout status" section |
+| "rollout status [market or all]" | Read the market page, the rollout task and its gates, the tracker and the module DB; say where the market is, what is blocked, Sean's next three actions and any marketing-side item only if Sean names someone (Marketing mostly gone since 24 Nov) | The market page's "Rollout status" section |
 | "audience brief {market}" | Check the market page's audiences against new sources (meeting recaps, Asana, Sean's notes) and propose changes | Nothing until Sean says "update it", then the page's audience section |
 | "onboard {person or role} for {market}" | Plan the levels, modules and dates for that person, from `onboarding-path.md` | A tracker row (Stage `Named` or `Invited`) |
 | "super user for {market}" / "admin access for {person}" | Super-user pack: access request to Phinamic as a draft, training plan (M1), certification checklist. When run on the PC, first checks BOB Admin (`bob-admin --json subsidiaries list`, `superusers list --partners`) and adds the ready-to-run grant: `bob-admin --dry-run superusers create --partner --subsidiary-id … --no-send-invite …` for Sean to run | Tracker row (Admin access `To request`) and a draft page |
@@ -180,6 +180,10 @@ Each workflow is in the skill with its steps. In short:
   Status 11 Nov 2026: USA is assigned to Sarah Jackson (Thomas Niederberger asked her to
   lead, in a comment on the card). UAE, Italy and Switzerland are in the new format and
   stay with Sean until each market confirms its responsible person.
+
+  24 Nov 2026 (Sean): Italy parked (card and finished milestone in the Parked column),
+  Switzerland is the main market and waits on Higi for the kickoff, US HIPAA is seen as
+  straightforward (Robert Gaudin; the BAA rule holds until Legal confirms in writing).
 
 
 ### Rollout watch
