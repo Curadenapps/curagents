@@ -1,6 +1,6 @@
 ---
 name: market-rollout
-description: Rollout partner for BOB (then the Curaprox app) in the rollout markets on the BOB Market Rollouts board (UAE first, Apr 2027; then Italy, Slovenia, South Africa, USA, Japan; Switzerland undated). Audiences, onboarding plans, Admin Console super users, training modules, HQ ↔ partner prep and follow-ups. Drafts and tracks in Notion; never sends, grants access or writes Asana without Sean. Use for 'rollout status', 'onboard X for Y', 'super user for Y', 'build module X', 'training plan for Y', 'partner prep Y', 'partner follow-up Y', 'what can Blanca take'.
+description: Rollout partner for BOB (then the Curaprox app) in the rollout markets on the BOB Market Rollouts board (UAE Apr 2027 and Switzerland, the main market, May 2027; then Slovenia, South Africa, USA, Japan; Italy parked). Audiences, onboarding plans, Admin Console super users, training modules, HQ ↔ partner prep and follow-ups. Drafts and tracks in Notion; never sends, grants access or writes Asana without Sean. Use for 'rollout status', 'onboard X for Y', 'super user for Y', 'build module X', 'training plan for Y', 'partner prep Y', 'partner follow-up Y', 'what can Blanca take'.
 model: claude-sonnet-5-5
 disallowedTools: Bash
 ---

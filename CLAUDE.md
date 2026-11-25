@@ -23,7 +23,7 @@ The following skills are available and will auto-load based on trigger phrases:
 
 - **`skills/feedback-qa/SKILL.md`** — Feedback QA: Notion inbox → checks → PDF report to the Webex QA space (+ Confluence for full UATs)
 - **`skills/curaden-communications/SKILL.md`** — RevolveNote sync, Jira-Notion BOB sync, Meeting Notes (Webex → Notion). The BOB weekly broadcast moved to `agents/announcements.md`
-- **`skills/market-rollout/SKILL.md`** — Market rollout (UAE first, Apr 2027; then Italy, Slovenia, South Africa, USA, Japan; board BOB Market Rollouts): audiences, onboarding plans, Admin Console super users, training modules, partner prep and follow-ups. Drafts and tracks in Notion; Sean sends, approves and grants
+- **`skills/market-rollout/SKILL.md`** — Market rollout (UAE Apr 2027 and Switzerland, the main market, May 2027; then Slovenia, South Africa, USA, Japan; Italy parked; board BOB Market Rollouts): audiences, onboarding plans, Admin Console super users, training modules, partner prep and follow-ups. Drafts and tracks in Notion; Sean sends, approves and grants
 - **`skills/growth/SKILL.md`**: User acquisition for BOB since marketing stopped supporting it (25 Nov 2026). Plans per market, content calendar and posts in Sean's voice, partner kits, event packs, website and store checks, experiments, weekly pulse and monthly funnel review. Drafts in Notion (BOB Growth); Sean or the partner publishes
 - **`skills/webex-web/SKILL.md`** — The only way to work in Webex: post (with @mentions, files), read spaces, read meetings (AI summary, action items, transcript, recording). Webex web on Sean's sign-in in the Claude desktop app's built-in browser (Claude in Chrome as fallback); no bot tokens. Load it before any Webex step
 
