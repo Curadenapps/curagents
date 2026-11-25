@@ -19,8 +19,8 @@ The full rules are in [`agents/app-support.md`](../agents/app-support.md).
 
 ## Set it up (about 10 minutes, once)
 
-**Before you start:** Sean has merged the App Support setup on `main` and sent you the Notion key privately, so the setup
-below is on `main`.
+**Before you start:** have the Notion key Sean sent you privately at hand. Don't
+paste it into the chat; step 5 opens a secure form for it.
 
 1. **Claude desktop app.** Open it, signed in with your Curaden account, and go to the
    **Code** tab.
