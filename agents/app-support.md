@@ -161,7 +161,7 @@ and Sean has no PC task for it ("I cannot handle this many agents").
 | **App Support (Fabian)**: cloud Routine | Fabian's | Hourly 07:20–19:20, Mon–Thu | Everything in "Scheduled run", for every request |
 | **App Support invites (Fabian)**: desktop-app scheduled task on Fabian's PC | Fabian's | 09:10, 13:10 and 16:10, Mon–Thu | Adds the submitters whose Review subtask was ticked ("Invite run") |
 | **App Support (Curaden)**: cloud Routine | Sean's Curaden account | Hourly 07:20–19:20, Mon–Fri | Covers only (below); otherwise logs `no-op` and stops |
-| **Support sweep (Fabian)**: Windows scheduled task on Fabian's PC, `bob-support sweep --all --post --scheduled` (`skills/bob-support`) | Fabian's Admin Console sign-in and Asana token | Hourly 07:30–19:30, Mon–Thu | Looks every open request on the board up in the Admin Console (`--all`, Fabian owns them all), **read-only**, and leaves the facts in Asana: a comment on the "Fabian: change in BOB Admin" subtask, or an "Admin Console check" subtask on the form task (no email addresses), only when they changed. Never changes the Admin Console and never writes to a requester |
+| **Support sweep (Fabian)**: Windows scheduled task on Fabian's PC, `bob-support sweep --all --post --close-solved --scheduled` (`skills/bob-support`) | Fabian's Admin Console sign-in and Asana token | Hourly 07:30–19:30, Mon–Thu | Looks every open request on the board up in the Admin Console (`--all`, Fabian owns them all), **read-only**, and leaves the facts in Asana: a comment on the "Fabian: change in BOB Admin" subtask, or an "Admin Console check" subtask on the form task (no email addresses), only when they changed. Closes an **Awaiting Feedback** ticket on its own when the requester has signed in to BOB **after** sending it (registration, activation and login requests; account active, temporary password replaced, practice active; Fabian, 25 Nov), with the reason in the check note. Never changes the Admin Console and never writes to a requester |
 
 Setup for Fabian: [`docs/app-support-quickstart.md`](../docs/app-support-quickstart.md).
 
@@ -549,7 +549,7 @@ the subtask, App Support:
    or Awaiting Feedback. A task in Development, Review or Ready for Deployment stays
    where it is (it's tracking dev work); App Support only lists it for the owner.
 
-It never closes a task its owner hasn't confirmed, and never reopens one.
+It never closes a task its owner hasn't confirmed, and never reopens one. The one exception is the support sweep's "solved" rule above (Fabian, 25 Nov): an Awaiting Feedback ticket whose requester has signed in since asking.
 
 ## 5. Dev hand-off (class b)
 

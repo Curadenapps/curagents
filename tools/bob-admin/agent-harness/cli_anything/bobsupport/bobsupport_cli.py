@@ -40,6 +40,7 @@ from cli_anything.bobsupport.core.asana import Asana, AsanaError
 from cli_anything.bobsupport.core.plan import VERDICTS, Case, Plan, build
 
 CLI_NAME = "bob-support"
+DONE_PREFIX = "Done with bob-support: "
 # App Support's sign-off in the languages it replies in ("— Sent by …'s support assistant (automated)")
 AUTOMATED_RE = re.compile(r"\((automated|automatisiert|automatizzato|automatisé|automatizado|automático|"
                           r"avtomatizirano|automatisch)\)", re.I)
@@ -87,10 +88,17 @@ def load_case(a: Asana, gid: str) -> Case:
     t = a.task(gid)
     if asana_mod.is_change_subtask(t):
         parent = a.task(t["parent"]["gid"])
-        return _case(parent, change=t, comments=a.comments(parent["gid"]))
-    change = next((s for s in a.subtasks(gid)
+        return _case(parent, change=t, comments=a.comments(parent["gid"]), subtasks=a.subtasks(parent["gid"]))
+    subs = a.subtasks(gid)
+    change = next((s for s in subs
                    if not s.get("completed") and "change in bob admin" in (s.get("name") or "").lower()), None)
-    return _case(t, change=change, comments=a.comments(gid))
+    return _case(t, change=change, comments=a.comments(gid), subtasks=subs)
+
+
+def done_with_bob_support(subtasks: list[dict[str, Any]] | None) -> list[str]:
+    """What `bob-support do` already did on this request (the notes of ticked change subtasks)."""
+    return [(s.get("notes") or "").split(DONE_PREFIX, 1)[1] for s in subtasks or []
+            if s.get("completed") and DONE_PREFIX in (s.get("notes") or "")]
 
 
 def requester_comments(task: dict[str, Any], comments: list[dict[str, Any]] | None) -> list[str]:
@@ -113,13 +121,14 @@ def requester_comments(task: dict[str, Any], comments: list[dict[str, Any]] | No
 
 
 def _case(task: dict[str, Any], change: dict[str, Any] | None = None,
-          comments: list[dict[str, Any]] | None = None) -> Case:
+          comments: list[dict[str, Any]] | None = None, subtasks: list[dict[str, Any]] | None = None) -> Case:
     sub = form.from_task(task)
     section = next((m.get("section", {}).get("name", "") for m in task.get("memberships") or []
                     if (m.get("project") or {}).get("gid") in (None, asana_mod.BOARD)), "")
     return Case(task_gid=task["gid"], title=task.get("name") or sub.get("title"), submission=sub,
                 section=section, change_gid=(change or {}).get("gid"), change_notes=(change or {}).get("notes") or "",
-                comments=requester_comments(task, comments))
+                comments=requester_comments(task, comments), done=done_with_bob_support(subtasks),
+                created_at=task.get("created_at") or "")
 
 
 def case_from_json(path: str) -> Case:
@@ -278,12 +287,13 @@ def collect(ctx: click.Context, everyone: bool) -> list[Case]:
                 continue
             if not asana_mod.is_form_task(parent) or parent.get("completed"):
                 continue
-            cases[parent_gid] = _case(parent, change=a.task(t["gid"]), comments=a.comments(parent_gid))
+            cases[parent_gid] = _case(parent, change=a.task(t["gid"]), comments=a.comments(parent_gid),
+                                      subtasks=a.subtasks(parent_gid))
         elif asana_mod.is_form_task(t) and t["gid"] not in cases:
             section = _case(t).section
             if section in ("Done", "Archived/Rejected"):
                 continue
-            cases[t["gid"]] = _case(t, comments=a.comments(t["gid"]))
+            cases[t["gid"]] = _case(t, comments=a.comments(t["gid"]), subtasks=a.subtasks(t["gid"]))
     return list(cases.values())
 
 
@@ -368,10 +378,11 @@ def tick_change(ctx: click.Context, case: Case, done: list[str]) -> str:
         msg = "No Asana token: tick the change subtask yourself so App Support closes the loop."
         click.echo(msg, err=True)
         return msg
-    note = "Done with bob-support: " + "; ".join(done)
+    note = DONE_PREFIX + "; ".join(done)
     if case.change_gid:
         a.comment(case.change_gid, note)
-        a.update_task(case.change_gid, completed=True)
+        # also in the notes, so later checks and sweeps see it was done (DONE_PREFIX)
+        a.update_task(case.change_gid, completed=True, notes=(case.change_notes.rstrip() + "\n\n" + note).strip())
         msg = f"ticked {asana_mod.task_link(case.change_gid)}"
     else:
         me = a.me()
@@ -390,8 +401,10 @@ def tick_change(ctx: click.Context, case: Case, done: list[str]) -> str:
 @click.option("--all", "everyone", is_flag=True, help="Every open form request, not only yours.")
 @click.option("--post/--no-post", default=False, help="Write the findings into Asana (internal notes only).")
 @click.option("--scheduled", is_flag=True, help="Run as the scheduled task: check the switch, write the run log.")
+@click.option("--close-solved", is_flag=True,
+              help="Close Awaiting Feedback tickets whose requester has signed in since asking (with --post).")
 @click.pass_context
-def sweep(ctx: click.Context, everyone: bool, post: bool, scheduled: bool) -> None:
+def sweep(ctx: click.Context, everyone: bool, post: bool, scheduled: bool, close_solved: bool) -> None:
     """Check every open request in the Admin Console (read-only); note what changed in Asana."""
     notion = runlog.Notion()
     registry_id = None
@@ -440,13 +453,27 @@ def sweep(ctx: click.Context, everyone: bool, post: bool, scheduled: bool) -> No
                 runlog.record({"task": case.task_gid, "type": plan.rtype.key, "verdict": plan.verdict, "by": "sweep"})
             except AsanaError as e:
                 errors.append(f"{case.task_gid}: {e}")
+        closed = ""
+        if plan.verdict == "solved" and case.closable:
+            closed = "would close" if not (post and close_solved) else ""
+            if post and close_solved:
+                try:
+                    if not wrote:  # make sure the reason is on the ticket before it closes
+                        write_note(a, case, plan, c.env)
+                    a.close(case.task_gid)
+                    closed = "closed"
+                    runlog.record({"task": case.task_gid, "type": plan.rtype.key, "verdict": "solved", "by": "sweep-close"})
+                except AsanaError as e:
+                    errors.append(f"{case.task_gid}: closing failed: {e}")
         results.append({"task": case.task_gid, "type": plan.rtype.key, "verdict": plan.verdict,
-                        "new": "yes" if changed else "", "written": wrote, "title": case.title})
+                        "new": "yes" if changed else "", "written": wrote, "closed": closed, "title": case.title})
     if post:
         runlog.save_state(state)
     written = sum(1 for r in results if r["written"])
-    summary = f"sweep: {len(results)} checked, {written} noted in Asana, {len(errors)} errors"
-    outcome = "failed" if errors and not results else ("partial" if errors else ("ok" if written else "no-op"))
+    n_closed = sum(1 for r in results if r["closed"] == "closed")
+    summary = (f"sweep: {len(results)} checked, {written} noted in Asana, {n_closed} closed as solved, "
+               f"{len(errors)} errors")
+    outcome = "failed" if errors and not results else ("partial" if errors else ("ok" if written or n_closed else "no-op"))
     runlog.log_local(f"{outcome}: {summary}" + (f" | {' | '.join(errors)}" if errors else ""))
     if scheduled:
         _write_run(notion, outcome, summary + (" (" + ", ".join(r["task"] for r in results if r["written"]) + ")" if written else ""),
@@ -454,7 +481,8 @@ def sweep(ctx: click.Context, everyone: bool, post: bool, scheduled: bool) -> No
     if ctx.obj.get("json"):
         out(ctx, {"outcome": outcome, "summary": summary, "results": results, "errors": errors})
     else:
-        click.echo(table(results, ["task", "type", "verdict", "new", "written", "title"]) if results else "(nothing open)")
+        click.echo(table(results, ["task", "type", "verdict", "new", "written", "closed", "title"])
+                   if results else "(nothing open)")
         click.echo(f"\n{summary}" + ("" if post else " (preview: add --post to write the notes)"))
         for e in errors:
             click.echo(f"error: {e}", err=True)
@@ -569,7 +597,7 @@ def _wrapper() -> Path:
     cmd = f'"{exe}"' if exe.exists() else f'"{sys.executable}" -m cli_anything.bobsupport'
     w = bindir / "bob-support-sweep.cmd"
     bindir.mkdir(parents=True, exist_ok=True)
-    w.write_text(f'@echo off\r\n{cmd} sweep --all --post --scheduled >> "{config_dir() / runlog.LOG_FILE}" 2>&1\r\n',
+    w.write_text(f'@echo off\r\n{cmd} sweep --all --post --close-solved --scheduled >> "{config_dir() / runlog.OUT_FILE}" 2>&1\r\n',
                  encoding="ascii")
     return w
 
@@ -580,7 +608,7 @@ def schedule_install(ctx: click.Context) -> None:
     """Register the Windows scheduled task (your user, no admin rights needed)."""
     if os.name != "nt":
         raise click.UsageError("The schedule command is for Windows. Elsewhere use cron: "
-                               "30 7-19 * * 1-4 bob-support sweep --all --post --scheduled")
+                               "30 7-19 * * 1-4 bob-support sweep --all --post --close-solved --scheduled")
     w = _wrapper()
     args = ["schtasks", "/Create", "/F", "/TN", TASK_NAME, "/TR", f'"{w}"', "/SC", "WEEKLY",
             "/D", "MON,TUE,WED,THU", "/ST", "07:30", "/RI", "60", "/DU", "12:01"]

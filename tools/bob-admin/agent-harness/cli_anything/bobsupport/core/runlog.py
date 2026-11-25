@@ -20,6 +20,7 @@ from cli_anything.bobadmin.core.client import config_dir
 
 STATE_FILE = "support-sweep-state.json"
 LOG_FILE = "support-sweep.log"
+OUT_FILE = "support-sweep.out"  # the scheduled run's screen output (the log itself is written by the sweep)
 HISTORY_FILE = "support-history.jsonl"
 NOTION_ENV = "NOTION_API_KEY"
 NOTION_VERSION = "2025-09-03"

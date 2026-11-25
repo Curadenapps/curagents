@@ -16,6 +16,7 @@ end to end without a network.
 | check | A change subtask plans the rename with the name from its notes; check never writes; a temporary-password request on a pending practice is reply-only; no account; a partner admin sees who approved their country's registrations; `--from-json` works without a token |
 | do | `--dry-run` sends nothing; `--yes` renames, comments on and ticks the change subtask, records the history; prod refuses without the unlock |
 | sweep | Writes one note per change and none when nothing changed; no email address in the note; preview writes nothing; without a change subtask it makes one "Admin Console check" subtask and updates it after that |
+| solved | Signed in after asking: verdict "solved", closed and moved to Done with the reason in the note (preview only says "would close"); active before asking, an unused temporary password, or a ticket outside Awaiting Feedback: not closed |
 | learn, types, schedule | Phrases and task corrections saved and exported; every type listed; the scheduled-task wrapper runs `sweep --all --post --scheduled` |
 
 ## Live check (25 Nov 2026, prod, read-only)
@@ -27,4 +28,4 @@ country's latest registrations were approved centrally), two "activate / new app
 requests (practice active, never signed in: plan a new temporary password) and two
 "I'd like an account" requests (no account under that email). Nothing was changed.
 
-Result (25 Nov 2026): 108 passed (30 bob-support + 24 bob-qa + 54 bob-admin).
+Result (25 Nov 2026): 113 passed (35 bob-support + 24 bob-qa + 54 bob-admin).

@@ -154,6 +154,11 @@ class World:
             self.tasks[gid] = {"gid": gid, "completed": False, "parent": {"gid": m.group(1)}, **data}
             self.subtasks.setdefault(m.group(1), []).append(gid)
             return asana_ok(self.tasks[gid])
+        m = re.fullmatch(r"/sections/(\d+)/addTask", path)
+        if m and method == "POST":
+            t = self.tasks[data["task"]]
+            t["memberships"] = [{"project": {"gid": "1200298616652229"}, "section": {"gid": m.group(1), "name": "Done"}}]
+            return asana_ok({})
         m = re.fullmatch(r"/tasks/(\d+)/stories", path)
         if m and method == "GET":
             return asana_ok(self.comments_in.get(m.group(1), []))
@@ -250,6 +255,14 @@ def test_do_renames_and_ticks_change_subtask(world):
     assert runlog.history()[-1]["type"] == "practice-rename"
 
 
+def test_done_change_is_not_proposed_again(world):
+    run("--yes", "do", "222")
+    world.practices[999]["name"] = "Old Name"  # even if the Admin Console still shows the old value
+    plan = json.loads(run("--json", "check", "111").output)
+    assert plan["verdict"] == "reply" and not plan["actions"]
+    assert any("Already done with bob-support" in f for f in plan["facts"])
+
+
 def test_do_prod_is_locked(world):
     Session(env="prod", access_token="ACCESS", user={"email": "a@b.c"}).save()
     r = CliRunner().invoke(cli, ["--env", "prod", "--yes", "do", "222"], obj={})
@@ -343,6 +356,46 @@ def test_german_automated_reply_ignored_for_sender(world):
     assert json.loads(run("--json", "check", "111").output)["type"] == "other"
 
 
+# ---------------------------------------------------------------- solved: signed in since asking
+def _registration_request(world, created_at):
+    _plain_form(world, request="I registered but I still can't get in", title="Registration")
+    world.tasks["111"]["created_at"] = created_at
+
+
+def test_signed_in_after_asking_is_solved_and_closed(world):
+    _registration_request(world, "2026-11-10T09:00:00Z")  # Ziva activated on 12 Nov, after asking
+    plan = json.loads(run("--json", "check", "111").output)
+    assert plan["verdict"] == "solved" and plan["closable"] and not plan["actions"]
+    preview = json.loads(run("--json", "sweep").output)
+    assert preview["results"][0]["closed"] == "would close" and world.tasks["111"]["completed"] is False
+    run("sweep", "--post", "--close-solved")
+    assert world.tasks["111"]["completed"] is True
+    assert world.tasks["111"]["memberships"][0]["section"]["name"] == "Done"
+    note = [t for t in world.tasks.values() if t.get("name", "").startswith("Admin Console check")][0]["notes"]
+    assert "signed in on 2026-11-12" in note  # the reason is on the ticket
+
+
+def test_active_before_asking_is_not_solved(world):
+    _registration_request(world, "2026-11-20T09:00:00Z")  # activated 12 Nov, asked 20 Nov: still a problem
+    plan = json.loads(run("--json", "check", "111").output)
+    assert plan["verdict"] != "solved"
+    run("sweep", "--post", "--close-solved")
+    assert world.tasks["111"]["completed"] is False
+
+
+def test_solved_outside_awaiting_feedback_stays_open(world):
+    _registration_request(world, "2026-11-10T09:00:00Z")
+    world.tasks["111"]["memberships"][0]["section"]["name"] = "Inbox"
+    run("sweep", "--post", "--close-solved")
+    assert world.tasks["111"]["completed"] is False
+
+
+def test_unused_temporary_password_is_not_solved(world):
+    _registration_request(world, "2026-11-10T09:00:00Z")
+    world.users[0]["mustSetPassword"] = True
+    assert json.loads(run("--json", "check", "111").output)["verdict"] != "solved"
+
+
 # ---------------------------------------------------------------- sweep
 def test_sweep_notes_once_per_change(world):
     r = run("sweep", "--post")
@@ -387,4 +440,6 @@ def test_types_lists_every_type(world):
 
 def test_wrapper_points_at_sweep(home, monkeypatch):
     w = bobsupport_cli._wrapper()
-    assert "sweep --all --post --scheduled" in w.read_text()
+    text = w.read_text()
+    assert "sweep --all --post --close-solved --scheduled" in text
+    assert runlog.OUT_FILE in text and runlog.LOG_FILE not in text  # the sweep writes the log itself (Windows locks it)

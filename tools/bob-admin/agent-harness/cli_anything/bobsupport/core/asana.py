@@ -17,6 +17,7 @@ API = "https://app.asana.com/api/1.0"
 TOKEN_ENV = "ASANA_TOKEN"
 WORKSPACE = "1171371475355741"
 BOARD = "1200298616652229"          # App Tasks, Requests & Feedback
+DONE_SECTION = "1200681385779297"   # its "Done" column
 TEAM = {"1196321462158324", "1207214370347608"}  # Fabian, Sean: their comments aren't the requester's
 TIMEOUT = 30
 TASK_FIELDS = ",".join([
@@ -112,6 +113,11 @@ class Asana:
 
     def comment(self, gid: str, text: str) -> dict[str, Any]:
         return self._call("POST", f"/tasks/{gid}/stories", body={"text": text})
+
+    def close(self, gid: str) -> None:
+        """Mark a form task complete and move it to the board's Done column."""
+        self._call("POST", f"/sections/{DONE_SECTION}/addTask", body={"task": gid})
+        self.update_task(gid, completed=True)
 
 
 def is_form_task(task: dict[str, Any]) -> bool:

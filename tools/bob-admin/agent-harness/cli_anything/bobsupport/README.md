@@ -14,7 +14,7 @@ because support requests are about real practices.
 | | Hourly sweep (automated) | You (`bob-support do`) |
 |---|---|---|
 | Admin Console | **Read-only**: finds the account by the form email, its practices, status, approval, first sign-in | Every change: rename, address, delete, new temporary password, email change |
-| Asana | One internal note per request, only when what it found changed: a comment on the change subtask, or an "Admin Console check" subtask on the form task (no email addresses) | Ticks the change subtask after the change, so App Support sends the "All done" reply and closes the task |
+| Asana | One internal note per request, only when what it found changed: a comment on the change subtask, or an "Admin Console check" subtask on the form task (no email addresses); closes an **Awaiting Feedback** ticket once the requester has signed in to BOB *after* asking (registration, activation, login requests), with the reason in the note | Ticks the change subtask after the change, so App Support sends the "All done" reply and closes the task |
 | Replies to requesters | No. App Support's hourly Routine writes them and you check them, as before; the note gives it the facts | You check and send, as before |
 
 Why the line is there: a change in the Admin Console acts on a real practice

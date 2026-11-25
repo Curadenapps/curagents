@@ -22,7 +22,11 @@ VERDICTS = {
     "reply": "Reply only, nothing to change",
     "no-account": "No BOB account found for that email",
     "check": "Owner decides",
+    "solved": "Solved: they signed in after asking",
 }
+# requests that are about getting in: solved once the person has signed in since asking
+SOLVABLE_BY_SIGN_IN = {"activation-status", "temp-password"}
+CLOSABLE_SECTION = "Awaiting Feedback"
 CHANGE_RE = re.compile(r"replace with\s+[\"“„']([^\"”“']+)[\"”“']", re.I)
 
 
@@ -46,6 +50,12 @@ class Case:
     change_gid: str | None = None
     change_notes: str = ""
     comments: list[str] = field(default_factory=list)
+    done: list[str] = field(default_factory=list)  # what `bob-support do` already did here
+    created_at: str = ""  # when the request came in (ISO); "solved" means signed in after this
+
+    @property
+    def closable(self) -> bool:
+        return self.section == CLOSABLE_SECTION and not self.change_gid
 
 
 @dataclass
@@ -67,6 +77,7 @@ class Plan:
             "task": self.case.task_gid, "changeSubtask": self.case.change_gid, "title": self.case.title,
             "type": self.rtype.key, "typeLabel": self.rtype.label, "matched": self.matched,
             "verdict": self.verdict, "verdictLabel": VERDICTS[self.verdict],
+            "closable": self.verdict == "solved" and self.case.closable, "section": self.case.section,
             "facts": self.facts, "warnings": self.warnings,
             "actions": [a.describe(base) for a in self.actions],
             "nextStep": self.next_step, "replyHint": self.reply_hint,
@@ -174,6 +185,23 @@ def emails_in_comments(comments: list[str]) -> tuple[str | None, str | None]:
     return None, None
 
 
+def signed_in_since(user: dict[str, Any] | None, practices: list[dict[str, Any]], since: str) -> str | None:
+    """The date they first signed in, if that was after `since` and they're fully on BOB; else None.
+
+    Fully on BOB: account active, activated, temporary password replaced, and at least
+    one active practice. Someone who was already active before asking (and still wrote
+    "I can't log in") is not solved by this.
+    """
+    if not user or user.get("status") != "active" or user.get("mustSetPassword"):
+        return None
+    activated = user.get("activatedAt") or ""
+    if not activated or not since or activated[:19] <= since[:19]:
+        return None
+    if not any(p.get("status") == "active" for p in practices):
+        return None
+    return activated[:10]
+
+
 def _date(v: Any) -> str:
     return str(v)[:10] if v else "never"
 
@@ -261,6 +289,23 @@ def build(c: Client, case: Case, overrides: dict[str, Any] | None = None,
 
     handler = HANDLERS.get(rtype.key, _other)
     handler(c, plan, o)
+    if case.done and not case.change_gid:
+        # `bob-support do` already handled this request and no new change subtask is open:
+        # don't propose the same change again or ask for its details again
+        plan.actions = [a for a in plan.actions if not any(a.label in d for d in case.done)]
+        plan.facts.append("Already done with bob-support: " + "; ".join(d.strip() for d in case.done) + ".")
+        if not plan.actions:
+            plan.verdict = "reply"
+            plan.next_step = "Nothing left to change: App Support sends the \"All done\" reply and closes the task."
+    signed_in = signed_in_since(user, plan.practices, case.created_at)
+    if rtype.key in SOLVABLE_BY_SIGN_IN and signed_in and not (user or {}).get("subsidiaryId") and not o:
+        plan.verdict = "solved"
+        plan.actions = []
+        plan.facts.append(f"They signed in on {signed_in}, after sending the request ({_date(case.created_at)}), "
+                          "and their practice is active: they're already on BOB.")
+        plan.next_step = ("Nothing to do: the sweep closes this ticket." if case.closable
+                          else "Nothing to change; close the ticket when it suits you.")
+        plan.reply_hint = ""
     if not user and plan.verdict not in ("change", "check"):
         plan.verdict = "no-account"
         plan.next_step = plan.next_step or "Ask which email address they registered with (or point them to the sign-up form)."
