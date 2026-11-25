@@ -328,6 +328,21 @@ def test_team_member_who_sent_the_form_counts(world):
     assert plan["type"] == "temp-password"
 
 
+def test_curaprox_app_request_skips_admin_console(world):
+    _plain_form(world, request="Wo kann mann sich regrestriren", title="Wo kann man sich regrestriren")
+    world.tasks["111"]["notes"] = world.tasks["111"]["notes"].replace("Application(s):\nBOB", "Application(s):\nCuraprox")
+    plan = json.loads(run("--json", "check", "111").output)
+    assert plan["type"] == "activation-status" and plan["verdict"] == "reply" and not plan["actions"]
+    assert any("not BOB" in f for f in plan["facts"])
+    assert not [c for c in world.calls if "/users" in c[1] and "asana" not in c[1]]  # no Admin Console lookup
+
+
+def test_german_automated_reply_ignored_for_sender(world):
+    _plain_form(world)
+    world.comment_on("111", "Hallo, bitte löschen Sie meine Praxis — Gesendet von Seans Support-Assistent (automatisiert).")
+    assert json.loads(run("--json", "check", "111").output)["type"] == "other"
+
+
 # ---------------------------------------------------------------- sweep
 def test_sweep_notes_once_per_change(world):
     r = run("sweep", "--post")

@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from collections import Counter
@@ -39,6 +40,9 @@ from cli_anything.bobsupport.core.asana import Asana, AsanaError
 from cli_anything.bobsupport.core.plan import VERDICTS, Case, Plan, build
 
 CLI_NAME = "bob-support"
+# App Support's sign-off in the languages it replies in ("— Sent by …'s support assistant (automated)")
+AUTOMATED_RE = re.compile(r"\((automated|automatisiert|automatizzato|automatisé|automatizado|automático|"
+                          r"avtomatizirano|automatisch)\)", re.I)
 CHECK_SUBTASK = "Admin Console check"
 TASK_NAME = "bob-support sweep (Fabian)"
 
@@ -100,7 +104,7 @@ def requester_comments(task: dict[str, Any], comments: list[dict[str, Any]] | No
     for c in comments or []:
         text = (c.get("text") or "").strip()
         who = c.get("created_by") or {}
-        if not text or "(automated)" in text:
+        if not text or AUTOMATED_RE.search(text):
             continue
         if who.get("gid") in asana_mod.TEAM and (who.get("name") or "").strip().lower() != sender:
             continue

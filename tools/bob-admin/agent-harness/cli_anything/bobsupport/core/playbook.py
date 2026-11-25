@@ -76,7 +76,8 @@ TYPES: tuple[RequestType, ...] = (
          "attivazione", "activar", "ativar", "aktivacija", "still waiting", "not active",
          "create a new account", "create an account", "new account", "access to the new app", "need access",
          "acceso a la nueva app", "nueva app", "acesso", "neues konto", "would like to have this", "sign up",
-         "signed up", "regestrieren"),
+         "signed up", "use the bob", "use bob", "usar o bob", "usar bob", "bob nutzen",
+         "regestrieren", "regrestriren", "regrestrieren", "registriren", "anmeldung", "konto erstellen"),
         "Checks the account and its practice: pending, active, rejected; for a partner admin, lists the "
         "practices waiting in their subsidiary.",
         "Approves in the Admin Console when it's ours to approve (`bob-admin practices approve`, needs the IDB "

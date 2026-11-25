@@ -210,6 +210,14 @@ def build(c: Client, case: Case, overrides: dict[str, Any] | None = None,
     if case.comments:
         plan.facts.append(f"Read {len(case.comments)} comment(s) from the requester"
                           + (" (the newest one decided the type)." if from_comment else "."))
+    app = case.submission.get("application")
+    mentions_bob = re.search(r"\bbob\b", " ".join([app, text, *case.comments]).lower()) is not None
+    if app and not mentions_bob and not o:
+        plan.facts.append(f"The request is about {app}, not BOB: the BOB Admin Console doesn't hold these "
+                          "accounts, so nothing was looked up there.")
+        plan.verdict = "reply"
+        plan.reply_hint = "Answer in Asana from the app's FAQ; no Admin Console change applies."
+        return plan
     if rtype.key == "account-email":
         old, new = emails_in_comments(case.comments)
         if old:

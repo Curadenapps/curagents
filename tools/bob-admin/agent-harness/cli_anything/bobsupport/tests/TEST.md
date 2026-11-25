@@ -27,4 +27,4 @@ country's latest registrations were approved centrally), two "activate / new app
 requests (practice active, never signed in: plan a new temporary password) and two
 "I'd like an account" requests (no account under that email). Nothing was changed.
 
-Result (25 Nov 2026): 106 passed (28 bob-support + 24 bob-qa + 54 bob-admin).
+Result (25 Nov 2026): 108 passed (30 bob-support + 24 bob-qa + 54 bob-admin).
