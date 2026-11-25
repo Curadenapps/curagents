@@ -56,6 +56,7 @@ memory:
     - docs/app-support-voice-sean.md     # how Sean's Routine writes
     - docs/app-support-voice-fabian.md   # how Fabian's Routine writes
     - docs/app-support-playbook.md       # recurring BOB request types, facts, templates and Sean's corrections (Nov 2026)
+    - "notion: Support replies 3287e8aabbb480b79f16f460a1c35a00 (📋 Support, Knowledge Wiki), read-only: the team's copy-and-paste replies"
     - "notion: the product FAQs, read-only: BOB: FAQ 3217e8aabbb480289be7f8bbf6260528 (source of the curaprox-apps.com FAQ), Curaprox — FAQ 2e77e8aabbb4809699f8ca3225f4a310, Curaden — FAQ 2e77e8aabbb48099b047df4e620a272b, and the How-To Documents they link (index: BOB Kit 1fb7e8aabbb480d29c88cbd43aaee5fc; interdental brush facts: How to BOB 3087e8aabbb480b48701f105c7d932c0, "Using interdental brushes"). Never cite a page that is in Notion's Trash: the IDB & BOB FAQs, System Requirements, Legacy Sign-Up and Mobile User Guide were archived on 18 Nov"
     - "web: curaprox-apps.com app pages (public FAQ, e.g. https://curaprox-apps.com/app-pages/bob-app), read-only, the link a reply gives"
     - agents/truth-catcher.md   # "App Tasks board": sections, working days, what it already watches
@@ -294,9 +295,9 @@ owner can switch it.
     info@bobscore.com; Curaprox app: curaden.apps@curaden.ch; settled 12 Nov, see the
     playbook's facts table).
   - Subject: "{App}: {form task title}", in the request's language.
-  - Body: the same reply in the voice, but signed for email (the voice file's
-    greeting, then "Kind regards," and the owner's name), with one line saying it
-    was prepared with the help of the support assistant.
+  - Body: the same reply in the voice, with no sign-off (the Outlook signature adds
+    it, as on the Support replies page), and one line saying it was prepared with
+    the help of the support assistant.
 
   The owner copies it into a new email in Outlook, edits it if needed, sends it,
   and ticks the subtask. The next run comments "Answered by email ({date})" on the
@@ -423,19 +424,27 @@ and getting smarter"):
 1. **The product FAQs in Notion** (BOB: FAQ, Curaprox — FAQ, Curaden — FAQ; interdental
    brushes: How to BOB) and the How-To pages they link. They're what Curaden tells users,
    so the reply uses their facts and on-screen paths word for word.
-2. **The learned FAQ**, [`docs/app-support-faq.md`](../docs/app-support-faq.md), and
+2. **The Support replies page** in Notion (📋 Support, Knowledge Wiki,
+   `3287e8aabbb480b79f16f460a1c35a00`): the team's copy-and-paste replies for BOB and
+   the Curaprox app, by topic, each with a "Use when". When one fits, use its facts,
+   links and wording, in the request's language and with the voice's greeting and
+   sign-off. The team edits it there and tells Sean, so it's newer than the learned FAQ
+   when they differ. Never offer BOB Admin access to a practice, even if a reply there
+   ever does again ("Which source wins", BA-325; Sean removed it from the
+   practice-name reply on 25 Nov 2026).
+3. **The learned FAQ**, [`docs/app-support-faq.md`](../docs/app-support-faq.md), and
    **the playbook**, [`docs/app-support-playbook.md`](../docs/app-support-playbook.md):
    what Sean and Fabian have answered and the corrections Sean made.
-3. **The board's own history.** `search_tasks` on `1200298616652229` with
+4. **The board's own history.** `search_tasks` on `1200298616652229` with
    `completed` unset (so closed tasks count), two or three keywords from the request in
    its language and in English ("register", "activate", "practice name",
    "address"…). Read the comments on the matches: what Sean, Fabian or Janine replied,
    and the Jira sync comments ("→ {name} commented in Jira") where Phinamic explains
    how the product works. Do the same on BOB App (`1204489225205419`) for open
    tickets.
-4. **Jira BA**, read-only: `searchJiraIssuesUsingJql` with `project = BA AND text ~
+5. **Jira BA**, read-only: `searchJiraIssuesUsingJql` with `project = BA AND text ~
    "{keyword}"`, newest first, for how a feature works today and what's being fixed.
-5. **Notion search** across the workspace (How-To Documents, BOB Kit, the BOB
+6. **Notion search** across the workspace (How-To Documents, BOB Kit, the BOB
    Academy (where partners and staff learn BOB) and its Training modules, which link
    each module's How-To pages through `How-to guides`, "Partner onboarding: BOB setup and
    training" `4107e8aabbb481c9a15fe680c321efd2`, Product Roadmap, the 🚩 Inbox WX
@@ -645,7 +654,7 @@ connectors): Fabian's, plus Sean's as cover ("What runs where"). A request that 
    every request. Sean's Routine handles them only when it's covering (Friday,
    Fabian's row paused or missing, or his last run more than 2 hours old); otherwise
    it logs `no-op` and stops.
-   Read Notion in view mode only (`RUNTIME.md` "Reading Notion"): this Routine runs
+   Read Notion in view mode only (`RUNTIME.md` "Reading Notion"); Fabian's Routine and invite run reach Notion through the REST API instead (`docs/app-support-quickstart.md`, "Notion through the API"): this Routine runs
    every hour, so SQL here would use up the workspace's query allowance.
 2. **Pick up and classify** new form submissions and new stories (steps 1–2), plus
    form tasks whose submitter the owner has just added but who hasn't been @mentioned

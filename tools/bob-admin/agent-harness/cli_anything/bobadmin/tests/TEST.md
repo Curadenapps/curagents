@@ -40,7 +40,7 @@ Draft news item "[CLI TEST] bob-admin write check", CH only, inactive:
 ## 18–20 Nov 2026: prod, `call`, chaining
 
 - Prod: the production admin's bundle makes exactly the same API calls as test;
-  prod `/api/health` is healthy. No signed-in prod run yet.
+  prod `/api/health` is healthy.
 - `call`: 140 generated commands (every endpoint but health). Tests check the
   count, required-field checks, type coercion (arrays, booleans, numbers), path +
   query building, the `--body-data` rename, `--out` for exports, IDs from stdin,
@@ -50,6 +50,17 @@ Draft news item "[CLI TEST] bob-admin write check", CH only, inactive:
   `--ids … | call practices find-one -` (live on test).
 - Installer: `install.ps1` installs into `%USERPROFILE%\.bob-admin`; the
   installed copy carries the spec and SKILL.md and kept the existing sign-in.
+
+## Live read-only pass on prod (23 Nov 2026, Super User account)
+
+Sean signed in with `--env prod auth login`. Every read command answered with
+`--json`: health, auth whoami / capabilities, countries, languages, practices
+(list, pending, decisions, stats for one practice), users, superusers (and
+`--partners`), subsidiaries, products, product tabs, BOB-value links, news,
+integrations, tickets, templates, and all eight reports. Most answer in about a
+second; `reports dashboard` takes about 12 s. Totals were production-sized (well
+above test), so it reads the real platform. No write was sent and
+`BOB_ADMIN_PROD_WRITES` was not set.
 
 ## Not yet covered
 

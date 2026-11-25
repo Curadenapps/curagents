@@ -113,6 +113,7 @@ personal projects stay on Personal; curagents and its automations move.
 | Webex courier | **PC (Personal)** | Desktop app scheduled task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 Zurich | The only scheduled PC task: sign-in check, outbox, Webex Sweep ("PC runs" below) |
 | `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and new meetings (summary, action items, transcript); Inbox log rows (the check-up log), triage tasks in BOB App › Webex inbox, Asana comments, a "New in Jira" note in the common chat |
 | `bob-admin` CLI (BOB Admin) | **PC** | "bob admin …", "pending registrations", "create super user …" (`skills/bob-admin`) | Runs on the signed-in user's own session in `%USERPROFILE%\.bob-admin` (Sean or Fabian, each their own login). Not for cloud Routines: they have no sign-in. Writes only after a yes per action; prod writes locked by default |
+| `bob-qa` CLI (BOB web app QA) | **PC** | "QA the BOB app", "bob-qa", "run the QA scenario" (`skills/bob-qa`) | Ships with bob-admin; its own coach sign-in in `%USERPROFILE%\.bob-admin\qa-session-<env>.json`. Writes (test patients, scores) on test only, after a yes per run; QA-TEST data cleaned up at the end of each run |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
@@ -156,6 +157,10 @@ flagged (Webex Sweep's log, feedback for feedback-qa, and Source `agent` rows fo
 needs Sean; `agents/orchestrator.md` §5). Same rules: found by ID, never recreated.
 
 ## Reading Notion (view mode only)
+
+Fabian's App Support runs are the exception: his Notion login is a guest here, so they
+use the REST API with the integration "App Support (Fabian)" (read and insert only),
+as `docs/app-support-quickstart.md` "Notion through the API" describes.
 
 Notion's SQL and rows-mode queries share one small hourly allowance across the whole
 workspace (no Notion Business, Sean 11 Nov). App Support runs every hour, the courier
