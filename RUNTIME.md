@@ -112,6 +112,8 @@ personal projects stay on Personal; curagents and its automations move.
 | `roadmap-watch` | Cloud + courier | Claude Routine "Roadmap watch (Curaden)" (Mon 07:40 Zurich); "roadmap watch" any time | Writes the report page and puts the App Team summary in the outbox |
 | Webex courier | **PC (Personal)** | Desktop app scheduled task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 Zurich | The only scheduled PC task: sign-in check, outbox, Webex Sweep ("PC runs" below) |
 | `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and new meetings (summary, action items, transcript); Inbox log rows (the check-up log), triage tasks in BOB App › Webex inbox, Asana comments, a "New in Jira" note in the common chat |
+| `bob-admin` CLI (BOB Admin) | **PC** | "bob admin …", "pending registrations", "create super user …" (`skills/bob-admin`) | Runs on the signed-in user's own session in `%USERPROFILE%\.bob-admin` (Sean or Fabian, each their own login). Not for cloud Routines: they have no sign-in. Writes only after a yes per action; prod writes locked by default |
+| `bob-qa` CLI (BOB web app QA) | **PC** | "QA the BOB app", "bob-qa", "run the QA scenario" (`skills/bob-qa`) | Ships with bob-admin; its own coach sign-in in `%USERPROFILE%\.bob-admin\qa-session-<env>.json`. Writes (test patients, scores) on test only, after a yes per run; QA-TEST data cleaned up at the end of each run |
 | Everything else | Wherever Sean asks | Trigger phrases in each spec | |
 
 ## Rules for every run
@@ -155,6 +157,10 @@ flagged (Webex Sweep's log, feedback for feedback-qa, and Source `agent` rows fo
 needs Sean; `agents/orchestrator.md` §5). Same rules: found by ID, never recreated.
 
 ## Reading Notion (view mode only)
+
+Fabian's App Support runs are the exception: his Notion login is a guest here, so they
+use the REST API with the integration "App Support (Fabian)" (read and insert only),
+as `docs/app-support-quickstart.md` "Notion through the API" describes.
 
 Notion's SQL and rows-mode queries share one small hourly allowance across the whole
 workspace (no Notion Business, Sean 11 Nov). App Support runs every hour, the courier
@@ -297,7 +303,10 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
      says: the row's **Space** (IDs in the skill), **Mentions**, **Marker**, the message
      from the row's page body (the **Message** property is only a preview). With an
      **Attachment**, download it (Notion file URL) and attach it first (Recipe 2).
-     Verify with `webex-read.js` (`markerCount: 1`).
+     Verify with `webex-read.js` (`markerCount: 1`). The Marker must appear word for
+     word (same case) in the message; an agent writing a row copies it from the
+     message's first line. If it doesn't, use the message's first line as the marker
+     and say so in the Courier note.
    - Posted → Status `Posted`, **Posted at** now. Failed after the skill's retries →
      Status stays `Queued`, Courier note with the reason (3 failed runs → `Failed`).
    - Boom Boom rows: before posting, check the space for replies since the row was

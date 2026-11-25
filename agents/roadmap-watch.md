@@ -178,7 +178,8 @@ Then write `.truth-cache/roadmap-watch/last-snapshot.json` and a dated copy in
 
 Like Truth Catcher in Asana, it posts without asking. Since 11 Nov it runs as a
 cloud Routine, so it writes one row to the **Webex outbox** (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`):
-Space `App Team`, Marker `Roadmap Watch: {iso_week}`, Agent `roadmap-watch`, Status
+Space `App Team`, Marker `Roadmap Watch, week {nn}` (the message's own first words, so
+the courier can find it in Webex), Agent `roadmap-watch`, Status
 `Queued`, Source the report page, the message in the row's body. The Webex courier on
 Sean's PC posts it (`RUNTIME.md` "Webex courier"). Message:
 
