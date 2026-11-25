@@ -56,6 +56,7 @@ memory:
     - docs/app-support-voice-sean.md     # how Sean's Routine writes
     - docs/app-support-voice-fabian.md   # how Fabian's Routine writes
     - docs/app-support-playbook.md       # recurring BOB request types, facts, templates and Sean's corrections (Nov 2026)
+    - "asana: the 'Admin Console check' subtasks and comments the support sweep (skills/bob-support) leaves on form tasks: what the Admin Console shows for the requester"
     - "notion: Support replies 3287e8aabbb480b79f16f460a1c35a00 (📋 Support, Knowledge Wiki), read-only: the team's copy-and-paste replies"
     - "notion: the product FAQs, read-only: BOB: FAQ 3217e8aabbb480289be7f8bbf6260528 (source of the curaprox-apps.com FAQ), Curaprox — FAQ 2e77e8aabbb4809699f8ca3225f4a310, Curaden — FAQ 2e77e8aabbb48099b047df4e620a272b, and the How-To Documents they link (index: BOB Kit 1fb7e8aabbb480d29c88cbd43aaee5fc; interdental brush facts: How to BOB 3087e8aabbb480b48701f105c7d932c0, "Using interdental brushes"). Never cite a page that is in Notion's Trash: the IDB & BOB FAQs, System Requirements, Legacy Sign-Up and Mobile User Guide were archived on 18 Nov"
     - "web: curaprox-apps.com app pages (public FAQ, e.g. https://curaprox-apps.com/app-pages/bob-app), read-only, the link a reply gives"
@@ -160,6 +161,7 @@ and Sean has no PC task for it ("I cannot handle this many agents").
 | **App Support (Fabian)**: cloud Routine | Fabian's | Hourly 07:20–19:20, Mon–Thu | Everything in "Scheduled run", for every request |
 | **App Support invites (Fabian)**: desktop-app scheduled task on Fabian's PC | Fabian's | 09:10, 13:10 and 16:10, Mon–Thu | Adds the submitters whose Review subtask was ticked ("Invite run") |
 | **App Support (Curaden)**: cloud Routine | Sean's Curaden account | Hourly 07:20–19:20, Mon–Fri | Covers only (below); otherwise logs `no-op` and stops |
+| **Support sweep (Fabian)**: Windows scheduled task on Fabian's PC, `bob-support sweep --all --post --scheduled` (`skills/bob-support`) | Fabian's Admin Console sign-in and Asana token | Hourly 07:30–19:30, Mon–Thu | Looks every open request on the board up in the Admin Console (`--all`, Fabian owns them all), **read-only**, and leaves the facts in Asana: a comment on the "Fabian: change in BOB Admin" subtask, or an "Admin Console check" subtask on the form task (no email addresses), only when they changed. Never changes the Admin Console and never writes to a requester |
 
 Setup for Fabian: [`docs/app-support-quickstart.md`](../docs/app-support-quickstart.md).
 
@@ -421,6 +423,14 @@ and never stop at the first source that comes up empty. Work through all of thes
 and use what the newest, most authoritative source says (details in "FAQ: answering
 and getting smarter"):
 
+0. **What the Admin Console shows for this requester**: the "Admin Console check"
+   subtask on the form task, or the "Admin Console check" comment on its change
+   subtask, written by the support sweep on Fabian's PC (`skills/bob-support`). It
+   is the newest word on the account (exists or not, practice pending or active,
+   signed in yet or not, who approved). Build the reply on it ("your practice is
+   active, so…", "I've sent you a new temporary password" only after Fabian ran
+   it), never quote its ids or internal notes to the requester. No such note yet:
+   answer as below, and don't guess the account's state.
 1. **The product FAQs in Notion** (BOB: FAQ, Curaprox — FAQ, Curaden — FAQ; interdental
    brushes: How to BOB) and the How-To pages they link. They're what Curaden tells users,
    so the reply uses their facts and on-screen paths word for word.
@@ -515,7 +525,15 @@ HubSpot"), with the exact change:
 Where: BOB Admin → Practices → {practice name} → Address
 Change: replace with {street and number}, {postcode}, {city}, {country}
 From: the submitter's reply on {date} (link)
+Run: bob-support do {this subtask's gid} --street "…" --zip "…" --city "…"
 ```
+
+Write a new name or value in quotes after `replace with` ("Change: replace with
+"{new name}""): `bob-support` reads it from there. The `Run:` line is the change as
+one command for the owner's PC (`skills/bob-support`): it checks the Admin Console,
+shows what it will send, asks, makes the change and ticks this subtask, which is the
+owner's "done" below. Types it handles: practice name, address and contact, delete,
+new temporary password, account email. For anything else leave the `Run:` line out.
 
 The subtask has no guest follower, so the submitter isn't emailed about it. The same
 line goes into `changes_for_sean`. If the change needs Phinamic (the field can't be

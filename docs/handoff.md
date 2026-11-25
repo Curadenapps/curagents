@@ -21,6 +21,30 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 25 Nov: bob-support, the support command line (Fabian)
+
+`bob-support` ships with bob-admin (`tools/bob-admin/agent-harness/cli_anything/bobsupport/`,
+skill `skills/bob-support`). It reads the App Tasks board (requests and "Fabian: change in
+BOB Admin" subtasks assigned to Fabian), looks the requester up in the Admin Console and
+plans the change: practice rename, address, delete, new temporary password, account email.
+The split: an hourly sweep on Fabian's PC (every open request on the board, `--all`) is read-only and leaves the facts in Asana (App
+Support's replies use them, spec step 3 source 0); every Admin Console change runs through
+`bob-support do` on Fabian's yes, then ticks the change subtask so App Support closes the
+loop. 25 unit tests; live read-only checks on six real requests.
+
+Open:
+- **Fabian:** make an Asana Personal Access Token (`bob-support setup`), save it as
+  `ASANA_TOKEN`, then `bob-support schedule install`. Until then `check --from-json` works.
+- **Sean:** add the Agent registry row "Support sweep (Fabian)" (Account `Fabian`, Where
+  PC) so the run log check expects its runs; it writes run-log rows once `NOTION_API_KEY`
+  is set on Fabian's PC.
+- **Practice name change (Asana 1220494681856181):** the requester was told "All done" on
+  18 Nov, but on 25 Nov both practices on her account still had the old names in prod.
+  Check what was changed (a new practice?) before closing it for good.
+- Brazil (Asana 1220879652754010): nothing is pending in the partner's subsidiary; the
+  latest BR registrations were approved by the shared Super User account (two on 23 and
+  25 Nov). Brazil has two subsidiaries (17 Curaden Brazil, 90 Campanha Curaden Brazil).
+
 ## 25 Nov: OralScan, escalations, Fabian's work, courier
 
 Decisions (Sean, 25 Nov):
