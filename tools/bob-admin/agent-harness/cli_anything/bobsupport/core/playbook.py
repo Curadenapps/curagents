@@ -147,10 +147,13 @@ def classify(text: str, task_gid: str | None = None, learned: dict | None = None
         if key in BY_KEY:
             return BY_KEY[key], ["(taught for this task)"]
     t = _norm(text)
+    two_emails = len(set(re.findall(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+", t))) >= 2
     best: tuple[int, int, RequestType, list[str]] | None = None
     for order, rt in enumerate(TYPES):
         phrases = list(rt.keywords) + list(learned.get("keywords", {}).get(rt.key, []))
         hits = [p for p in phrases if _phrase_in(_norm(p), t)]
+        if rt.key == "account-email" and two_emails:
+            hits += ["(an old and a new email address)"] * 2  # "change my address from a@x to b@y"
         if hits and (best is None or len(hits) > best[0]):
             best = (len(hits), order, rt, hits)
     if best is None:

@@ -92,7 +92,13 @@ class World:
         }
         self.subtasks = {"111": ["222"]}
         self.stories: dict[str, list[str]] = {}
+        self.comments_in: dict[str, list[dict]] = {}  # comments already on a task (what GET stories returns)
         self.next_gid = 900
+
+    def comment_on(self, gid, text, who_gid="555", who_name="Ziva Example"):
+        self.comments_in.setdefault(gid, []).append({
+            "text": text, "resource_subtype": "comment_added", "created_at": "2026-11-25T14:32:00Z",
+            "created_by": {"gid": who_gid, "name": who_name}})
 
     def request(self, method, url, headers=None, **kw):
         body = json.loads(kw["data"]) if isinstance(kw.get("data"), str) else kw.get("json")
@@ -149,6 +155,8 @@ class World:
             self.subtasks.setdefault(m.group(1), []).append(gid)
             return asana_ok(self.tasks[gid])
         m = re.fullmatch(r"/tasks/(\d+)/stories", path)
+        if m and method == "GET":
+            return asana_ok(self.comments_in.get(m.group(1), []))
         if m and method == "POST":
             self.stories.setdefault(m.group(1), []).append(data["text"])
             return asana_ok({"gid": "s1"})
@@ -281,6 +289,43 @@ def test_from_json_without_token(world, monkeypatch, tmp_path):
     f.write_text(json.dumps({"data": {"gid": "111", "name": "Practice name change", "notes": FORM_NOTES}}), encoding="utf-8")
     plan = json.loads(run("--json", "check", "--from-json", str(f), "--name", "Brand New").output)
     assert plan["actions"][0]["body"] == {"name": "Brand New"}
+
+
+# ---------------------------------------------------------------- comments
+def _plain_form(world, request="I need some help if the CLI works", title="Test"):
+    world.tasks["111"]["notes"] = FORM_NOTES.replace("Hello. I opened my own practice. How can I change the practice name?",
+                                                     request).replace("Practice name change", title)
+    world.tasks["111"]["name"] = title
+    world.subtasks["111"] = []
+    world.tasks.pop("222")
+
+
+def test_requester_comment_decides_type_and_emails(world):
+    _plain_form(world)
+    world.users.append({**world.users[0], "id": 4000, "email": "old@yopmail.com", "username": "old"})
+    world.comment_on("111", "hi would like to change my address from old@yopmail.com to new@yopmail.com")
+    plan = json.loads(run("--json", "check", "111").output)
+    assert plan["type"] == "account-email" and plan["verdict"] == "change"
+    assert plan["userId"] == 4000  # looked up by the old address from the comment
+    assert plan["actions"][0]["body"] == {"email": "new@yopmail.com"}
+    assert any("newest one decided" in f for f in plan["facts"])
+    assert not any("@" in f for f in plan["facts"])  # no email addresses in the note
+
+
+def test_automated_and_team_comments_ignored(world):
+    _plain_form(world)
+    world.comment_on("111", "Hi Ziva, please change the practice name… — Sent by Fabian's support assistant (automated).")
+    world.comment_on("111", "Please delete my practice", who_gid="1207214370347608", who_name="Sean Dunne")
+    plan = json.loads(run("--json", "check", "111").output)
+    assert plan["type"] == "other"
+
+
+def test_team_member_who_sent_the_form_counts(world):
+    _plain_form(world)
+    world.tasks["111"]["notes"] = world.tasks["111"]["notes"].replace("Ziva Example", "Sean Dunne")
+    world.comment_on("111", "please send me a new temporary password", who_gid="1207214370347608", who_name="Sean Dunne")
+    plan = json.loads(run("--json", "check", "111").output)
+    assert plan["type"] == "temp-password"
 
 
 # ---------------------------------------------------------------- sweep

@@ -20,7 +20,7 @@ VERDICTS = {
     "change": "Admin Console change needed",
     "need-info": "Needs details from the requester first",
     "reply": "Reply only, nothing to change",
-    "no-account": "No BOB account for the form email",
+    "no-account": "No BOB account found for that email",
     "check": "Owner decides",
 }
 CHANGE_RE = re.compile(r"replace with\s+[\"“„']([^\"”“']+)[\"”“']", re.I)
@@ -77,7 +77,8 @@ class Plan:
     def note(self, env: str) -> str:
         """The internal note the sweep leaves in Asana (no email addresses)."""
         lines = [
-            f"Type: {self.rtype.label}" + (f" (matched: {', '.join(self.matched[:3])})" if self.matched else ""),
+            f"Type: {self.rtype.label}" + (f" (matched: {', '.join(list(dict.fromkeys(self.matched))[:3])})"
+                                           if self.matched else ""),
             f"Verdict: {VERDICTS[self.verdict]}",
             "",
             *[f"• {f}" for f in self.facts],
@@ -154,6 +155,25 @@ def practice_stats(c: Client, practice_id: Any) -> dict[str, Any]:
     return s if isinstance(s, dict) else {}
 
 
+EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+FROM_TO_RE = re.compile(r"(?:from|von|da|de|od)\s+(\S+@\S+?)[\s,.;]+(?:to|zu|auf|a|para|à|na|v)\s+(\S+@\S+?)[\s,.;]*$",
+                        re.I | re.M)
+
+
+def emails_in_comments(comments: list[str]) -> tuple[str | None, str | None]:
+    """(current email, new email) from the requester's newest comment that has any."""
+    for text in comments:
+        m = FROM_TO_RE.search(text)
+        if m:
+            return m.group(1).strip(".,;").lower(), m.group(2).strip(".,;").lower()
+        found = [e.lower() for e in EMAIL_RE.findall(text)]
+        if len(found) >= 2:
+            return found[0], found[1]
+        if len(found) == 1:
+            return None, found[0]
+    return None, None
+
+
 def _date(v: Any) -> str:
     return str(v)[:10] if v else "never"
 
@@ -169,16 +189,33 @@ def build(c: Client, case: Case, overrides: dict[str, Any] | None = None,
           learned: dict | None = None) -> Plan:
     o = {k: v for k, v in (overrides or {}).items() if v not in (None, "", ())}
     text = "\n".join([case.title, case.submission.text])
+    from_comment = False
     if o.get("type"):
         rtype, matched = playbook.BY_KEY[o["type"]], ["(given with --type)"]
     else:
         rtype, matched = playbook.classify(text, case.task_gid, learned)
+        if matched != ["(taught for this task)"]:
+            # the requester's newest comment wins when it names a request: it's the latest word
+            for comment in case.comments:
+                ct, cm = playbook.classify(comment, None, learned)
+                if ct.key != "other":
+                    rtype, matched, from_comment = ct, cm, True
+                    break
         if rtype.key == "other" and case.change_notes:
             rtype, matched = playbook.classify(case.change_notes, None, learned)
     plan = Plan(case=case, rtype=rtype, matched=matched)
     if case.change_notes:
         first = case.change_notes.strip().splitlines()
         plan.facts.append("Change subtask says: " + " / ".join(x.strip() for x in first[:2]))
+    if case.comments:
+        plan.facts.append(f"Read {len(case.comments)} comment(s) from the requester"
+                          + (" (the newest one decided the type)." if from_comment else "."))
+    if rtype.key == "account-email":
+        old, new = emails_in_comments(case.comments)
+        if old:
+            o.setdefault("lookup_email", old)
+        if new:
+            o.setdefault("email", new)
 
     email = o.get("lookup_email") or case.submission.email
     user = find_user(c, email) if email else None
@@ -186,7 +223,8 @@ def build(c: Client, case: Case, overrides: dict[str, Any] | None = None,
         user = unwrap(c.call(Request("GET", f"/users/{o['user_id']}")))
     plan.user = user
     if not user:
-        plan.facts.append("No BOB account with the form email." if email else "The form has no email address.")
+        which = "the form email" if email == case.submission.email else "the email the requester named"
+        plan.facts.append(f"No BOB account with {which} (on {c.env})." if email else "The form has no email address.")
     else:
         roles = ", ".join(user.get("roles") or []) or "none"
         temp_state = "not used yet (must set a password at first sign-in)" if user.get("mustSetPassword") else "already changed"

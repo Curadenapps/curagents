@@ -83,18 +83,39 @@ def load_case(a: Asana, gid: str) -> Case:
     t = a.task(gid)
     if asana_mod.is_change_subtask(t):
         parent = a.task(t["parent"]["gid"])
-        return _case(parent, change=t)
+        return _case(parent, change=t, comments=a.comments(parent["gid"]))
     change = next((s for s in a.subtasks(gid)
                    if not s.get("completed") and "change in bob admin" in (s.get("name") or "").lower()), None)
-    return _case(t, change=change)
+    return _case(t, change=change, comments=a.comments(gid))
 
 
-def _case(task: dict[str, Any], change: dict[str, Any] | None = None) -> Case:
+def requester_comments(task: dict[str, Any], comments: list[dict[str, Any]] | None) -> list[str]:
+    """What the requester wrote after the form, newest first.
+
+    Skips App Support's automated replies and the team's own comments, unless the
+    commenter is the person who sent the form (a team member testing, for example).
+    """
+    sender = form.from_task(task).get("name").strip().lower()
+    out = []
+    for c in comments or []:
+        text = (c.get("text") or "").strip()
+        who = c.get("created_by") or {}
+        if not text or "(automated)" in text:
+            continue
+        if who.get("gid") in asana_mod.TEAM and (who.get("name") or "").strip().lower() != sender:
+            continue
+        out.append(text)
+    return list(reversed(out))
+
+
+def _case(task: dict[str, Any], change: dict[str, Any] | None = None,
+          comments: list[dict[str, Any]] | None = None) -> Case:
     sub = form.from_task(task)
     section = next((m.get("section", {}).get("name", "") for m in task.get("memberships") or []
                     if (m.get("project") or {}).get("gid") in (None, asana_mod.BOARD)), "")
     return Case(task_gid=task["gid"], title=task.get("name") or sub.get("title"), submission=sub,
-                section=section, change_gid=(change or {}).get("gid"), change_notes=(change or {}).get("notes") or "")
+                section=section, change_gid=(change or {}).get("gid"), change_notes=(change or {}).get("notes") or "",
+                comments=requester_comments(task, comments))
 
 
 def case_from_json(path: str) -> Case:
@@ -107,10 +128,10 @@ def case_from_json(path: str) -> Case:
     task = raw.get("data", raw)
     parent = task.get("parent") if isinstance(task.get("parent"), dict) else None
     if parent and parent.get("notes"):
-        return _case({**parent, "gid": parent["gid"]}, change=task)
+        return _case({**parent, "gid": parent["gid"]}, change=task, comments=parent.get("comments"))
     change = next((s for s in task.get("subtasks") or []
                    if "change in bob admin" in (s.get("name") or "").lower() and not s.get("completed")), None)
-    return _case(task, change=change)
+    return _case(task, change=change, comments=task.get("comments"))
 
 
 def overrides(**kw: Any) -> dict[str, Any]:
@@ -253,12 +274,12 @@ def collect(ctx: click.Context, everyone: bool) -> list[Case]:
                 continue
             if not asana_mod.is_form_task(parent) or parent.get("completed"):
                 continue
-            cases[parent_gid] = _case(parent, change=a.task(t["gid"]))
+            cases[parent_gid] = _case(parent, change=a.task(t["gid"]), comments=a.comments(parent_gid))
         elif asana_mod.is_form_task(t) and t["gid"] not in cases:
             section = _case(t).section
             if section in ("Done", "Archived/Rejected"):
                 continue
-            cases[t["gid"]] = _case(t)
+            cases[t["gid"]] = _case(t, comments=a.comments(t["gid"]))
     return list(cases.values())
 
 

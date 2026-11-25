@@ -17,6 +17,7 @@ API = "https://app.asana.com/api/1.0"
 TOKEN_ENV = "ASANA_TOKEN"
 WORKSPACE = "1171371475355741"
 BOARD = "1200298616652229"          # App Tasks, Requests & Feedback
+TEAM = {"1196321462158324", "1207214370347608"}  # Fabian, Sean: their comments aren't the requester's
 TIMEOUT = 30
 TASK_FIELDS = ",".join([
     "name", "notes", "completed", "created_at", "modified_at", "permalink_url",
