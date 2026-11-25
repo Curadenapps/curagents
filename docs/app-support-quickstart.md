@@ -165,7 +165,8 @@ to work. If it misses a run, the next one catches up.
 Fabian's Notion login is a guest in Sean's workspace (seandunne), so the Notion
 connector on his account can only open the Curaden workspace. His runs use Sean's
 internal integration **"App Support (Fabian)"** instead: read and insert only, shared
-with the Agent control room (registry and run log), the product FAQs, BOB Kit and its
+with the Agent control room (registry and run log), the product FAQs, the Support
+replies page (📋 Support, `3287e8aabbb480b79f16f460a1c35a00`), BOB Kit and its
 how-tos, the Product Roadmap, the Market Rollout Academy and the Education Hub
 markets pages. Nothing else in the workspace is visible to it.
 
