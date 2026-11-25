@@ -73,6 +73,7 @@ comes from Notion instead of `dream.md` §4, and escalations go to the Inbox.
 | `rollout status` / `onboard * for *` / `super user for *` / `admin access for *` / `build module *` / `training plan for *` / `partner prep *` / `partner follow-up *` / `audience brief *` / `what can Blanca take` / `rollout watch` / `rock n rollout` | market-rollout (signs in Asana as "Rock 'n' Rollout 🎸"; structural board edits only after Sean says go) |
 | `bob admin *` / `admin console *` / `pending registrations` / `approve practice *` / `reject practice *` / `create super user *` / `add a coach *` / `practice usage` / `export bob scores` / `admin report *` / `post news in the app` | Orchestrator itself with `skills/bob-admin` (the `bob-admin` CLI). PC only: it runs on Sean's own sign-in. Reads straight away; every write as `--dry-run` first, sent only after Sean's yes for that action; prod writes stay locked unless Sean unlocks his shell |
 | `qa the bob app` / `bob-qa *` / `run the qa scenario` / `smoke test bob` / `check the coach flow` | Orchestrator itself with `skills/bob-qa` (the `bob-qa` CLI). PC only, on Sean's own coach sign-in on test. `qa run smoke` straight away; `qa run coach-loop` and other writes only after Sean's yes for that run; never on prod |
+| `growth plan *` / `acquisition plan *` / `growth review` / `growth pulse` / `content calendar` / `draft post *` / `partner kit *` / `event prep *` / `website check` / `store listing check` / `follow up sign-ups *` / `new experiment *` / `campaign brief *` / `how do we get more clinics` | growth (drafts in BOB Growth only; website fixes via webflow, clinical wording via brand-asset, approved clinics to market-rollout) |
 | `sync revolvenote` / `push revolvenote` | curaden-communications › revolvenote-sync |
 | `sync BOB` / `sync jira` | curaden-communications › jira-notion-bob-sync |
 | `brand review` / `check approvals` | brand-asset |
@@ -194,7 +195,7 @@ pinned to its model tier. Dispatch them with the Agent tool.
 | Tier | Agents |
 |------|--------|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance (mechanical: poll, diff, link, route) |
-| Sonnet 5.5 | truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout, app-support (judgement on structured data) |
+| Sonnet 5.5 | truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout, app-support, growth (judgement on structured data) |
 | Opus 5.5 | brand-asset, release (approval gates, clinical claims, releases) |
 
 - **Run in parallel** only agents that are independent and read-only for the current
