@@ -26,3 +26,6 @@ Thumbs.db
 
 # Boom Boom Derek — Webex message files, never in Git
 .boom-boom-derek/
+
+# Roadmap pack — working folder (roadmap rows, picture, PDF), never in Git
+.roadmap-pack/
