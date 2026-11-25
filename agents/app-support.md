@@ -644,7 +644,7 @@ connectors): Fabian's, plus Sean's as cover ("What runs where"). A request that 
    every request. Sean's Routine handles them only when it's covering (Friday,
    Fabian's row paused or missing, or his last run more than 2 hours old); otherwise
    it logs `no-op` and stops.
-   Read Notion in view mode only (`RUNTIME.md` "Reading Notion"): this Routine runs
+   Read Notion in view mode only (`RUNTIME.md` "Reading Notion"); Fabian's Routine and invite run reach Notion through the REST API instead (`docs/app-support-quickstart.md`, "Notion through the API"): this Routine runs
    every hour, so SQL here would use up the workspace's query allowance.
 2. **Pick up and classify** new form submissions and new stories (steps 1–2), plus
    form tasks whose submitter the owner has just added but who hasn't been @mentioned

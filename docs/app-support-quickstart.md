@@ -19,13 +19,15 @@ The full rules are in [`agents/app-support.md`](../agents/app-support.md).
 
 ## Set it up (about 10 minutes, once)
 
-**Before you start:** Sean merges the App Support pull request (#79), so the setup
-below is on `main`.
+**Before you start:** have the Notion key Sean sent you privately at hand. Don't
+paste it into the chat; step 5 opens a secure form for it.
 
 1. **Claude desktop app.** Open it, signed in with your Curaden account, and go to the
    **Code** tab.
-2. **Connectors.** In Settings → Connectors, check that **Asana** and **Notion** are
-   connected (both signed in as you).
+2. **Connectors.** In Settings → Connectors, check that **Asana** is connected
+   (signed in as you). Notion doesn't go through the connector for you: your Notion
+   login is a guest in Sean's workspace, so the connector can't reach it. Your runs
+   use a Notion key Sean sends you privately instead ("Notion through the API" below).
 3. **Chrome.** Install the **Claude in Chrome** extension, and in Chrome sign in to
    Asana (app.asana.com). Leave Chrome open during work hours: the invite run uses it.
 4. **The repo.** In the Code tab, open a new session in any folder and paste:
@@ -39,8 +41,11 @@ below is on `main`.
    > Set up App Support for me from `docs/app-support-quickstart.md`, section
    > "Setup details". Create the cloud Routine "App Support (Fabian)" and the desktop
    > scheduled task "App Support invites (Fabian)" with exactly the names, schedules
-   > and prompts given there. Then check that Asana and Notion are connected and that
-   > Chrome is signed in to Asana, and run the invite task once as a test. Ask me
+   > and prompts given there. Set up Notion as "Notion through the API" says: open
+   > the secure credential form so I can paste the Notion key myself, and never show,
+   > echo or save it anywhere. Then check that Asana is connected, that the Notion
+   > key can read the Agent registry, and that Chrome is signed in to Asana, and run
+   > the invite task once as a test. Ask me
    > before you invite anyone in that test. Finish with a short list of what's set up
    > and anything I still need to do.
 
@@ -102,7 +107,10 @@ to do any of it by hand.
 
 - **Name:** `App Support (Fabian)`
 - **Repository:** `Curadenapps/curagents`
-- **Connectors:** Asana and Notion only (both signed in as Fabian)
+- **Connectors:** Asana only (signed in as Fabian). No Notion connector: Notion goes
+  through the API ("Notion through the API" below)
+- **Environment:** the Routine's cloud environment has the variable `NOTION_API_KEY`
+  (the key Sean sent you) and its network access allows `api.notion.com`
 - **Model:** Claude Sonnet
 - **Schedule:** every hour, Monday to Thursday, 07:20 to 19:20 Zurich. Routines use
   UTC: `20 6-18 * * 1-4` (in summer time that runs an hour later; that's fine)
@@ -123,8 +131,12 @@ to do any of it by hand.
 > app or admin system, invite anyone, handle passwords or write personal data
 > outside Asana. Don't commit or push.
 > Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
-> describes (Agent `app-support`, Where Cloud, Account Fabian). Use the Asana and
-> Notion connectors; if either is missing, log `failed` with which one.
+> describes (Agent `app-support`, Where Cloud, Account Fabian). Use the Asana
+> connector for Asana. For Notion use the REST API with `NOTION_API_KEY` exactly as
+> `docs/app-support-quickstart.md` "Notion through the API" says, never the Notion
+> connector, and never print the key. If the Asana connector or the key is missing,
+> log `failed` with which one (no key: say so in your final message, since the run
+> log can't be written).
 
 ### 2. Desktop scheduled task "App Support invites (Fabian)"
 
@@ -140,11 +152,54 @@ to do any of it by hand.
 > `agents/app-support.md` describes, using Claude in Chrome (Chrome is signed in to
 > Asana). Live: don't ask me first. Only invite people from a Review subtask I
 > ticked, always untick "Also invite to App Tasks, Requests & Feedback project", and
-> never type a password. End with one row in the Agent run log (Agent `app-support`,
-> Where PC, Account Fabian).
+> never type a password. For Notion use the REST API with `NOTION_API_KEY` as
+> `docs/app-support-quickstart.md` "Notion through the API" says, and never print the
+> key. End with one row in the Agent run log (Agent `app-support`, Where PC, Account
+> Fabian).
 
 The PC has to be on, with the Claude desktop app and Chrome open, for the invite run
 to work. If it misses a run, the next one catches up.
+
+### 3. Notion through the API
+
+Fabian's Notion login is a guest in Sean's workspace (seandunne), so the Notion
+connector on his account can only open the Curaden workspace. His runs use Sean's
+internal integration **"App Support (Fabian)"** instead: read and insert only, shared
+with the Agent control room (registry and run log), the product FAQs, BOB Kit and its
+how-tos, the Product Roadmap, the Market Rollout Academy and the Education Hub
+markets pages. Nothing else in the workspace is visible to it.
+
+**The key.** Sean sends it to Fabian privately. It lives only in:
+- the cloud environment of the Routine "App Support (Fabian)", as the environment
+  variable `NOTION_API_KEY` (claude.ai → Code → the Routine's environment →
+  environment variables); that environment's network access must allow
+  `api.notion.com`;
+- Fabian's PC, for the invite run, as a Windows user environment variable
+  `NOTION_API_KEY` (Start → "Edit environment variables for your account" → New),
+  then restart the Claude desktop app.
+
+Never in a prompt, the repo, a file, chat, Notion, Asana or Webex. If it leaks, Sean
+deletes the integration in Notion (Developer tools → Developer connections) and makes
+a new one.
+
+**How a run uses it.** Every call sends `Authorization: Bearer $NOTION_API_KEY` and
+`Notion-Version: 2025-09-03`, with the key read from the environment, never typed
+out. Never print it: no `echo`, `env`, `set -x` or verbose `curl`.
+
+| Need | Call |
+|------|------|
+| Registry rows (the switch) | `POST https://api.notion.com/v1/data_sources/ca4bcf81-b541-49e6-9da5-1fc8bfd38418/query`, paging with `start_cursor` |
+| Run-log columns | `GET https://api.notion.com/v1/data_sources/9b260587-5c0d-4d90-947e-b6e10ba159df` (property names and options) |
+| Write the run-log row | `POST https://api.notion.com/v1/pages` with parent `{"type": "data_source_id", "data_source_id": "9b260587-5c0d-4d90-947e-b6e10ba159df"}`, the columns from `RUNTIME.md` "Agent run log", and the body (FAQ candidates, voice notes) as `children` |
+| A page (FAQ, how-to, market) | `GET https://api.notion.com/v1/pages/{id}` and `GET https://api.notion.com/v1/blocks/{id}/children`, paging |
+| Other databases (Roadmap, Markets) | `POST https://api.notion.com/v1/data_sources/{data source id}/query`; the data source ids are the `collection://` ids in the spec and `RUNTIME.md` |
+| Search | `POST https://api.notion.com/v1/search` with a `query`; it only finds what's shared with the integration |
+
+These API reads don't use the workspace's hourly query allowance ("Reading Notion" in
+`RUNTIME.md` is about the connector). The key can't edit an existing page; a run
+only ever creates its run-log row. A `401` means the key is wrong or missing; a `404`
+on a page means it isn't shared with the integration: log `failed` with the page id
+so Sean can share it.
 
 ## Running it yourself (optional)
 

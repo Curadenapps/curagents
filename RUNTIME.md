@@ -158,6 +158,10 @@ needs Sean; `agents/orchestrator.md` §5). Same rules: found by ID, never recrea
 
 ## Reading Notion (view mode only)
 
+Fabian's App Support runs are the exception: his Notion login is a guest here, so they
+use the REST API with the integration "App Support (Fabian)" (read and insert only),
+as `docs/app-support-quickstart.md` "Notion through the API" describes.
+
 Notion's SQL and rows-mode queries share one small hourly allowance across the whole
 workspace (no Notion Business, Sean 11 Nov). App Support runs every hour, the courier
 four times a day, and Sean's own sessions spend from the same allowance. It was used
