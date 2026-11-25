@@ -1,4 +1,4 @@
-# Handoff: state of curagents (5 Nov 2026, latest section 23 Nov)
+# Handoff: state of curagents (5 Nov 2026, latest section 25 Nov)
 
 Read this after `CLAUDE.md`, `RUNTIME.md` and `dream.md` when you pick up maintenance
 in a new session. Update it (or delete the lines that are done) by PR whenever you
@@ -20,6 +20,41 @@ finish one of the items, so the next session starts from the truth.
   be off).
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
+
+## 25 Nov: OralScan, escalations, Fabian's work, courier
+
+Decisions (Sean, 25 Nov):
+- **OralScan moves to Phinamic.** UDevHub won't continue on it. The spike report
+  (`4237e8aabbb48193acd1f35ea0155506`, under the roadmap row "Curaprox app: OralScan
+  discovery") found the production AI unreliable (score inflated, accuracy 0.40 vs the
+  claimed 0.90, unstable scores, no training data or test set handed over). It also found
+  patient photos, children's included, some with GPS, in the repository, and photos sent
+  to OpenAI: take that to Tino now. A separate session drafts the options, the UDevHub
+  hand-over checklist for Thu 26 Nov, the privacy note and a Phinamic brief, as child
+  pages of the report. Drafts only until Sean says go.
+- **Gently: no escalation.** Fabian handles it. Issue #97 is closed; Truth Catcher
+  doesn't re-escalate it.
+- **Shopify recommendation** (Asana 1219269079724491, Sony Nguyen, due 17 Nov):
+  Phinamic should answer. Boom Boom chases it in the common chat from Thu 26 Nov (noted
+  on its Notion page).
+- **Fabian** runs the form requests with his own App Support agent (#101: his runs reach
+  Notion through the API, once his key is set up). Sean's App Support covers him only
+  while his registry row has no runs, and stops by itself after his first run. He also
+  takes **automatic practice approval (BA-324)** with the bob-admin CLI (Asana
+  1220905863349438).
+- **Team update:** one round-up from 5 Nov to 26 Nov on Thu 26 Nov, replacing the two
+  held drafts (Sean's notes are on Inbox row `4237e8aabbb4814e928bfb5c7a4302d5`).
+  Marketing isn't taking BOB on for now; the Product Roadmap covers it. Say it neutrally.
+- **Gisèle's account change** was answered by Fabian on 24 Nov; the held Review subtask
+  1220715857418450 is closed.
+
+Courier and Boom Boom should run on their own. Open on the Personal PC:
+- Two courier sessions fired for the 25 Nov 09:02 slot. With two copies, Webex shows
+  "Another tab has been opened" and the built-in browser freezes. Keep exactly one
+  "Webex courier (Personal)" task.
+- The old `boom-boom-derek` PC task still runs (24 and 25 Nov, no double posts). Switch
+  it off.
+- The 17:02 and 08:02 slots are often missed (PC asleep or app closed).
 
 ## 23 Nov: product overviews and the BOB App / Curaprox App pages
 
