@@ -22,8 +22,8 @@ The meeting-notes agent picks the source on its own (`agents/meeting-notes.md` â
 
 1. **Install** Yogurt for Windows x64 from the
    [latest release](https://github.com/FrigadeHQ/yogurt/releases/latest)
-   (`Yogurt-windows-x64.exe`, per-user, no admin). The Windows build is **unsigned**, so
-   SmartScreen warns; if Curaden IT blocks it, it needs their OK like the other tools.
+   (`Yogurt-windows-x64.exe`, per-user, no admin, signed by Frigade Inc.). Installed on
+   Sean's PC 25 Nov (v0.3.76); it updates itself.
 2. **Open it once**: it checks the PC (8 GB RAM minimum) and downloads its models.
    Set the spoken language to **multi** (German, English and more in one call).
    Add the Outlook calendar's private ICS link in Settings > Calendars if you want
@@ -38,6 +38,8 @@ The meeting-notes agent picks the source on its own (`agents/meeting-notes.md` â
 
    It adds the `yogurt` MCP server at **user scope** (`%LOCALAPPDATA%\Programs\Yogurt\resources\bin\yogurt-mcp.exe`),
    so it exists on this PC only and the cloud Routines never try to reach it.
+   `~/.claude.json` is shared by every Claude Code session on the PC, Curaden and
+   Personal accounts alike, so one registration covers all of them (done 25 Nov).
    `-Check` reports without changing anything. Restart the Claude desktop app after.
 
 ## Using it
