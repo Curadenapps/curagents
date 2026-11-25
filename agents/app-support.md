@@ -429,8 +429,9 @@ and getting smarter"):
    the Curaprox app, by topic, each with a "Use when". When one fits, use its facts,
    links and wording, in the request's language and with the voice's greeting and
    sign-off. The team edits it there and tells Sean, so it's newer than the learned FAQ
-   when they differ. Its "Change the practice name" reply still offers Practice Admin
-   rights in BOB Admin: leave that option out ("Which source wins", BA-325).
+   when they differ. Never offer BOB Admin access to a practice, even if a reply there
+   ever does again ("Which source wins", BA-325; Sean removed it from the
+   practice-name reply on 25 Nov 2026).
 3. **The learned FAQ**, [`docs/app-support-faq.md`](../docs/app-support-faq.md), and
    **the playbook**, [`docs/app-support-playbook.md`](../docs/app-support-playbook.md):
    what Sean and Fabian have answered and the corrections Sean made.
