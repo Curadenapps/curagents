@@ -158,6 +158,10 @@ needs Sean; `agents/orchestrator.md` §5). Same rules: found by ID, never recrea
 
 ## Reading Notion (view mode only)
 
+Fabian's App Support runs are the exception: his Notion login is a guest here, so they
+use the REST API with the integration "App Support (Fabian)" (read and insert only),
+as `docs/app-support-quickstart.md` "Notion through the API" describes.
+
 Notion's SQL and rows-mode queries share one small hourly allowance across the whole
 workspace (no Notion Business, Sean 11 Nov). App Support runs every hour, the courier
 four times a day, and Sean's own sessions spend from the same allowance. It was used
@@ -282,8 +286,18 @@ the Agent run log. Runs never edit specs or push.
 
 ### Webex courier
 
-The one scheduled PC task (Personal desktop app, built-in browser). In order:
+The one scheduled PC task (Personal desktop app, built-in browser). Sean switches
+between sessions and accounts, so more than one copy can fire for the same slot
+(25 Nov). That's fine: the first claims the slot and the others stop. In order:
 
+0. **Claim the slot** (before opening Webex). The slot is the scheduled time this
+   run belongs to (08:02, 09:02, 12:02 or 17:02 Zurich; a late start still belongs to
+   the slot before it). Read the Agent run log for a `webex-courier` row with Run
+   `webex-courier {YYYY-MM-DD} {slot}`. If one exists, stop at once: no Webex, no
+   browser tab, no row. Otherwise write that row now (Where `PC`, Account `Personal`,
+   Outcome `partial`, Summary "running"), then read again. If another row for the same
+   slot was created before yours, set yours to Outcome `no-op`, Summary "second
+   firing, stopped", and stop. The row you keep is the one you update in step 4.
 1. **Sign-in.** Open Webex in the built-in browser (`skills/webex-web/SKILL.md`) and
    check the sign-in. Never type credentials or click sign-in, cookie or consent
    buttons. Signed out: try Claude in Chrome (the skill's fallback). Neither works:
@@ -314,7 +328,7 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
    run-log row; Inbox log rows, triage tasks in BOB App › Webex inbox, Asana
    comments, its "New in Jira" note in the common chat). A space it can't read →
    `partial` with the space name.
-4. **Run log.** One row: Agent `webex-courier` (or `other`), Where `PC`, Account
+4. **Run log.** Update the slot row from step 0: Agent `webex-courier` (or `other`), Where `PC`, Account
    `Personal`, Outcome `posted` (anything went out) / `ok` / `partial` / `failed`,
    Summary "{n} posted, {m} held/expired; sweep: {sweep summary}". Webex Sweep keeps
    its own `webex-sweep` row.

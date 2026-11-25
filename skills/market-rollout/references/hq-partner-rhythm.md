@@ -39,8 +39,8 @@ on Sean remembering to ask. The agent prepares every meeting and follow-up below
 
 ## What Blanca can take (Marketing)
 
-Marketing support is mostly gone (Sean, 24 Nov 2026), so don't plan around this list. It is
-only for when Sean names someone. Only marketing-side work, and only when Sean hands it over:
+Marketing support is mostly gone (Sean, 24 Nov 2026), so don't plan around this list: the
+`growth` agent drafts this work now. The list is only for when Sean names Blanca. Only marketing-side work, and only when Sean hands it over:
 - Briefs for localising the kit (value sheet, posters, QR counter display, patient email)
 - Practice-story write-ups from the monthly reviews
 - Event follow-up email templates and the 48-hour follow-up list

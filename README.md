@@ -46,6 +46,14 @@ Skills are invokable by any Claude session. Trigger by phrase — no manual setu
 
 Config details for each procedure: [`skills/curaden-communications/references/`](skills/curaden-communications/references/)
 
+### `growth` → [`skills/growth/SKILL.md`](skills/growth/SKILL.md)
+
+User acquisition for BOB since marketing stopped supporting it (25 Nov 2026), used by the
+`growth` agent. Notion home: BOB Growth (Growth experiments + Content calendar), under the
+BOB App hub. Phrases: "growth plan {market}", "content calendar", "draft post {topic}",
+"partner kit {market}", "event prep {event}", "website check", "store listing check",
+"new experiment {idea}", "growth pulse", "growth review".
+
 ### `market-rollout` → [`skills/market-rollout/SKILL.md`](skills/market-rollout/SKILL.md)
 
 Rollout support for the 2027 markets: UAE (Apr 2027) and Switzerland, the main market (May, waiting on Higi); then Slovenia and South Africa (Aug, on hold), USA and Japan (Sep); Germany self-service, Italy and Brazil parked. Calendar and stages live on the Notion Market rollout system page; to-dos on the Asana board BOB Market Rollouts. Used by the
@@ -105,6 +113,7 @@ or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
 | Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
 | Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | PC task Mon 08:00 (report + App Team summary in Webex) + manual "roadmap watch" |
 | Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in UAE, CH, Slovenia, South Africa, USA, Japan (Italy parked): audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
+| Growth | [`agents/growth.md`](agents/growth.md) | BOB user acquisition: 90-day plans per market, content calendar and posts in Sean's voice, partner kits, event packs, website and store checks, experiments, funnel G1–G4 against the Launch KPIs. Drafts only; Sean or the partner publishes | Manual + Claude Routine Mon 09:10 "Growth pulse (Curaden)" once created |
 | App Support | [`agents/app-support.md`](agents/app-support.md) | Writes the answer to every "App Requests & Feedback" form submission (signed as automated) from the product FAQs and what it has learned; the owner checks it and adds the submitter to send it (since 13 Nov), hands Fabian (owner of every request since 18 Nov; Sean covers) the exact change and anything it can't answer, closes on their confirm; bugs and product gaps to Jira via In Development. Fabian can run it too ([`docs/app-support-quickstart.md`](docs/app-support-quickstart.md)). Mailboxes support@ / info@bobscore.com planned, pending IT | Claude Routine hourly 07:20–19:20 weekdays (Curaden) + manual "app support" |
 | Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
 
@@ -116,7 +125,7 @@ scripts and `.claude/agents/` wrappers all use the same tier.
 | Tier | Agents | Why |
 |------|--------|-----|
 | Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
-| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout, app-support | Judgement on structured data |
+| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout, app-support, growth | Judgement on structured data |
 | Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
 
 Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.

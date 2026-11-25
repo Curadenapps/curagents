@@ -79,7 +79,7 @@ The page is the source of truth for that market; the references only hold IDs an
    - one line: gate, date, overall (on track / at risk / blocked) and why
    - Blocked: up to three, each with owner
    - Sean's next three actions
-   - Marketing-side items only if Sean names someone to take them (Marketing support is mostly gone since 24 Nov 2026)
+   - Marketing-side items go to the `growth` agent (Marketing support is mostly gone since 24 Nov 2026), not to Blanca
    - Updated: date, by the Market Rollout agent
 4. Return the same in `for_sean` and `for_blanca`. For "all", one line per market in chat.
 
@@ -194,8 +194,8 @@ reply. Return it in chat, or as a draft page if it's long.
 
 ### 10. What Blanca can take — "what can Blanca take"
 
-Marketing support is mostly gone since 24 Nov 2026, so say that first and only list items
-Sean could hand over if he names someone. Go through the active rollout markets and list marketing-side items only (the split is in
+Marketing support is mostly gone since 24 Nov 2026 and the `growth` agent now drafts that
+work, so say that first and point there; only list items for Blanca if Sean names her. Go through the active rollout markets and list marketing-side items only (the split is in
 `hq-partner-rhythm.md`): kit localisation briefs, posters and QR displays, value sheet,
 practice-story write-ups, event follow-up emails, the IDB Challenge tie-in. Each item
 with market, what "done" looks like and a date. Chat only; Sean decides what to hand over.

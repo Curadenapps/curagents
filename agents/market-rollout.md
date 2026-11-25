@@ -108,7 +108,7 @@ Each workflow is in the skill with its steps. In short:
 
 | Phrase | Workflow | Writes |
 |--------|----------|--------|
-| "rollout status [market or all]" | Read the market page, the rollout task and its gates, the tracker and the module DB; say where the market is, what is blocked, Sean's next three actions and any marketing-side item only if Sean names someone (Marketing mostly gone since 24 Nov) | The market page's "Rollout status" section |
+| "rollout status [market or all]" | Read the market page, the rollout task and its gates, the tracker and the module DB; say where the market is, what is blocked, Sean's next three actions and marketing-side items handed to the `growth` agent (Marketing mostly gone since 24 Nov) | The market page's "Rollout status" section |
 | "audience brief {market}" | Check the market page's audiences against new sources (meeting recaps, Asana, Sean's notes) and propose changes | Nothing until Sean says "update it", then the page's audience section |
 | "onboard {person or role} for {market}" | Plan the levels, modules and dates for that person, from `onboarding-path.md` | A tracker row (Stage `Named` or `Invited`) |
 | "super user for {market}" / "admin access for {person}" | Super-user pack: access request to Phinamic as a draft, training plan (M1), certification checklist. When run on the PC, first checks BOB Admin (`bob-admin --json subsidiaries list`, `superusers list --partners`) and adds the ready-to-run grant: `bob-admin --dry-run superusers create --partner --subsidiary-id … --no-send-invite …` for Sean to run | Tracker row (Admin access `To request`) and a draft page |
