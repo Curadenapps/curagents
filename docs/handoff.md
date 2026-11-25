@@ -310,6 +310,10 @@ the courier on Personal). Sean runs prompt 2, then prompt 3.
    30 Oct; the live version has unsourced market facts. Pick the version.
 8. Truth Catcher (5 Nov) suggests updating the Referral Program roadmap row's release
    to match the UAE referral MVP (Mar 2027).
+9. **Yogurt (23 Nov)**: install it on the PC, turn on its MCP server in Settings, run
+   `scripts/setup-yogurt.ps1` (steps in `docs/yogurt.md`). Until then meeting-notes
+   can't read Webex calls, video chats or recordings that have no Webex AI recap. The
+   Windows build is unsigned: if IT blocks it, it joins the IT approvals list.
 
 ## Agent refinements to do (maintenance session)
 

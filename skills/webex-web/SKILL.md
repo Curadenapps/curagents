@@ -214,6 +214,10 @@ a transcript with speakers. These are the meeting source; Fireflies isn't used.
    element (`currentTime` to the transcript timestamp) and taking a `screenshot`.
    Never download, share or delete a recording.
 
+Calls in a space, 1:1 calls, video chats and unrecorded meetings have no Meeting
+recap here. Those come from Yogurt, the local recorder on Sean's PC, through its MCP
+server, not from Webex web: see [`docs/yogurt.md`](../../docs/yogurt.md).
+
 Partner-safe and privacy rules come from the agent: a summary is internal until
 the agent's spec says what may leave Notion.
 
