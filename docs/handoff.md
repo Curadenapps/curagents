@@ -48,10 +48,18 @@ Decisions (Sean, 25 Nov):
 - **Gisèle's account change** was answered by Fabian on 24 Nov; the held Review subtask
   1220715857418450 is closed.
 
+- **New agent: Growth** (`agents/growth.md`, `skills/growth/`). Marketing no longer
+  supports BOB, so user acquisition runs from it. Notion home is BOB Growth
+  `4237e8aabbb4810f80ede5c7f3decc1f`, with the Growth experiments and Content calendar
+  databases. It drafts only. Open for Sean: create the "Growth pulse (Curaden)" Routine
+  (prompt in `docs/curaden-routines.md`), then flip its registry row to Curaden. The
+  first useful run is "growth plan UAE".
+- **Courier double firing is expected** (Sean switches sessions): step 0 in `RUNTIME.md`
+  "Webex courier" now claims the slot, and a second copy stops before opening Webex.
+
 Courier and Boom Boom should run on their own. Open on the Personal PC:
-- Two courier sessions fired for the 25 Nov 09:02 slot. With two copies, Webex shows
-  "Another tab has been opened" and the built-in browser freezes. Keep exactly one
-  "Webex courier (Personal)" task.
+- Two courier sessions fired for the 25 Nov 09:02 slot. That's fine now: the slot
+  claim (RUNTIME step 0) stops the second copy before it opens Webex.
 - The old `boom-boom-derek` PC task still runs (24 and 25 Nov, no double posts). Switch
   it off.
 - The 17:02 and 08:02 slots are often missed (PC asleep or app closed).
