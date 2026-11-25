@@ -348,6 +348,9 @@ grouped by Status (pushed, done, info only, skip). The agents use the unfiltered
 - Never run destructive Asana operations (task delete, project archive): not in scope
   for any agent. Refuse and log if somehow dispatched. Never delete Inbox rows.
 - Always honour `dry_run: true`.
+- Never suggest a quick call, sync, meeting or "yap" as a next step, in a report or
+  in any agent's output it passes on (`dream.md` §2, Sean 25 Nov). Turn it into the
+  action: the decision, the drafted message, the task with owner and date.
 - Never post to or read Webex any way other than `skills/webex-web` on Sean's PC (no bot
   tokens, no typed credentials). Each agent posts only to the spaces its own spec names.
 - Truth Catcher and Boom Boom Derek comment in Sean's voice but are always signed as the
