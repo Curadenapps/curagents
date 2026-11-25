@@ -1,8 +1,8 @@
 ---
 name: market-rollout
 description: >
-  Rollout support for BOB, and later the Curaprox app, in the USA, Switzerland,
-  UAE, Japan and Italy: audiences, onboarding plans, Admin Console super users and
+  Rollout support for BOB, and later the Curaprox app, in the rollout markets
+  (UAE and Switzerland first, then Slovenia, South Africa, USA, Japan; Italy parked): audiences, onboarding plans, Admin Console super users and
   access requests, training modules, partner meeting prep and follow-ups, and
   the HQ ↔ local partner rhythm. Triggers on "rollout status", "market status",
   "onboard <person/role> for <market>", "super user for <market>", "admin access
@@ -16,7 +16,7 @@ description: >
 # Market Rollout
 
 The working method for `agents/market-rollout.md`. Sean leads the rollout of BOB in
-rollout markets mostly alone, with some help from Blanca Suarez (Marketing). The skill
+rollout markets mostly alone, and Marketing support is mostly gone since 24 Nov 2026. The skill
 turns each request into prepared work he can act on in minutes.
 
 ## Read first
@@ -79,7 +79,7 @@ The page is the source of truth for that market; the references only hold IDs an
    - one line: gate, date, overall (on track / at risk / blocked) and why
    - Blocked: up to three, each with owner
    - Sean's next three actions
-   - Blanca could take (only marketing-side items)
+   - Marketing-side items go to the `growth` agent (Marketing support is mostly gone since 24 Nov 2026), not to Blanca
    - Updated: date, by the Market Rollout agent
 4. Return the same in `for_sean` and `for_blanca`. For "all", one line per market in chat.
 
@@ -194,7 +194,8 @@ reply. Return it in chat, or as a draft page if it's long.
 
 ### 10. What Blanca can take — "what can Blanca take"
 
-Go through the active rollout markets and list marketing-side items only (the split is in
+Marketing support is mostly gone since 24 Nov 2026 and the `growth` agent now drafts that
+work, so say that first and point there; only list items for Blanca if Sean names her. Go through the active rollout markets and list marketing-side items only (the split is in
 `hq-partner-rhythm.md`): kit localisation briefs, posters and QR displays, value sheet,
 practice-story write-ups, event follow-up emails, the IDB Challenge tie-in. Each item
 with market, what "done" looks like and a date. Chat only; Sean decides what to hand over.

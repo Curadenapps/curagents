@@ -31,7 +31,7 @@ this file when an owner, ID or gate changes.
 | Blanca Suarez (Marketing) | look up her Asana user by name before assigning; only when Sean names her |
 | Phinamic technical owner | Derek La |
 
-## Rollout calendar (Sean, 11 Nov 2026; source: the Notion Market rollout system page)
+## Rollout calendar (Sean, 11 Nov 2026, updated 24 Nov; source: the Notion Market rollout system page)
 
 "One, then three, then six." **Launch** = first clinics live with real patients (start of
 stage 3); it is the due date on the market's card. **Finished** = the "BOB rollout [market]
@@ -41,17 +41,21 @@ Aftercare: support and feedback routes handed over, monthly check-in.
 | Wave | Market | Launch | Finished | What decides it |
 |------|--------|--------|----------|-----------------|
 | 1 | UAE | Apr 2027 | Jul 2027 | Fewest open issues; first live treatment plan |
-| 2 | Italy | Jul 2027 | Oct 2027 | Step by step with keen practices, no full pilot |
+| 1 | Switzerland | May 2027 | Sep 2027 | Our main market (Sean, 24 Nov). Waiting on Higi Berchtold for the kickoff, so the date only holds once she's in |
 | 2 | Slovenia | Aug 2027, maybe earlier | Nov 2027 | Treatment plan, new Curaprox app. On hold: don't engage yet |
 | 2 | South Africa | Aug 2027, maybe earlier | Nov 2027 | Treatment plan, new Curaprox app. On hold: don't engage yet |
-| 3 | USA | Aug–Sep 2027 | Dec 2027 | Compliance (HIPAA, BAAs) |
+| 3 | USA | Sep 2027 | Dec 2027 | HIPAA expected to be straightforward (Robert Gaudin, 24 Nov), so not compliance-blocked; the BAA rule holds until Legal confirms in writing |
 | 3 | Japan | Aug–Sep 2027 | Dec 2027 | Compliance (APPI, entrustment, hosting) |
-| — | Switzerland | Not set (card placeholder 31 Aug 2027) | — | Higi Berchtold added to the board 11 Nov |
 | — | Germany | Parked: self-service only | — | Curaden Germany emails practices, they sign up themselves; no HQ stages |
+| — | Italy | Parked (24 Nov 2026) | — | Sean parked it. No status runs, prep or partner drafts until he unparks it |
 | — | Brazil | Parked | — | Bandwidth |
 
 Retired: the "Apr–Aug 2027 window (CH, DE, UAE, BR, USA, JP)" and the Italy Milan pilot
 before it. The official launch (place and date open) is no longer a gate for Italy.
+
+24 Nov 2026 (Sean): Italy parked, Switzerland the main market, US HIPAA seen as
+straightforward (Robert Gaudin's view, not a Legal sign-off), and Marketing support mostly
+gone, so rollout plans don't count on Blanca or marketing campaigns.
 
 Stage milestones on every card: Stage 0 Kickoff · 1 Set-up · 2 Train · 3 First clinics ·
 4 Loop on · "BOB rollout [market] finished" (was Stage 5 Run / Gate 3) · Stage 6 Aftercare.
@@ -67,7 +71,7 @@ The old G0–G3 gate GIDs below are the Stage 0, 2, 4 and finished milestones.
 | Gate milestones | G0 `1219987239503441` · G1 `1219987333010259` · G2 `1219987314151447` · G3 `1219987393285523` |
 | Owner | Sarah Jackson (main collaborator) |
 | Languages | US English |
-| Hard rule | No real patient data before Gate 1 (BAA signed per practice). Demo and anonymous sessions only. |
+| Hard rule | No real patient data before Gate 1 (BAA signed per practice). Demo and anonymous sessions only. HIPAA is expected to be straightforward (Robert Gaudin, 24 Nov 2026), but this rule holds until Legal confirms in writing. |
 | Patient side | Curaprox app web edition |
 
 ## Switzerland
@@ -116,11 +120,12 @@ The old G0–G3 gate GIDs below are the Stage 0, 2, 4 and finished milestones.
 | What | Value |
 |------|-------|
 | Market page | `4097e8aabbb4800d8cf5ffb8c45bc397` |
-| Rollout task | `1220067715520562` (launch 31 Jul 2027, finished 31 Oct 2027) |
+| Status | Parked 24 Nov 2026 (Sean); card and finished milestone in the Parked column. Nothing below is active |
+| Rollout task | `1220067715520562` (was: launch 31 Jul 2027, finished 31 Oct 2027) |
 | Admin super user + training (Gate 1) | `1220067667419747` |
 | Gate milestones | G0 `1220067667364410` · G1 `1220067667469030` · G2 `1220067667301024` · G3 `1220067716274803` |
 | Linked launch | Official BOB launch (place and date open): Asana `1217552489272192`, Notion milestone `3f97e8aabbb4812a923eced30d6aa7bd`. Not a gate for Italy since 11 Nov 2026 |
-| Campaign | IDB activation campaign from Jan 2027 (Blanca), Notion `3fe7e8aabbb48138aea4eac451fdcf35` |
+| Campaign | IDB activation campaign from Jan 2027 (Blanca; Marketing support mostly gone since 24 Nov, don't count on it), Notion `3fe7e8aabbb48138aea4eac451fdcf35` |
 | Owner | Paolo Saggiorato, country manager Curaprox Italy |
 | Languages | Italian (BOB practice interface lists Italian; patient side [confirm]) |
 | Hard rule | Step by step, no full pilot; Legal frame (GDPR, processing agreement, Italian consent) [confirm with Tino] before real patients |
