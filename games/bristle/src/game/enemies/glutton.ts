@@ -9,6 +9,7 @@ import { TILE } from '../../engine/render';
 import { TAU, clamp, sign } from '../../engine/math';
 import type { Game, Hit } from '../types';
 import { unlockOrder } from '../orders';
+import { unlockAllOrders } from '../orders';
 
 type State = 'dormant' | 'wake' | 'idle' | 'hopTell' | 'hop' | 'spitTell' | 'spit' | 'rollTell' | 'roll' | 'dizzy' | 'summon' | 'dying';
 const FLAG = 'glutton-defeated';
@@ -125,7 +126,7 @@ export class Glutton extends Enemy {
     return true;
   }
   finish(g: Game) {
-    this.dead = true; g.setFlag(FLAG, true); unlockOrder(g, 'bulwark');
+    this.dead = true; g.setFlag(FLAG, true); unlockAllOrders(g); (g as any).progress?.queueOrders?.();
     g.save.killed[this.type] = (g.save.killed[this.type] || 0) + 1; g.progress?.onKill(this);
     g.fx.burst(this.x, this.y, { n: 80, color: ['#FCE300', '#C4D600', '#FF8200', '#F277C6', '#ffffff'], speed: [100, 620], size: [2, 6], gravity: 900, life: [0.6, 1.6] });
     g.fx.burst(this.x, this.y, { n: 1, color: '#ffffff', shape: 'ring', size: [10, 10], grow: 900, emissive: true, life: [0.5, 0.5] });

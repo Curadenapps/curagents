@@ -108,7 +108,7 @@ export class Player extends Actor implements PlayerApi {
       g.fx.burst(this.x - this.facing * 8, this.y + (Math.random() - 0.5) * 30, { n: 1, color: C.sky, shape: 'streak', speed: [40, 80], angle: this.facing > 0 ? Math.PI : 0, spread: 0.3, emissive: true, size: [1, 2], life: [0.15, 0.3] });
       if (this.dashT <= 0) { this.dashing = false; this.vx = this.facing * RUN * ORDER_STATS[this.ord].run * 0.9; }
     } else {
-      if (want('dash', 0.08) && g.save.abilities.dash && this.dashCd <= 0 && (this.grounded || this.airDash || this.wallSlide)) {
+      if (want('dash', 0.08) && this.dashCd <= 0 && (this.grounded || this.airDash || this.wallSlide)) {
         inp.consume('dash'); if (this.wallSlide) this.facing = -this.wallSlide as 1 | -1; else if (ax) this.facing = sign(ax) as 1 | -1;
         this.dashT = DASH_T; this.dashing = true; this.invuln = Math.max(this.invuln, 0.12); this.charge = 0; this.dashCd = DASH_CD * (perk('i1') ? 0.65 : 1); this.vx = this.facing * DASH_V; this.vy = 0; this.slash = null; this.focusT = 0; this.dashHits.clear();
         if (!this.grounded) { this.airDashes--; if (this.airDashes <= 0) this.airDash = false; } this.sx = 1.35; this.sy = 0.7;
@@ -185,7 +185,7 @@ export class Player extends Actor implements PlayerApi {
           g.spawn(new RefillShot(this.x + this.facing * 24, this.y - 8, this.facing * sp, k < 0.6 ? -140 * (1 - k) : 0, sz, POWER[sz] + Math.round(3 * k), k >= (this.ord === 'ranger' ? 0.5 : 1), k < 0.6, this.ord));
           setAmmo(g, sz, ammo(g, sz) - 1); this.throwT = 0.18; this.vx -= this.facing * 80 * k; this.sx = 1.1; this.sy = 0.94;
           g.audio.sfx('throw', { pitch: 1.3 }); g.shake(1 + 2 * k, 0.08);
-          if (!g.save.flags['shot-tip']) { g.save.flags['shot-tip'] = true; g.ui.toast('Hold to draw further, release to shoot. R changes the refill size. Fired refills can be picked back up.', 5600); }
+          if (!g.save.flags['shot-tip']) { g.save.flags['shot-tip'] = true; g.ui.toast('Hold right-click (or L) to draw further, let go to shoot. Mouse wheel or R changes the size. Walk over fired refills to take them back; fountains fill them.', 6000); }
         }
         this.shotT = -1;
       }

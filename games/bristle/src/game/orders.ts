@@ -1,8 +1,9 @@
 // The Orders: one hero, three earned armour sets (plus the Initiate everyone starts as), swapped at fountains.
 // Art lives in src/design/hero.ts (shared with the style guide); this file owns ownership, unlocks and stats.
 //   Saved as flags: `order` = the set worn, `order-<id>` = owned.
-//   Unlocks: Vanguard at the first fountain rest, Ranger with the Prime Dash relic, Bulwark when the Glutton
-//   is rinsed away. Every room stays beatable in any set: map progress is tied to relics, never to a set.
+//   You play the Initiate until the Glutton (the first boss) is rinsed away; then all three sets unlock and a card
+//   pick asks which to wear (progress.ts openOrders). After that, rest again at a fountain to change sets.
+//   Every room stays beatable in any set: map progress is tied to relics, never to a set.
 import { orderArts, ORDER_IDS, type OrderId } from '../design/hero';
 import type { Game } from './types';
 
@@ -26,7 +27,9 @@ export const ORDER_STATS: Record<OrderId, OrderStats> = {
   bulwark: { hp: 2, run: 0.867, atkCd: 1.15, chargeT: 0.6, airDashes: 0, slash: 3, guard: true },
 };
 
-export const owned = (g: Game, id: OrderId) => id === 'initiate' || !!g.save.flags['order-' + id];
+/** Sets exist only after the first boss (or with the dev flag &all). Older saves that unlocked one early stay Initiate. */
+export const ordersOpen = (g: Game) => !!g.save.flags['glutton-defeated'] || !!g.save.flags['orders-dev'];
+export const owned = (g: Game, id: OrderId) => id === 'initiate' || (ordersOpen(g) && !!g.save.flags['order-' + id]);
 export const ownedOrders = (g: Game) => ORDER_IDS.filter((id) => owned(g, id));
 export function currentOrder(g: Game): OrderId {
   const o = g.save.flags.order as OrderId;
@@ -49,6 +52,8 @@ export function unlockOrder(g: Game, id: OrderId, equip = false) {
   const a = ART[id];
   g.ui.toast(equip ? `You wear the ${a.name} set now. ${a.line} Rest again at any fountain to change sets.` : `New Order: ${a.name}. ${a.line} Change sets at any fountain.`, 6200);
 }
+/** After the first boss: own all three sets at once (no toasts); the card pick chooses which to wear. */
+export function unlockAllOrders(g: Game) { for (const id of ['vanguard', 'ranger', 'bulwark']) g.setFlag('order-' + id, true); }
 /** The next owned set after the one worn (for "rest again to change"). */
 export function nextOrder(g: Game): OrderId {
   const list = ownedOrders(g), i = list.indexOf(currentOrder(g));

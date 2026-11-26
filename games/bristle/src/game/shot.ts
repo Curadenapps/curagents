@@ -116,3 +116,12 @@ export function installShotHud(g: Game & { hudHooks: ((c: CanvasRenderingContext
   });
 }
 export { clamp, TAU };
+
+/** Cleared creatures sometimes drop a refill (about one in three), of the usable size you are lowest on. */
+export function maybeDropRefill(g: Game, x: number, y: number) {
+  const list = usable(g); if (!list.length || Math.random() > 0.34) return;
+  const ord = ((g.player as any)?.ord ?? 'initiate') as OrderId, low = list.filter((s) => ammo(g, s) < CARRY[ord]);
+  if (!low.length) return;
+  const s = low.sort((a, b) => ammo(g, a) - ammo(g, b))[0], r = new RefillPickup(x, y - 6, s);
+  r.vy = -260; r.vx = (Math.random() - 0.5) * 120; g.spawn(r);
+}

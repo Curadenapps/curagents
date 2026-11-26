@@ -33,27 +33,30 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
 - 19 rooms: Crown Gate, Gumline, Narrows, Sugar Wastes (rest fountain + Pip merchant, then the Glutton boss), Calculus Deep.
 - **Brand packs** (`src/design/brands.ts`): CURAPROX by default and a made-up demo (`?brand=demo`). The game and the style
   guide read colours, fonts, product names and the Order's name from the pack; the mouth's own colours stay fixed.
-- **The Orders** (`src/design/hero.ts` art, `src/game/orders.ts` rules): one knight rig, four sets. Initiate (start),
-  Vanguard (first fountain rest), Ranger (Prime Dash relic), Bulwark (Glutton rinsed away). Rest again at a fountain to
-  change sets. Each set changes health, speed, slash, Deep Clean charge, air dashes, refills carried and draw speed;
+- **The Orders** (`src/design/hero.ts` art, `src/game/orders.ts` rules): one knight rig, four sets. You play the
+  Initiate until the Glutton (first boss) is rinsed away; then all three Orders unlock and a card pick chooses one. Rest
+  again at a fountain to change sets. Saves from before this rule stay Initiate until the Glutton. Each set changes health, speed, slash, Deep Clean charge, air dashes, refills carried and draw speed;
   the Bulwark's dash blocks shots.
-- **Controls**: move A/D, jump Space/Z, slash J/X (hold for Deep Clean, up/down for up-slash and pogo), dash K/C/Shift,
-  **interdental shot** L/V (hold to load and draw, release to fire), **Up + L = Rinse wave**, **size R/Tab** (S/M/L),
+- **Controls**: move A/D, jump Space/Z, slash J/X (hold for Deep Clean, up/down for up-slash and pogo), dash Shift/K/C (from the start;
+  the Prime Dash relic now only gives the size M brush), **interdental shot** right-click or L/V (hold to draw, release
+  to fire), **Up + shot = Rinse wave**, **size: mouse wheel, middle-click, R or Tab** (S/M/L),
   focus heal F/Q, interact E/Up, pause Esc. The toothpaste throw is gone (the `PasteGlob` class is unused).
-- **The shot** (`src/game/shot.ts`): refills per size, picked back up where they land, refilled at fountains; the right
+- **The shot** (`src/game/shot.ts`): refills per size, picked back up where they land, dropped by about a third of
+  cleared creatures, refilled at fountains; the right
   size unclogs a gap from range. Ammo shows under the health.
 - **IDB gaps** (`src/game/gaps.ts`): cleaned like a key, the holder in, once, and out, then the walls crumble.
   `tests/reach.mjs` now treats gaps as solid until a standing spot can clean them (it found and fixed a stuck gap in
   narrows-slits).
 - **XP** (`src/game/xp.ts`): every clear, plus first reads of oath stones, new rooms and areas, first talks, a fountain's
-  first rest and relics. Level up deals **three Oath cards** (one from your Order's path), take one; the pause menu's
+  first rest and relics. Level up deals **three Oath cards** (one from your Order's path) once you are calm (on the ground, no creature near),
+  and ignores input for 0.7 s so a mashed button cannot take or close it; Enter / E / click take one; the pause menu's
   Oath shows the cards you hold.
 - Dental particles (bristle flicks, plaque crumbs, rinse bubbles, clean-tooth sparkles); slashes sweep a full arc with
   a lunge; the knight stays visible while talking.
 
 ## Known gaps (only when Sean asks)
 
-- Sean wants more hero variants before the art is final; the slash still needs play-testing for feel.
+- Hero art: six variants in the style guide (A-F); Sean picks before the art is final. The slash still needs play-testing.
 - No `H` (large) gaps placed yet, and Pip doesn't sell the L brush yet.
 - The Oath cards reuse the 12 old perks (wording updated); per-Order tracks with keystones (PLAN-v2 section 4.3) are not built.
 - The Bulwark's slam that cracks tartar floors is not built (there are no tartar floor tiles).

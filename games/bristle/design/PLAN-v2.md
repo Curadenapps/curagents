@@ -82,13 +82,13 @@ The slice works: five areas, a boss, an Oath tree, Pip's shop, Claude-voiced NPC
 Decided by Sean, 26 Nov. One hero, three earned armour sets. The style guide's **Orders** section (09) shows them drawn on one shared body, with a live swap.
 
 ### 4.1 One hero, three Orders
-The knight is always the same hero with the same core moves: run, jump, dash, brush slash. Today's hero becomes the **Initiate** everyone starts as. Each Order is earned on the route and swapped at a fountain. It changes the helm, the gear and a few moves, and each one masters one tool, so the three together carry the habit message: brush, interdental and rinse need each other.
+The knight is always the same hero with the same core moves: run, jump, dash, brush slash. Today's hero becomes the **Initiate** everyone plays until the first boss (Sean, 26 Nov: you should not be a knight until you have come through the early stages). Each Order is earned on the route and swapped at a fountain. It changes the helm, the gear and a few moves, and each one masters one tool, so the three together carry the habit message: brush, interdental and rinse need each other.
 
-| Order | Masters | Plays | Earned (proposal) | Absorbs Crown cusp |
+| Order | Masters | Plays | Earned | Absorbs Crown cusp |
 |---|---|---|---|---|
-| **Vanguard** | the brush | balanced, strongest brush, fastest Deep Clean | from Derek at the first fountain, Crown Gate | Velvet |
-| **Ranger** | the interdental brush | light and quick, built around the interdental shot | in the Narrows with the holder, beside the first clogged gaps | Prime |
-| **Bulwark** | the rinse | heavy and steady: guards, shield charge, rinse magic, cracks tartar | from the Glutton's hoard, Sugar Wastes, before the Calculus Deep | Foam |
+| **Vanguard** | the brush | balanced, strongest brush, fastest Deep Clean | all three at once when the Glutton (first boss) is rinsed away; a card pick chooses which to wear | Velvet |
+| **Ranger** | the interdental brush | light and quick, built around the interdental shot | (same) | Prime |
+| **Bulwark** | the rinse | heavy and steady: guards, shield charge, rinse magic, cracks tartar | (same) | Foam |
 
 ### 4.2 One rig, six slots
 - A set fills six slots on a shared skeleton: **helm, shoulders, chest, back, weapon/front, boots**. Walk, run, jump and slash are animated once for every Order. This is the cheap way to get three looks.

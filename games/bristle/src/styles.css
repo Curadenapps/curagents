@@ -320,3 +320,5 @@ html, body { height: 100%; margin: 0; background: #000; overflow: hidden; }
 .deal footer { display: flex; gap: 22px; align-items: center; font-family: var(--display); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint, rgba(232,238,249,0.5)); }
 .deal footer button { font: inherit; letter-spacing: 0.12em; color: var(--blue); background: #fff; border: 0; border-radius: 99px; padding: 9px 18px; cursor: pointer; }
 .deal-empty { color: var(--mist); }
+.deal.locked .dcard { opacity: 0.55; pointer-events: none; transform: translateY(8px); }
+.deal .dcard { transition: transform 180ms var(--ease), border-color 180ms, box-shadow 180ms, opacity 260ms; }

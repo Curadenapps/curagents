@@ -10,9 +10,13 @@ import { brandText as BT } from '../../design/tokens';
 import { applyOrder, currentOrder, ART } from '../orders';
 import { brush, idbHolder, idbRefill, foamCluster } from '../../design/kit';
 import { brand as BR, idb, mint } from '../../design/tokens';
+import { setOrder, type OrderId } from '../orders';
+import { drawRig, staticPose } from '../../design/hero';
 
 const GUESS: [RegExp, Faction][] = [[/leech|flare|swell|gum|inflam/, 'gum'], [/imp|sugar/, 'sugar'], [/tartar|spit|brute|calculus|matriarch/, 'tartar']];
 export const nextXp = (level: number) => 12 + level * 14;
+/** Seconds the card pick ignores input after it opens, so a button mashed in a fight cannot take or close it. */
+const LOCK = 0.7;
 export const masteryOf = (xp: number) => Math.min(5, Math.floor(Math.sqrt(xp / 20)));
 export const masteryXp = (lvl: number) => lvl * lvl * 20;
 
@@ -37,13 +41,18 @@ export class Progress implements ProgressApi {
     p.xp += xp;
     while (p.xp >= nextXp(p.level)) {
       p.xp -= nextXp(p.level); p.level++; p.points++;
-      g.ui.toast(`Oath level ${p.level}. Choose a skill.`, 3000); this.queueOpen();
+      g.ui.toast(`Oath level ${p.level}. Your cards wait for a calm moment.`, 3000); this.queueOpen();
       g.audio.sfx('levelup'); g.flash([0.8, 0.9, 1], 0.25);
       const pl = g.player; if (pl) g.fx.burst(pl.x, pl.y, { n: 36, color: ['#ffffff', '#8BB8E8', '#FCE300'], shape: 'streak', speed: [120, 420], angle: -Math.PI / 2, spread: 2.2, emissive: true, size: [1, 2], life: [0.4, 0.9] });
     }
   }
   /** Open the Oath picker as soon as the moment is calm (not mid-transition or mid-dialogue). */
   pending = -1;
+  /** Calm: standing, not just hit, no creature within about ten tiles. Cards never open mid-fight. */
+  calm() {
+    const g = this.g as any, p = g.player; if (!p || !p.grounded || p.hurtT > -0.6 || p.invuln > 0.3) return false;
+    return !g.entities.some((e: any) => e.team === 'enemy' && !e.dead && Math.abs(e.x - p.x) < 340 && Math.abs(e.y - p.y) < 240);
+  }
   queueOpen() { if (this.pending < 0) this.pending = 0.45; }
   canBuy(id: string) { const k = PERKS.find((x) => x.id === id)!; return !this.has(id) && this.p.points > 0 && (!k.needs || this.has(k.needs)); }
   buy(id: string) {
@@ -57,6 +66,10 @@ export class Progress implements ProgressApi {
   // Level up: three cards from what you can take next, at least one from the Order you wear; take one.
   // With no points (opened from the pause menu) it shows the cards you hold.
   hand: string[] = [];
+  /** 'perks' = the level-up hand; 'orders' = the pick of a set after the first boss. */
+  mode: 'perks' | 'orders' = 'perks'; ordersPending = false;
+  queueOrders() { this.ordersPending = true; }
+  openOrders() { if (this.el) return; this.mode = 'orders'; this.open(); }
   /** Cards you could take now (ignoring points): not held, and the card before it on its path is held. */
   open_() { return PERKS.filter((k) => !this.has(k.id) && (!k.needs || this.has(k.needs))); }
   deal() {
@@ -68,32 +81,35 @@ export class Progress implements ProgressApi {
     this.sel = Math.min(this.sel, Math.max(0, this.hand.length - 1));
   }
   open() {
-    if (this.el) return; const g = this.g; g.modal++; this.sel = 0; this.t = 0; this.deal();
-    const root = document.getElementById('ui')!; const el = document.createElement('div'); el.className = 'deal'; root.appendChild(el); this.el = el;
+    if (this.el) return; const g = this.g; g.modal++; this.sel = 0; this.t = 0; if (this.mode === 'orders') this.hand = ['vanguard', 'ranger', 'bulwark']; else this.deal();
+    const root = document.getElementById('ui')!; const el = document.createElement('div'); el.className = 'deal locked'; root.appendChild(el); this.el = el;
     el.addEventListener('click', (e) => {
       const c = (e.target as HTMLElement).closest('[data-card]') as HTMLElement | null;
-      if (c) { this.sel = Number(c.dataset.card); this.take(); }
+      if (c && this.t >= LOCK) { this.sel = Number(c.dataset.card); this.take(); }
       if ((e.target as HTMLElement).closest('[data-close]')) this.close();
     });
     g.audio.sfx('ui-open'); this.render();
   }
   take() {
+    if (this.mode === 'orders') { const id = this.hand[this.sel] as OrderId; setOrder(this.g as any, id); this.g.persist(); this.g.audio.sfx('buy'); this.g.ui.toast(`You wear the ${ART[id].name} set. Rest again at any fountain to change it.`, 5200); this.close(); return; }
     const id = this.hand[this.sel]; if (!id || this.p.points <= 0) { this.g.audio.sfx('ui-back'); return; }
     this.buy(id); this.deal(); this.render();
     if (this.p.points <= 0) setTimeout(() => this.close(), 380);
   }
-  close() { if (!this.el) return; this.el.remove(); this.el = null; this.g.modal = Math.max(0, this.g.modal - 1); this.g.audio.sfx('ui-close'); this.g.input.clear(); }
+  close() { if (!this.el) return; this.el.remove(); this.el = null; this.mode = 'perks'; this.g.modal = Math.max(0, this.g.modal - 1); this.g.audio.sfx('ui-close'); this.g.input.clear(); }
   /** Runs before the UI layer each frame so the card pick owns input while it is open. */
   update(dt: number) {
     const g = this.g;
-    if (!this.el && this.pending >= 0 && g.state === 'play') { this.pending -= dt; if (this.pending <= 0 && !g.busy() && !g.ui.isOpen() && g.player && g.player.deadT < 0) { this.pending = -1; if (this.p.points > 0) this.open(); } }
+    if (!this.el && this.ordersPending && g.state === 'play' && !g.busy() && !g.ui.isOpen() && this.calm()) { this.ordersPending = false; this.openOrders(); }
+    if (!this.el && this.pending >= 0 && g.state === 'play') { this.pending -= dt; if (this.pending <= 0 && !g.busy() && !g.ui.isOpen() && g.player && g.player.deadT < 0) { if (this.calm()) { this.pending = -1; if (this.p.points > 0) this.open(); } else this.pending = 0.3; } }
     if (!this.el) return; this.t += dt; const i = this.g.input, n = this.hand.length;
     let s = this.sel;
     if (n && i.tap('left')) s = (s + n - 1) % n; if (n && i.tap('right')) s = (s + 1) % n;
     if (s !== this.sel) { this.sel = s; this.g.audio.sfx('ui-move'); this.render(); }
-    if (i.tap('confirm') || i.tap('attack') || i.tap('interact')) { if (this.p.points > 0) this.take(); else this.close(); }
-    if (i.tap('back') || i.tap('pause') || i.tap('dash')) this.close();
-    for (const a of ['jump', 'spell', 'focus', 'up', 'down'] as const) i.tap(a);
+    const locked = this.t < LOCK; this.el.classList.toggle('locked', locked);
+    if (!locked && (i.tap('confirm') || i.tap('interact'))) { if (this.mode === 'orders' || this.p.points > 0) this.take(); else this.close(); }
+    if (!locked && this.mode !== 'orders' && (i.tap('back') || i.tap('pause'))) this.close();
+    for (const a of ['confirm', 'interact', 'back', 'pause', 'attack', 'dash', 'jump', 'spell', 'focus', 'up', 'down', 'size'] as const) i.tap(a);
   }
   /** One card: art, the Order's chip, name, one line. */
   card(id: string, i: number, small = false) {
@@ -107,6 +123,13 @@ export class Progress implements ProgressApi {
   }
   render() {
     if (!this.el) return; const p = this.p, picking = p.points > 0;
+    if (this.mode === 'orders') {
+      this.el.innerHTML = `<div class="deal-wrap"><header><p>The Glutton is rinsed away</p><h1>Choose your Order</h1></header>
+        <div class="deal-hand">${this.hand.map((id, i) => { const a = ART[id as OrderId]; return `<button type="button" class="dcard order${i === this.sel ? ' on' : ''}" data-card="${i}"><canvas data-knight="${id}" width="360" height="300"></canvas><span class="dchip">Order</span><b>${a.name}</b><span class="dtext">${a.line}</span></button>`; }).join('')}</div>
+        <footer><span>← → choose · Enter take · change it later at any fountain</span></footer></div>`;
+      for (const c of Array.from(this.el.querySelectorAll<HTMLCanvasElement>('canvas[data-knight]'))) drawKnightCard(c, c.dataset.knight as OrderId);
+      return;
+    }
     const bar = `<div class="deal-bar"><i style="width:${Math.min(100, (p.xp / Math.max(1, nextXp(p.level))) * 100).toFixed(1)}%"></i></div>`;
     this.el.innerHTML = picking ? `
       <div class="deal-wrap">
@@ -121,6 +144,14 @@ export class Progress implements ProgressApi {
       </div>`;
     for (const c of Array.from(this.el.querySelectorAll<HTMLCanvasElement>('canvas[data-art]'))) drawCardArt(c, c.dataset.art as string);
   }
+}
+
+/** An Order card: the knight in that set, standing, lit from the front. */
+function drawKnightCard(cv: HTMLCanvasElement, id: OrderId) {
+  const c = cv.getContext('2d')!, W = cv.width, H = cv.height, g = c.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#1d3466'); g.addColorStop(1, '#070F2A'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#132B57'; c.fillRect(0, H * 0.88, W, H); const s = H / 72, art = ART[id];
+  c.save(); c.translate(W * 0.46, H * 0.88); c.scale(s, s); drawRig(c, art, staticPose(art), 'scene'); c.globalCompositeOperation = 'lighter'; drawRig(c, art, staticPose(art), 'glow'); c.restore();
 }
 
 /** Card art in the house style: the brush, the interdental holder with a refill, or rinse foam and drops. */

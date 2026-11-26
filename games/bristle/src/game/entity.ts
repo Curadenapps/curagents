@@ -101,7 +101,7 @@ export abstract class Enemy extends Actor {
   die(g: Game, hit: Hit) {
     this.dead = true;
     g.save.killed[this.type] = (g.save.killed[this.type] || 0) + 1;
-    g.progress?.onKill(this);
+    g.progress?.onKill(this); (g as any).dropRefill?.(g, this.x, this.y); // set in main.ts (shot.ts), no import: shot.ts builds on this file
     g.fx.burst(this.x, this.y, { n: 26, speed: [80, 460], color: this.bloodColor(), size: [2, 4.5], gravity: 1000, shape: 'crumb', spin: 10, life: [0.4, 1.0], drag: 1.5 });
     g.fx.burst(this.x, this.y, { n: 1, speed: [0, 0], color: '#ffffff', shape: 'ring', size: [6, 6], grow: 260, emissive: true, life: [0.25, 0.25] });
     g.audio.sfx('kill', { x: this.x, y: this.y });

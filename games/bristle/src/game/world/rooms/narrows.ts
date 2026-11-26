@@ -70,7 +70,7 @@ export const rooms: RoomDef[] = [
     biome: "narrows",
     doors: { '1': { to: "narrows-shaft", door: "2" }, '2': { to: "narrows-slits", door: "1" } },
     objects: [
-      { type: "relic", x: 31, y: 17, ability: "dash", title: "Prime Dash", text: "Press K or Shift to dash. Tucked in the plinth: a size M interdental brush for wider gaps." },
+      { type: "relic", x: 31, y: 17, ability: "dash", title: "Prime M", text: "A size M interdental brush for wider gaps, and M refills for your holder. Press R or turn the mouse wheel to load M." },
       { type: "lore", x: 50, y: 9, text: "Prime: to go first, quickly, before the Film has its say. The Order was never good at waiting." },
     ],
     map: [

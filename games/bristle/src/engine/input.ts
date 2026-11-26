@@ -34,9 +34,12 @@ export class Input {
     target.addEventListener('blur', () => { this.down.clear(); });
     target.addEventListener('mousedown', (e) => {
       if ((e.target as HTMLElement)?.closest?.('#ui button, #ui input, #ui a')) return;
-      const a: Action = e.button === 2 ? 'dash' : 'attack'; this.down.add(a); this.pending.add(a);
+      // left = slash, right = interdental shot (hold to draw; Up + right = Rinse), middle = refill size
+      const a: Action = e.button === 2 ? 'spell' : e.button === 1 ? 'size' : 'attack'; this.down.add(a); this.pending.add(a);
     });
-    target.addEventListener('mouseup', (e) => this.down.delete(e.button === 2 ? 'dash' : 'attack'));
+    target.addEventListener('mouseup', (e) => this.down.delete(e.button === 2 ? 'spell' : e.button === 1 ? 'size' : 'attack'));
+    // the wheel cycles the refill size: one press per notch, ignored over menus
+    target.addEventListener('wheel', (e) => { if ((e.target as HTMLElement)?.closest?.('#ui')) return; if (Math.abs(e.deltaY) > 0) this.pending.add('size'); }, { passive: true });
     target.addEventListener('contextmenu', (e) => { if ((e.target as HTMLElement)?.tagName === 'CANVAS') e.preventDefault(); });
   }
 

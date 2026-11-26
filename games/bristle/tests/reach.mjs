@@ -29,6 +29,8 @@ const HUMAN = process.argv.includes('--human');
 const T = 32, RUN = HUMAN ? 270 : 300, ACC_G = 5200, ACC_A = 3400, JUMP_V = HUMAN ? 772 : 830, GRAV_UP = 2500, GRAV_DOWN = 3100, MAX_FALL = 820;
 const COYOTE = 0.09, JUMP_BUF = 0.13, DASH_T = 0.19, DASH_V = 820, HW = 10, HH = 21, DT = 1 / 120, ATK_CD = 0.36;
 
+// Dash is always available (Sean, 26 Nov); the Prime Dash relic now only gives the size M interdental brush.
+const DASH_ALWAYS = true;
 const problems = [], warnings = [];
 const fail = (m) => problems.push(m), warn = (m) => warnings.push(m);
 
@@ -119,7 +121,7 @@ function simulate(G, s, pol, ab, cb) {
       if (s.dashT <= 0) { s.vx = s.facing * RUN * 0.9; if (!G.solidAt(s.x, s.y, false)) s.pass = false; }
     } else {
       if (s.pass && !insideSlit(G, s)) s.pass = false;
-      if (ab.dash && pol.dash != null && !s.dashed && t >= pol.dash && (s.grounded || s.airDash || s.wallSlide)) {
+      if ((DASH_ALWAYS || ab.dash) && pol.dash != null && !s.dashed && t >= pol.dash && (s.grounded || s.airDash || s.wallSlide)) {
         s.dashed = true; if (s.wallSlide) s.facing = -s.wallSlide; else if (ax) s.facing = Math.sign(ax);
         s.dashT = DASH_T; s.vx = s.facing * DASH_V; s.vy = 0; s.slashT = -1; if (!s.grounded) s.airDash = false;
       }
@@ -174,21 +176,21 @@ function simulate(G, s, pol, ab, cb) {
 const DIRS = [[[0, -1]], [[0, 0]], [[0, 1]], [[0, 0], [0.18, -1]], [[0, 0], [0.18, 1]], [[0, -1], [0.2, 0]], [[0, 1], [0.2, 0]], [[0, -1], [0.25, 1]], [[0, 1], [0.25, -1]], [[0, -1], [0.45, 1]], [[0, 1], [0.45, -1]]];
 function groundPolicies(ab, pogo, onLedge) {
   const out = [{ walk: true, dirs: [[0, -1]], hold: 9 }, { walk: true, dirs: [[0, 1]], hold: 9 }];
-  for (const dirs of DIRS) for (const hold of [9, 0.07, 0.16]) for (const dash of ab.dash ? [null, 0.08, 0.25, 0.42] : [null]) for (const pg of pogo ? [false, true] : [false]) out.push({ jump: true, dirs, hold, dash, pogo: pg, run: true });
-  if (ab.dash) for (const d of [-1, 1]) { out.push({ dirs: [[0, d]], hold: 9, dash: 0 }); out.push({ dirs: [[0, d], [0.2, 0]], hold: 9, dash: 0 }); }
+  for (const dirs of DIRS) for (const hold of [9, 0.07, 0.16]) for (const dash of (DASH_ALWAYS || ab.dash) ? [null, 0.08, 0.25, 0.42] : [null]) for (const pg of pogo ? [false, true] : [false]) out.push({ jump: true, dirs, hold, dash, pogo: pg, run: true });
+  if ((DASH_ALWAYS || ab.dash)) for (const d of [-1, 1]) { out.push({ dirs: [[0, d]], hold: 9, dash: 0 }); out.push({ dirs: [[0, d], [0.2, 0]], hold: 9, dash: 0 }); }
   if (onLedge) for (const d of [-1, 0, 1]) out.push({ jump: true, drop: true, dirs: [[0, d]], hold: 9 });
   return out;
 }
 function airPolicies(ab, pogo) { // falling or popping up into a room
   const out = [];
-  for (const dirs of DIRS) for (const dash of ab.dash ? [null, 0.15, 0.4] : [null]) for (const pg of pogo ? [false, true] : [false]) out.push({ dirs, hold: 9, dash, pogo: pg });
+  for (const dirs of DIRS) for (const dash of (DASH_ALWAYS || ab.dash) ? [null, 0.15, 0.4] : [null]) for (const pg of pogo ? [false, true] : [false]) out.push({ dirs, hold: 9, dash, pogo: pg });
   return out;
 }
 function wallPolicies(side, ab, pogo) { // side: -1 wall on the left, 1 on the right
   const away = -side, out = [{ slide: true, dirs: [[0, side]], hold: 9 }, { dirs: [[0, away]], hold: 9 }];
   // a wall jump needs the stick toward the wall on the jump frame; the wall lock then ignores input for 0.15 s
-  for (const dirs of [[[0.02, away]], [[0.02, away], [0.15, side]], [[0.02, away], [0.15, 0]], [[0.02, side]], [[0.02, away], [0.3, side]]]) for (const hold of [9, 0.1]) for (const dash of ab.dash ? [null, 0.2, 0.35] : [null]) for (const pg of pogo ? [false, true] : [false]) out.push({ jump: true, dirs: [[0, side], ...dirs], hold, dash, pogo: pg });
-  if (ab.dash) out.push({ dirs: [[0, away]], hold: 9, dash: 0 });
+  for (const dirs of [[[0.02, away]], [[0.02, away], [0.15, side]], [[0.02, away], [0.15, 0]], [[0.02, side]], [[0.02, away], [0.3, side]]]) for (const hold of [9, 0.1]) for (const dash of (DASH_ALWAYS || ab.dash) ? [null, 0.2, 0.35] : [null]) for (const pg of pogo ? [false, true] : [false]) out.push({ jump: true, dirs: [[0, side], ...dirs], hold, dash, pogo: pg });
+  if ((DASH_ALWAYS || ab.dash)) out.push({ dirs: [[0, away]], hold: 9, dash: 0 });
   return out;
 }
 

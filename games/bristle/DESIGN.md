@@ -53,8 +53,8 @@ which is added after lighting and feeds bloom. Keep emissive for real light sour
 ## Controls
 
 Move A/D or arrows · Jump Space/Z · Blade J/X/left mouse (hold up/down for up-slash and pogo) ·
-Dash K/C/Shift/right mouse · Interdental shot L/V (hold to draw, release to fire; Up + L/V = Rinse) ·
-Refill size R/Tab · Focus (heal) hold F/Q · Interact E or Up · Pause Esc.
+Dash Shift/K/C · Interdental shot right mouse or L/V (hold to draw, release to fire; Up + shot = Rinse) ·
+Refill size mouse wheel, middle mouse, R or Tab · Focus (heal) hold F/Q · Interact E or Up · Pause Esc.
 Gamepad: A jump, X blade, B/RB/RT dash, Y shot (Up + Y rinse), stick click size, LB/LT focus, Start pause.
 
 ## Code map and ownership

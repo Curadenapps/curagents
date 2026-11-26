@@ -19,7 +19,7 @@ export class Tips {
       gap: `A clogged gap between two teeth. Walk up and press ${this.k('Up or E', 'up')} to clean it with an interdental brush of the size shown.`,
       walljump: `Touching a wall in the air? Jump again (${this.k('Space', 'A')}) to spring off it.`,
       crouch: `Hold ${this.k('Down', 'down')} to crawl under low gaps.`,
-      paste: `Your fluor is ready: throw toothpaste with ${this.k('L', 'Y')}. It loosens the Film from a distance.`,
+      paste: `Shoot an interdental refill: hold right-click or ${this.k('L', 'Y')} to draw, let go to fire. Mouse wheel or R changes the size.`,
       focus: `Low on enamel? Hold ${this.k('F', 'LB')} to focus and mend a shard with fluor.`,
       deepclean: `Guarded creature. Hold slash (${this.k('J', 'X')}) to charge a Deep Clean, then let go: it cracks guards.`,
       stuck: 'Exits glow and show where they lead. Hold Up or Down for a moment to look around.',
@@ -35,7 +35,7 @@ export class Tips {
     // hazards: count hits from spikes and pits
     if (p.hazardT >= 0 && p.hazardT < dt * 1.5) this.hazards++;
     if (this.hazards >= 1) this.show('pogo');
-    if (this.hazards >= 2 && ab.dash) this.show('airdash');
+    if (this.hazards >= 2) this.show('airdash');
     // spikes in view for the first time
     if (!this.seen('pogo') && this.near(tx, ty, 6, (c) => c === '^')) this.show('pogo');
     // pressed against a slit
@@ -47,12 +47,12 @@ export class Tips {
     // in the air against a wall
     if (!p.grounded && (p.wallL || p.wallR)) { this.wallT += dt; if (this.wallT > 0.25) this.show('walljump'); } else this.wallT = 0;
     // resources
-    if (p.fluor >= 25 && !this.seen('paste') && g.save.playTime > 40) this.show('paste');
+    if (!this.seen('paste') && g.save.playTime > 40) this.show('paste');
     if (p.hp <= 2 && p.fluor >= 33) this.show('focus');
     // a guarded creature nearby
     if (!this.seen('deepclean')) for (const e of g.entities as any[]) if (e.type === 'tartar-brute' && Math.abs(e.x - p.x) < 260 && Math.abs(e.y - p.y) < 120) { this.show('deepclean'); break; }
     // lingering in one room
-    if (this.roomT > 75) this.show(ab.dash && this.hazards > 0 ? 'airdash' : 'stuck');
+    if (this.roomT > 75) this.show(this.hazards > 0 ? 'airdash' : 'stuck');
   }
   private near(tx: number, ty: number, rad: number, test: (c: string) => boolean) {
     const r = this.g.room;
