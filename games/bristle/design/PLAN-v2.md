@@ -169,8 +169,10 @@ Equip one item per slot. Items are the CURAPROX range expressed as gameplay. Pip
 | M5 | Hub and companions | Crown Gate town, Pip helper, world map | M |
 | M6 | New world and polish | one new world end to end, audio pass, juice | L |
 
-## 9. Open questions for Sean
-1. How far to brighten: fully bright worlds, or bright with darker interiors (dungeons) for contrast?
-2. Should real product names appear in the game now, or only placeholders until the brand team signs off?
-3. Should the Daily Tide (real-life brushing log) be in, or kept out of the game entirely?
-4. Is a companion (Pip helping in fights) wanted, or should the knight stay solo in combat?
+## 9. Decisions (Sean, 26 Nov)
+1. **Dark to bright.** Start dark (dungeon-like, the Film everywhere) and brighten as areas are restored; later worlds are bright.
+2. **Real product names** appear in the game (CURAPROX range); exact names, colours and sizes are verified by the brand team before a public build.
+3. **Daily Tide:** parked. It would be an optional real-life "I brushed" check-in twice a day for a small in-game bonus.
+4. **Companions:** yes.
+   - **Pip** fights alongside the knight: throws paste and hands out help and hints all game.
+   - A second companion, **Cusp**, is a tiny living crown. Cusp lights dark rooms, points to secrets and open gaps, and teaches technique with light-touch cues.
