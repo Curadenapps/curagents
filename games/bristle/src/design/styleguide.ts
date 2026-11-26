@@ -608,7 +608,7 @@ function knightSentinel(ctx: Ctx, mode: KMode) {
   // back arm hangs, front hand holds the spear upright
   ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-5, -38); ctx.quadraticCurveTo(-8, -31, -7, -25); ctx.stroke();
   plate(ctx, fnPath((p) => p.roundRect(-9.5, -26.5, 5, 5, 1.8)), { base: KE.shade, shade: KE.deep, sx: -6, sy: -26, sr: 3 });
-  idbHolder(ctx, 9, 6, 74, { kind: 'angled', angle: -0.05, loaded: T.idb.sizes.l.col, refillSize: 30 }); // the long angled IDB handle as a scythe
+  idbHolder(ctx, 9.5, -12, 60, { kind: 'angled', angle: -0.1, loaded: T.idb.sizes.l.col, refillSize: 25 }); // the angled IDB handle as a scythe, held high so the blade arcs over the helm
   ctx.strokeStyle = KE.cloth; ctx.lineWidth = 3.8; ctx.beginPath(); ctx.moveTo(5, -38); ctx.quadraticCurveTo(9, -35, 10.5, -30); ctx.stroke();
   plate(ctx, fnPath((p) => p.roundRect(8, -32.5, 5.6, 5.4, 1.9)), { sx: 11, sy: -32, sr: 3.4 });
   plate(ctx, fnPath((p) => p.ellipse(6.5, -38.5, 5, 4, 0.2, 0, TAU)), { sx: 8, sy: -40, sr: 4.5, gloss: [6.5, -40, 1.5, 0.7] });
@@ -620,37 +620,57 @@ function knightSentinel(ctx: Ctx, mode: KMode) {
   ctx.fillStyle = B.ink; ctx.fill(SENTINEL_SLIT);
 }
 
-// E. Squire Knight: stout and bouncy, caught mid-hop. A big round two-cusp helm (today's, grown up) with a raised visor
-//    lid over two glowing eye slits, a short flared cape, and two brushes: one wound up overhead, one low behind.
-const SQUIRE_EYES = (() => { const p = new Path2D(); p.roundRect(1.5, -46, 2.6, 4.4, 1.3); p.roundRect(6.4, -46.2, 2.6, 4.4, 1.3); return p; })();
+/** A single-tuft brush as a short sword: slim coloured handle, a clear neck and one tapered tuft for the point. */
+function singleTuft(ctx: Ctx, x: number, y: number, len: number, angle: number, col: string) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+  const h = len * 0.62, n = len * 0.24, t = len * 0.14;
+  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(0, -1.9, h, 3.8, 1.9); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(1.5, -1.4, h - 3, 0.9);
+  ctx.fillStyle = 'rgba(230,240,255,0.85)'; ctx.beginPath(); ctx.moveTo(h, -1.4); ctx.lineTo(h + n, -0.9); ctx.lineTo(h + n, 0.9); ctx.lineTo(h, 1.4); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(h + n - 0.5, -1.6, 2.4, 3.2, 1); ctx.fill();
+  // the tuft: a tight bundle tapering to a soft point
+  ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(h + n + 1.6, -2.2); ctx.quadraticCurveTo(h + n + t * 0.7, -1.8, h + n + t + 1.6, 0); ctx.quadraticCurveTo(h + n + t * 0.7, 1.8, h + n + 1.6, 2.2); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#D2DDEB'; ctx.lineWidth = 0.5; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(h + n + 2, i * 1.1); ctx.lineTo(h + n + t, i * 0.3); ctx.stroke(); }
+  ctx.restore();
+}
+/** A toothbrush travel case as a shield: a bright rounded box, a clear lid seam with a clasp, a carry loop on top. */
+function travelCase(ctx: Ctx, x: number, y: number, w: number, h: number, col: string) {
+  ctx.save(); ctx.translate(x, y);
+  const lid = mix(col, '#FFFFFF', 0.25), shade = mix(col, '#000000', 0.22);
+  ctx.strokeStyle = '#F3F6FC'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, -h / 2, w * 0.22, Math.PI, 0); ctx.stroke(); // carry loop
+  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, w * 0.28); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, w * 0.28); ctx.clip();
+  ctx.fillStyle = lid; ctx.fillRect(-w / 2, -h / 2, w, h * 0.42); ctx.fillStyle = shade; ctx.fillRect(w * 0.18, -h / 2, w * 0.4, h); ctx.restore();
+  ctx.strokeStyle = shade; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.moveTo(-w / 2, -h / 2 + h * 0.42); ctx.lineTo(w / 2, -h / 2 + h * 0.42); ctx.stroke();
+  ctx.fillStyle = '#F3F6FC'; ctx.beginPath(); ctx.roundRect(-w * 0.12, -h / 2 + h * 0.36, w * 0.24, h * 0.14, 1); ctx.fill(); // clasp
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.ellipse(-w * 0.24, -h * 0.32, w * 0.14, h * 0.05, -0.3, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+
+// E. Squire Knight: stout and young, the closest to today's hero. A round two-cusp helm with a closed slit, a short flared
+//    cape, a toothbrush travel case for a shield and a single-tuft brush for a short sword, ready stance.
+const SQUIRE_SLIT = fnPath((p) => p.roundRect(-0.5, -46.4, 11.5, 3, 1.5));
 function knightSquire(ctx: Ctx, mode: KMode) {
   const pr = B.blue, dk = B.blueDark;
-  if (mode === 'glow') { visorGlow(ctx, SQUIRE_EYES, 5, -44, 14); return; }
-  const cape = fnPath((p) => { p.moveTo(-6, -33); p.quadraticCurveTo(-16, -30, -21, -20); p.lineTo(-17, -19); p.lineTo(-18, -14); p.quadraticCurveTo(-10, -20, -3, -28); p.closePath(); }); ctx.fillStyle = dk; ctx.fill(cape); ctx.strokeStyle = pr; ctx.lineWidth = 1.2; ctx.stroke(cape);
-  // hop: back leg trailing, front knee lifted
-  ctx.lineCap = 'round'; ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-2.5, -17); ctx.quadraticCurveTo(-6, -10, -9, -5); ctx.stroke();
-  ctx.fillStyle = mix(KE.cloth, '#000000', 0.25); ctx.beginPath(); ctx.ellipse(-10.5, -4, 4.6, 2.6, -0.4, 0, TAU); ctx.fill();
-  ctx.strokeStyle = KE.leg; ctx.beginPath(); ctx.moveTo(2.5, -17); ctx.quadraticCurveTo(9, -16, 7.5, -9); ctx.stroke();
-  plate(ctx, fnPath((p) => p.ellipse(6.5, -15.5, 3.2, 3.6, 0, 0, TAU)), { sx: 8, sy: -16.5, sr: 3.4 });
-  ctx.fillStyle = KE.cloth; ctx.beginPath(); ctx.ellipse(9.5, -8, 5, 2.8, 0.2, 0, TAU); ctx.fill();
-  // body: rounded breastplate over a short brand tunic
+  if (mode === 'glow') { visorGlow(ctx, SQUIRE_SLIT, 5, -45, 15); return; }
+  const cape = fnPath((p) => { p.moveTo(-6, -33); p.quadraticCurveTo(-15, -28, -17, -15); p.lineTo(-13, -16); p.lineTo(-11, -12); p.quadraticCurveTo(-8, -22, -2, -30); p.closePath(); }); ctx.fillStyle = dk; ctx.fill(cape); ctx.strokeStyle = pr; ctx.lineWidth = 1.2; ctx.stroke(cape);
+  legsK(ctx, -17, 14, 5, [-3, -7], [3, 6.5], KE.cloth, true);
   ctx.fillStyle = pr; ctx.beginPath(); ctx.moveTo(-8, -22); ctx.lineTo(8, -22); ctx.lineTo(9, -14); ctx.quadraticCurveTo(0, -12, -9, -14); ctx.closePath(); ctx.fill();
   plate(ctx, fnPath((p) => { p.moveTo(-8, -34); p.quadraticCurveTo(-10.5, -26, -7.5, -20.5); p.lineTo(7.5, -20.5); p.quadraticCurveTo(10.5, -26, 8, -34); p.quadraticCurveTo(0, -36.5, -8, -34); }), { sx: 3, sy: -30, sr: 9.5, gloss: [4, -31, 2, 1] });
   ctx.fillStyle = B.ink; ctx.fillRect(-8, -22.4, 16, 2.4); crownCap(ctx, 0, -20.2, 5, { cusps: 3 });
-  // back arm out for balance, front arm raises the brush overhead
-  ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.6; ctx.beginPath(); ctx.moveTo(-6, -32); ctx.quadraticCurveTo(-12, -32, -15, -27); ctx.stroke();
-  brush(ctx, -15, -27, 30, { angle: 2.35, handle: B.cerise }); // the second brush, low and back
-  plate(ctx, fnPath((p) => p.roundRect(-18, -29.5, 5.4, 5.2, 1.8)), { base: KE.shade, shade: KE.deep, sx: -15, sy: -29, sr: 3 });
-  brush(ctx, 12, -40, 34, { angle: -2.5, handle: pr });
-  ctx.strokeStyle = KE.cloth; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(6, -32); ctx.quadraticCurveTo(12, -36, 12, -41); ctx.stroke();
-  plate(ctx, fnPath((p) => p.roundRect(9.2, -44, 5.6, 5.4, 1.9)), { sx: 12, sy: -43.5, sr: 3.4 });
+  // front hand: the single-tuft sword, raised and ready
+  singleTuft(ctx, 10.5, -25, 30, -0.95, B.cerise);
+  ctx.strokeStyle = KE.cloth; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(6, -32); ctx.quadraticCurveTo(10, -30, 10.5, -26); ctx.stroke();
+  plate(ctx, fnPath((p) => p.roundRect(7.8, -28.4, 5.6, 5.4, 1.9)), { sx: 10.5, sy: -28, sr: 3.4 });
   plate(ctx, fnPath((p) => p.ellipse(6.5, -32.5, 4.4, 3.6, -0.3, 0, TAU)), { sx: 8, sy: -34, sr: 4, gloss: [6.5, -34, 1.4, 0.6] });
+  // back hand: the travel case held across the body as a shield
+  ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.6; ctx.beginPath(); ctx.moveTo(-6, -32); ctx.quadraticCurveTo(-5, -26, 0, -24); ctx.stroke();
+  travelCase(ctx, 1.5, -22, 15, 11, '#FF8200');
   ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -35, 8, 2.1, 0, 0, TAU); ctx.fill();
-  // helm: big round two-cusp crown, an open visor showing a dark face plate, the lid raised above it
+  // helm: big round two-cusp crown with a closed slit, like today's hero grown up
   plate(ctx, fnPath((p) => { p.moveTo(-11, -37); p.quadraticCurveTo(-13.5, -48, -10, -54); p.quadraticCurveTo(-8, -60, -4, -56); p.quadraticCurveTo(0.5, -58, 4.5, -56); p.quadraticCurveTo(9, -60, 10.6, -53.5); p.quadraticCurveTo(13.5, -47, 11, -37); p.quadraticCurveTo(0, -34.5, -11, -37); p.closePath(); }), { sx: 5, sy: -47, sr: 12.5, gloss: [5, -52, 2.6, 1.2] });
-  ctx.fillStyle = B.ink; ctx.beginPath(); ctx.roundRect(-0.8, -48.4, 12, 8, 3); ctx.fill();
-  plate(ctx, fnPath((p) => { p.moveTo(-1.6, -49); p.quadraticCurveTo(5, -53.5, 12.4, -50.6); p.lineTo(12, -48.4); p.quadraticCurveTo(5, -50.6, -1.2, -47.6); p.closePath(); }), { base: KE.shade, shade: KE.deep, sx: 6, sy: -51, sr: 6 });
-  ctx.fillStyle = mix(B.ink, '#FFFFFF', 0.3); ctx.fill(SQUIRE_EYES);
+  ctx.strokeStyle = 'rgba(120,140,185,0.75)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(-1.5, -56); ctx.quadraticCurveTo(-1, -53, 0.5, -52); ctx.stroke();
+  ctx.fillStyle = B.ink; ctx.fill(SQUIRE_SLIT);
 }
 
 /** A tongue cleaner as a crescent glaive: a thick translucent arc with rounded tips and a grip at its middle. */
@@ -796,7 +816,7 @@ function heroOptions() {
     ['B', 'Ranger', knightRanger, 'The archer of the Order, built around the interdental bow. A swept canine-tooth sallet with an angled slit, a short hooded mantle lined in gum pink, a bandolier and quiver of colour-coded refills, tall boots, and the ring holder raised to shoot.', 'Most original silhouette and the best fit for the shot mechanic. The slimmest build, so it needs strong poses to feel heroic.'],
     ['C', 'Bulwark', knightBulwark, 'The shield of the Order. Short and broad, with a flat-cusped molar helm and a visor of glowing bristle bars. Molar-cusp shoulder plates, a round shield in the brand colour with the crown on it, and the brush-blade slung across the back.', 'Reads instantly at 1 tile and feels sturdy and safe. The heaviest look, so it moves slower and plays less nimbly than today.'],
     ['D', 'Sentinel', knightSentinel, 'Tall and calm. Long legs, a long brand tabard to the knee, a wide-brimmed crown helm with three tall cusps (the slit sits in the shadow of the brim), one round shoulder plate, and the long angled interdental handle carried as a scythe, a large refill at the bend for the blade.', 'The most noble silhouette and the easiest to read from far away. The tallest, so low gaps and crawling need care.'],
-    ['E', 'Squire Knight', knightSquire, 'Stout and bouncy, caught mid-hop: the round two-cusp helm of today, grown up, its visor lid raised over two glowing eye slits, a short flared cape, and two brushes: one wound up overhead, one held low behind for the follow-up.', 'The most lively and closest to a young audience while staying a knight. The eye slits read as a face, so keep them small.'],
+    ['E', 'Squire Knight', knightSquire, 'Stout and young, the closest to the hero of today: a big round two-cusp helm with a closed slit, a short flared cape, a toothbrush travel case held as a shield and a single-tuft brush as a short sword.', 'The friendliest sword-and-shield and the easiest first knight for a young audience. Product shapes are placeholders until the brand team checks them.'],
     ['F', 'Crescent (the Kunoichi)', knightDuelist, 'Sean, 26 Nov: one class with H, the Kunoichi. Lean, in a lunge. A sleek long helm with a horsetail of bristles from the crest, one plate on the back shoulder, a half cape off it. Fights with a tongue cleaner held like a crescent glaive: wide sweeping arcs, and it can be thrown and caught again.', 'The most original weapon, and a product many players have never used, so it teaches something. Needs its own throw-and-return move; product shape and name are placeholders until the brand team checks them.'],
     ['G', 'Lancer (the Bulwark)', knightLancer, 'Sean, 26 Nov: this is the look for the Bulwark Order. Planted and charging, a sonic toothbrush levelled from the hip in both hands like a lance, its head humming. Round shoulder plates, a short cape, a helm with a short upright crest of bristles and a cross visor.', 'Heavy, direct and easy to read: charge, pierce, hold the line. Based on the Hydrosonic; product shape and name are placeholders until the brand team checks them.'],
     ['H', 'Kunoichi (with the Crescent)', knightKunoichi, 'Sean, 26 Nov: one class with F; the tongue-cleaner glaive and the teething rings are both her throwables. Low and quick, crouched to spring. A narrow crown helm wrapped in a long scarf, light boots, and teething rings as ring blades: one held back ready, one already spinning out ahead.', 'The fastest and most playful, with a ranged weapon that comes back like a boomerang. Based on the baby teething ring; keep it clearly a soft toy, never sharp. Placeholder until the brand team checks it.'],

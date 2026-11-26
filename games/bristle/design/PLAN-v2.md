@@ -203,3 +203,10 @@ Equip one item per slot. Items are the CURAPROX range expressed as gameplay. Pip
    - A second companion, **Cusp**, is a tiny living crown. Cusp lights dark rooms, points to secrets and open gaps, and teaches technique with light-touch cues.
 5. **Orders:** one hero with three earned armour sets (Vanguard, Ranger, Bulwark) on one shared rig, replacing the Oath grid and the Crown board. See section 4.
 6. **Story (parked, thinking aloud, not planned):** each Order could have its own ending with the same lesson learnt in a different form: brushing gets you far but you need the interdental brush, the interdental brush needs brushing, and the rinse needs both. In-world habit flavour only, never a health claim.
+7. **Completion reward (idea, not planned yet):** finishing the game gives 10% off the real product your hero fought with
+   (the Orders and hero options map to products: brush, interdental holder and refills, Hydrosonic, tongue cleaner,
+   teething ring, travel case, single tuft). Open before any build:
+   - who issues and redeems the codes (the brand's own shop; per market), and how a code is shown without collecting data;
+   - promotion terms per country, and rules on marketing to children and teens (BRISTLE aims young): a question for the
+     brand's legal team, not settled here;
+   - which product each hero maps to, verified by the brand team.
