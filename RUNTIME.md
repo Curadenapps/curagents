@@ -321,7 +321,7 @@ The one scheduled PC task (Personal desktop app, built-in browser). In order:
 
 ### Manual PC runs
 
-"post it" (posts a Held team-update row now, same as the courier), "send QA report",
+"post it" (posts a Held team-update or meeting-recap row now, same as the courier), "send QA report",
 "roadmap watch", "boom boom" and "meeting notes" work from any session on the PC; the
 Webex part follows the courier's steps 1–2. Start with the paste-once prompt's fetch
 step, read the agent's spec, and end like every PC run (run-log row, no spec edits).

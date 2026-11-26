@@ -34,6 +34,7 @@ memory:
     - "notion: Decision Log & Meeting Recaps 3f27e8aabbb481baa16ce7cb9e7514dd (existing recaps)"
   write:
     - "notion: one recap page per meeting (Meeting Notes DB if NOTION_MEETING_NOTES_DB_ID is set, else a child page of Decision Log & Meeting Recaps)"
+    - "notion: one Held Webex outbox row per recap (one-tap send; Sean ticks Approved, the courier posts)"
 idempotency_key: "meeting-notes:{webex meeting container id | yogurt:{meeting id} | fireflies id}"
 dry_run: false
 output:
@@ -133,6 +134,37 @@ asks for that exact change. Never copy audio paths from `get_audio` anywhere.
   plus a row in that page's Date / Meeting / Key decision table. Actions that
   need tracking go to Asana only when Sean asks (through `asana-maintenance`).
 
+## Share with the team (one-tap send)
+
+Every recap, from any source, gets a ready-to-send Webex message that waits for
+Sean's one tap. Nothing goes to Webex on its own (agreed 26 Nov).
+
+1. **Pick the space** from who was in the meeting (attendees, the people the
+   transcript names, the title):
+
+   | Meeting | Space (`skills/webex-web/SKILL.md` "Spaces") | Message |
+   |---------|-------|---------|
+   | Curaden people only | `App Team` | Full recap |
+   | With Phinamic (Derek, Khanh) | The common chat `644fd150…` | **Partner-safe** cut: only what Phinamic may read (decisions and actions that involve them); nothing from an internal heading, no prices, contracts, other partners or people issues |
+   | Other externals (markets, distributors, agencies, legal), 1:1s, or can't tell | No row | Say so, and ask Sean which space if he wants it shared |
+
+   Sean naming a space ("send it to App Team") overrides the table.
+2. **Write the message** in the meeting's language, under ~1,500 characters:
+   first line `📝 Recap: {meeting} — {D Mon}` (this is the Marker), then 2–3 lines of
+   what was decided, then **Next steps** as `- {action} — {owner}, {due}`. For App
+   Team add the Notion page link; for the partner space leave the link out (Phinamic
+   can't open it). No transcript quotes, no clinical or efficacy claims (`dream.md` §2).
+3. **One row in the Webex outbox** (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`):
+   Status **`Held`**, Agent `meeting-notes`, Space, Marker = the first line, Mentions
+   only the owners named in Next steps who are in that space, Source = the recap page,
+   **Expires** 7 days after the meeting, the message in the row's body. Never `Queued`.
+   Idempotency: one row per recap page; if one exists, update its body instead.
+4. **Tell Sean** in one line: "Recap ready to send to {space}: tick Approved on the
+   outbox row (or say "post it")". The Webex courier posts approved rows on its next
+   run (weekdays 08:02, 09:02, 12:02, 17:02); "post it" on the PC posts now
+   (`RUNTIME.md` "Manual PC runs"). Sean can edit the row's body before ticking.
+   An unapproved row lapses at **Expires**; the recap stays in Notion.
+
 ---
 
 ## Hard Rules
@@ -142,7 +174,7 @@ asks for that exact change. Never copy audio paths from `get_audio` anywhere.
 - Yogurt transcripts and audio stay on Sean's PC. Only the recap goes to Notion; never
   paste a full Yogurt transcript into Notion, Asana, Jira or Webex.
 - Read-only in Webex: never download, share, edit or delete a recording, summary or
-  transcript. If a sign-in or recording password appears, stop and tell Sean.
+  transcript. The only way a recap reaches Webex is the Held outbox row Sean approves. If a sign-in or recording password appears, stop and tell Sean.
 - Assign owners by reading context and using judgment. Never use regex-style patterns.
 - Output the Notion page in the **same language as the meeting** (German stays German) unless the user asks for a translation.
 - If `DRY_RUN=true`, print the formatted Notion page to the console; do not write to Notion.

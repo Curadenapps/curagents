@@ -57,6 +57,11 @@ The meeting-notes agent picks the source on its own (`agents/meeting-notes.md` â
   and drag the `.m4a` from `Downloads\Yogurt uploads` into Yogurt's **Upload a file**.
 - Then say **"meeting notes from Yogurt"** (or just "recap the call") and the
   meeting-notes agent writes the Notion recap.
+- **One-tap send**: the agent also writes the Webex message as a **Held** row in the
+  Webex outbox (App Team for Curaden-only calls, a partner-safe cut for the common
+  chat when Phinamic was on). Tick **Approved** on the row (or say "post it") and the
+  courier posts it. Nothing is sent without that tick; unapproved rows lapse after
+  7 days. Rules in `agents/meeting-notes.md` "Share with the team".
 
 ## Limits and rules
 
