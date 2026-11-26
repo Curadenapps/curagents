@@ -7,7 +7,9 @@ import type { GameCore } from '../game';
 import type { Entity, Faction, ProgressApi } from '../types';
 import { PERKS, BRANCHES, FACTIONS } from './perks';
 import { brandText as BT } from '../../design/tokens';
-import { applyOrder } from '../orders';
+import { applyOrder, currentOrder, ART } from '../orders';
+import { brush, idbHolder, idbRefill, foamCluster } from '../../design/kit';
+import { brand as BR, idb, mint } from '../../design/tokens';
 
 const GUESS: [RegExp, Faction][] = [[/leech|flare|swell|gum|inflam/, 'gum'], [/imp|sugar/, 'sugar'], [/tartar|spit|brute|calculus|matriarch/, 'tartar']];
 export const nextXp = (level: number) => 12 + level * 14;
@@ -51,45 +53,85 @@ export class Progress implements ProgressApi {
     g.persist(); this.render();
   }
 
-  // ---------- the Oath screen ----------
+  // ---------- the Oath cards ----------
+  // Level up: three cards from what you can take next, at least one from the Order you wear; take one.
+  // With no points (opened from the pause menu) it shows the cards you hold.
+  hand: string[] = [];
+  /** Cards you could take now (ignoring points): not held, and the card before it on its path is held. */
+  open_() { return PERKS.filter((k) => !this.has(k.id) && (!k.needs || this.has(k.needs))); }
+  deal() {
+    const pool = this.open_(), mine = BRANCHES.find((b) => b.order === currentOrder(this.g as any))?.id;
+    let seed = this.p.level * 977 + this.p.perks.length * 131 + 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const shuffled = pool.map((k) => [rnd(), k] as const).sort((x, y) => x[0] - y[0]).map((x) => x[1]);
+    const first = shuffled.find((k) => k.branch === mine);
+    this.hand = [...(first ? [first] : []), ...shuffled.filter((k) => k !== first)].slice(0, 3).map((k) => k.id);
+    this.sel = Math.min(this.sel, Math.max(0, this.hand.length - 1));
+  }
   open() {
-    if (this.el) return; const g = this.g; g.modal++; this.sel = Math.max(0, PERKS.findIndex((k) => this.canBuy(k.id))); this.t = 0;
-    const root = document.getElementById('ui')!; const el = document.createElement('div'); el.className = 'oath'; root.appendChild(el); this.el = el;
-    el.addEventListener('click', (e) => { const b = (e.target as HTMLElement).closest('[data-perk]') as HTMLElement | null; if (b) { this.sel = PERKS.findIndex((k) => k.id === b.dataset.perk); this.buy(b.dataset.perk!); } if ((e.target as HTMLElement).closest('[data-close]')) this.close(); });
+    if (this.el) return; const g = this.g; g.modal++; this.sel = 0; this.t = 0; this.deal();
+    const root = document.getElementById('ui')!; const el = document.createElement('div'); el.className = 'deal'; root.appendChild(el); this.el = el;
+    el.addEventListener('click', (e) => {
+      const c = (e.target as HTMLElement).closest('[data-card]') as HTMLElement | null;
+      if (c) { this.sel = Number(c.dataset.card); this.take(); }
+      if ((e.target as HTMLElement).closest('[data-close]')) this.close();
+    });
     g.audio.sfx('ui-open'); this.render();
   }
+  take() {
+    const id = this.hand[this.sel]; if (!id || this.p.points <= 0) { this.g.audio.sfx('ui-back'); return; }
+    this.buy(id); this.deal(); this.render();
+    if (this.p.points <= 0) setTimeout(() => this.close(), 380);
+  }
   close() { if (!this.el) return; this.el.remove(); this.el = null; this.g.modal = Math.max(0, this.g.modal - 1); this.g.audio.sfx('ui-close'); this.g.input.clear(); }
-  /** Runs before the UI layer each frame so the Oath screen owns input while it is open. */
+  /** Runs before the UI layer each frame so the card pick owns input while it is open. */
   update(dt: number) {
     const g = this.g;
     if (!this.el && this.pending >= 0 && g.state === 'play') { this.pending -= dt; if (this.pending <= 0 && !g.busy() && !g.ui.isOpen() && g.player && g.player.deadT < 0) { this.pending = -1; if (this.p.points > 0) this.open(); } }
-    if (!this.el) return; this.t += dt; const i = this.g.input;
-    const col = (n: number) => Math.floor(n / 4), row = (n: number) => n % 4;
+    if (!this.el) return; this.t += dt; const i = this.g.input, n = this.hand.length;
     let s = this.sel;
-    if (i.tap('left')) s = Math.max(0, s - 4); if (i.tap('right')) s = Math.min(PERKS.length - 1, s + 4);
-    if (i.tap('up')) s = col(s) * 4 + Math.max(0, row(s) - 1); if (i.tap('down')) s = col(s) * 4 + Math.min(3, row(s) + 1);
+    if (n && i.tap('left')) s = (s + n - 1) % n; if (n && i.tap('right')) s = (s + 1) % n;
     if (s !== this.sel) { this.sel = s; this.g.audio.sfx('ui-move'); this.render(); }
-    if (i.tap('confirm') || i.tap('attack') || i.tap('interact')) this.buy(PERKS[this.sel].id);
+    if (i.tap('confirm') || i.tap('attack') || i.tap('interact')) { if (this.p.points > 0) this.take(); else this.close(); }
     if (i.tap('back') || i.tap('pause') || i.tap('dash')) this.close();
-    for (const a of ['jump', 'spell', 'focus'] as const) i.tap(a);
+    for (const a of ['jump', 'spell', 'focus', 'up', 'down'] as const) i.tap(a);
+  }
+  /** One card: art, the Order's chip, name, one line. */
+  card(id: string, i: number, small = false) {
+    const k = PERKS.find((x) => x.id === id)!, br = BRANCHES.find((b) => b.id === k.branch)!, ord = ART[br.order as keyof typeof ART];
+    const tier = PERKS.filter((x) => x.branch === k.branch).findIndex((x) => x.id === id) + 1;
+    return `<button type="button" class="dcard b-${k.branch}${!small && i === this.sel ? ' on' : ''}${small ? ' small' : ''}" ${small ? '' : `data-card="${i}"`}>
+      <canvas data-art="${k.branch}" width="360" height="220"></canvas>
+      <span class="dchip">${ord.name} · ${br.name}</span>
+      <b>${k.name}</b><span class="dtext">${k.text}</span>
+      <i class="dtier">${[1, 2, 3, 4].map((t) => `<em class="${t <= tier ? 'on' : ''}"></em>`).join('')}</i></button>`;
   }
   render() {
-    if (!this.el) return; const p = this.p, sel = PERKS[this.sel];
-    const bar = (v: number, max: number, c: string) => `<i style="width:${Math.min(100, (v / Math.max(1, max)) * 100).toFixed(1)}%;background:${c}"></i>`;
-    this.el.innerHTML = `
-      <div class="oath-card">
-        <header><div><p class="oath-eyebrow">The Oath of the ${BT.orderShort}</p><h1>Level ${p.level}</h1></div>
-          <div class="oath-points"><b>${p.points}</b><span>skill point${p.points === 1 ? '' : 's'}</span></div></header>
-        <div class="oath-xp"><span>${p.xp} / ${nextXp(p.level)} to level ${p.level + 1}</span><div class="oath-bar">${bar(p.xp, nextXp(p.level), '#8BB8E8')}</div></div>
-        <div class="oath-tree">${BRANCHES.map((b) => `<section><h2>${b.name}</h2><p>${b.blurb}</p>${PERKS.filter((k) => k.branch === b.id).map((k) => {
-          const own = this.has(k.id), can = this.canBuy(k.id), locked = !own && k.needs && !this.has(k.needs), on = sel.id === k.id;
-          return `<button type="button" class="perk${own ? ' own' : ''}${can ? ' can' : ''}${locked ? ' locked' : ''}${on ? ' on' : ''}" data-perk="${k.id}"><b>${k.name}</b><span>${k.text}</span><em>${own ? 'Sworn' : locked ? 'Locked' : can ? 'Take' : 'Needs a point'}</em></button>`;
-        }).join('')}</section>`).join('')}</div>
-        <div class="oath-mastery"><h2>Mastery</h2>${FACTIONS.map((f) => { const xp = p.mastery[f.id] || 0, lv = masteryOf(xp), lo = masteryXp(lv), hi = masteryXp(lv + 1);
-          return `<div class="m"><div class="m-head"><b>${f.name}</b><span>Level ${lv}${lv ? ` · +${lv * 10}% damage` : ''}</span></div><div class="oath-bar">${bar(lv >= 5 ? 1 : xp - lo, lv >= 5 ? 1 : hi - lo, f.colour)}</div><p>${f.blurb}</p></div>`; }).join('')}</div>
-        <footer><span>Arrows to choose · Enter to take · Esc to keep points for later</span><button type="button" data-close>Close</button></footer>
+    if (!this.el) return; const p = this.p, picking = p.points > 0;
+    const bar = `<div class="deal-bar"><i style="width:${Math.min(100, (p.xp / Math.max(1, nextXp(p.level))) * 100).toFixed(1)}%"></i></div>`;
+    this.el.innerHTML = picking ? `
+      <div class="deal-wrap">
+        <header><p>Level ${p.level}</p><h1>Choose a card</h1>${p.points > 1 ? `<span class="deal-more">${p.points} to choose</span>` : ''}</header>
+        <div class="deal-hand">${this.hand.map((id, i) => this.card(id, i)).join('') || '<p class="deal-empty">Every card on every path is yours.</p>'}</div>
+        <footer><span>← → choose · Enter take · Esc later</span></footer>
+      </div>` : `
+      <div class="deal-wrap">
+        <header><p>Level ${p.level} · ${p.xp} / ${nextXp(p.level)} XP</p><h1>Your cards</h1></header>${bar}
+        <div class="deal-hand held">${p.perks.map((id, i) => this.card(id, i, true)).join('') || '<p class="deal-empty">No cards yet. Level up to choose your first.</p>'}</div>
+        <footer><span>Level up to draw new cards</span><button type="button" data-close>Close</button></footer>
       </div>`;
+    for (const c of Array.from(this.el.querySelectorAll<HTMLCanvasElement>('canvas[data-art]'))) drawCardArt(c, c.dataset.art as string);
   }
+}
+
+/** Card art in the house style: the brush, the interdental holder with a refill, or rinse foam and drops. */
+function drawCardArt(cv: HTMLCanvasElement, branch: string) {
+  const c = cv.getContext('2d')!, W = cv.width, H = cv.height;
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, branch === 'brush' ? '#13306e' : branch === 'gap' ? '#3a1c18' : '#0f3a44'); g.addColorStop(1, '#070F2A');
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  c.globalAlpha = 0.18; c.fillStyle = '#FFFFFF'; c.beginPath(); c.arc(W / 2, H * 0.55, H * 0.42, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1;
+  if (branch === 'brush') brush(c, W * 0.12, H * 0.66, W * 0.76, { angle: -0.32, handle: BR.blue });
+  else if (branch === 'gap') { idbHolder(c, W * 0.38, H * 0.62, H * 0.62, { angle: Math.PI / 2, loaded: idb.sizes.m.col }); idbRefill(c, W * 0.78, H * 0.86, H * 0.5, { col: idb.sizes.s.col, angle: 0.2 }); }
+  else { foamCluster(c, W * 0.5, H * 0.86, H * 0.32, { count: 16, seed: 4 }); for (let i = 0; i < 5; i++) { c.fillStyle = i % 2 ? mint.base : '#FFFFFF'; c.beginPath(); c.arc(W * (0.22 + i * 0.14), H * (0.25 + (i % 2) * 0.12), 5 + (i % 3), 0, Math.PI * 2); c.fill(); } }
 }
 
 export function installProgress(g: GameCore) {

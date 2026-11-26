@@ -289,3 +289,34 @@ html, body { height: 100%; margin: 0; background: #000; overflow: hidden; }
   .pause-title { font-size: 40px; }
 }
 @media (prefers-reduced-motion: reduce) { .scr, .scr * { animation-duration: 0.01s !important; transition-duration: 0.01s !important; } }
+
+/* ===================================================================== Oath cards (level-up pick) */
+.deal { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(3, 8, 24, 0.8); backdrop-filter: blur(6px); animation: oath-in 260ms cubic-bezier(.16,1,.3,1) both; padding: 24px; font-family: var(--body); }
+.deal-wrap { display: flex; flex-direction: column; align-items: center; gap: 22px; max-width: 980px; width: 100%; }
+.deal header { text-align: center; }
+.deal header p { margin: 0; font-family: var(--display); font-size: 12px; letter-spacing: 0.26em; text-transform: uppercase; color: var(--sky); }
+.deal header h1 { margin: 6px 0 0; font-family: var(--display); font-weight: 400; font-size: 34px; letter-spacing: 0.14em; text-transform: uppercase; color: #fff; }
+.deal-more { display: inline-block; margin-top: 8px; font-family: var(--display); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.deal-hand { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+.deal-hand.held { gap: 14px; }
+.deal-bar { width: min(420px, 80%); height: 4px; border-radius: 2px; background: rgba(139,184,232,0.18); overflow: hidden; }
+.deal-bar i { display: block; height: 100%; background: var(--sky); }
+.dcard { width: 220px; display: flex; flex-direction: column; text-align: left; gap: 8px; padding: 0 0 16px; border-radius: 16px; overflow: hidden; cursor: pointer;
+  background: linear-gradient(180deg, #0e2253, #081633); border: 1.5px solid rgba(139,184,232,0.22); color: var(--mist); box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+  transition: transform 180ms var(--ease), border-color 180ms, box-shadow 180ms; font: inherit; }
+.dcard canvas { width: 100%; height: auto; display: block; }
+.dcard b { padding: 0 16px; font-family: var(--display); font-weight: 400; font-size: 19px; letter-spacing: 0.06em; color: #fff; }
+.dcard .dtext { padding: 0 16px; font-size: 14px; line-height: 1.45; color: var(--mist); min-height: 40px; }
+.dchip { margin: 4px 16px 0; align-self: flex-start; font-family: var(--display); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; background: rgba(139,184,232,0.14); color: var(--sky); }
+.dcard.b-brush .dchip { background: color-mix(in srgb, var(--blue) 45%, transparent); color: #fff; }
+.dcard.b-gap .dchip { background: rgba(255,130,0,0.22); color: #FFC489; }
+.dcard.b-care .dchip { background: rgba(159,227,240,0.18); color: #BFEFF7; }
+.dtier { display: flex; gap: 5px; padding: 2px 16px 0; }
+.dtier em { width: 16px; height: 4px; border-radius: 2px; background: rgba(232,238,249,0.12); }
+.dtier em.on { background: var(--sky); }
+.dcard.on, .dcard:hover { transform: translateY(-12px); border-color: rgba(232,238,249,0.85); box-shadow: 0 26px 50px rgba(0,0,0,0.55), 0 0 0 4px rgba(139,184,232,0.18); }
+.dcard.small { width: 150px; cursor: default; transform: none; }
+.dcard.small b { font-size: 15px; } .dcard.small .dtext { font-size: 12px; min-height: 0; }
+.deal footer { display: flex; gap: 22px; align-items: center; font-family: var(--display); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint, rgba(232,238,249,0.5)); }
+.deal footer button { font: inherit; letter-spacing: 0.12em; color: var(--blue); background: #fff; border: 0; border-radius: 99px; padding: 9px 18px; cursor: pointer; }
+.deal-empty { color: var(--mist); }

@@ -1,51 +1,59 @@
-# BRISTLE handoff (2026-11-26)
+# BRISTLE handoff (2026-11-26, evening)
 
-Read this first when you pick BRISTLE up in a new session. The game is in a **good, agreed state** at the
-commit that added this file. Sean asked: do not build anything beyond what he asks for next.
+Read this first when you pick BRISTLE up in a new session. Sean asked: do not build anything beyond what he asks for next.
 
 ## Rules for the next session
 
 - **Do not start new features, agents or refactors on your own.** Wait for Sean's next ask, then do exactly that.
-- Do not resume or merge the three stopped agents (see below). Their half-finished work was local only and is gone.
-- Branch: `claude/dazzling-meitner-9fo696`. Claude app (artifact, private): https://claude.ai/artifact/7RrzdiT1yUeCX34PiECaJD
+- Branch: `claude/dazzling-meitner-9fo696` (pushed, so the PC and the laptop can both work on it).
+  Claude app (artifact, private): https://claude.ai/artifact/7RrzdiT1yUeCX34PiECaJD
   (publish `dist/fragment.html` to that URL; it keeps the `sample` capability for Claude-voiced NPCs).
-- Brand guardrails: CURAPROX palette and type; no violence (plaque is loosened and rinsed away, never hurt);
-  no clinical or efficacy claims; real product names and IDB sizes/colours are placeholders until the brand team verifies them.
+- Brand guardrails: the brand pack's palette and type; no violence (plaque is loosened and rinsed away, never hurt;
+  say "cleaning power", not "damage"); no clinical or efficacy claims; real product names and IDB sizes/colours are
+  placeholders until the brand team verifies them.
+- Ownership: Sean says BRISTLE is his own idea, built for himself and possibly Phinamic, not for Curaden. Keep it
+  modular so it can be pitched to other oral-care brands.
 
 ## Run and check
 
 ```
 npm install
-npm run dev                      # http://localhost:5460  (dev params: ?room=<id>&door=<n>&all&god&play)
+npm run dev                      # http://localhost:5460  (dev params: ?room=<id>&door=<n>&all&god&play&order=<id>&brand=<id>)
+node styleguide.mjs              # dist/styleguide.html, the living design system (also served by npm run dev)
 node build.mjs --fragment        # dist/index.html + dist/fragment.html (artifact)
 npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three must pass before a push
 ```
 
+`tests/smoke.cjs` needs Playwright, which is not installed on Sean's PC; recent pushes ran tsc and reach only.
+
 ## What works now
 
 - 19 rooms: Crown Gate, Gumline, Narrows, Sugar Wastes (rest fountain + Pip merchant, then the Glutton boss), Calculus Deep.
-- Difficulty (Gentle / Knight / Veteran) and Brightness in Settings; darker grade.
-- Player: run, jump, wall jump (once per jump, refreshed on the opposite wall), dash, crawl under low gaps (hold Down),
-  slash with pogo, Deep Clean (hold slash), toothpaste throw, focus heal, Floss Grip.
-- **IDB gaps** (`src/game/gaps.ts`): clogged gaps between teeth, size S `|` / M `I` / L `H` with a colour badge.
-  Walk up, press Up/E; the right brush cleans it for good (+8 XP, saved as `gap:<room>:x,y`). Wrong size says which one it needs.
-  S from the start, M from the Prime Dash relic. Dash no longer passes through walls.
-- **Levelling**: XP only from kills and cleaning gaps (room-entry XP removed). The skill picker opens about half a second
-  after the XP that levels you up.
-- Contextual one-time tips (`src/game/tips.ts`), exits with light bands and next-area labels, enemy health bars, XP floaters.
+- **Brand packs** (`src/design/brands.ts`): CURAPROX by default and a made-up demo (`?brand=demo`). The game and the style
+  guide read colours, fonts, product names and the Order's name from the pack; the mouth's own colours stay fixed.
+- **The Orders** (`src/design/hero.ts` art, `src/game/orders.ts` rules): one knight rig, four sets. Initiate (start),
+  Vanguard (first fountain rest), Ranger (Prime Dash relic), Bulwark (Glutton rinsed away). Rest again at a fountain to
+  change sets. Each set changes health, speed, slash, Deep Clean charge, air dashes, refills carried and draw speed;
+  the Bulwark's dash blocks shots.
+- **Controls**: move A/D, jump Space/Z, slash J/X (hold for Deep Clean, up/down for up-slash and pogo), dash K/C/Shift,
+  **interdental shot** L/V (hold to load and draw, release to fire), **Up + L = Rinse wave**, **size R/Tab** (S/M/L),
+  focus heal F/Q, interact E/Up, pause Esc. The toothpaste throw is gone (the `PasteGlob` class is unused).
+- **The shot** (`src/game/shot.ts`): refills per size, picked back up where they land, refilled at fountains; the right
+  size unclogs a gap from range. Ammo shows under the health.
+- **IDB gaps** (`src/game/gaps.ts`): cleaned like a key, the holder in, once, and out, then the walls crumble.
+  `tests/reach.mjs` now treats gaps as solid until a standing spot can clean them (it found and fixed a stuck gap in
+  narrows-slits).
+- **XP** (`src/game/xp.ts`): every clear, plus first reads of oath stones, new rooms and areas, first talks, a fountain's
+  first rest and relics. Level up deals **three Oath cards** (one from your Order's path), take one; the pause menu's
+  Oath shows the cards you hold.
+- Dental particles (bristle flicks, plaque crumbs, rinse bubbles, clean-tooth sparkles); slashes sweep a full arc with
+  a lunge; the knight stays visible while talking.
 
-## Known gaps (not started; only when Sean asks)
+## Known gaps (only when Sean asks)
 
+- Sean wants more hero variants before the art is final; the slash still needs play-testing for feel.
 - No `H` (large) gaps placed yet, and Pip doesn't sell the L brush yet.
-- Oath perks feel too small (Sean: "not worth picking"). Decided fix: the **Orders** (one hero, three armour sets on a shared rig), `design/PLAN-v2.md` section 4 and the style guide's Orders section. Not built in the game yet.
-- Planned in PLAN-v2 and the reviews in `design/reviews/`: Combat 2.0, Crown board, Pip catalogue with real names,
-  companions (Pip fights alongside, Cusp the living crown), clean-don't-harm wording pass, dark-to-bright restoration,
-  BRISTLE Design System artifact, Tide Ritual mini-game (parked).
-
-## Stopped agents (not merged, do not resume)
-
-1. Companions: Pip and Cusp
-2. Clean-don't-harm and dark-to-bright pass
-3. BRISTLE Design System (+ `src/design/tokens.ts`)
-
-Redo any of these from `design/PLAN-v2.md` only when Sean asks.
+- The Oath cards reuse the 12 old perks (wording updated); per-Order tracks with keystones (PLAN-v2 section 4.3) are not built.
+- The Bulwark's slam that cracks tartar floors is not built (there are no tartar floor tiles).
+- Story idea (parked, Sean thinking aloud): a different ending per Order, same lesson that brush, interdental and rinse need each other.
+- Still planned in PLAN-v2: Combat 2.0, Pip catalogue with real names, companions (Pip, Cusp), dark-to-bright restoration.
