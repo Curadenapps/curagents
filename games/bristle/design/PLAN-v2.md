@@ -77,31 +77,56 @@ The slice works: five areas, a boss, an Oath tree, Pip's shop, Claude-voiced NPC
 | Gleam active | 3.2x | short windows |
 | Boss time to kill | 2-3 min mashing, 70-90 s mastery | |
 
-## 4. Progression: the Crown board (replaces the Oath grid)
+## 4. Progression: the Orders (replaces the Oath grid and the Crown board)
 
-### 4.1 Shape and feel
-- The skill tree becomes **the Crown**: a radial board shaped like the top of a molar. **Four cusps**, each a path, meeting at a central fissure.
-  - **Velvet** (gentle brushing, combos, Shine)
-  - **Prime** (precision, Gaps, crits, dash)
-  - **Foam** (paste, rinse, sonic, the Kit Deck)
-  - **Enamel** (health, defence, healing, inflammation)
-- About 24 nodes. **Every node is felt**: a new move, a new rule or a big number (20%+), never +3%.
-- Each cusp ends in a **keystone** that changes how you play, for example:
-  - *Velvet Touch:* the clean-stroke window doubles and clean strokes heal.
-  - *Gap Master:* Prime crits chain to a second open Gap.
-  - *Foam Tide:* paste puddles merge and grow.
-  - *Living Enamel:* take a hit and gain Shine instead of losing it, once per fight.
-- **Preview before you pick:** each node shows a 2-second looping clip or before/after numbers.
-- **Free respec at fountains.** Experimenting is part of the fun.
+Decided by Sean, 26 Nov. One hero, three earned armour sets. The style guide's **Orders** section (09) shows them drawn on one shared body, with a live swap.
 
-### 4.2 Earning points
+### 4.1 One hero, three Orders
+The knight is always the same hero with the same core moves: run, jump, dash, brush slash. Today's hero becomes the **Initiate** everyone starts as. Each Order is earned on the route and swapped at a fountain. It changes the helm, the gear and a few moves, and each one masters one tool, so the three together carry the habit message: brush, interdental and rinse need each other.
+
+| Order | Masters | Plays | Earned (proposal) | Absorbs Crown cusp |
+|---|---|---|---|---|
+| **Vanguard** | the brush | balanced, strongest brush, fastest Deep Clean | from Derek at the first fountain, Crown Gate | Velvet |
+| **Ranger** | the interdental brush | light and quick, built around the interdental shot | in the Narrows with the holder, beside the first clogged gaps | Prime |
+| **Bulwark** | the rinse | heavy and steady: guards, shield charge, rinse magic, cracks tartar | from the Glutton's hoard, Sugar Wastes, before the Calculus Deep | Foam |
+
+### 4.2 One rig, six slots
+- A set fills six slots on a shared skeleton: **helm, shoulders, chest, back, weapon/front, boots**. Walk, run, jump and slash are animated once for every Order. This is the cheap way to get three looks.
+- What each set changes (numbers to tune):
+
+  | Move | Initiate | Vanguard | Ranger | Bulwark |
+  |---|---|---|---|---|
+  | Brush slash | base | +2 cleaning power, longer reach | base | slower, +3 cleaning power |
+  | Deep Clean (hold) | 0.6 s charge | 0.4 s, wider arc | base | base |
+  | Interdental shot | 6 refills | 6 refills | fast draw, 9 refills, pierces from half draw | slow draw, 3 refills |
+  | Dash | base | base | +1 air dash | shield charge, blocks shots while dashing |
+  | Pogo | base | base | base | slam that cracks tartar floors |
+  | Health / run speed | 5 / 300 | 5 / 300 | 4 / 320 | 7 / 260 |
+
+### 4.3 Growing an Order
+- Each Order has a short **track of 5 upgrades plus a keystone**, bought with points. The Crown board's rules carry over:
+  - **Every upgrade is felt:** a new move, a new rule or a big number (20%+), never +3%.
+  - **Preview before you pick:** a 2-second looping clip or before/after numbers.
+  - **Free respec at fountains.**
+- Keystones from the Crown board move to their Order:
+  - Vanguard, *Velvet Touch:* the clean-stroke window doubles and clean strokes heal.
+  - Ranger, *Gap Master:* Prime crits chain to a second open Gap.
+  - Bulwark, *Foam Tide:* rinse and paste puddles merge and grow.
+- The Enamel cusp becomes a **shared track** every Order uses (health, healing, inflammation), with *Living Enamel* as its keystone: take a hit and gain Shine instead of losing it, once per fight.
+
+### 4.4 Rules
+1. **Any set, any room.** Map progress is tied to relics, never to a set. A set changes how a room plays, not whether it can be done.
+2. **Swap at fountains only**, so a fight never pauses for a menu. The swap is a rinse of bubbles and a glint.
+3. **Brands can add a set.** A brand pack can dress a fourth Order in its own product line, on the same rig.
+
+### 4.5 Earning points
 - **XP sources:**
   - Kills, full the first time a room is cleared and 25% on repeats, which stops grinding.
   - Exploration: first visit, plaque walls scrubbed, lore read, secrets found.
   - Bosses: a guaranteed level.
-- One Crown point per level. Keystones need 3 points in their cusp.
+- One point per level, spent on any Order's track. A keystone needs 3 points in its track.
 - **Level pace:** level 2 within 2 minutes, about one level per area room, and roughly level 10 at the slice's final boss.
-- **Faction mastery** stays and shows on the Crown as rings around each cusp.
+- **Faction mastery** stays and shows as rings on the Orders screen.
 
 ## 5. CURAPROX content through Pip (and friends)
 
@@ -149,10 +174,10 @@ Equip one item per slot. Items are the CURAPROX range expressed as gameplay. Pip
 - **UI:**
   - a **command-style HUD**: the health crown plus Shine ring top left and the Kit Deck radial bottom left
   - big rounded panels, crisp Futura caps
-  - the Crown board as the showpiece screen
+  - the Orders screen as the showpiece: the knight on the shared rig, the three sets, each track
 - **Design system:** built as a claude.ai Design System. It covers:
   - tokens: world palettes, materials, light presets, type, motion and game-feel numbers
-  - components: HUD pieces, panels, buttons, the Crown board, item cards, dialogue box, boss bar, toasts
+  - components: HUD pieces, panels, buttons, the Orders screen, item cards, dialogue box, boss bar, toasts
   - the drawing kit for characters
   - do/don't rules
 
@@ -163,7 +188,7 @@ Equip one item per slot. Items are the CURAPROX range expressed as gameplay. Pip
 | # | Milestone | Content | Size |
 |---|---|---|---|
 | M1 | Combat 2.0 | rhythm strokes, finisher, stagger and Gaps, Prime strike, Shine and Gleam, balance pass | L |
-| M2 | Crown board | radial board UI, 24 nodes, keystones, previews, respec, new XP rules | M |
+| M2 | Orders | shared hero rig with six part slots, Vanguard, Ranger and Bulwark sets, swap at fountains, Order tracks with keystones, previews, respec, new XP rules | L |
 | M3 | Design system and style pivot | the design system, then a bright-world art pass, character restyle, new HUD | L |
 | M4 | Pip's catalogue and Kit Deck | slots, 15-20 items, catalogue UI, Derek's drills | M |
 | M5 | Hub and companions | Crown Gate town, Pip helper, world map | M |
@@ -176,3 +201,5 @@ Equip one item per slot. Items are the CURAPROX range expressed as gameplay. Pip
 4. **Companions:** yes.
    - **Pip** fights alongside the knight: throws paste and hands out help and hints all game.
    - A second companion, **Cusp**, is a tiny living crown. Cusp lights dark rooms, points to secrets and open gaps, and teaches technique with light-touch cues.
+5. **Orders:** one hero with three earned armour sets (Vanguard, Ranger, Bulwark) on one shared rig, replacing the Oath grid and the Crown board. See section 4.
+6. **Story (parked, thinking aloud, not planned):** each Order could have its own ending with the same lesson learnt in a different form: brushing gets you far but you need the interdental brush, the interdental brush needs brushing, and the rinse needs both. In-world habit flavour only, never a health claim.

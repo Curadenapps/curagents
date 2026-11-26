@@ -37,7 +37,7 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
 ## Known gaps (not started; only when Sean asks)
 
 - No `H` (large) gaps placed yet, and Pip doesn't sell the L brush yet.
-- Oath perks feel too small (Sean: "not worth picking"). The fix is the Crown board redesign in `design/PLAN-v2.md`.
+- Oath perks feel too small (Sean: "not worth picking"). Decided fix: the **Orders** (one hero, three armour sets on a shared rig), `design/PLAN-v2.md` section 4 and the style guide's Orders section. Not built in the game yet.
 - Planned in PLAN-v2 and the reviews in `design/reviews/`: Combat 2.0, Crown board, Pip catalogue with real names,
   companions (Pip fights alongside, Cusp the living crown), clean-don't-harm wording pass, dark-to-bright restoration,
   BRISTLE Design System artifact, Tide Ritual mini-game (parked).

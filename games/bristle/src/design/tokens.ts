@@ -9,19 +9,33 @@
 //   `rgba(...)` strings or in a separate number.
 import type { Grade } from '../engine/post';
 import type { BurstOpts } from '../engine/particles';
+import { mix } from '../engine/math';
+import { pack } from './brands';
+
+export { pack };
 
 // ---------------------------------------------------------------------------------------------
-// 1. Brand roots (CURAPROX app design system). Never re-tint these; derive with tints below.
+// 1. Brand roots. Two layers:
+//    - `world`: the dental world's own colours (rinse sky, plaque yellow, citrus, sugar tangerine,
+//      gum orchid). They describe the mouth, not a company, so they stay the same for every brand.
+//    - the brand pack (brands.ts): primary family, ink, signature accent, fonts, products.
+//    `brand` keeps the old key names so existing code reads on: `blue` is the pack's primary,
+//    `cerise` the pack's accent. With the CURAPROX pack every value is exactly what it was.
 // ---------------------------------------------------------------------------------------------
-export const brand = {
-  blue: '#003DA5',      // CURAPROX Blue. The hero's cloak, primary buttons, the one colour that says "us"
-  blue80: '#3364B7', blue60: '#668BC9', blue40: '#99B1DB', blue20: '#CCD8ED',
-  blueDark: '#002E7D',  // in code: player.ts C.blueDk (cloak back)
-  ink: '#0A1F44', ink2: '#132B57',
+export const world = {
+  sky: '#8BB8E8',       // rinse, light, fluor, the hero's visor
+  citrus: '#C4D600', yellow: '#FCE300', tangerine: '#FF8200', orchid: '#F277C6',
   white: '#FFFFFF', grey10: '#EDEDED', grey: '#706F6F',
-  sky: '#8BB8E8',       // Soft Sky. Light, rinse, fluor, the hero's visor
-  citrus: '#C4D600', yellow: '#FCE300', tangerine: '#FF8200', orchid: '#F277C6', cerise: '#E31C79',
 } as const;
+const PC = pack.colour, tint = (k: number) => mix(PC.primary, '#FFFFFF', k);
+export const brand = {
+  blue: PC.primary,     // the pack's primary: hero cloak, primary buttons, brush grip
+  blue80: tint(0.2), blue60: tint(0.4), blue40: tint(0.6), blue20: tint(0.8),
+  blueDark: PC.primaryDark,
+  ink: PC.ink, ink2: PC.ink2,
+  cerise: PC.accent,    // the pack's signature accent
+  ...world,
+};
 
 // ---------------------------------------------------------------------------------------------
 // 2. Ink and backgrounds. The game lives in the dark; these are the floors under every biome.
@@ -110,8 +124,8 @@ export const material = {
   sugar: { // crystals and syrup: warm, faceted, translucent
     hi: '#FFFDF5', crystal: '#FFF4E0', facet: '#FFD08A', syrup: '#FFB347', glow: '#FF8200', deep: '#C25A10', shadow: '#6A2E0C',
   },
-  paste: { // CURAPROX toothpaste the hero throws: clean white with a brand stripe, glossy
-    base: '#F7FBFF', shade: '#D6E2F4', gel: '#BFE3F5', stripe: '#E31C79', stripe2: '#003DA5', glint: '#FFFFFF',
+  paste: { // the brand's toothpaste the hero throws: clean white with the pack's stripes, glossy
+    base: '#F7FBFF', shade: '#D6E2F4', gel: '#BFE3F5', stripe: pack.product.paste.stripe, stripe2: pack.product.paste.stripe2, glint: '#FFFFFF',
   },
   foam: { // in code: RinseWave, Fountain bubbles
     white: '#FFFFFF', tint: '#CCD8ED', sky: '#8BB8E8', body: 'rgba(220,236,255,0.9)',
@@ -133,17 +147,20 @@ export const hero = {
   brush: { handle: '#DFE7F6', grip: brand.blue, head: '#C9D8F2', filament: '#E8F1FF', filamentTip: '#FFFFFF' },
 } as const;
 
-/** Bold handle colours for brush variants and cosmetic unlocks (CS 5460 comes in many). */
-export const brushHandles = [
-  { id: 'curaprox-blue', name: 'Curaprox Blue', handle: brand.blue, filament: '#E8F1FF' },
-  { id: 'cerise', name: 'Cerise', handle: brand.cerise, filament: '#FFE3F0' },
-  { id: 'tangerine', name: 'Tangerine', handle: brand.tangerine, filament: '#FFF0DC' },
-  { id: 'citrus', name: 'Citrus', handle: brand.citrus, filament: '#F6FBD8' },
-  { id: 'orchid', name: 'Orchid', handle: brand.orchid, filament: '#FFE8F6' },
-  { id: 'sky', name: 'Soft Sky', handle: brand.sky, filament: '#FFFFFF' },
-  { id: 'vivid', name: 'Vivid Yellow', handle: brand.yellow, filament: '#FFFBE0' },
-  { id: 'ink', name: 'Night Ink', handle: brand.ink2, filament: '#CCD8ED' },
-] as const;
+/** Bold handle colours for brush variants and cosmetic unlocks. From the brand pack. */
+export const brushHandles = pack.product.handles;
+
+/**
+ * Interdental kit: the holder is the bow, the refill is the arrow. Body and size colours come from the
+ * brand pack (refill base colour = size, as on real refills); wire and filaments are the same for all.
+ */
+export const idb = {
+  holder: { body: pack.product.idb.body, shade: pack.product.idb.shade, hi: pack.product.idb.hi, alpha: 0.82 },
+  wire: '#C9D1DC', wireShade: '#8E99A8', filament: '#FFFFFF', filamentShade: '#D2DDEB',
+  sizes: pack.product.idb.sizes,
+  /** Archer feel (proposal, not in the game yet). Seconds and world units. */
+  shot: { load: 0.18, drawMax: 0.6, speedMin: 520, speedMax: 980, gravityLow: 900, pierceAt: 1, carry: 6 },
+} as const;
 
 // ---------------------------------------------------------------------------------------------
 // 4. Light colours (for g.light and halos). The light map is multiplied x2: #808080 is neutral.
@@ -190,10 +207,8 @@ export const ui = {
 // ---------------------------------------------------------------------------------------------
 // 6. Typography. Futura for anything the game says (uppercase, tracked); Info Display for reading.
 // ---------------------------------------------------------------------------------------------
-export const font = {
-  display: "'Futura LT Pro', Futura, 'Century Gothic', 'Avenir Next', sans-serif", // in code: styles.css --display
-  body: "'Info Display Pro', 'Helvetica Neue', Arial, sans-serif",                // in code: styles.css --body
-  canvas: '"Futura LT Pro", Futura, "Century Gothic", sans-serif',                // in code: hud.ts FONT
+export const font = { // from the brand pack (CURAPROX: Futura LT Pro + Info Display Pro, as styles.css / hud.ts today)
+  display: pack.font.display, body: pack.font.body, canvas: pack.font.canvas,
   weight: { book: 400, bold: 700 },
 } as const;
 
@@ -303,26 +318,43 @@ export const gradeModifier = {
 // ---------------------------------------------------------------------------------------------
 // 10. Particle presets for g.fx.burst(x, y, preset). Spread them and override per call:
 //     g.fx.burst(x, y, { ...particle.dust, n: 8 })
+//     Dental first: every effect should read as something from a bathroom shelf (foam, rinse drops,
+//     bristle flicks, the clean-tooth sparkle, loosened plaque crumbs), never as generic game dust.
+//     `was:` notes name what the game draws today; the game moves to these when it reads the tokens.
 // ---------------------------------------------------------------------------------------------
 const P = (o: BurstOpts) => o;
+/** Mint: the cool fresh note for heals and rinses. Not a brand colour; a tint between sky and citrus. */
+export const mint = { base: '#9FE3F0', hi: '#E6FBFF', deep: '#4FB8C8' } as const;
 export const particle = {
-  dust: P({ n: 8, color: ['#A7B6D6', '#7E8FB7'], speed: [30, 140], angle: -Math.PI / 2, spread: 2.6, size: [2, 4.5], grow: 5, gravity: -60, drag: 4, life: [0.3, 0.6] }), // in code: Player.dust
-  dashPuff: P({ n: 8, color: '#9FB4D9', speed: [40, 160], spread: 1.2, size: [2, 5], life: [0.3, 0.6], grow: 6 }),
-  wallDust: P({ n: 6, color: '#C9D6EE', speed: [40, 140], size: [1.5, 3], life: [0.2, 0.4], spread: 1.5 }),
-  spark: P({ n: 6, color: '#FFFFFF', shape: 'streak', speed: [250, 520], spread: 0.8, size: [1, 2], emissive: true, life: [0.08, 0.18] }), // in code: Enemy.onHit
-  impactRing: P({ n: 1, color: '#FFFFFF', shape: 'ring', speed: [0, 0], size: [4, 4], grow: 300, emissive: true, life: [0.14, 0.14] }),
-  plaqueSplat: P({ n: 12, color: [brand.yellow, brand.citrus, brand.tangerine], speed: [80, 300], size: [2, 4.5], gravity: 900, life: [0.3, 0.7] }), // in code: scrub
-  plaqueBurst: P({ n: 26, color: [brand.yellow, brand.citrus, brand.tangerine], speed: [80, 460], size: [2, 5], gravity: 1000, life: [0.4, 1.0], drag: 1.5 }), // in code: Enemy.die
-  tartarChip: P({ n: 14, color: [material.tartar.bone, material.tartar.base, material.tartar.crust], shape: 'square', speed: [120, 380], size: [1.5, 3.5], gravity: 1100, spin: 18, life: [0.4, 0.9] }),
+  // movement: brushing foam, not dirt
+  dust: P({ n: 7, color: ['#FFFFFF', brand.blue20, brand.sky], shape: 'bubble', speed: [30, 130], angle: -Math.PI / 2, spread: 2.6, size: [1.2, 3], grow: 2, gravity: -50, drag: 4, life: [0.3, 0.6] }), // was: grey-blue dust puffs (Player.dust)
+  dashPuff: P({ n: 10, color: ['#FFFFFF', brand.blue20], shape: 'bubble', speed: [40, 170], spread: 1.2, size: [1.5, 4], life: [0.3, 0.6], grow: 3, drag: 3 }), // was: flat blue puff
+  wallDust: P({ n: 6, color: [mint.base, '#FFFFFF'], shape: 'drop', speed: [60, 160], spread: 1.4, size: [1, 2], gravity: 600, life: [0.25, 0.45] }), // was: dots; now drips off the wall
+  // blade: the brush-blade flicks bristles and foam, it does not cut
+  spark: P({ n: 7, color: ['#FFFFFF', '#E8F1FF', brand.sky], shape: 'bristle', speed: [200, 460], spread: 0.9, size: [1.4, 2.4], spin: 30, drag: 4, emissive: true, life: [0.12, 0.26] }), // was: white streaks (Enemy.onHit)
+  impactRing: P({ n: 1, color: '#FFFFFF', shape: 'ring', speed: [0, 0], size: [4, 4], grow: 300, emissive: true, life: [0.14, 0.14] }), // a ring of foam
+  // plaque is loosened into crumbs and rinsed away, never splattered
+  plaqueSplat: P({ n: 12, color: [brand.yellow, brand.citrus, material.plaque.core], shape: 'crumb', speed: [80, 280], size: [1.6, 3.6], gravity: 900, spin: 8, life: [0.35, 0.75] }), // was: splat dots (scrub)
+  plaqueBurst: P({ n: 22, color: [brand.yellow, brand.citrus, material.plaque.core], shape: 'crumb', speed: [80, 420], size: [2, 4.5], gravity: 1000, spin: 10, life: [0.45, 1.0], drag: 1.5 }), // was: splat dots (Enemy.die)
+  rinseAway: P({ n: 16, color: ['#FFFFFF', brand.blue20, mint.base], shape: 'bubble', speed: [30, 140], angle: -Math.PI / 2, spread: 2.2, size: [1.5, 4.5], gravity: -90, drag: 2, life: [0.6, 1.2] }), // NEW: follows plaqueBurst, the plaque rinses off
+  tartarChip: P({ n: 14, color: [material.tartar.bone, material.tartar.base, material.tartar.crust], shape: 'crumb', speed: [120, 380], size: [1.8, 3.6], gravity: 1100, spin: 18, life: [0.4, 0.9] }), // was: squares
+  // rinse, paste, fountain
   foam: P({ n: 26, color: ['#FFFFFF', brand.sky], shape: 'bubble', speed: [60, 320], size: [2, 6], life: [0.3, 0.9], gravity: -60 }), // in code: RinseWave.pop
+  mouthwash: P({ n: 20, color: [mint.base, brand.sky, '#FFFFFF'], shape: 'drop', speed: [160, 420], spread: 1.1, size: [1.6, 3.2], gravity: 700, drag: 1, life: [0.4, 0.8] }), // NEW: rinse spell spray
   fountain: P({ n: 1, color: brand.blue20, shape: 'bubble', speed: [10, 40], angle: -Math.PI / 2, spread: 0.6, size: [1, 3], gravity: -30, life: [0.8, 1.6], emissive: true }), // in code: Fountain
-  pasteSplat: P({ n: 16, color: [material.paste.base, material.paste.gel, material.paste.stripe], speed: [80, 320], size: [2, 5], gravity: 700, drag: 2.5, life: [0.35, 0.8] }),
+  pasteSplat: P({ n: 16, color: [material.paste.base, material.paste.gel, material.paste.stripe], shape: 'crumb', speed: [80, 320], size: [2, 4.5], gravity: 700, drag: 2.5, spin: 6, life: [0.35, 0.8] }),
   sugar: P({ n: 10, color: [material.sugar.crystal, material.sugar.facet, brand.tangerine], shape: 'square', speed: [60, 260], size: [1, 2.6], gravity: 500, spin: 24, life: [0.4, 1.0], emissive: true }),
-  shine: P({ n: 5, color: brand.yellow, speed: [40, 120], size: [1, 2], life: [0.2, 0.4], emissive: true }), // in code: Shine pickup
-  heal: P({ n: 24, color: [brand.sky, brand.white], speed: [80, 260], size: [1, 2.5], life: [0.3, 0.7], emissive: true }), // in code: focus heal
+  // reward: the clean-tooth sparkle is the game's "ding"
+  shine: P({ n: 4, color: [brand.yellow, '#FFFFFF'], shape: 'sparkle', speed: [30, 100], size: [2, 3.5], spin: 4, life: [0.3, 0.5], emissive: true }), // was: yellow dots (Shine pickup)
+  cleanGlint: P({ n: 3, color: '#FFFFFF', shape: 'sparkle', speed: [10, 60], size: [3, 6], spin: 3, drag: 4, life: [0.45, 0.7], emissive: true }), // NEW: a cleaned gap, a beaten enemy, a clean tooth
+  heal: P({ n: 22, color: [mint.base, mint.hi, brand.sky], shape: 'sparkle', speed: [60, 220], size: [1.5, 3], spin: 4, life: [0.35, 0.75], emissive: true }), // was: sky dots (focus heal)
   relic: P({ n: 60, color: ['#FFFFFF', brand.sky, brand.yellow], speed: [80, 520], size: [1, 3], life: [0.4, 1.2], shape: 'streak', emissive: true }), // in code: Relic
-  hurtShards: P({ n: 18, color: [material.enamel.base, brand.sky, brand.ink2], speed: [150, 420], size: [1.5, 4], gravity: 900, life: [0.3, 0.8], shape: 'square', spin: 20 }), // in code: Player.hurt
-  spore: P({ n: 1, color: [brand.orchid, '#9FE3F0'], speed: [4, 18], angle: -Math.PI / 2, spread: 1.2, size: [0.8, 1.8], gravity: -8, drag: 0.4, life: [3, 6], emissive: true }),
+  // getting hit: a splash of rinse water, never chipped enamel (teeth stay whole)
+  hurtShards: P({ n: 18, color: [brand.sky, '#FFFFFF', brand.blue60], shape: 'drop', speed: [150, 420], size: [1.6, 3.4], gravity: 900, life: [0.3, 0.7] }), // was: enamel shards (Player.hurt)
+  spore: P({ n: 1, color: [brand.orchid, mint.base], speed: [4, 18], angle: -Math.PI / 2, spread: 1.2, size: [0.8, 1.8], gravity: -8, drag: 0.4, life: [3, 6], emissive: true }),
+  // interdental shot (see `idb` below)
+  idbTrail: P({ n: 3, color: ['#FFFFFF', '#E8F1FF'], shape: 'bristle', speed: [10, 60], spread: Math.PI * 2, size: [1, 1.8], spin: 20, drag: 6, life: [0.12, 0.22], emissive: true }), // NEW: behind a flying refill
+  idbHit: P({ n: 10, color: [brand.yellow, brand.citrus, '#FFFFFF'], shape: 'crumb', speed: [90, 300], spread: 1.4, size: [1.5, 3], gravity: 900, spin: 10, life: [0.3, 0.6] }), // NEW: refill strikes plaque
 } as const;
 export type ParticleId = keyof typeof particle;
 

@@ -2,7 +2,8 @@
 // Everything on the page is drawn from the real tokens, the kit, the real Player, the real HUD, the
 // real particle system and the real WebGL post pipeline, so the page cannot drift from the game.
 import * as T from './tokens';
-import { kit, blob, enamel, gumFold, glowEye, crownCap, foamCluster, crystalShard, lightShaft, fogBand, brush, pasteDollop, palateRidges, tongueSurface, salivaPool, glint, silhouetteStrip } from './kit';
+import { packs } from './brands';
+import { kit, idbRefill, idbHolder, blob, enamel, gumFold, glowEye, crownCap, foamCluster, crystalShard, lightShaft, fogBand, brush, pasteDollop, palateRidges, tongueSurface, salivaPool, glint, silhouetteStrip } from './kit';
 import { Player } from '../game/player';
 import { Hud } from '../ui/hud';
 import { Particles, type BurstOpts } from '../engine/particles';
@@ -14,7 +15,9 @@ import type { Light } from '../engine/render';
 
 type Ctx = CanvasRenderingContext2D;
 const PR = Math.min(2, window.devicePixelRatio || 1);
-const B = T.brand, M = T.material;
+const B = T.brand, M = T.material, P = T.pack;
+const famName = (f: string) => f.split(',')[0].replace(/['"]/g, '').trim();
+const FD = famName(P.font.display), FB = famName(P.font.body);
 
 // ---------------------------------------------------------------------------------------------
 // canvas plumbing
@@ -33,7 +36,7 @@ function glowSprite(color: string) {
 }
 function halo(ctx: Ctx, x: number, y: number, r: number, color: string, a: number) { ctx.globalAlpha = a; ctx.drawImage(glowSprite(color), x - r, y - r, r * 2, r * 2); ctx.globalAlpha = 1; }
 /** The slice of Game that Player.draw / drawEmissive / animate touch. */
-const G = { r: { halo }, audio: { sfx() {} }, time: 0 } as unknown as Game;
+const G = { r: { halo }, audio: { sfx() {} }, time: 0, save: { flags: {}, abilities: {} }, progress: { has: () => false } } as unknown as Game;
 
 interface LitScene { ambient: string; grade?: Partial<Grade>; scene(ctx: Ctx): void; emissive?(ctx: Ctx): void; lights?: Light[]; time?: number }
 /** Runs a scene through the game's own composite: scene x light map + emissive, bloom and grade (engine/post.ts). */
@@ -203,13 +206,13 @@ const live: ((dt: number) => void)[] = [];
 // ---------------------------------------------------------------------------------------------
 // sections
 // ---------------------------------------------------------------------------------------------
-const SECTIONS: [string, string][] = [['principles', 'Principles'], ['colour', 'Colour'], ['type', 'Typography'], ['components', 'UI components'], ['materials', 'Materials'], ['kit', 'Drawing kit'], ['hero', 'The hero'], ['light', 'Light and grade'], ['particles', 'Particles'], ['motion', 'Motion and feel'], ['dodont', 'Do and don\'t']];
+const SECTIONS: [string, string][] = [['principles', 'Principles'], ['colour', 'Colour'], ['type', 'Typography'], ['components', 'UI components'], ['materials', 'Materials'], ['kit', 'Drawing kit'], ['hero', 'The hero'], ['options', 'Hero options'], ['orders', 'Orders'], ['idb', 'Interdental kit'], ['light', 'Light and grade'], ['particles', 'Particles'], ['motion', 'Motion and feel'], ['dodont', 'Do and don\'t']];
 const head = (n: number, title: string, lead: string) => `<p class="eyebrow">${String(n).padStart(2, '0')} &nbsp;/&nbsp; ${SECTIONS[n - 1][1]}</p><h2>${title}</h2><p class="lead">${lead}</p>`;
 
 function cover() {
   return `<section class="cover" id="top"><div class="cover-art">${aLit(760, (w, h) => coverScene(w, h), 'cover-canvas')}
   <div class="cover-text" style="top:92px;bottom:auto;display:block">
-    <div class="t1">CURAPROX &nbsp;&middot;&nbsp; Design system v0.1</div>
+    <div class="t1">${P.name} &nbsp;&middot;&nbsp; Design system v0.1</div>
     <h1>BRISTLE</h1><div class="t2">Knight of the Crown</div>
     <p style="max-width:460px;color:var(--mist);margin-top:26px;font-size:16px">The art direction, tokens, drawing kit and rules for a quiet, beautiful action-platformer set inside the Great Smile. Everything on this page is drawn live by the game's own code.</p>
   </div>
@@ -253,7 +256,7 @@ function principles() {
     ['The crown is our motif', 'Molar crowns everywhere: the hero\'s helm, NPC circlets, calcified crowns on tartar creatures, the boss\'s throne. Two cusps for the hero, three for royalty, four for tartar.'],
     ['Light is earned', 'Emissive is for real light sources: eyes, plaque, sparks, relics, fountains. Under 8% of the screen in calm play, 15% in a fight.'],
     ['Soft shapes, stepped shade', 'Quadratic curves, flat fills, one or two hard-edged shade bands, a back rim light and one gloss spot. Hairlines only for fissures and folds.'],
-    ['CURAPROX first', 'Curaprox Blue is the hero and the primary button. Futura uppercase tracked for anything the game says; Info Display for reading. Pill buttons. No emoji.'],
+    ['Brand first, world second', `The brand pack's primary is the hero's cloak and the primary button; the mouth keeps its own colours. ${FD} uppercase tracked for anything the game says; ${FB} for reading. Pill buttons. No emoji.`],
   ];
   return `<section id="principles">${head(1, 'Principles', 'Six rules that decide every pixel. When in doubt, re-read these before reaching for a colour or a glow.')}
   <div class="grid g3">${P.map(([t, d], i) => `<div class="card principle"><div class="n">${String(i + 1).padStart(2, '0')}</div><h4>${t}</h4><p>${d}</p></div>`).join('')}</div>
@@ -300,9 +303,9 @@ function ramp(name: string, desc: string, obj: Record<string, string>, path: str
   return `<div class="ramp"><div class="label"><h4>${name}</h4><p>${desc}</p><p class="mono" style="margin-top:6px">${path}</p></div><div class="chips">${entries.map(([k, v]) => `<div style="background:${v}"><span style="color:${v.startsWith('#') ? onColor(v) : '#fff'}">${k}<br>${v.startsWith('#') ? v.toUpperCase() : ''}</span></div>`).join('')}</div></div>`;
 }
 function colour() {
-  const brandList: [string, string, string][] = [['Curaprox Blue', B.blue, 'brand.blue'], ['Ink', B.ink, 'brand.ink'], ['Ink 2', B.ink2, 'brand.ink2'], ['White', B.white, 'brand.white'], ['Soft Sky', B.sky, 'brand.sky']];
+  const brandList: [string, string, string][] = [[P.name + ' primary', B.blue, 'brand.blue'], ['Ink', B.ink, 'brand.ink'], ['Ink 2', B.ink2, 'brand.ink2'], ['White', B.white, 'brand.white'], ['Soft Sky', B.sky, 'brand.sky']];
   const tints: [string, string, string][] = [['Blue 80', B.blue80, 'brand.blue80'], ['Blue 60', B.blue60, 'brand.blue60'], ['Blue 40', B.blue40, 'brand.blue40'], ['Blue 20', B.blue20, 'brand.blue20'], ['Blue Dark', B.blueDark, 'brand.blueDark'], ['Light grey', B.grey10, 'brand.grey10'], ['Grey', B.grey, 'brand.grey']];
-  const support: [string, string, string][] = [['Citrus', B.citrus, 'brand.citrus'], ['Vivid Yellow', B.yellow, 'brand.yellow'], ['Tangerine', B.tangerine, 'brand.tangerine'], ['Orchid', B.orchid, 'brand.orchid'], ['Cerise', B.cerise, 'brand.cerise']];
+  const support: [string, string, string][] = [['Citrus', B.citrus, 'brand.citrus'], ['Vivid Yellow', B.yellow, 'brand.yellow'], ['Tangerine', B.tangerine, 'brand.tangerine'], ['Orchid', B.orchid, 'brand.orchid'], ['Brand accent', B.cerise, 'brand.cerise']];
   const biomes = (Object.keys(T.biome) as T.BiomeId[]).map((id) => {
     const b = T.biome[id], t = b.terrain;
     const strip = (o: Record<string, string>) => `<div class="strip">${Object.entries(o).map(([k, v]) => `<div style="background:${v}"><span style="color:${onColor(v)}">${k} ${v}</span></div>`).join('')}</div>`;
@@ -311,7 +314,7 @@ function colour() {
   }).join('');
   const lights = Object.entries(T.light).map(([k, v]) => `<div class="card">${a2d(110, (ctx, w, h) => { ctx.fillStyle = '#050B1F'; ctx.fillRect(0, 0, w, h); ctx.globalCompositeOperation = 'lighter'; halo(ctx, w / 2, h / 2, h * 0.9, v, 0.9); halo(ctx, w / 2, h / 2, h * 0.18, '#FFFFFF', 0.3); ctx.globalCompositeOperation = 'source-over'; })}<div class="pad" style="padding:12px 14px"><div class="nm" style="font-family:var(--display);font-size:11px;letter-spacing:.18em;text-transform:uppercase">${k}</div><div class="mono">${v}</div></div></div>`).join('');
   const uiRows: [string, string][] = [['text', T.ui.text], ['primary', T.ui.primary], ['focus', T.ui.focus], ['shine', T.ui.shine], ['danger', T.ui.danger], ['success', T.ui.success]];
-  return `<section id="colour">${head(2, 'Colour', 'CURAPROX roots, then the dark the game lives in, then a ramp for every material in the mouth. Each chip shows its token path; contrast badges mark brand colours that pass WCAG AA for text on white or ink.')}
+  return `<section id="colour">${head(2, 'Colour', 'Brand roots from the ' + P.name + ' pack, then the world colours every brand shares, then the dark the game lives in, then a ramp for every material in the mouth. Each chip shows its token path; contrast badges mark brand colours that pass WCAG AA for text on white or ink.')}
   <h3>Brand roots</h3><div class="grid g5">${brandList.map(([n, x, t]) => swatch(n, x, t, true)).join('')}</div>
   <div class="grid g7" style="grid-template-columns:repeat(7,1fr);margin-top:18px">${tints.map(([n, x, t]) => swatch(n, x, t)).join('')}</div>
   <h3>Supporting colours</h3><div class="grid g5">${support.map(([n, x, t]) => swatch(n, x, t)).join('')}</div>
@@ -341,12 +344,12 @@ function typeSection() {
   };
   const rows = Object.entries(T.type).map(([k, t]) => {
     const fam = t.family === 'display' ? 'var(--display)' : 'var(--body)';
-    return `<div class="type-row"><div class="spec"><b>${k}</b>${t.family === 'display' ? 'Futura LT Pro' : 'Info Display Pro'} ${t.weight === 700 ? 'Bold' : 'Book'}<br>${t.size}px / ${t.lineHeight} &middot; tracking ${t.tracking}em${t.upper ? ' &middot; UPPER' : ''}<br><span style="color:var(--faint)">${t.use}</span></div>
+    return `<div class="type-row"><div class="spec"><b>${k}</b>${t.family === 'display' ? FD : FB} ${t.weight === 700 ? 'Bold' : 'Book'}<br>${t.size}px / ${t.lineHeight} &middot; tracking ${t.tracking}em${t.upper ? ' &middot; UPPER' : ''}<br><span style="color:var(--faint)">${t.use}</span></div>
       <div style="font-family:${fam};font-size:${t.size}px;font-weight:${t.weight};letter-spacing:${t.tracking}em;line-height:${t.lineHeight};text-transform:${t.upper ? 'uppercase' : 'none'}">${sample[k] ?? k}</div></div>`;
   }).join('');
-  return `<section id="type">${head(3, 'Typography', 'Futura LT Pro speaks for the game: uppercase, generously tracked, Book weight. Info Display Pro is for reading: dialogue and descriptions in sentence case. Sizes are CSS px at the HUD\'s 820 px reference height; the HUD scales between 0.7x and 1.4x.')}
-  <div class="grid g2"><div class="card family"><div class="aa" style="font-family:var(--display)">Aa</div><div><h4>Futura LT Pro</h4><p class="glyphs" style="font-family:var(--display);text-transform:uppercase;letter-spacing:.12em">ABCDEFGHIJKLM NOPQRSTUVWXYZ 0123456789</p><p class="mono">font.display &middot; titles, menus, HUD, prompts</p></div></div>
-  <div class="card family"><div class="aa" style="font-family:var(--body)">Aa</div><div><h4>Info Display Pro</h4><p class="glyphs" style="font-family:var(--body)">Abcdefghijklm nopqrstuvwxyz 0123456789 .,;:?!</p><p class="mono">font.body &middot; dialogue, descriptions, help</p></div></div></div>
+  return `<section id="type">${head(3, 'Typography', FD + ' speaks for the game: uppercase, generously tracked, Book weight. ' + FB + ' is for reading: dialogue and descriptions in sentence case. Sizes are CSS px at the HUD\'s 820 px reference height; the HUD scales between 0.7x and 1.4x.')}
+  <div class="grid g2"><div class="card family"><div class="aa" style="font-family:var(--display)">Aa</div><div><h4>${FD}</h4><p class="glyphs" style="font-family:var(--display);text-transform:uppercase;letter-spacing:.12em">ABCDEFGHIJKLM NOPQRSTUVWXYZ 0123456789</p><p class="mono">font.display &middot; titles, menus, HUD, prompts</p></div></div>
+  <div class="card family"><div class="aa" style="font-family:var(--body)">Aa</div><div><h4>${FB}</h4><p class="glyphs" style="font-family:var(--body)">Abcdefghijklm nopqrstuvwxyz 0123456789 .,;:?!</p><p class="mono">font.body &middot; dialogue, descriptions, help</p></div></div></div>
   <h3>Scale</h3>${rows}</section>`;
 }
 
@@ -366,7 +369,7 @@ function charmIcon(kind: string) {
 }
 function components() {
   const shop = [['Interdental Spool', 'Charm. Pogo hits chain into a second bounce.', 'tuft', 180], ['Cerise Handle', 'Brush finish. Purely for looks; Pip swears it is faster.', 'brush', 90], ['Paste Satchel', 'Carry two more paste throws.', 'paste', 240]] as const;
-  return `<section id="components">${head(4, 'UI components', 'The game\'s UI is quiet and premium: dark translucent panels, hairline rings, Futura labels and CURAPROX pill buttons. Glow only marks focus and readiness.')}
+  return `<section id="components">${head(4, 'UI components', 'The game\'s UI is quiet and premium: dark translucent panels, hairline rings, Futura labels and brand pill buttons. Glow only marks focus and readiness.')}
   <h3>Buttons</h3><div class="card"><div class="stage">
     <button class="btn primary">Continue</button><button class="btn primary hover">Hover</button><button class="btn primary focus">Focused</button>
     <button class="btn secondary">Settings</button><button class="btn ghost">Back</button><button class="btn danger">Erase save</button><button class="btn primary" disabled>Disabled</button><button class="btn secondary sm">Small</button>
@@ -403,7 +406,7 @@ function portrait(ctx: Ctx, w: number, h: number) {
   glowEye(ctx, w / 2 - 2.6, h * 1.02 - 28 * 2.6, 1.9 * 2.6, { mode: 'glow', color: '#D8ECFF', halo: 0.3 }); glowEye(ctx, w / 2 + 5 * 2.6, h * 1.02 - 28 * 2.6, 1.9 * 2.6, { mode: 'glow', color: '#D8ECFF', halo: 0.3 });
   ctx.globalCompositeOperation = 'source-over';
 }
-function hudFake(hp: number, maxHp: number, fluor: number, shine: number) { return { state: 'play', player: { hp, maxHp, fluor }, save: { shine }, time: 1.6 } as unknown as GameCore; }
+function hudFake(hp: number, maxHp: number, fluor: number, shine: number) { return { state: 'play', player: { hp, maxHp, fluor, inflamed: 0 }, save: { shine, flags: {}, progress: { level: 3, xp: 30, points: 1, mastery: {}, perks: [] } }, hudHooks: [], time: 1.6 } as unknown as GameCore; }
 function hudMini(hp: number, maxHp: number, fluor: number, shine: number) {
   return (el: HTMLElement, w: number, h: number) => {
     el.style.background = 'radial-gradient(500px 200px at 20% 0%, #1B2A52, #070F2A)';
@@ -431,10 +434,10 @@ function materials() {
     ['Plaque', 'The Film. Glowing, soft, bouncy. Yellow core, citrus spots, tangerine when hot.', (c, w, h) => { bg(c, w, h, '#14101E'); plaqueling(c, w * 0.32, h * 0.86, 2.6, 2); blob(c, w * 0.74, h * 0.62, 30, { color: M.plaque.glow, shade: M.plaque.base, deep: M.plaque.deep, seed: 6, wobble: 0.12, squash: 0.9 }); c.globalCompositeOperation = 'lighter'; halo(c, w * 0.74, h * 0.62, 70, B.yellow, 0.25); plaquelingEm(c, w * 0.32, h * 0.86, 2.6); c.globalCompositeOperation = 'source-over'; }, { core: M.plaque.core, glow: M.plaque.glow, base: M.plaque.base, deep: M.plaque.deep, lime: M.plaque.lime, hot: M.plaque.hot }],
     ['Tartar', 'Calcified plaque. Bone and grey-beige, matte strata, crust nodules, lime glints.', (c, w, h) => { bg(c, w, h, '#1C1A18'); crownCap(c, w * 0.3, h * 0.82, 96, { calcified: true, cusps: 4, seed: 3 }); crownCap(c, w * 0.74, h * 0.82, 70, { calcified: true, cusps: 3, seed: 8 }); }, M.tartar],
     ['Sugar', 'Faceted crystals with a warm syrup core. Sparkle, never sticky-looking.', (c, w, h) => { bg(c, w, h, '#220E06'); c.globalCompositeOperation = 'source-over'; crystalShard(c, w * 0.35, h * 0.92, 120, { cluster: 3, seed: 2 }); crystalShard(c, w * 0.74, h * 0.92, 80, { cluster: 2, seed: 5, angle: 0.2 }); glint(c, w * 0.36, h * 0.2, 7); }, M.sugar],
-    ['Paste', 'CURAPROX toothpaste: glossy white with a brand stripe. The hero\'s thrown weapon.', (c, w, h) => { bg(c, w, h, '#0B1A40'); pasteDollop(c, w * 0.36, h * 0.86, 90); pasteDollop(c, w * 0.74, h * 0.8, 54, { stripe: B.tangerine, stripe2: B.sky, tilt: 0.15 }); }, M.paste],
+    ['Paste', 'The brand\'s toothpaste: glossy white with its stripes. The hero\'s thrown weapon.', (c, w, h) => { bg(c, w, h, '#0B1A40'); pasteDollop(c, w * 0.36, h * 0.86, 90); pasteDollop(c, w * 0.74, h * 0.8, 54, { stripe: B.tangerine, stripe2: B.sky, tilt: 0.15 }); }, M.paste],
     ['Foam', 'Paste and rinse foam: bubble domes with a sky edge and a white gloss.', (c, w, h) => { bg(c, w, h, '#0B1A40'); foamCluster(c, w * 0.35, h * 0.8, 52, { seed: 2, count: 18 }); foamCluster(c, w * 0.76, h * 0.8, 32, { seed: 8 }); }, M.foam],
     ['Rinse and saliva', 'Cool clear water: fountains, pools, the Rinse wave. Bright surface line.', (c, w, h) => { bg(c, w, h, '#0A1838'); salivaPool(c, w / 2, h * 0.52, w * 0.8, { depth: 50, seed: 3 }); }, { pool: M.saliva.pool, surface: M.saliva.surface, deep: M.saliva.deep, glow: M.rinse.glow }],
-    ['Brush (CS 5460 style)', 'Slim octagonal handle in a bold colour, compact head, dense fine filaments.', (c, w, h) => { bg(c, w, h, '#0B1A40'); brush(c, w * 0.08, h * 0.38, w * 0.86, { handle: B.blue }); brush(c, w * 0.08, h * 0.72, w * 0.86, { handle: B.cerise }); }, T.hero.brush as unknown as Record<string, string>],
+    ['Brush (' + P.product.brush + ' style)', 'Slim octagonal handle in a bold colour, compact head, dense fine filaments.', (c, w, h) => { bg(c, w, h, '#0B1A40'); brush(c, w * 0.08, h * 0.38, w * 0.86, { handle: B.blue }); brush(c, w * 0.08, h * 0.72, w * 0.86, { handle: B.cerise }); }, T.hero.brush as unknown as Record<string, string>],
   ];
   return `<section id="materials">${head(5, 'Materials', 'Every surface in the mouth is one of these materials, drawn with the kit. The chips under each card are the material ramp from tokens.ts.')}
   <div class="grid g4">${cards.map(([n, d, fn, r]) => `<div class="card">${a2d(190, fn)}<div class="ramp" style="display:block;padding:0;border:0"><div class="chips" style="border-radius:0;height:26px">${Object.values(r).filter((v) => typeof v === 'string').map((v) => `<div style="background:${v}"></div>`).join('')}</div></div><div class="pad"><h4>${n}</h4><p>${d}</p></div></div>`).join('')}</div></section>`;
@@ -453,7 +456,7 @@ function kitSection() {
     ['crystalShard', 'faceted shards and clusters', 'crystalShard(ctx, x, yBase, length, { angle, cluster })', (c, w, h) => { bg(c, w, h, '#1A0B05'); crystalShard(c, w * 0.18, h * 0.9, 100); crystalShard(c, w * 0.52, h * 0.9, 110, { cluster: 3, seed: 4 }); crystalShard(c, w * 0.84, h * 0.9, 90, { lit: M.tartar.hi, dark: M.tartar.base, core: B.citrus, angle: -0.2, glow: false }); }],
     ['lightShaft', 'beams with drifting motes', 'lightShaft(ctx, x, yTop, length, { angle, width, color })', (c, w, h) => { bg(c, w, h, '#050B1F'); lightShaft(c, w * 0.3, -6, h + 10, { width: 26, alpha: 0.45, motes: 14 }); lightShaft(c, w * 0.7, -6, h + 10, { width: 20, alpha: 0.4, color: B.orchid, angle: -0.2, seed: 6 }); }],
     ['fogBand', 'wavy haze between planes', 'fogBand(ctx, x, yCentre, height, { width, color, alpha })', (c, w, h) => { bg(c, w, h, '#050B1F'); silhouetteStrip(c, w / 2, h * 0.7, h * 0.5, { width: w, color: '#12224A', seed: 2 }); fogBand(c, w / 2, h * 0.62, h * 0.4, { width: w, alpha: 0.3 }); fogBand(c, w / 2, h * 0.9, h * 0.25, { width: w, color: B.orchid, alpha: 0.25, seed: 9 }); }],
-    ['brush', 'CS 5460 style brush-blade', 'brush(ctx, x, y, length, { angle, handle, filament })', (c, w, h) => { bg(c, w, h, '#0B1633'); brush(c, w * 0.1, h * 0.35, w * 0.8, { handle: B.tangerine }); brush(c, w * 0.1, h * 0.75, w * 0.8, { handle: B.citrus }); }],
+    ['brush', P.product.brush + ' style brush-blade', 'brush(ctx, x, y, length, { angle, handle, filament })', (c, w, h) => { bg(c, w, h, '#0B1633'); brush(c, w * 0.1, h * 0.35, w * 0.8, { handle: B.tangerine }); brush(c, w * 0.1, h * 0.75, w * 0.8, { handle: B.citrus }); }],
     ['pasteDollop', 'the thrown toothpaste', 'pasteDollop(ctx, x, yBase, width, { stripe, stripe2 })', (c, w, h) => { bg(c, w, h, '#0B1633'); pasteDollop(c, w * 0.3, h * 0.85, 70); pasteDollop(c, w * 0.72, h * 0.85, 56, { stripe: B.citrus, stripe2: B.orchid }); }],
     ['palateRidges', 'rugae ceiling', 'palateRidges(ctx, x, y, height, { width, ridges })', (c, w, h) => { bg(c, w, h, '#1F0A24'); palateRidges(c, w / 2, h / 2, h * 0.6, { width: w - 30 }); }],
     ['tongueSurface', 'tongue landscape', 'tongueSurface(ctx, x, yTop, height, { width, humps })', (c, w, h) => { bg(c, w, h, '#1F0A24'); tongueSurface(c, w / 2, h * 0.4, h * 0.6, { width: w, humps: 2 }); }],
@@ -478,11 +481,11 @@ function heroSection() {
   };
   const brushes = T.brushHandles.map((b) => `<div style="display:grid;grid-template-columns:1fr 130px;align-items:center;gap:12px">${a2d(44, (c, w, h) => brush(c, 6, h * 0.62, w - 12, { handle: b.handle, filament: b.filament }))}<span class="mono">${b.name}<br>${b.handle}</span></div>`).join('');
   const chips = Object.entries(T.hero).filter(([, v]) => typeof v === 'string').map(([k, v]) => `<div style="display:flex;align-items:center;gap:10px;font-size:12.5px"><span class="chipdot" style="background:${v};width:22px;height:22px;border-radius:6px"></span><span>${k}</span><span class="mono" style="margin-left:auto">${v}</span></div>`).join('');
-  return `<section id="hero">${head(7, 'The hero', 'Bristle, last knight of the Order of the 5,460. Drawn by the real Player class from src/game/player.ts, posed by setting its fields (facing, velocity, slash, focus, squash) and run through the game\'s lighting. Enamel crown helm with two cusps, Curaprox-blue cloak, sky visor, the brush-blade.')}
+  return `<section id="hero">${head(7, 'The hero', 'Bristle, last knight of the ' + T.pack.product.order + '. Drawn by the real Player class from src/game/player.ts, posed by setting its fields (facing, velocity, slash, focus, squash) and run through the game\'s lighting. Enamel crown helm with two cusps, brand-primary cloak, sky visor, the brush-blade.')}
   <h3>Pose sheet</h3><div class="grid g6">${P.map(([p, n, d]) => `<div class="card pose">${aLit(200, tile(p))}<div class="lbl">${n}<small>${d}</small></div></div>`).join('')}</div>
   <h3>Proportions and hit boxes</h3>
   <div class="grid" style="grid-template-columns:1.25fr 1fr;gap:18px;align-items:start"><div class="card">${a2d(470, proportions)}<div class="pad"><p>One tile is 32 units; the camera shows 17 tiles of height. The hero is 42 units of body plus a 10-unit crown: about 1.6 tiles. The helm is a third of the height, which keeps the crown readable at any zoom. Blue box: hurt box (10 x 21 half extents). Sky: side slash reach (42 forward, 40 x 26). Dashed: up and down slash.</p></div></div>
-  <div class="card"><div class="pad"><h4>Hero palette</h4><div style="display:grid;gap:8px;margin-top:12px">${chips}</div></div><div class="pad" style="border-top:1px solid var(--hair)"><h4>Brush handle variants</h4><p>CS 5460 comes in many bold colours: handle finishes are a natural cosmetic unlock (tokens.brushHandles).</p><div style="display:grid;gap:4px;margin-top:10px">${brushes}</div></div></div></div>
+  <div class="card"><div class="pad"><h4>Hero palette</h4><div style="display:grid;gap:8px;margin-top:12px">${chips}</div></div><div class="pad" style="border-top:1px solid var(--hair)"><h4>Brush handle variants</h4><p>${T.pack.product.brush} comes in many bold colours: handle finishes are a natural cosmetic unlock (tokens.brushHandles).</p><div style="display:grid;gap:4px;margin-top:10px">${brushes}</div></div></div></div>
   </section>`;
 }
 function proportions(ctx: Ctx, w: number, h: number) {
@@ -503,11 +506,372 @@ function proportions(ctx: Ctx, w: number, h: number) {
   ctx.fillText('1 TILE = 32 U', 14, 22);
 }
 
+// ---- hero options ----
+// Three deviations of today's knight. Same crown helm and visor glow, no face. What changes is the body
+// (knight proportions: about 2.5-3 heads instead of 1.6), the helm's silhouette and the dental gear.
+// Feet at (0,0), facing right, about 58 units tall. mode 'scene' draws the body, 'glow' the emissive parts.
+type KMode = 'scene' | 'glow';
+const KE = { base: '#F3F6FC', shade: '#C7D3EA', deep: '#9FB0D0', stroke: '#8FA3C9', gloss: '#FFFFFF', cloth: '#18244A', leg: '#121A36', boot: '#0B1128' };
+/** Enamel plate in the house style: flat fill, one stepped shade on the back side, hairline outline, one gloss spot. */
+function plate(ctx: Ctx, path: Path2D, o: { base?: string; shade?: string; sx: number; sy: number; sr: number; gloss?: [number, number, number, number] }) {
+  ctx.fillStyle = o.base ?? KE.base; ctx.fill(path);
+  ctx.save(); ctx.clip(path); ctx.fillStyle = o.shade ?? KE.shade; ctx.beginPath(); ctx.rect(-200, -200, 400, 400); ctx.arc(o.sx, o.sy, o.sr, 0, TAU, true); ctx.fill('evenodd');
+  if (o.gloss) { ctx.globalAlpha = 0.85; ctx.fillStyle = KE.gloss; ctx.beginPath(); ctx.ellipse(o.gloss[0], o.gloss[1], o.gloss[2], o.gloss[3], -0.35, 0, TAU); ctx.fill(); }
+  ctx.restore(); ctx.strokeStyle = KE.stroke; ctx.lineWidth = 0.9; ctx.stroke(path);
+}
+function poly(pts: number[]) { const p = new Path2D(); p.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) p.lineTo(pts[i], pts[i + 1]); p.closePath(); return p; }
+/** A plume or tuft of filaments: white roots, coloured tips, swept by `sweep` (radians, negative = backwards). */
+function plume(ctx: Ctx, x: number, y: number, len: number, tip: string, n: number, a0: number, a1: number, curl: number) {
+  ctx.lineCap = 'round';
+  for (let i = 0; i < n; i++) {
+    const t = i / (n - 1), a = a0 + (a1 - a0) * t, L = len * (0.8 + 0.25 * Math.sin(i * 2.3)), ex = x + Math.cos(a) * L, ey = y + Math.sin(a) * L;
+    const cx = x + Math.cos(a - curl) * L * 0.55, cy = y + Math.sin(a - curl) * L * 0.55;
+    ctx.lineWidth = 1.1; ctx.strokeStyle = i % 2 ? '#FFFFFF' : '#E3ECF8'; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(cx, cy, (cx + ex) / 2, (cy + ey) / 2); ctx.stroke();
+    ctx.strokeStyle = tip; ctx.beginPath(); ctx.moveTo((cx + ex) / 2, (cy + ey) / 2); ctx.quadraticCurveTo(ex - Math.cos(a) * 1, ey, ex, ey); ctx.stroke();
+  }
+}
+function legsK(ctx: Ctx, hip: number, len: number, w: number, back: [number, number], front: [number, number], boot: string, knee: boolean) {
+  for (const [hx, fx, col] of [[back[0], back[1], '#0D1430'], [front[0], front[1], KE.leg]] as [number, number, string][]) {
+    ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hx, hip); ctx.quadraticCurveTo((hx + fx) / 2, hip + len * 0.5, fx, -3); ctx.stroke();
+    if (knee) plate(ctx, (() => { const p = new Path2D(); p.ellipse((hx + fx) / 2 + 0.6, hip + len * 0.5, w * 0.62, w * 0.75, 0, 0, TAU); return p; })(), { sx: (hx + fx) / 2 + 1.5, sy: hip + len * 0.5 - 1, sr: w * 0.7 });
+    const b = new Path2D(); b.moveTo(fx - w * 0.75, -4.5); b.quadraticCurveTo(fx - w * 0.9, 0, fx - w * 0.6, 0); b.lineTo(fx + w * 1.7, 0); b.quadraticCurveTo(fx + w * 1.7, -2.6, fx + w * 0.5, -4.2); b.closePath();
+    ctx.fillStyle = col === KE.leg ? boot : mix(boot, '#000000', 0.25); ctx.fill(b);
+  }
+}
+function visorGlow(ctx: Ctx, path: Path2D, hx: number, hy: number, r: number) {
+  halo(ctx, hx, hy, r * 0.7, B.sky, 0.3); ctx.globalAlpha = 0.55; ctx.fillStyle = B.sky; ctx.fill(path); ctx.globalAlpha = 1;
+}
+
+// A. Vanguard: today's hero grown up. Taller coronet helm with a T-visor, a bristle plume, incisor pauldrons,
+//    brand tabard with the white stripe, half cape, the brush-blade carried as a longsword.
+function knightVanguard(ctx: Ctx, mode: KMode) {
+  const pr = B.blue, dk = B.blueDark;
+  const visor = poly([-0.5, -48.6, 8.8, -48.6, 8.8, -46.6, 4.6, -46.6, 4.6, -41.8, 2.6, -41.8, 2.6, -46.6, -0.5, -46.6]);
+  if (mode === 'glow') { visorGlow(ctx, visor, 4.5, -47, 18); halo(ctx, 14, 0, 10, B.sky, 0.35); return; }
+  const cape = new Path2D(); cape.moveTo(-5, -38); cape.quadraticCurveTo(-19, -28, -19, -6); cape.lineTo(-15, -8); cape.lineTo(-12, -4); cape.lineTo(-9, -8); cape.lineTo(-6, -5); cape.quadraticCurveTo(-5, -22, 1, -37); cape.closePath();
+  ctx.fillStyle = dk; ctx.fill(cape); ctx.strokeStyle = pr; ctx.lineWidth = 1.2; ctx.stroke(cape);
+  legsK(ctx, -20, 17, 4.6, [-3.2, -5.5], [2.6, 4.5], KE.cloth, true);
+  ctx.fillStyle = KE.cloth; ctx.beginPath(); ctx.roundRect(-8, -38, 16, 19, 4); ctx.fill();
+  plate(ctx, (() => { const p = new Path2D(); p.moveTo(-8.4, -37.5); p.quadraticCurveTo(-10, -29, -7, -22); p.lineTo(7.5, -22); p.quadraticCurveTo(10.2, -29, 8.4, -37.5); p.quadraticCurveTo(0, -39.6, -8.4, -37.5); return p; })(), { sx: 3, sy: -33, sr: 10.5, gloss: [4.5, -34.5, 2.4, 1.1] });
+  const tab = poly([-4.6, -33, 4.6, -33, 5.6, -13, 0, -9.5, -5.6, -13]); ctx.fillStyle = pr; ctx.fill(tab);
+  ctx.save(); ctx.clip(tab); ctx.fillStyle = dk; ctx.fillRect(-6, -33, 3.2, 24); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-6, -17.5, 12, 1.7); ctx.restore();
+  ctx.fillStyle = B.ink; ctx.fillRect(-8.2, -22.4, 16.4, 2.6); crownCap(ctx, 0, -20, 5.4, { cusps: 3 });
+  plate(ctx, (() => { const p = new Path2D(); p.ellipse(-8.2, -35.5, 3.8, 4.6, 0.3, 0, TAU); return p; })(), { base: KE.shade, shade: KE.deep, sx: -7, sy: -37, sr: 3.6 });
+  brush(ctx, 9, -25, 32, { angle: 1.32, handle: pr });
+  ctx.strokeStyle = KE.cloth; ctx.lineWidth = 4.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(7.5, -34); ctx.quadraticCurveTo(11, -30, 9.5, -25.5); ctx.stroke();
+  plate(ctx, (() => { const p = new Path2D(); p.roundRect(7, -28, 5.6, 5.4, 2); return p; })(), { sx: 10, sy: -27, sr: 3.4 });
+  plate(ctx, (() => { const p = new Path2D(); p.moveTo(4.5, -38.5); p.quadraticCurveTo(13.5, -40, 13, -33); p.quadraticCurveTo(12.4, -30.2, 9.2, -30.4); p.quadraticCurveTo(5, -31, 4.5, -38.5); return p; })(), { sx: 10, sy: -38, sr: 5, gloss: [8.8, -37, 1.8, 0.8] });
+  plume(ctx, -5.5, -56, 15, pr, 11, -2.2, -3.6, -0.5);
+  ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -38.6, 8.6, 2.2, 0, 0, TAU); ctx.fill();
+  const helm = new Path2D(); helm.moveTo(-9, -39.5); helm.quadraticCurveTo(-11.4, -47, -9.6, -52.5); helm.quadraticCurveTo(-9, -59.6, -5.6, -54.6); helm.quadraticCurveTo(-3.6, -60.4, -1, -55.2);
+  helm.quadraticCurveTo(1.8, -60.4, 4.2, -55); helm.quadraticCurveTo(7.6, -59.2, 9, -52.4); helm.quadraticCurveTo(11.4, -46, 9.8, -39.5); helm.quadraticCurveTo(0.4, -37.4, -9, -39.5); helm.closePath();
+  plate(ctx, helm, { sx: 5, sy: -50, sr: 11.5, gloss: [5, -53.5, 2.6, 1.2] });
+  ctx.strokeStyle = 'rgba(120,140,185,0.75)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(-3.6, -55); ctx.quadraticCurveTo(-3, -52.5, -1.5, -51.5); ctx.moveTo(1.8, -55); ctx.quadraticCurveTo(1.2, -52.5, -0.4, -51.5); ctx.stroke();
+  ctx.fillStyle = B.ink; ctx.fill(visor);
+}
+
+// B. Ranger: the archer of the Order. A swept canine-tooth sallet with an angled slit, a short hooded mantle
+//    lined in gum pink, a bandolier of refills, a quiver on the back, the ring holder raised like a bow.
+function knightRanger(ctx: Ctx, mode: KMode) {
+  const pr = B.blue, dk = B.blueDark, S = T.idb.sizes;
+  const slit = poly([0.5, -48.4, 9.4, -51.6, 9.6, -49.4, 0.5, -46.6]);
+  if (mode === 'glow') { visorGlow(ctx, slit, 5, -49, 16); halo(ctx, 24, -33, 12, '#FFFFFF', 0.3); return; }
+  ctx.save(); ctx.translate(-7.5, -27); ctx.rotate(-0.6); ctx.fillStyle = dk; ctx.beginPath(); ctx.roundRect(-2.6, -12, 5.2, 18, 2); ctx.fill();
+  [S.s, S.m, S.l].forEach((z, i) => idbRefill(ctx, -1.3 + i * 1.3, -11, 7, { col: z.col, angle: -0.1 + i * 0.1 })); ctx.restore();
+  const scarf = new Path2D(); scarf.moveTo(-4, -38); scarf.quadraticCurveTo(-14, -36, -22, -30); scarf.lineTo(-20, -27.5); scarf.quadraticCurveTo(-13, -32, -4, -35); scarf.closePath(); ctx.fillStyle = B.cerise; ctx.fill(scarf);
+  legsK(ctx, -21, 18, 3.8, [-2.6, -7.5], [2.2, 6], KE.base, false);
+  ctx.fillStyle = pr; ctx.fillRect(-9.4, -8.5, 4, 2); ctx.fillRect(4.2, -8.5, 4, 2);
+  const jer = new Path2D(); jer.moveTo(-6.5, -36); jer.quadraticCurveTo(-8, -28, -6.5, -19); jer.lineTo(6.5, -19); jer.quadraticCurveTo(8, -28, 6.5, -36); jer.closePath(); ctx.fillStyle = KE.cloth; ctx.fill(jer);
+  ctx.strokeStyle = B.ink2; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(-6, -35); ctx.lineTo(6, -21); ctx.stroke();
+  [S.s, S.m, S.l, S.m].forEach((z, i) => { ctx.fillStyle = z.col; ctx.beginPath(); ctx.roundRect(-4.6 + i * 3, -33.6 + i * 3.5, 2, 2.8, 0.6); ctx.fill(); });
+  ctx.fillStyle = B.ink; ctx.fillRect(-6.8, -20.8, 13.6, 2.2);
+  const mantle = new Path2D(); mantle.moveTo(-8.5, -38.5); mantle.quadraticCurveTo(-11.5, -33, -9.5, -29); for (let i = 0; i < 4; i++) mantle.quadraticCurveTo(-7.4 + i * 4.6, -26.4, -5 + i * 4.6, -29.2); mantle.quadraticCurveTo(11, -33, 8.4, -38.5); mantle.quadraticCurveTo(0, -41, -8.5, -38.5); mantle.closePath();
+  ctx.fillStyle = B.orchid; ctx.save(); ctx.translate(0, 1.1); ctx.fill(mantle); ctx.restore(); ctx.fillStyle = pr; ctx.fill(mantle);
+  ctx.save(); ctx.clip(mantle); ctx.fillStyle = dk; ctx.fillRect(-12, -40, 6, 14); ctx.restore();
+  ctx.strokeStyle = KE.cloth; ctx.lineWidth = 3.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(6, -35); ctx.lineTo(16, -33.5); ctx.stroke();
+  idbHolder(ctx, 21, -33, 22, { angle: Math.PI / 2, loaded: S.m.col });
+  plate(ctx, (() => { const p = new Path2D(); p.roundRect(14.5, -35.6, 5, 4.6, 1.8); return p; })(), { sx: 17, sy: -35, sr: 3 });
+  const helm = new Path2D(); helm.moveTo(-7.5, -40); helm.quadraticCurveTo(-10.5, -45, -15.5, -47.5); helm.quadraticCurveTo(-12, -50, -9, -50.6); helm.quadraticCurveTo(-6.5, -59.6, 1.5, -61);
+  helm.quadraticCurveTo(9, -57, 9.6, -48); helm.quadraticCurveTo(10, -42, 7, -39.6); helm.quadraticCurveTo(0, -38.4, -7.5, -40); helm.closePath();
+  plate(ctx, helm, { sx: 4, sy: -49, sr: 10.5, gloss: [4.2, -55, 2.2, 1] });
+  ctx.strokeStyle = 'rgba(120,140,185,0.75)'; ctx.lineWidth = 0.7; ctx.beginPath(); ctx.moveTo(1, -60); ctx.quadraticCurveTo(-3, -52, -9, -49.8); ctx.stroke();
+  ctx.fillStyle = B.ink; ctx.fill(slit);
+}
+
+// C. Bulwark: the shield of the Order. Short and broad, a flat-cusped molar helm with a bristle-bar visor,
+//    molar-cusp pauldrons, a round crown shield in the brand colour, the brush-blade slung across the back.
+function knightBulwark(ctx: Ctx, mode: KMode) {
+  const pr = B.blue, dk = B.blueDark;
+  const bars = new Path2D(); for (let i = 0; i < 5; i++) bars.roundRect(-0.6 + i * 2.2, -48.5, 1.2, 6.4, 0.6);
+  if (mode === 'glow') { visorGlow(ctx, bars, 4, -45.5, 17); return; }
+  brush(ctx, -14, -16, 40, { angle: -0.95, handle: pr });
+  const cape = new Path2D(); cape.moveTo(-10, -37); cape.quadraticCurveTo(-15, -22, -13, -8); cape.lineTo(9, -8); cape.quadraticCurveTo(11, -22, 9, -37); cape.closePath(); ctx.fillStyle = dk; ctx.fill(cape);
+  legsK(ctx, -17, 13, 5.6, [-4, -6.5], [3.6, 5], KE.cloth, true);
+  const chest = new Path2D(); chest.moveTo(-10.5, -37); chest.quadraticCurveTo(-13, -27, -9.5, -17.5); chest.lineTo(9.5, -17.5); chest.quadraticCurveTo(13, -27, 10.5, -37); chest.quadraticCurveTo(0, -40, -10.5, -37); chest.closePath();
+  plate(ctx, chest, { sx: 4, sy: -31, sr: 13, gloss: [5, -33.5, 2.6, 1.2] });
+  ctx.save(); ctx.clip(chest); ctx.fillStyle = pr; ctx.fillRect(-14, -27.5, 28, 6); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-14, -23.2, 28, 1.4); ctx.restore();
+  for (const [sx, k] of [[-11, -1], [11, 1]] as [number, number][]) { // molar-cusp pauldrons
+    const p = new Path2D(); p.moveTo(sx - 5.5, -33); p.quadraticCurveTo(sx - 6.5, -40, sx - 3, -40); p.quadraticCurveTo(sx - 1.5, -42.6, sx, -40.2); p.quadraticCurveTo(sx + 1.6, -42.6, sx + 3, -40); p.quadraticCurveTo(sx + 6.5, -40, sx + 5.5, -33); p.quadraticCurveTo(sx, -31, sx - 5.5, -33); p.closePath();
+    plate(ctx, p, k < 0 ? { base: KE.shade, shade: KE.deep, sx: sx + 2, sy: -38, sr: 5 } : { sx: sx + 1.5, sy: -38, sr: 5.5, gloss: [sx + 1.5, -38.6, 1.6, 0.8] });
+  }
+  const shield = new Path2D(); shield.arc(10, -20, 9.5, 0, TAU);
+  plate(ctx, shield, { sx: 12, sy: -22, sr: 9 }); const field = new Path2D(); field.arc(10, -20, 7.6, 0, TAU); ctx.fillStyle = pr; ctx.fill(field);
+  ctx.save(); ctx.clip(field); ctx.fillStyle = dk; ctx.beginPath(); ctx.arc(6, -16, 9, 0, TAU); ctx.fill(); ctx.restore(); crownCap(ctx, 10, -16.5, 9, { cusps: 3 });
+  ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -38.4, 9.2, 2.2, 0, 0, TAU); ctx.fill();
+  const helm = new Path2D(); helm.moveTo(-10.5, -39); helm.quadraticCurveTo(-12.5, -46, -10.5, -51); helm.quadraticCurveTo(-8.5, -55.4, -5.4, -52.8); helm.quadraticCurveTo(-3, -55.6, -0.4, -53);
+  helm.quadraticCurveTo(2.4, -55.6, 5, -52.8); helm.quadraticCurveTo(8.6, -55.2, 10.6, -50.6); helm.quadraticCurveTo(12.6, -45, 10.8, -39); helm.quadraticCurveTo(0, -36.6, -10.5, -39); helm.closePath();
+  plate(ctx, helm, { sx: 5, sy: -47, sr: 12.5, gloss: [6, -51, 2.6, 1.1] });
+  ctx.fillStyle = B.ink; ctx.beginPath(); ctx.roundRect(-1.8, -49.4, 12, 8.2, 2.2); ctx.fill();
+  ctx.fillStyle = mix(B.ink, '#FFFFFF', 0.25); ctx.fill(bars);
+}
+function heroOptions() {
+  const tile = (fn: (c: Ctx, m: KMode) => void) => (ctx: Ctx, w: number, h: number) => { // flat sketch: no bloom, so shapes and slits stay readable
+    const s = Math.min(3.6, w / 46), x = w * 0.44, gy = h * 0.9, tx = w - 26;
+    const put = (m: KMode, px: number, k: number) => { ctx.save(); ctx.translate(px, gy); ctx.scale(k, k); fn(ctx, m); ctx.restore(); };
+    const g = ctx.createRadialGradient(x, h * 0.45, 10, x, h * 0.45, w); g.addColorStop(0, '#22365F'); g.addColorStop(1, '#070F2A'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#132B57'; ctx.fillRect(0, gy, w, h - gy); ctx.fillStyle = 'rgba(201,214,238,0.35)'; ctx.fillRect(0, gy, w, 1.5);
+    put('scene', x, s); ctx.globalCompositeOperation = 'lighter'; put('glow', x, s); ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = 'rgba(204,216,237,0.3)'; ctx.lineWidth = 1; ctx.strokeRect(tx - 16, gy - 32, 32, 32); put('scene', tx, 1);
+    ctx.fillStyle = 'rgba(232,238,249,0.6)'; ctx.font = `10px ${T.font.display}`; ctx.textAlign = 'center'; ctx.fillText('1 TILE', tx, gy + 14);
+  };
+  const today = (w: number, h: number): LitScene => { const s = Math.min(3.6, w / 46), x = w * 0.5, gy = h * 0.9; return { ambient: '#4A5068', grade: { vignette: 0.45, bloom: 0.4, bloomThreshold: 0.82 }, lights: heroLights('idle', x, gy, s / 2.6, 0.35),
+    scene(ctx) { const g = ctx.createRadialGradient(x, h * 0.45, 10, x, h * 0.45, w); g.addColorStop(0, '#1A2747'); g.addColorStop(1, '#070F2A'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#132B57'; ctx.fillRect(0, gy, w, h - gy); hero(ctx, 'idle', x, gy, s); },
+    emissive(ctx) { heroEm(ctx, 'idle', x, gy, s); } }; };
+  const O: [string, string, (c: Ctx, m: KMode) => void, string, string][] = [
+    ['A', 'Vanguard', knightVanguard, 'Today\'s knight grown up. The helm keeps its four cusps but rises into a coronet, with a T-visor instead of the horizontal slit and a bristle plume off the back cusp. Incisor-shaped shoulder plates, a breastplate over the brand tabard with the white stripe, a half cape, and the brush-blade carried point down like a longsword.', 'The safest step: everyone still reads the same hero. The T-visor and plume carry the originality.'],
+    ['B', 'Ranger', knightRanger, 'The archer of the Order, built around the interdental bow. A swept canine-tooth sallet with an angled slit, a short hooded mantle lined in gum pink, a bandolier and quiver of colour-coded refills, tall boots, and the ring holder raised to shoot.', 'Most original silhouette and the best fit for the shot mechanic. The slimmest build, so it needs strong poses to feel heroic.'],
+    ['C', 'Bulwark', knightBulwark, 'The shield of the Order. Short and broad, with a flat-cusped molar helm and a visor of glowing bristle bars. Molar-cusp shoulder plates, a round shield in the brand colour with the crown on it, and the brush-blade slung across the back.', 'Reads instantly at 1 tile and feels sturdy and safe. The heaviest look, so it moves slower and plays less nimbly than today.'],
+  ];
+  return `<section id="options">${head(8, 'Hero options', 'Three deviations of today\'s knight. The crown helm and visor glow stay; there is no face. Each one fixes the body (knight proportions, about 2.5-3 heads tall instead of 1.6, real armour) and gives the helm its own silhouette, with dental gear in place of borrowed shapes. Large figure for the look, small one at 1 tile for the read in game. Sketches, not final art.')}
+  <div class="grid" style="grid-template-columns:0.7fr 1fr 1fr 1fr;gap:18px">
+  <div class="card">${aLit(380, today)}<div class="pad"><h4>Today</h4><p>For comparison: 1.6 tiles, helm about a third of the height on a small body. The round helm and horizontal visor are what read as a mask.</p></div></div>
+  ${O.map(([k, n, fn, d, trade]) => `<div class="card">${a2d(380, tile(fn))}<div class="pad"><h4>${k} &nbsp;&middot;&nbsp; ${n}</h4><p>${d}</p><p><b>Trade-off</b> ${trade}</p></div></div>`).join('')}</div></section>`;
+}
+
+// ---- orders ----
+// One hero, one rig, three earned armour sets (Orders) plus the Initiate the game starts with.
+// The rig owns the skeleton (legs, torso, arms, gauntlets, collar) and draws in a fixed order; a set only
+// fills slots: back, chest, shoulders, weapon, front, helm, boots. Feet at (0,0), facing right.
+type V2 = [number, number];
+interface OrderSet {
+  id: 'initiate' | 'vanguard' | 'ranger' | 'bulwark'; name: string; line: string; earned: string;
+  stats: { health: number; speed: number; reach: number; guard: number }; // 1-5, for the bars
+  boot: string; knees: boolean; gauntlet: boolean; hands: { front: V2; back: V2 };
+  back?(c: Ctx): void; legs?(c: Ctx): void; chest(c: Ctx): void; weapon?(c: Ctx): void; front?(c: Ctx): void; shoulders?(c: Ctx): void;
+  helm(c: Ctx): void; glow(c: Ctx): void;
+}
+function arm(ctx: Ctx, from: V2, to: V2, col: string, w: number, bend: number) {
+  const mx = (from[0] + to[0]) / 2 + bend, my = (from[1] + to[1]) / 2 + Math.abs(bend) * 0.4;
+  ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(from[0], from[1]); ctx.quadraticCurveTo(mx, my, to[0], to[1]); ctx.stroke();
+}
+function hand(ctx: Ctx, at: V2, gauntlet: boolean, dark = false) {
+  if (!gauntlet) { ctx.fillStyle = dark ? KE.shade : KE.base; ctx.beginPath(); ctx.arc(at[0], at[1], 2.6, 0, TAU); ctx.fill(); ctx.strokeStyle = KE.stroke; ctx.lineWidth = 0.7; ctx.stroke(); return; }
+  const p = new Path2D(); p.roundRect(at[0] - 2.8, at[1] - 2.7, 5.6, 5.4, 1.9);
+  plate(ctx, p, dark ? { base: KE.shade, shade: KE.deep, sx: at[0] + 1, sy: at[1] - 1, sr: 3 } : { sx: at[0] + 1, sy: at[1] - 1, sr: 3.4 });
+  ctx.strokeStyle = 'rgba(120,140,185,0.7)'; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(at[0] - 1.6, at[1] - 0.6); ctx.lineTo(at[0] + 1.8, at[1] - 0.6); ctx.stroke();
+}
+function rig(ctx: Ctx, set: OrderSet, mode: KMode, bob = 0) {
+  if (mode === 'glow') { ctx.save(); ctx.translate(0, bob); set.glow(ctx); ctx.restore(); return; }
+  set.back?.(ctx);
+  legsK(ctx, -20, 17, 4.4, [-3.2, -5.5], [2.6, 4.5], set.boot, set.knees); set.legs?.(ctx);
+  ctx.save(); ctx.translate(0, bob);
+  arm(ctx, [-5.5, -34], set.hands.back, '#0D1430', 3.8, -2); hand(ctx, set.hands.back, set.gauntlet, true);
+  ctx.fillStyle = KE.cloth; ctx.beginPath(); ctx.roundRect(-7.6, -38, 15.2, 19, 4); ctx.fill();
+  set.chest(ctx); set.weapon?.(ctx);
+  arm(ctx, [6, -34], set.hands.front, KE.cloth, 4, 1.5); hand(ctx, set.hands.front, set.gauntlet);
+  set.front?.(ctx); set.shoulders?.(ctx);
+  ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -38.6, 8.6, 2.2, 0, 0, TAU); ctx.fill();
+  set.helm(ctx); ctx.restore();
+}
+const fnPath = (f: (p: Path2D) => void) => { const p = new Path2D(); f(p); return p; };
+function orderSets(): OrderSet[] {
+  const pr = B.blue, dk = B.blueDark, S = T.idb.sizes;
+  const initiate: OrderSet = {
+    id: 'initiate', name: 'Initiate', line: 'Today\'s hero: a round helm, a plain cloak, a short brush. Where everyone starts.', earned: 'Start of the game, Crown Gate.',
+    stats: { health: 3, speed: 3, reach: 2, guard: 1 }, boot: '#0B1128', knees: false, gauntlet: false, hands: { front: [10, -26], back: [-8, -25] },
+    back(c) { const p = fnPath((p) => { p.moveTo(-4, -37); p.quadraticCurveTo(-14, -24, -13, -8); p.lineTo(-3, -10); p.quadraticCurveTo(-2, -24, 2, -37); p.closePath(); }); c.fillStyle = dk; c.fill(p); c.strokeStyle = pr; c.lineWidth = 1.2; c.stroke(p); },
+    chest(c) { c.fillStyle = pr; c.beginPath(); c.moveTo(-8, -37); c.quadraticCurveTo(-10, -27, -6.5, -20); c.lineTo(2, -22); c.quadraticCurveTo(3.5, -30, 3, -37.5); c.closePath(); c.fill(); c.fillStyle = '#FFFFFF'; c.fillRect(-6.8, -21.6, 8, 1.4); },
+    weapon(c) { brush(c, 9, -24, 24, { angle: -1.15, handle: B.cerise }); },
+    helm(c) {
+      c.save(); c.translate(0.5, -49.2);
+      const h = fnPath((p) => { p.moveTo(-10, 6); p.quadraticCurveTo(-12, -4, -9.6, -9); p.quadraticCurveTo(-8, -14, -5.2, -11.2); p.quadraticCurveTo(-3.4, -14.2, -1.2, -11.4); p.quadraticCurveTo(1, -13.8, 3.2, -11.2); p.quadraticCurveTo(5.8, -14.4, 8.2, -10.6); p.quadraticCurveTo(12, -5, 10, 6); p.quadraticCurveTo(8.5, 9.6, 0, 9.8); p.quadraticCurveTo(-8.5, 9.6, -10, 6); p.closePath(); });
+      plate(c, h, { sx: 4, sy: -1, sr: 12, gloss: [4.5, -7.5, 2.6, 1.3] }); c.fillStyle = B.ink; c.beginPath(); c.roundRect(-3, -0.5, 14, 4.2, 2); c.fill(); c.restore();
+    },
+    glow(c) { const v = fnPath((p) => p.roundRect(-2.5, -49.4, 13, 3.6, 1.8)); visorGlow(c, v, 5, -48, 16); },
+  };
+  const vanguard: OrderSet = {
+    id: 'vanguard', name: 'Vanguard', line: 'The sword of the Order, master of the brush. Balanced, with the strongest strokes.', earned: 'From Derek at the first fountain, Crown Gate.',
+    stats: { health: 3, speed: 3, reach: 4, guard: 3 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [10, -25], back: [-8, -24] },
+    back(c) { const p = fnPath((p) => { p.moveTo(-5, -38); p.quadraticCurveTo(-19, -28, -19, -6); p.lineTo(-15, -8); p.lineTo(-12, -4); p.lineTo(-9, -8); p.lineTo(-6, -5); p.quadraticCurveTo(-5, -22, 1, -37); p.closePath(); }); c.fillStyle = dk; c.fill(p); c.strokeStyle = pr; c.lineWidth = 1.2; c.stroke(p); },
+    chest(c) {
+      plate(c, fnPath((p) => { p.moveTo(-8.4, -37.5); p.quadraticCurveTo(-10, -29, -7, -22); p.lineTo(7.5, -22); p.quadraticCurveTo(10.2, -29, 8.4, -37.5); p.quadraticCurveTo(0, -39.6, -8.4, -37.5); }), { sx: 3, sy: -33, sr: 10.5, gloss: [4.5, -34.5, 2.4, 1.1] });
+      const tab = poly([-4.6, -33, 4.6, -33, 5.6, -13, 0, -9.5, -5.6, -13]); c.fillStyle = pr; c.fill(tab);
+      c.save(); c.clip(tab); c.fillStyle = dk; c.fillRect(-6, -33, 3.2, 24); c.fillStyle = '#FFFFFF'; c.fillRect(-6, -17.5, 12, 1.7); c.restore();
+      c.fillStyle = B.ink; c.fillRect(-8.2, -22.4, 16.4, 2.6); crownCap(c, 0, -20, 5.4, { cusps: 3 });
+    },
+    weapon(c) { brush(c, 10, -25, 32, { angle: 1.32, handle: pr }); },
+    shoulders(c) {
+      plate(c, fnPath((p) => p.ellipse(-8.2, -35.5, 3.8, 4.6, 0.3, 0, TAU)), { base: KE.shade, shade: KE.deep, sx: -7, sy: -37, sr: 3.6 });
+      plate(c, fnPath((p) => { p.moveTo(4.5, -38.5); p.quadraticCurveTo(13.5, -40, 13, -33); p.quadraticCurveTo(12.4, -30.2, 9.2, -30.4); p.quadraticCurveTo(5, -31, 4.5, -38.5); }), { sx: 10, sy: -38, sr: 5, gloss: [8.8, -37, 1.8, 0.8] });
+    },
+    helm(c) {
+      plume(c, -5.5, -56, 15, pr, 11, -2.2, -3.6, -0.5);
+      plate(c, fnPath((p) => { p.moveTo(-9, -39.5); p.quadraticCurveTo(-11.4, -47, -9.6, -52.5); p.quadraticCurveTo(-9, -59.6, -5.6, -54.6); p.quadraticCurveTo(-3.6, -60.4, -1, -55.2); p.quadraticCurveTo(1.8, -60.4, 4.2, -55); p.quadraticCurveTo(7.6, -59.2, 9, -52.4); p.quadraticCurveTo(11.4, -46, 9.8, -39.5); p.quadraticCurveTo(0.4, -37.4, -9, -39.5); p.closePath(); }), { sx: 5, sy: -50, sr: 11.5, gloss: [5, -53.5, 2.6, 1.2] });
+      c.strokeStyle = 'rgba(120,140,185,0.75)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(-3.6, -55); c.quadraticCurveTo(-3, -52.5, -1.5, -51.5); c.moveTo(1.8, -55); c.quadraticCurveTo(1.2, -52.5, -0.4, -51.5); c.stroke();
+      c.fillStyle = B.ink; c.fill(VANGUARD_VISOR);
+    },
+    glow(c) { visorGlow(c, VANGUARD_VISOR, 4.5, -47, 18); },
+  };
+  const ranger: OrderSet = {
+    id: 'ranger', name: 'Ranger', line: 'The bow of the Order, master of the interdental brush. Light and quick, built around the shot.', earned: 'In the Narrows, with the holder, beside the first clogged gaps.',
+    stats: { health: 2, speed: 5, reach: 5, guard: 2 }, boot: KE.base, knees: false, gauntlet: true, hands: { front: [16, -33.5], back: [4, -32] },
+    back(c) {
+      c.save(); c.translate(-7.5, -27); c.rotate(-0.6); c.fillStyle = dk; c.beginPath(); c.roundRect(-2.6, -12, 5.2, 18, 2); c.fill();
+      [S.s, S.m, S.l].forEach((z, i) => idbRefill(c, -1.3 + i * 1.3, -11, 7, { col: z.col, angle: -0.1 + i * 0.1 })); c.restore();
+      const sc = fnPath((p) => { p.moveTo(-4, -38); p.quadraticCurveTo(-14, -36, -22, -30); p.lineTo(-20, -27.5); p.quadraticCurveTo(-13, -32, -4, -35); p.closePath(); }); c.fillStyle = B.cerise; c.fill(sc);
+    },
+    legs(c) { c.fillStyle = pr; c.fillRect(-9.2, -8.5, 4.2, 2); c.fillRect(2.8, -8.5, 4.2, 2); },
+    chest(c) {
+      c.strokeStyle = B.ink2; c.lineWidth = 2.2; c.beginPath(); c.moveTo(-6, -35); c.lineTo(6, -21); c.stroke();
+      [S.s, S.m, S.l, S.m].forEach((z, i) => { c.fillStyle = z.col; c.beginPath(); c.roundRect(-4.6 + i * 3, -33.6 + i * 3.5, 2, 2.8, 0.6); c.fill(); });
+      c.fillStyle = B.ink; c.fillRect(-7.4, -20.8, 14.8, 2.2);
+    },
+    front(c) { idbHolder(c, 21.5, -33.5, 22, { angle: Math.PI / 2, loaded: S.m.col }); },
+    shoulders(c) {
+      const m = fnPath((p) => { p.moveTo(-8.5, -38.5); p.quadraticCurveTo(-11.5, -33, -9.5, -29); for (let i = 0; i < 4; i++) p.quadraticCurveTo(-7.4 + i * 4.6, -26.4, -5 + i * 4.6, -29.2); p.quadraticCurveTo(11, -33, 8.4, -38.5); p.quadraticCurveTo(0, -41, -8.5, -38.5); p.closePath(); });
+      c.fillStyle = B.orchid; c.save(); c.translate(0, 1.1); c.fill(m); c.restore(); c.fillStyle = pr; c.fill(m); c.save(); c.clip(m); c.fillStyle = dk; c.fillRect(-12, -40, 6, 14); c.restore();
+    },
+    helm(c) {
+      plate(c, fnPath((p) => { p.moveTo(-7.5, -40); p.quadraticCurveTo(-10.5, -45, -15.5, -47.5); p.quadraticCurveTo(-12, -50, -9, -50.6); p.quadraticCurveTo(-6.5, -59.6, 1.5, -61); p.quadraticCurveTo(9, -57, 9.6, -48); p.quadraticCurveTo(10, -42, 7, -39.6); p.quadraticCurveTo(0, -38.4, -7.5, -40); p.closePath(); }), { sx: 4, sy: -49, sr: 10.5, gloss: [4.2, -55, 2.2, 1] });
+      c.strokeStyle = 'rgba(120,140,185,0.75)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(1, -60); c.quadraticCurveTo(-3, -52, -9, -49.8); c.stroke();
+      c.fillStyle = B.ink; c.fill(RANGER_SLIT);
+    },
+    glow(c) { visorGlow(c, RANGER_SLIT, 5, -49, 16); halo(c, 25, -33.5, 7, '#FFFFFF', 0.35); },
+  };
+  const bulwark: OrderSet = {
+    id: 'bulwark', name: 'Bulwark', line: 'The shield of the Order, master of the rinse. Heavy and steady: guards, charges and cracks tartar.', earned: 'From the Glutton\'s hoard, Sugar Wastes, before the Calculus Deep.',
+    stats: { health: 5, speed: 2, reach: 3, guard: 5 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [9, -22], back: [-9, -24] },
+    back(c) {
+      brush(c, -14, -16, 40, { angle: -0.95, handle: pr });
+      const p = fnPath((p) => { p.moveTo(-10, -37); p.quadraticCurveTo(-15, -22, -13, -8); p.lineTo(9, -8); p.quadraticCurveTo(11, -22, 9, -37); p.closePath(); }); c.fillStyle = dk; c.fill(p);
+    },
+    chest(c) {
+      const ch = fnPath((p) => { p.moveTo(-10.5, -37); p.quadraticCurveTo(-13, -27, -9.5, -17.5); p.lineTo(9.5, -17.5); p.quadraticCurveTo(13, -27, 10.5, -37); p.quadraticCurveTo(0, -40, -10.5, -37); p.closePath(); });
+      plate(c, ch, { sx: 4, sy: -31, sr: 13, gloss: [5, -33.5, 2.6, 1.2] });
+      c.save(); c.clip(ch); c.fillStyle = pr; c.fillRect(-14, -27.5, 28, 6); c.fillStyle = '#FFFFFF'; c.fillRect(-14, -23.2, 28, 1.4); c.restore();
+    },
+    front(c) {
+      plate(c, fnPath((p) => p.arc(10, -20, 9.5, 0, TAU)), { sx: 12, sy: -22, sr: 9 });
+      const f = fnPath((p) => p.arc(10, -20, 7.6, 0, TAU)); c.fillStyle = pr; c.fill(f); c.save(); c.clip(f); c.fillStyle = dk; c.beginPath(); c.arc(6, -16, 9, 0, TAU); c.fill(); c.restore(); crownCap(c, 10, -16.5, 9, { cusps: 3 });
+    },
+    shoulders(c) {
+      for (const [sx, k] of [[-11, -1], [11, 1]] as V2[]) {
+        const p = fnPath((p) => { p.moveTo(sx - 5.5, -33); p.quadraticCurveTo(sx - 6.5, -40, sx - 3, -40); p.quadraticCurveTo(sx - 1.5, -42.6, sx, -40.2); p.quadraticCurveTo(sx + 1.6, -42.6, sx + 3, -40); p.quadraticCurveTo(sx + 6.5, -40, sx + 5.5, -33); p.quadraticCurveTo(sx, -31, sx - 5.5, -33); p.closePath(); });
+        plate(c, p, k < 0 ? { base: KE.shade, shade: KE.deep, sx: sx + 2, sy: -38, sr: 5 } : { sx: sx + 1.5, sy: -38, sr: 5.5, gloss: [sx + 1.5, -38.6, 1.6, 0.8] });
+      }
+    },
+    helm(c) {
+      plate(c, fnPath((p) => { p.moveTo(-10.5, -39); p.quadraticCurveTo(-12.5, -46, -10.5, -51); p.quadraticCurveTo(-8.5, -55.4, -5.4, -52.8); p.quadraticCurveTo(-3, -55.6, -0.4, -53); p.quadraticCurveTo(2.4, -55.6, 5, -52.8); p.quadraticCurveTo(8.6, -55.2, 10.6, -50.6); p.quadraticCurveTo(12.6, -45, 10.8, -39); p.quadraticCurveTo(0, -36.6, -10.5, -39); p.closePath(); }), { sx: 5, sy: -47, sr: 12.5, gloss: [6, -51, 2.6, 1.1] });
+      c.fillStyle = B.ink; c.beginPath(); c.roundRect(-1.8, -49.4, 12, 8.2, 2.2); c.fill(); c.fillStyle = mix(B.ink, '#FFFFFF', 0.25); c.fill(BULWARK_BARS);
+    },
+    glow(c) { visorGlow(c, BULWARK_BARS, 4, -45.5, 17); },
+  };
+  return [initiate, vanguard, ranger, bulwark];
+}
+const VANGUARD_VISOR = poly([-0.5, -48.6, 8.8, -48.6, 8.8, -46.6, 4.6, -46.6, 4.6, -41.8, 2.6, -41.8, 2.6, -46.6, -0.5, -46.6]);
+const RANGER_SLIT = poly([0.5, -48.4, 9.4, -51.6, 9.6, -49.4, 0.5, -46.6]);
+const BULWARK_BARS = (() => { const p = new Path2D(); for (let i = 0; i < 5; i++) p.roundRect(-0.6 + i * 2.2, -48.5, 1.2, 6.4, 0.6); return p; })();
+
+function ordersSection() {
+  const sets = orderSets();
+  const stage = (ctx: Ctx, w: number, h: number, gy: number) => {
+    const g = ctx.createRadialGradient(w * 0.45, h * 0.45, 10, w * 0.45, h * 0.45, w); g.addColorStop(0, '#22365F'); g.addColorStop(1, '#070F2A'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#132B57'; ctx.fillRect(0, gy, w, h - gy); ctx.fillStyle = 'rgba(201,214,238,0.35)'; ctx.fillRect(0, gy, w, 1.5);
+  };
+  const figure = (set: OrderSet) => (ctx: Ctx, w: number, h: number) => {
+    const s = Math.min(3.4, w / 44), x = w * 0.42, gy = h * 0.9; stage(ctx, w, h, gy);
+    ctx.save(); ctx.translate(x, gy); ctx.scale(s, s); rig(ctx, set, 'scene'); ctx.globalCompositeOperation = 'lighter'; rig(ctx, set, 'glow'); ctx.restore();
+    const tx = w - 24; ctx.strokeStyle = 'rgba(204,216,237,0.3)'; ctx.lineWidth = 1; ctx.strokeRect(tx - 16, gy - 32, 32, 32); ctx.save(); ctx.translate(tx, gy); rig(ctx, set, 'scene'); ctx.restore();
+  };
+  // the swap: one rig, the set changes at a fountain with a rinse of bubbles and a clean-tooth glint
+  const swap = (ctx: Ctx, w: number, h: number) => {
+    const fx = new Particles(), gy = h * 0.88, s = Math.min(3.8, h / 72), x = w * 0.5; let t = 0, i = 1, flash = 0;
+    return (dt: number) => {
+      t += dt; flash = Math.max(0, flash - dt * 2.5);
+      if (t > 1.6) { t = 0; i = (i + 1) % sets.length; flash = 1; fx.burst(x, gy - 30 * s, { ...T.particle.rinseAway, n: 26, speed: [60, 240], spread: TAU }); fx.burst(x + 6 * s, gy - 48 * s, { ...T.particle.cleanGlint, n: 4 }); }
+      fx.update(dt);
+      ctx.setTransform(PR, 0, 0, PR, 0, 0); stage(ctx, w, h, gy);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; halo(ctx, x, gy, 90 * (1 + flash), B.sky, 0.12 + flash * 0.35); ctx.restore();
+      const bob = Math.sin(performance.now() / 1000 * 2.4) * 0.6;
+      ctx.save(); ctx.translate(x, gy); ctx.scale(s, s); rig(ctx, sets[i], 'scene', bob); ctx.globalCompositeOperation = 'lighter'; rig(ctx, sets[i], 'glow', bob); ctx.restore();
+      fx.draw(ctx, false); ctx.globalCompositeOperation = 'lighter'; fx.draw(ctx, true); ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = 'rgba(232,238,249,0.9)'; ctx.font = `15px ${T.font.display}`; ctx.textAlign = 'left'; ctx.fillText(sets[i].name.toUpperCase(), 22, 34);
+      ctx.fillStyle = 'rgba(232,238,249,0.5)'; ctx.font = `11px ${T.font.display}`; ctx.fillText('SAME RIG  ·  SWAP AT A FOUNTAIN', 22, 54);
+    };
+  };
+  const bars = (st: OrderSet['stats']) => (['health', 'speed', 'reach', 'guard'] as const).map((k) => `<div class="ostat"><span>${k}</span><i>${[1, 2, 3, 4, 5].map((n) => `<b class="${n <= st[k] ? 'on' : ''}"></b>`).join('')}</i></div>`).join('');
+  const slots: [string, string][] = [['Helm', 'The silhouette. Each Order has its own helm and visor glow.'], ['Shoulders', 'Plates or mantle. They set how broad the knight reads.'], ['Chest', 'Breastplate, tabard or bandolier, in the brand primary.'], ['Back', 'Cape, quiver or a slung brush. Moves after the body.'], ['Weapon / front', 'Brush longsword, the interdental bow, or the crown shield.'], ['Boots', 'Colour and knee plates; light boots for the Ranger.']];
+  const moves: [string, string, string, string, string][] = [
+    ['Brush slash', 'Base', '+2 cleaning power, longer reach', 'Base', 'Slower, +3 cleaning power'],
+    ['Deep Clean (hold slash)', '0.6 s charge', '0.4 s charge, wider arc', 'Base', 'Base'],
+    ['Interdental shot', `Base, ${T.idb.shot.carry} refills`, `Base, ${T.idb.shot.carry} refills`, 'Fast draw, 9 refills, pierces from half draw', 'Slow draw, 3 refills'],
+    ['Dash', 'Base', 'Base', '+1 air dash', 'Shield charge: blocks shots while dashing'],
+    ['Pogo', 'Base', 'Base', 'Base', 'Slam: cracks tartar floors'],
+    ['Health / run speed', '5 / 300', '5 / 300', '4 / 320', '7 / 260'],
+  ];
+  return `<section id="orders">${head(9, 'Orders', 'One hero, three armour sets. The knight always has the same body and the same core moves (run, jump, dash, brush slash). Each Order is earned on the route and swapped at a fountain: it changes the helm and gear and a few moves, never whether a room can be finished. Today\'s hero becomes the Initiate everyone starts as.')}
+  <div class="grid" style="grid-template-columns:1.25fr 1fr;gap:18px;align-items:stretch">
+    <div class="card">${art({ k: 'live', h: 420, fn: swap })}</div>
+    <div class="card pad"><h4>One rig, six slots</h4><p>A set fills slots on a shared skeleton, so walk, run, jump and slash are animated once for every Order.</p>
+      <div class="oslots">${slots.map(([n, d]) => `<div><b>${n}</b><span>${d}</span></div>`).join('')}</div>
+      <p class="mono" style="margin-top:14px">Draw order: back, legs, back arm, torso, chest, weapon, front arm, front, shoulders, collar, helm. Glow pass: visor and charge.</p></div>
+  </div>
+  <h3>The four sets</h3><div class="grid g4">${sets.map((st, i) => `<div class="card">${a2d(330, figure(st))}<div class="pad"><p class="eyebrow" style="margin:0 0 6px">${i === 0 ? 'Start' : 'Order ' + i}</p><h4>${st.name}</h4><p>${st.line}</p><p><b>Earned</b> ${st.earned}</p><div class="ostats">${bars(st.stats)}</div></div></div>`).join('')}</div>
+  <h3>What each set changes (proposal, numbers to tune)</h3>
+  <div class="card"><table class="otable"><thead><tr><th>Move</th>${sets.map((s) => `<th>${s.name}</th>`).join('')}</tr></thead><tbody>${moves.map((r) => `<tr>${r.map((c, j) => j ? `<td>${c}</td>` : `<th>${c}</th>`).join('')}</tr>`).join('')}</tbody></table></div>
+  <div class="nolist" style="margin-top:18px">
+    <div><b>Any set, any room</b>Progress through the map is tied to relics, never to a set. A set changes how a room plays, not whether it can be done.</div>
+    <div><b>Swap at fountains</b>Choosing happens at rest points, so a fight is never paused for a menu. The swap is a rinse of bubbles and a glint.</div>
+    <div><b>Brands can add a set</b>A brand pack can dress a fourth Order in its own product line, on the same rig.</div>
+  </div></section>`;
+}
+
+// ---- interdental kit ----
+function idbSection() {
+  const S = T.idb.sizes, sizes = [S.s, S.m, S.l];
+  const dark = (c: Ctx, w: number, h: number) => bg(c, w, h, '#0B1633');
+  const products: [string, string, (c: Ctx, w: number, h: number) => void][] = [
+    ['Ring holder', `${P.product.idb.holder}. The short bow: quick to load, quick to fire. Translucent body in the brand's holder colour.`, (c, w, h) => { dark(c, w, h); idbHolder(c, w * 0.3, h * 0.62, h * 0.72); idbHolder(c, w * 0.7, h * 0.62, h * 0.72, { loaded: S.m.col }); }],
+    ['Angled handle', 'The long bow: slower draw, longer reach. Refill mounts sideways at the bend.', (c, w, h) => { dark(c, w, h); idbHolder(c, w * 0.38, h * 0.92, h * 0.82, { kind: 'angled', angle: 0.35, loaded: S.s.col }); }],
+    ['Refills', 'The arrows. Base colour = size, as on the real refills. Placeholders until the brand verifies sizes and colours.', (c, w, h) => { dark(c, w, h); sizes.forEach((z, i) => { idbRefill(c, w * (0.27 + i * 0.23), h * 0.88, h * (0.56 + i * 0.1), { col: z.col }); c.fillStyle = 'rgba(232,238,249,0.75)'; c.font = `11px ${T.font.display}`; c.textAlign = 'center'; c.fillText(`${z.name} · ${z.channel} U`, w * (0.27 + i * 0.23), h * 0.97); }); }],
+  ];
+  // the shot in four frames, holder horizontal (pointing right)
+  const frame = (k: 0 | 1 | 2 | 3) => (c: Ctx, w: number, h: number) => {
+    dark(c, w, h); const hx = w * 0.26 - (k === 1 ? 8 : 0), hy = h * 0.55, H = h * 0.62, col = S.m.col, A = Math.PI / 2;
+    c.fillStyle = '#132B57'; c.fillRect(0, h * 0.86, w, h);
+    idbHolder(c, hx, hy, H, { angle: A, loaded: k === 1 ? col : null });
+    if (k === 0) { idbRefill(c, hx + H * 0.66, hy - 16, H * 0.42, { col, angle: A }); c.strokeStyle = 'rgba(204,216,237,0.6)'; c.lineWidth = 1.2; for (const d of [0, 6]) { c.beginPath(); c.moveTo(hx + H * 0.7 - d, hy - 6); c.lineTo(hx + H * 0.63 - d, hy - 2); c.stroke(); } }
+    if (k === 1) { c.strokeStyle = rgba(B.sky, 0.8); c.lineWidth = 2.5; c.beginPath(); c.arc(hx, hy, H * 0.33, -Math.PI * 0.75, Math.PI * 0.75); c.stroke(); c.globalCompositeOperation = 'lighter'; halo(c, hx + H * 0.75, hy, 28, '#FFFFFF', 0.5); c.globalCompositeOperation = 'source-over'; glint(c, hx + H * 0.95, hy - 10, 5); }
+    if (k === 2) { const rx = w * 0.72; c.strokeStyle = 'rgba(255,255,255,0.7)'; c.lineCap = 'round'; for (let i = 0; i < 7; i++) { const tx = rx - 18 - i * 11, ty = hy + Math.sin(i * 1.9) * 3; c.lineWidth = 1; c.beginPath(); c.moveTo(tx - 3, ty - 2 + (i % 2) * 4); c.lineTo(tx + 3, ty + 2 - (i % 2) * 4); c.stroke(); } idbRefill(c, rx - H * 0.2, hy, H * 0.42, { col, angle: A, glow: 0.6 }); }
+    if (k === 3) { const px = w * 0.74, py = h * 0.86; plaqueling(c, px, py, 2.4, 5); idbRefill(c, px - 46, py - 30, H * 0.42, { col, angle: A + 0.12 }); c.fillStyle = B.yellow; for (let i = 0; i < 7; i++) { c.beginPath(); c.arc(px - 30 + i * 9, py - 50 - (i % 3) * 8, 2 + (i % 2), 0, TAU); c.fill(); } glint(c, px - 12, py - 40, 9); }
+  };
+  const ammo = (c: Ctx, w: number, h: number) => { // HUD: three refill icons with counts, the selected one lifted
+    bg(c, w, h, '#050D24'); c.fillStyle = T.ui.panel; c.beginPath(); c.roundRect(w / 2 - 118, h / 2 - 34, 236, 68, 34); c.fill(); c.strokeStyle = T.ui.hairline; c.lineWidth = 1; c.stroke();
+    sizes.forEach((z, i) => { const x = w / 2 - 70 + i * 70, sel = i === 1; idbRefill(c, x - 10, h / 2 + 22 - (sel ? 4 : 0), 40, { col: z.col, angle: 0.35 });
+      c.fillStyle = sel ? '#FFFFFF' : 'rgba(232,238,249,0.6)'; c.font = `${sel ? 15 : 13}px ${T.font.canvas}`; c.textAlign = 'left'; c.fillText(`${z.name} ${[6, 4, 2][i]}`, x + 2, h / 2 + 6); if (sel) { c.fillStyle = B.sky; c.fillRect(x - 14, h / 2 + 26, 36, 2); } });
+  };
+  return `<section id="idb">${head(10, 'Interdental kit', 'The interdental brush is the hero\'s bow. Load a refill into the holder, draw, and shoot it out. The right size also unclogs a gap from range. Drawn by kit.idbHolder and kit.idbRefill; colours from the brand pack.')}
+  <div class="grid g3">${products.map(([n, d, fn]) => `<div class="card">${a2d(220, fn)}<div class="pad"><h4>${n}</h4><p>${d}</p></div></div>`).join('')}</div>
+  <h3>The shot</h3><div class="grid g4">${(['Load', 'Draw', 'Release', 'Hit'] as const).map((n, i) => `<div class="card">${a2d(170, frame(i as 0 | 1 | 2 | 3))}<div class="pad" style="padding:12px 16px"><h4>${String(i + 1).padStart(2, '0')} &nbsp;${n}</h4><p>${['The refill clicks into the socket (' + T.idb.shot.load + ' s).', 'Hold to draw, up to ' + T.idb.shot.drawMax + ' s. The refill glows as it charges.', 'Short draw: slower, arcs, drops. Full draw: fast, straight, passes through one enemy.', 'Plaque loosens into crumbs and a clean-tooth sparkle. The refill drops and can be picked up again.'][i]}</p></div></div>`).join('')}</div>
+  <div class="grid g2" style="margin-top:18px"><div class="card">${a2d(150, ammo)}<div class="pad"><h4>Ammo on the HUD</h4><p>Three sizes, a count each, the loaded size lifted and underlined. Carry ${T.idb.shot.carry} of each; fountains refill, Pip sells packs.</p></div></div>
+  <div class="card pad"><h4>How the sizes play (proposal)</h4><p><b>S</b> light and quick: short draw, fires fast, small knock-back. Fits narrow gaps.</p><p><b>M</b> the all-rounder. Standard draw and damage.</p><p><b>L</b> heavy: slow draw, big knock-back, cracks tartar. Fits wide gaps.</p><p class="mono" style="margin-top:10px">Open question: does the shot replace the toothpaste throw, or sit next to it?</p></div></div></section>`;
+}
+
 // ---- light ----
 function lightSection() {
   const ids = ['crown', 'gumline', 'narrows', 'sugar', 'calculus', 'throne'] as const;
   const fmt = (v: unknown) => Array.isArray(v) ? v.map((n) => (+n).toFixed(2)).join(' ') : typeof v === 'number' ? String(v) : '';
-  return `<section id="light">${head(8, 'Light and grade', 'Each biome gets an ambient (the light-map base: #808080 is neutral) and a grade that merges over DEFAULT_GRADE, exactly as game.ts does. Previews run through engine/post.ts: lighting composite, bloom, fringe, grade, vignette and grain.')}
+  return `<section id="light">${head(11, 'Light and grade', 'Each biome gets an ambient (the light-map base: #808080 is neutral) and a grade that merges over DEFAULT_GRADE, exactly as game.ts does. Previews run through engine/post.ts: lighting composite, bloom, fringe, grade, vignette and grain.')}
   <div class="grid g3">${ids.map((id) => { const p = T.lightPreset[id], g = { ...T.DEFAULT_GRADE_TOKENS, ...p.grade };
     return `<div class="card">${aLit(220, (w, h) => diorama(id, w, h))}<div class="pad"><h4>${p.label}</h4><p>${p.note}</p><div class="vals">
       <div>ambient<b><span class="chipdot" style="background:${p.ambient}"></span>${p.ambient}</b></div><div>tint<b>${fmt(g.tint)}</b></div><div>lift<b>${fmt(g.lift)}</b></div><div>saturation<b>${g.saturation}</b></div>
@@ -538,7 +902,7 @@ function particleSection() {
       ctx.globalCompositeOperation = 'lighter'; ctx.setTransform(PR, 0, 0, PR, 0, 0); ctx.globalAlpha = 0.9; ctx.drawImage(lo, 0, 0, w, h); ctx.globalAlpha = 1; ctx.scale(k, k); fx.draw(ctx, true); ctx.globalCompositeOperation = 'source-over';
     };
   };
-  return `<section id="particles">${head(9, 'Particles', 'Presets for g.fx.burst(x, y, { ...particle.id, n }). Lit particles catch the light map; emissive ones glow. Running live on the engine\'s own particle pool.')}
+  return `<section id="particles">${head(12, 'Particles', 'Presets for g.fx.burst(x, y, { ...particle.id, n }). Lit particles catch the light map; emissive ones glow. Running live on the engine\'s own particle pool.')}
   <div class="grid g6">${ids.map((id) => { const o = T.particle[id] as BurstOpts; return `<div class="card">${art({ k: 'live', h: 170, fn: tile(id) })}<div class="pad" style="padding:12px 14px"><h4 style="font-size:11.5px">${id}</h4><span class="mono">${o.shape ?? 'dot'} &middot; n ${o.n ?? 10}${o.emissive ? ' &middot; emissive' : ''}${o.gravity ? ' &middot; g ' + o.gravity : ''}</span></div></div>`; }).join('')}</div></section>`;
 }
 
@@ -555,7 +919,7 @@ function motionSection() {
   const durBars = (Object.entries(D) as [string, number][]).map(([k, v]) => `<div class="bar-row"><span>${k}</span><div class="track"><i style="width:${Math.max(2, (v / maxD) * 100)}%"></i></div><span class="v">${v} ms</span></div>`).join('');
   const hs = Object.entries(T.feel.hitstop).map(([k, v]) => `<div class="bar-row"><span>${k}</span><div class="track"><i style="width:${(v / 0.35) * 100}%;background:linear-gradient(90deg,#E31C79,#F277C6)"></i></div><span class="v">${Math.round(v * 1000)} ms</span></div>`).join('');
   const sh = Object.entries(T.feel.shake).map(([k, v]) => `<div class="bar-row"><span>${k}</span><div class="track"><i style="width:${(v[0] / 14) * 100}%;background:linear-gradient(90deg,#FF8200,#FCE300)"></i></div><span class="v">${v[0]} u / ${Math.round(v[1] * 1000)}</span></div>`).join('');
-  return `<section id="motion">${head(10, 'Motion and feel', 'UI moves softly and quickly (ease out, 140-400 ms). The game feels crisp: short hitstops, small shakes that scale with weight, squash and stretch on every jump, land and dash. Numbers are from the code, so tuning here means tuning there.')}
+  return `<section id="motion">${head(13, 'Motion and feel', 'UI moves softly and quickly (ease out, 140-400 ms). The game feels crisp: short hitstops, small shakes that scale with weight, squash and stretch on every jump, land and dash. Numbers are from the code, so tuning here means tuning there.')}
   <div class="grid g4">${(['out', 'inOut', 'outBack', 'linear'] as const).map((n) => `<div class="card">${a2d(150, curve(n))}<div class="pad"><h4>ease.${n}</h4><span class="mono">${T.easeCss[n]}</span></div></div>`).join('')}</div>
   <div class="grid g3" style="margin-top:18px"><div class="card pad"><h4 style="margin-bottom:14px">UI durations</h4><div class="bars">${durBars}</div></div>
     <div class="card pad"><h4 style="margin-bottom:14px">Hitstop (seconds of freeze)</h4><div class="bars">${hs}</div><h4 style="margin:22px 0 14px">Shake (amplitude / ms)</h4><div class="bars">${sh}</div></div>
@@ -579,18 +943,18 @@ function chipsX(cols: string[]) {
 }
 function doDont() {
   const pair = (title: string, doTxt: string, doArt: string, dontTxt: string, dontArt: string) => `<div class="card"><div class="pad" style="padding-bottom:0"><h4>${title}</h4></div><div class="dd"><div><span class="tag do">Do</span><p>${doTxt}</p>${doArt}</div><div><span class="tag dont">Don't</span><p>${dontTxt}</p>${dontArt}</div></div></div>`;
-  return `<section id="dodont">${head(11, 'Do and don\'t', 'The fastest way to keep the world on-brand. Pairs show the rule; the no-go list is absolute.')}
+  return `<section id="dodont">${head(14, 'Do and don\'t', 'The fastest way to keep the world on-brand. Pairs show the rule; the no-go list is absolute.')}
   <div class="grid g2">
   ${pair('Glow is earned', 'Glow for real light sources only: eyes, plaque, sparks, relics, fountains.', aLit(170, (w, h) => diorama('calculus', w, h)), 'Glow everything and raise bloom: the world turns to fog and the hero disappears.', aLit(170, (w, h) => diorama('calculus', w, h, { glowAll: true })))}
   ${pair('Gums and flesh', 'Orchid to cerise, soft folds, a light lip, dry and clean.', a2d(170, (c, w, h) => { bg(c, w, h, '#2A0D26'); enamel(c, w * 0.3, h * 0.62, 60, { height: 110 }); enamel(c, w * 0.7, h * 0.62, 60, { height: 110, seed: 3 }); gumFold(c, w / 2, h * 0.52, h * 0.5, { width: w + 10, scallops: 3 }); }), 'Raw red, brown or purple-black flesh, wet sheen, drips, bleeding gums.', a2d(170, chipsX(['#8B1A1A', '#5A1E14', '#3A0E18', '#A0522D'])))}
   ${pair('Tartar and teeth', 'Tartar is bone and grey-beige, matte, layered like a reef. Teeth are always clean white enamel.', a2d(170, (c, w, h) => { bg(c, w, h, '#1C1A18'); crownCap(c, w * 0.32, h * 0.86, 90, { calcified: true, cusps: 4 }); enamel(c, w * 0.72, h * 0.95, 70, { shape: 'molar', height: 80 }); }), 'Brown or black stains, holes, cracks, broken or rotten teeth, anything that reads as decay.', a2d(170, chipsX(['#3B2A14', '#1A120A', '#5C4A1E', '#2B2B2B'])))}
   ${pair('Silhouette and value', 'Dark ground, the hero\'s enamel helm and sky visor carry the read. Keep a full value step between actor and background.', aLit(170, (w, h) => ({ ambient: '#3E465E', lights: heroLights('idle', w / 2, h * 0.86, 2.4), scene(c) { sky(c, w, h, ['#0B1A40', '#050B1F']); c.fillStyle = '#0D1736'; c.fillRect(0, h * 0.86, w, h); hero(c, 'idle', w / 2, h * 0.86, 2.4); }, emissive(c) { heroEm(c, 'idle', w / 2, h * 0.86, 2.4); } })), 'Mid-blue hero on a mid-blue busy background: the cloak and blade vanish.', aLit(170, (w, h) => ({ ambient: '#9AA8C8', grade: { bloom: 0.2 }, scene(c) { c.fillStyle = '#3364B7'; c.fillRect(0, 0, w, h); for (let i = 0; i < 30; i++) { c.fillStyle = i % 2 ? '#2C4377' : '#668BC9'; c.fillRect((i * 53) % w, (i * 31) % h, 30, 20); } hero(c, 'idle', w / 2, h * 0.86, 2.4); } })))}
   ${pair('Copy tone', 'Gentle in-world habit flavour, a little funny, never a promise.', `<p class="ex">&ldquo;Twice a day the old knights swept the towers, at sunrise and at dusk. The towers remembered.&rdquo;</p><p class="ex">&ldquo;Pip insists the cerise handle is faster. It is not.&rdquo;</p>`, 'Clinical or medical claims, fear about real teeth, lecturing.', `<p class="ex strike">&ldquo;Removes 99% of plaque. Clinically proven.&rdquo;</p><p class="ex strike">&ldquo;Brush or your teeth will rot.&rdquo;</p>`)}
-  ${pair('Originality', 'Our own names, creatures and places: Plaqlings, Mother Calculus, the Order of the 5,460, Ivoria, the Great Smile.', `<p class="ex">A brush-blade, a crown helm, a rinse fountain: the genre's verbs in a world nobody else has.</p>`, 'Borrowed characters, masks, bug knights, lore, music, maps or layouts from any existing game.', `<p class="ex strike">Hollow-eyed masks, insect knights, look-alike HUDs.</p>`)}
+  ${pair('Originality', 'Our own names, creatures and places: Plaqlings, Mother Calculus, the ' + P.product.order + ', Ivoria, the Great Smile.', `<p class="ex">A brush-blade, a crown helm, a rinse fountain: the genre's verbs in a world nobody else has.</p>`, 'Borrowed characters, masks, bug knights, lore, music, maps or layouts from any existing game.', `<p class="ex strike">Hollow-eyed masks, insect knights, look-alike HUDs.</p>`)}
   </div>
   <h3>No-go list</h3><div class="nolist">
     <div><b>No gore</b>No blood, wounds, organs or body horror. Hits are sparks and plaque splats.</div><div><b>No decay imagery</b>No cavities, stains, rot, black teeth or bad breath gags.</div><div><b>No clinical claims</b>No "prevents", "cures", "removes 99%", no dental advice.</div>
-    <div><b>No copying</b>The genre is fair game; another game's characters, art, music or layouts are not.</div><div><b>No fear</b>No scaring players about their real teeth, dentists or treatments.</div><div><b>No emoji, no brand abuse</b>No emoji in UI. Never recolour CURAPROX Blue; no logos in-world.</div>
+    <div><b>No copying</b>The genre is fair game; another game's characters, art, music or layouts are not.</div><div><b>No fear</b>No scaring players about their real teeth, dentists or treatments.</div><div><b>No emoji, no brand abuse</b>No emoji in UI. Never recolour the brand primary; no logos in-world.</div>
   </div></section>`;
 }
 
@@ -599,10 +963,12 @@ function doDont() {
 // ---------------------------------------------------------------------------------------------
 async function boot() {
   try { await Promise.all([document.fonts.load(`400 20px ${T.font.display}`), document.fonts.load(`700 20px ${T.font.display}`), document.fonts.load(`400 20px ${T.font.body}`)]); } catch { /* fallback fonts */ }
+  const rs = document.documentElement.style; rs.setProperty('--blue', B.blue); rs.setProperty('--blue80', B.blue80); rs.setProperty('--ink', B.ink); rs.setProperty('--cerise', B.cerise); rs.setProperty('--display', T.font.display); rs.setProperty('--body', T.font.body);
   LIT = new Lit();
-  const nav = `<nav class="side"><div class="mark">BRISTLE<small>Design system v0.1</small></div><ol>${SECTIONS.map(([id, n], i) => `<li><a href="#${id}"><span>${String(i + 1).padStart(2, '0')}</span>${n}</a></li>`).join('')}</ol><div class="foot">Living style guide, drawn by the game's own code.<br>Build: node styleguide.mjs</div></nav>`;
-  const main = `<main>${cover()}${principles()}${colour()}${typeSection()}${components()}${materials()}${kitSection()}${heroSection()}${lightSection()}${particleSection()}${motionSection()}${doDont()}<footer><span>BRISTLE: Knight of the Crown &middot; an original game for CURAPROX</span><span>tokens.ts &middot; kit.ts &middot; ART-BIBLE.md &middot; BACKLOG.md</span></footer></main>`;
+  const nav = `<nav class="side"><div class="mark">BRISTLE<small>Design system v0.1</small></div><ol>${SECTIONS.map(([id, n], i) => `<li><a href="#${id}"><span>${String(i + 1).padStart(2, '0')}</span>${n}</a></li>`).join('')}</ol><label class="brandpick">Brand pack<select id="brandpick">${Object.values(packs).map((p) => `<option value="${p.id}"${p.id === P.id ? ' selected' : ''}>${p.name}</option>`).join('')}</select></label><div class="foot">Living style guide, drawn by the game's own code.<br>Build: node styleguide.mjs</div></nav>`;
+  const main = `<main>${cover()}${principles()}${colour()}${typeSection()}${components()}${materials()}${kitSection()}${heroSection()}${heroOptions()}${ordersSection()}${idbSection()}${lightSection()}${particleSection()}${motionSection()}${doDont()}<footer><span>BRISTLE: Knight of the Crown &middot; ${P.legal}</span><span>tokens.ts &middot; kit.ts &middot; ART-BIBLE.md &middot; BACKLOG.md</span></footer></main>`;
   document.body.innerHTML = `<div class="layout">${nav}${main}</div>`;
+  document.getElementById('brandpick')?.addEventListener('change', (ev) => { const u = new URL(location.href); u.searchParams.set('brand', (ev.target as HTMLSelectElement).value); location.href = u.toString(); });
   await new Promise((r) => requestAnimationFrame(() => r(null)));
   const liveTicks: { tick: (dt: number) => void }[] = [];
   for (const el of Array.from(document.querySelectorAll<HTMLElement>('[data-art]'))) {

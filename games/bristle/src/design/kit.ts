@@ -10,7 +10,7 @@
 // one or two *stepped* (hard-edged) shade bands, a thin rim light on the side away from the key
 // light, one small gloss highlight, hairline strokes only for fissures and folds. Glow is a separate
 // pass: draw the `glow`/`emissive` parts on the emissive canvas.
-import { material, brand, hero, biome } from './tokens';
+import { material, brand, hero, biome, idb } from './tokens';
 import { TAU, rgba, mix } from '../engine/math';
 
 type Ctx = CanvasRenderingContext2D;
@@ -506,4 +506,72 @@ export function silhouetteStrip(ctx: Ctx, x: number, y: number, size: number, o:
 }
 
 /** Every helper by name, for tools and the style guide. */
-export const kit = { blob, enamel, gumFold, glowEye, crownCap, foamCluster, crystalShard, lightShaft, fogBand, brush, pasteDollop, palateRidges, tongueSurface, salivaPool, glint, silhouetteStrip } as const;
+// ---------------------------------------------------------------------------------------------
+// Interdental kit. The holder is the bow, the refill is the arrow.
+// ---------------------------------------------------------------------------------------------
+export interface RefillOpts { col?: string; angle?: number; glow?: number }
+/** size = full length; x,y = bottom centre of the plug foot; angle 0 points up. A refill as on the shelf:
+ *  size-coloured plug with a foot flange, short wire stem, bottle-brush filaments tapering to a wire tip. */
+export function idbRefill(ctx: Ctx, x: number, y: number, size: number, o: RefillOpts = {}) {
+  const L = size, col = o.col ?? idb.sizes.m.col, ink = mix(col, '#000000', 0.28), lite = mix(col, '#FFFFFF', 0.4);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(o.angle ?? 0); ctx.lineCap = 'round';
+  // foot flange with two tabs, then the plug
+  ctx.fillStyle = ink; ctx.beginPath(); ctx.roundRect(-L * 0.15, -L * 0.05, L * 0.3, L * 0.05, L * 0.012); ctx.fill();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(-L * 0.08, -L * 0.25, L * 0.16, L * 0.21, [L * 0.05, L * 0.05, L * 0.01, L * 0.01]); ctx.fill();
+  ctx.fillStyle = ink; ctx.fillRect(L * 0.025, -L * 0.23, L * 0.045, L * 0.18);
+  ctx.fillStyle = lite; ctx.fillRect(-L * 0.06, -L * 0.22, L * 0.025, L * 0.16);
+  // wire stem
+  ctx.strokeStyle = idb.wire; ctx.lineWidth = Math.max(0.6, L * 0.022); ctx.beginPath(); ctx.moveTo(0, -L * 0.25); ctx.lineTo(0, -L * 0.98); ctx.stroke();
+  // filaments: short strokes either side of the wire, tapering, every other row offset (the twist)
+  const y0 = -L * 0.36, y1 = -L * 0.95, rows = Math.max(10, Math.round(L / 3.2));
+  for (let i = 0; i < rows; i++) {
+    const t = i / (rows - 1), yy = y0 + (y1 - y0) * t, r = L * (0.11 - 0.075 * t), off = (i % 2 ? 0.35 : -0.35) * L * 0.012;
+    ctx.lineWidth = Math.max(0.45, L * 0.012);
+    ctx.strokeStyle = idb.filament; ctx.beginPath(); ctx.moveTo(-r, yy + off); ctx.lineTo(0, yy); ctx.stroke();
+    ctx.strokeStyle = idb.filamentShade; ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(r, yy - off); ctx.stroke();
+  }
+  ctx.fillStyle = idb.wire; ctx.beginPath(); ctx.arc(0, -L * 0.985, Math.max(0.6, L * 0.018), 0, TAU); ctx.fill();
+  if (o.glow) { radial(ctx, 0, -L * 0.65, L * 0.45, '#FFFFFF', 0.35 * o.glow); }
+  ctx.restore();
+}
+
+export interface HolderOpts { kind?: 'ring' | 'angled'; angle?: number; loaded?: string | null; refillSize?: number; body?: string; shade?: string; hi?: string }
+/** Ring holder: x,y = ring centre, size = height. Angled handle: x,y = handle end, size = length.
+ *  Translucent coloured plastic with a gloss line. `loaded` = refill colour to seat one in the socket. */
+export function idbHolder(ctx: Ctx, x: number, y: number, size: number, o: HolderOpts = {}) {
+  const H = size, body = o.body ?? idb.holder.body, shade = o.shade ?? idb.holder.shade, hi = o.hi ?? idb.holder.hi, a = idb.holder.alpha;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(o.angle ?? 0); ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  let socket: [number, number, number];
+  if ((o.kind ?? 'ring') === 'ring') {
+    const R = H * 0.26, r = H * 0.12, top = -R - H * 0.36, s = new Path2D();
+    s.moveTo(-H * 0.05, -R * 0.86); s.quadraticCurveTo(-H * 0.045, top + H * 0.12, -H * 0.03, top + H * 0.02); s.lineTo(H * 0.03, top + H * 0.02);
+    s.quadraticCurveTo(H * 0.045, top + H * 0.12, H * 0.05, -R * 0.86); s.arc(0, 0, R, -Math.PI / 2 + 0.2, Math.PI * 1.5 - 0.2); s.closePath();
+    s.moveTo(-H * 0.035, R * 0.997); s.lineTo(-H * 0.03, R + H * 0.07); s.lineTo(H * 0.03, R + H * 0.07); s.lineTo(H * 0.035, R * 0.997); s.closePath();
+    const hole = new Path2D(); hole.arc(0, 0, r, 0, TAU); s.addPath(hole);
+    socket = [0, top + H * 0.02, -Math.PI / 2];
+    ctx.globalAlpha *= a; ctx.fillStyle = body; ctx.fill(s, 'evenodd'); ctx.globalAlpha /= a;
+    ctx.save(); ctx.clip(s, 'evenodd'); ctx.globalAlpha *= 0.55; ctx.fillStyle = shade; ctx.beginPath(); ctx.arc(R * 0.35, R * 0.3, R * 1.05, 0, TAU); ctx.arc(-R * 0.2, -R * 0.25, R * 1.1, 0, TAU, true); ctx.fill('evenodd'); ctx.restore();
+    ctx.strokeStyle = shade; ctx.lineWidth = Math.max(0.8, H * 0.012); ctx.stroke(s);
+    ctx.strokeStyle = rgba(hi, 0.9); ctx.lineWidth = Math.max(0.8, H * 0.014); ctx.beginPath(); ctx.arc(0, 0, (R + r) / 2 + R * 0.12, Math.PI * 1.08, Math.PI * 1.42); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-H * 0.022, -R * 1.05); ctx.lineTo(-H * 0.018, top + H * 0.07); ctx.stroke();
+    ctx.strokeStyle = rgba(hi, 0.5); ctx.beginPath(); ctx.arc(0, 0, r + 0.5, Math.PI * 0.1, Math.PI * 0.6); ctx.stroke();
+  } else {
+    // angled handle: a long flat bar, a bend near the top, a head that holds the refill sideways
+    const bend: [number, number] = [H * 0.08, -H * 0.72], head: [number, number] = [H * 0.24, -H * 0.9], w = H * 0.07;
+    const path = new Path2D(); path.moveTo(0, 0); path.lineTo(bend[0], bend[1]); path.lineTo(head[0], head[1]);
+    ctx.globalAlpha *= a; ctx.strokeStyle = body; ctx.lineWidth = w; ctx.stroke(path); ctx.globalAlpha /= a;
+    ctx.strokeStyle = rgba(shade, 0.6); ctx.lineWidth = w * 0.3; ctx.save(); ctx.translate(w * 0.22, 0); ctx.stroke(path); ctx.restore();
+    ctx.strokeStyle = rgba(hi, 0.85); ctx.lineWidth = Math.max(0.8, w * 0.14); ctx.save(); ctx.translate(-w * 0.22, 0); ctx.stroke(path); ctx.restore();
+    ctx.fillStyle = shade; ctx.beginPath(); ctx.arc(head[0], head[1], w * 0.62, 0, TAU); ctx.fill();
+    ctx.fillStyle = body; ctx.beginPath(); ctx.arc(head[0], head[1], w * 0.44, 0, TAU); ctx.fill();
+    socket = [head[0] - w * 0.2, head[1] - w * 0.1, -Math.PI * 0.95];
+  }
+  if (o.loaded) {
+    const [sx, sy, sa] = socket, rl = o.refillSize ?? H * 0.42;
+    idbRefill(ctx, sx + Math.cos(sa) * rl * 0.04, sy + Math.sin(sa) * rl * 0.04, rl, { col: o.loaded, angle: sa + Math.PI / 2 });
+    ctx.globalAlpha *= a; ctx.fillStyle = body; ctx.beginPath(); ctx.arc(sx, sy, H * 0.038, 0, TAU); ctx.fill(); ctx.globalAlpha /= a;
+  }
+  ctx.restore();
+}
+
+export const kit = { idbRefill, idbHolder, blob, enamel, gumFold, glowEye, crownCap, foamCluster, crystalShard, lightShaft, fogBand, brush, pasteDollop, palateRidges, tongueSurface, salivaPool, glint, silhouetteStrip } as const;

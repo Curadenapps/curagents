@@ -1,7 +1,9 @@
 // Pooled particles. Lit particles draw into the scene (they catch the light map); emissive ones glow.
 import { TAU } from './math';
 
-export type Shape = 'dot' | 'streak' | 'ring' | 'square' | 'bubble';
+// Dental shapes: 'sparkle' the four-point clean-tooth glint, 'drop' a mouthwash droplet along its motion,
+// 'bristle' a flicked filament with a bright tip, 'crumb' a loosened lump of plaque (never a splat).
+export type Shape = 'dot' | 'streak' | 'ring' | 'square' | 'bubble' | 'sparkle' | 'drop' | 'bristle' | 'crumb';
 export interface BurstOpts {
   n?: number; speed?: [number, number]; angle?: number; spread?: number; life?: [number, number];
   size?: [number, number]; color?: string | string[]; gravity?: number; drag?: number; shape?: Shape;
@@ -46,6 +48,20 @@ export class Particles {
       else if (p.shape === 'ring') { ctx.lineWidth = Math.max(0.5, s * 0.25 * k); ctx.beginPath(); ctx.arc(p.x, p.y, s, 0, TAU); ctx.stroke(); }
       else if (p.shape === 'bubble') { ctx.lineWidth = 0.8; ctx.beginPath(); ctx.arc(p.x, p.y, s, 0, TAU); ctx.stroke(); ctx.globalAlpha *= 0.5; ctx.beginPath(); ctx.arc(p.x - s * 0.3, p.y - s * 0.3, s * 0.3, 0, TAU); ctx.fill(); }
       else if (p.shape === 'square') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillRect(-s, -s, s * 2, s * 2); ctx.restore(); }
+      else if (p.shape === 'sparkle') { // swells then shrinks over its life, arms thin and long
+        const r = s * (0.6 + 1.6 * Math.sin(Math.PI * k)), w = r * 0.22; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * 0.15); ctx.beginPath();
+        ctx.moveTo(0, -r); ctx.quadraticCurveTo(w, -w, r, 0); ctx.quadraticCurveTo(w, w, 0, r); ctx.quadraticCurveTo(-w, w, -r, 0); ctx.quadraticCurveTo(-w, -w, 0, -r); ctx.fill(); ctx.restore(); }
+      else if (p.shape === 'drop') { // round belly trailing a point back along the velocity
+        const a = Math.atan2(p.vy, p.vx), tl = s * (1.6 + Math.min(2.2, Math.hypot(p.vx, p.vy) / 160)); ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(a); ctx.beginPath();
+        ctx.arc(0, 0, s, -Math.PI / 2, Math.PI / 2); ctx.quadraticCurveTo(-tl * 0.4, s * 0.6, -tl, 0); ctx.quadraticCurveTo(-tl * 0.4, -s * 0.6, 0, -s); ctx.fill();
+        ctx.globalAlpha *= 0.7; ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(s * 0.25, -s * 0.35, s * 0.28, 0, TAU); ctx.fill(); ctx.restore(); }
+      else if (p.shape === 'bristle') { // one filament: thin shaft spinning end over end, rounded bright tip
+        const L = s * 4.5, ca = Math.cos(p.rot) * L * 0.5, sa = Math.sin(p.rot) * L * 0.5; ctx.lineCap = 'round'; ctx.lineWidth = Math.max(0.6, s * 0.35);
+        ctx.beginPath(); ctx.moveTo(p.x - ca, p.y - sa); ctx.lineTo(p.x + ca, p.y + sa); ctx.stroke(); ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(p.x + ca, p.y + sa, Math.max(0.5, s * 0.4), 0, TAU); ctx.fill(); }
+      else if (p.shape === 'crumb') { // soft five-lobed lump, seeded by its spin so each crumb keeps its shape
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.beginPath();
+        for (let i = 0; i < 5; i++) { const a = (i / 5) * TAU, rr = s * (0.8 + 0.25 * Math.sin(i * 2.7 + p.max * 40)); const x2 = Math.cos(a) * rr, y2 = Math.sin(a) * rr; if (i) ctx.lineTo(x2, y2); else ctx.moveTo(x2, y2); }
+        ctx.closePath(); ctx.fill(); ctx.globalAlpha *= 0.45; ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(-s * 0.25, -s * 0.3, s * 0.3, 0, TAU); ctx.fill(); ctx.restore(); }
       else { ctx.beginPath(); ctx.arc(p.x, p.y, s, 0, TAU); ctx.fill(); }
     }
     ctx.globalAlpha = 1;
