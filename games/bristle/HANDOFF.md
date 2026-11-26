@@ -56,6 +56,31 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
 - Dental particles (bristle flicks, plaque crumbs, rinse bubbles, clean-tooth sparkles); slashes sweep a full arc with
   a lunge; the knight stays visible while talking.
 
+## Next up: aim the interdental shot with the mouse (planned 26 Nov, not built)
+
+Sean asked for it; build it next on the laptop. Today the shot flies straight along the facing (with a small lob at
+low draw). Shot power was raised the same day: S 8 / M 11 / L 15, plus up to +6 at full draw.
+
+1. **Mouse position** (`src/engine/input.ts`): track `mousemove` over the game canvas as CSS pixels, plus a
+   `mouseAim` flag that turns on when the mouse moves and off when a stick or the keyboard aims.
+2. **Screen to world** (`src/game/game.ts`): `screenToWorld(mx, my)` from the camera:
+   `x = cam.left() + mx / cssWidth * cam.viewW`, `y = cam.top() + my / cssHeight * cam.viewH` (`src/engine/render.ts` Camera).
+3. **Aim angle** (`src/game/player.ts`, shot block): while `shotT >= 0`, aim from the shoulder (`grip()` sx, sy through
+   `bodyToWorld`) to the mouse's world point; turn `facing` toward it. Without the mouse: 8 directions from the
+   arrows / WASD (Up, Up+forward, forward, Down+forward in the air), or the right stick (gamepad axes 2 and 3).
+   Up + shot stays the Rinse wave only when the mouse is not aiming (keyboard players), so aiming up with the mouse
+   still shoots.
+4. **Fire along the aim**: `vx, vy = cos(a), sin(a) * speed`; keep gravity for draws under 0.6 so weak shots arc.
+   `RefillShot` already takes vx, vy, and gap cells are checked per cell, so shooting up into a gap works.
+5. **Show the aim**: `drawHeld` (`src/game/shot.ts`) takes the angle and rotates the holder; the front arm points
+   along it (`rigPose` frontHand = front shoulder + direction x reach; the Ranger's own art uses the same).
+   While drawing, a dotted trajectory preview on the emissive layer (simulate the shot's gravity for about 0.5 s),
+   brighter at full draw, plus a small crosshair at the mouse on the HUD.
+6. **Feel**: slow the knight to 0.45 run speed while drawing (already), allow a draw in the air, cap upward aim when
+   standing under a low ceiling. Test aiming at enemies above and below, a vertical gap, and with a gamepad.
+
+Rough size: two to three hours. No new tests needed; check by play.
+
 ## Known gaps (only when Sean asks)
 
 - Hero lineup (style guide, Hero options; Sean, 26 Nov), one product per class: A Vanguard (CS 5460 as a two-handed

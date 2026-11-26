@@ -183,7 +183,7 @@ export class Player extends Actor implements PlayerApi {
       } else {
         if (this.shotT >= LOAD) {
           const sz = selectedSize(g), k = clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1), sp = 520 + 460 * k;
-          g.spawn(new RefillShot(this.x + this.facing * 24, this.y - 8, this.facing * sp, k < 0.6 ? -140 * (1 - k) : 0, sz, POWER[sz] + Math.round(3 * k), k >= (this.ord === 'ranger' ? 0.5 : 1), k < 0.6, this.ord));
+          g.spawn(new RefillShot(this.x + this.facing * 24, this.y - 8, this.facing * sp, k < 0.6 ? -140 * (1 - k) : 0, sz, POWER[sz] + Math.round(6 * k), k >= (this.ord === 'ranger' ? 0.5 : 1), k < 0.6, this.ord));
           setAmmo(g, sz, ammo(g, sz) - 1); this.throwT = 0.18; this.vx -= this.facing * 80 * k; this.sx = 1.1; this.sy = 0.94;
           g.audio.sfx('throw', { pitch: 1.3 }); g.shake(1 + 2 * k, 0.08);
           if (!g.save.flags['shot-tip']) { g.save.flags['shot-tip'] = true; g.ui.toast('Hold right-click (or L) to draw further, let go to shoot. Mouse wheel or R changes the size. Walk over fired refills to take them back; fountains fill them.', 6000); }

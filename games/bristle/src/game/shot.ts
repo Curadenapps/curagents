@@ -20,7 +20,7 @@ export const SIZES: GapSize[] = ['s', 'm', 'l'];
 const COL: Record<GapSize, string> = { s: idb.sizes.s.col, m: idb.sizes.m.col, l: idb.sizes.l.col };
 const NAME: Record<GapSize, string> = { s: 'S', m: 'M', l: 'L' };
 /** Cleaning power per size, before the draw bonus (up to +3 at full draw). */
-export const POWER: Record<GapSize, number> = { s: 5, m: 7, l: 10 }; // 5+: below 5 a hit counts as a foam tick (no shove)
+export const POWER: Record<GapSize, number> = { s: 8, m: 11, l: 15 }; // plus up to +6 at full draw; a slash is 5, a common creature about 15
 export const LOAD = idb.shot.load;
 /** Seconds of drawing to reach full power, and refills carried per size, by Order. */
 export const DRAW: Record<OrderId, number> = { initiate: 0.6, vanguard: 0.6, duelist: 0.5, ranger: 0.35, lancer: 0.8 };
