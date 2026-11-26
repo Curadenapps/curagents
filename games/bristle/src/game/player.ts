@@ -260,25 +260,54 @@ export class Player extends Actor implements PlayerApi {
   }
 
   // ---- look ----
+  animT = 0; bob = 0; breath = 0; blinkT = 2.5; blink = 0; headTilt = 0; legA = 0; legB = 0;
   animate(g: Game, dt: number, ax: number) {
+    this.animT += dt;
     this.sx = damp(this.sx, 1, 14, dt); this.sy = damp(this.sy, 1, 14, dt);
     if (!this.grounded && this.dashT <= 0) { const k = clamp(-this.vy / JUMP_V, -1, 1); this.sy = damp(this.sy, 1 + k * 0.12, 20, dt); this.sx = damp(this.sx, 1 - k * 0.08, 20, dt); }
-    if (this.grounded && Math.abs(this.vx) > 20) { this.runPhase += Math.abs(this.vx) * dt * 0.05; this.stepT -= dt; if (this.stepT <= 0) { this.stepT = 0.27; g.audio.sfx('step', { vol: 0.35, pitch: 0.9 + Math.random() * 0.2 }); } } else this.runPhase = damp(this.runPhase, Math.round(this.runPhase / Math.PI) * Math.PI, 10, dt);
-    this.lean = damp(this.lean, clamp(this.vx / RUN, -1, 1) * 0.12 * (this.grounded ? 1 : 0.5), 10, dt);
-    const s = this.slash, target = s ? (s.dir === 'up' ? -1.9 : s.dir === 'down' ? 1.6 : (s.flip > 0 ? 0.9 : -0.8)) : this.throwT > 0 ? -1.2 : this.focusT > 0 ? -0.2 : 2.3;
+    const running = this.grounded && Math.abs(this.vx) > 20;
+    if (running) { this.runPhase += Math.abs(this.vx) * dt * 0.055; this.stepT -= dt; if (this.stepT <= 0) { this.stepT = 0.27; g.audio.sfx('step', { vol: 0.35, pitch: 0.9 + Math.random() * 0.2 }); } }
+    else this.runPhase = damp(this.runPhase, Math.round(this.runPhase / Math.PI) * Math.PI, 10, dt);
+    // body: run bob, idle breathing, lunges and flinches
+    this.bob = damp(this.bob, running ? Math.abs(Math.sin(this.runPhase)) * 2.4 : 0, 18, dt);
+    this.breath = Math.sin(this.animT * 2.3) * (running ? 0 : 0.7);
+    let lean = clamp(this.vx / RUN, -1, 1) * 0.12 * (this.grounded ? 1 : 0.5);
+    if (this.slash && this.slash.t < 0.1) lean += this.facing * (this.slash.dir === 'side' ? 0.16 : 0.05);
+    if (this.hurtT > 0) lean -= this.facing * 0.28;
+    if (this.focusT > 0) lean *= 0.2;
+    this.lean = damp(this.lean, lean, 12, dt);
+    this.headTilt = damp(this.headTilt, (this.grounded ? 0 : clamp(this.vy / 900, -1, 1) * 0.12 * this.facing) + (this.hurtT > 0 ? -this.facing * 0.2 : 0) + Math.sin(this.animT * 1.1) * 0.02, 10, dt);
+    // legs: swing from the hip when running, tuck when rising, dangle when falling
+    const sw = Math.sin(this.runPhase), rising = !this.grounded && this.vy < 0;
+    const la = running ? sw * 0.7 : !this.grounded ? (rising ? 0.45 : -0.25) : 0, lb = running ? -sw * 0.7 : !this.grounded ? (rising ? -0.15 : 0.3) : 0;
+    this.legA = damp(this.legA, la, 20, dt); this.legB = damp(this.legB, lb, 20, dt);
+    // visor blink
+    this.blinkT -= dt; if (this.blinkT <= 0) { this.blink = 0.13; this.blinkT = 2.5 + Math.random() * 3; } this.blink = Math.max(0, this.blink - dt);
+    // the brush: held in the hand; resting pose depends on what the knight is doing
+    const s = this.slash;
+    const rest = this.focusT > 0 ? -1.45 : running ? 2.55 + Math.sin(this.runPhase * 2) * 0.12 : !this.grounded ? (rising ? 2.85 : 1.95) : 1.8 + this.breath * 0.04;
+    const target = s ? (s.dir === 'up' ? -1.9 : s.dir === 'down' ? 1.6 : (s.flip > 0 ? 0.9 : -0.8)) : this.throwT > 0 ? -1.2 : this.charge > 0.15 ? 2.9 : rest;
     this.bladeA = damp(this.bladeA, target, s ? 40 : 12, dt);
     // cloak: verlet chain hanging from the shoulders
-    const ax0 = this.x - this.facing * 2, ay0 = this.y - 7, wind = -this.vx * 0.012;
+    const ax0 = this.x - this.facing * 2, ay0 = this.y - 7 + this.bob * 0.5, wind = -this.vx * 0.012;
     const c = this.cloak; c[0].x = ax0; c[0].y = ay0;
-    for (let i = 1; i < c.length; i++) { const p = c[i], vx = (p.x - p.px) * 0.9, vy = (p.y - p.py) * 0.9; p.px = p.x; p.py = p.y; p.x += vx + wind * dt * 60 * 0.5 - this.facing * 0.15; p.y += vy + 900 * dt * dt; }
+    for (let i = 1; i < c.length; i++) { const p = c[i], vx = (p.x - p.px) * 0.9, vy = (p.y - p.py) * 0.9; p.px = p.x; p.py = p.y; p.x += vx + wind * dt * 60 * 0.5 - this.facing * 0.15 + Math.sin(this.animT * 3 + i) * 0.04; p.y += vy + 900 * dt * dt; }
     for (let it = 0; it < 3; it++) for (let i = 1; i < c.length; i++) { const a = c[i - 1], b = c[i], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, k = (d - 4.2) / d; b.x -= dx * k; b.y -= dy * k; }
     void ax;
+  }
+
+  /** Shoulder and hand in body space (origin at the feet, +y down), and the brush's angle. */
+  grip() {
+    const f = this.facing, a = this.bladeA * f + (f < 0 ? Math.PI : 0);
+    const sx = f * 3.2, sy = -22.5 + this.bob * 0.5 - this.breath * 0.3;
+    // the arm reaches toward the brush; slashes extend it, idle keeps it close
+    const reach = this.slash ? 10 : this.focusT > 0 ? 8 : 7;
+    return { sx, sy, hx: sx + Math.cos(a) * reach, hy: sy + Math.sin(a) * reach, a };
   }
 
   draw(ctx: CanvasRenderingContext2D, g: Game) {
     if (this.invuln > 0 && this.deadT < 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0) return;
     const f = this.facing, x = this.x, y = this.y + this.hh; // feet
-    // dash afterimages (lit, faint)
     ctx.save();
     // cloak behind
     const c = this.cloak; ctx.beginPath();
@@ -290,19 +319,35 @@ export class Player extends Actor implements PlayerApi {
     ctx.lineWidth = 1.5; ctx.strokeStyle = C.blue; ctx.stroke();
     // body transform (squash at the feet)
     ctx.translate(x, y); ctx.rotate(this.lean); ctx.scale(this.sx, this.sy);
-    // legs
-    const run = this.grounded ? Math.sin(this.runPhase) : 0, air = this.grounded ? 0 : 1;
+    const lift = -this.bob;
+    // legs, swinging from the hip
     ctx.fillStyle = '#121a36';
-    for (const s of [-1, 1]) { const lx = s * 3.5 + run * s * 4 * f, lift = Math.max(0, run * s) * 4 + air * (s > 0 ? 4 : 1); ctx.beginPath(); ctx.roundRect(lx - 2.6, -11 - lift, 5.2, 11, 2.4); ctx.fill(); }
-    // tunic
-    ctx.fillStyle = '#18244a'; ctx.beginPath(); ctx.moveTo(-8, -10); ctx.quadraticCurveTo(-9, -24, 0, -26); ctx.quadraticCurveTo(9, -24, 8, -10); ctx.closePath(); ctx.fill();
+    for (const [k, ang] of [[-1, this.legB], [1, this.legA]] as const) {
+      ctx.save(); ctx.translate(k * 3.4, -10.5 + lift * 0.4); ctx.rotate(ang * f);
+      ctx.beginPath(); ctx.roundRect(-2.6, 0, 5.2, 10.8, 2.4); ctx.fill();
+      ctx.fillStyle = '#0b1128'; ctx.beginPath(); ctx.roundRect(-3, 8, 6.4 * 1, 3, 1.5); ctx.fill(); ctx.fillStyle = '#121a36';
+      ctx.restore();
+    }
+    ctx.translate(0, lift);
+    const gr = this.grip();
+    // back arm (half hidden): swings opposite the legs
+    ctx.strokeStyle = C.blueDk; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    const ba = 1.9 + Math.sin(this.runPhase) * 0.6 * (this.grounded ? 1 : 0) + (this.throwT > 0 ? -2.6 : 0);
+    ctx.beginPath(); ctx.moveTo(-f * 3, -22.5 + this.bob * 0.5); ctx.lineTo(-f * 3 + Math.cos(ba) * 7 * -f, -22.5 + this.bob * 0.5 + Math.sin(ba) * 7); ctx.stroke();
+    // tunic (breathes a little)
+    const br = this.breath * 0.4;
+    ctx.fillStyle = '#18244a'; ctx.beginPath(); ctx.moveTo(-8, -10); ctx.quadraticCurveTo(-9.2 - br, -24, 0, -26 - br); ctx.quadraticCurveTo(9.2 + br, -24, 8, -10); ctx.closePath(); ctx.fill();
     // cloak front panel
     ctx.fillStyle = C.blue; ctx.beginPath(); ctx.moveTo(-f * 9, -25); ctx.quadraticCurveTo(-f * 11, -14, -f * 7, -9); ctx.lineTo(f * 2, -12); ctx.quadraticCurveTo(f * 4, -20, f * 3, -26); ctx.closePath(); ctx.fill();
     ctx.fillStyle = C.white; ctx.globalAlpha = 0.9; ctx.fillRect(-f * 7 - 1, -10.5, f * 9, 1.6); ctx.globalAlpha = 1;
-    // the brush
-    this.drawBlade(ctx, f, brushColour(g));
+    // the brush, then the arm and hand that hold it
+    this.drawBlade(ctx, gr.hx, gr.hy, gr.a, brushColour(g));
+    ctx.strokeStyle = C.blue; ctx.lineWidth = 4.4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(gr.sx, gr.sy); ctx.lineTo(gr.hx, gr.hy); ctx.stroke();
+    ctx.fillStyle = C.enamel; ctx.beginPath(); ctx.arc(gr.hx, gr.hy, 2.9, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#8fa3c9'; ctx.lineWidth = 0.8; ctx.stroke();
     // helm: a molar crown (four cusps, fissures) seated on a gum-pink collar, visor slit across the front
-    ctx.save(); ctx.translate(f * 0.5, -32);
+    ctx.save(); ctx.translate(f * 0.5, -32 - this.breath * 0.5); ctx.rotate(this.headTilt);
     ctx.fillStyle = '#F277C6'; ctx.beginPath(); ctx.ellipse(0, 9.6, 9.5, 2.8, 0, 0, TAU); ctx.fill();
     ctx.fillStyle = '#E31C79'; ctx.globalAlpha = 0.55; ctx.beginPath(); ctx.ellipse(0, 10.6, 8.5, 1.6, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
     const helm = () => { ctx.beginPath(); ctx.moveTo(-10, 6); ctx.quadraticCurveTo(-12, -4, -9.6, -9); ctx.quadraticCurveTo(-8, -14, -5.2, -11.2); ctx.quadraticCurveTo(-3.4, -14.2, -1.2, -11.4); ctx.quadraticCurveTo(1, -13.8, 3.2, -11.2); ctx.quadraticCurveTo(5.8, -14.4, 8.2, -10.6); ctx.quadraticCurveTo(12, -5, 10, 6); ctx.quadraticCurveTo(8.5, 9.6, 0, 9.8); ctx.quadraticCurveTo(-8.5, 9.6, -10, 6); ctx.closePath(); };
@@ -318,19 +363,15 @@ export class Player extends Actor implements PlayerApi {
     ctx.restore();
     ctx.restore();
   }
-  /** A CURAPROX CS 5460-style brush: slim octagonal handle in a bold colour, angled neck, compact head, dense filaments. */
-  drawBlade(ctx: CanvasRenderingContext2D, f: number, col = BRUSH.cerise) {
-    ctx.save(); ctx.translate(f * 6, -18); ctx.rotate(this.bladeA * f + (f < 0 ? Math.PI : 0));
-    // handle: long, slim, faceted (a light band and a dark band read as an octagon)
-    ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(-4, -1.9, 24, 3.8, 1.9); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(-2.5, -1.4, 21, 0.9);
-    ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fillRect(-2.5, 0.7, 21, 0.8);
-    // neck tapers and angles slightly up, transparent like the real thing
-    ctx.fillStyle = 'rgba(230,240,255,0.85)'; ctx.beginPath(); ctx.moveTo(19, -1.6); ctx.lineTo(27, -2.4); ctx.lineTo(27, 0.6); ctx.lineTo(19, 1.6); ctx.closePath(); ctx.fill();
-    // head
-    ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(26, -2.2, 9.5, 3.4, 1.6); ctx.fill();
-    // dense filament tuft standing off the head (5,460 of them, give or take)
-    for (let i = 0; i < 9; i++) { const x = 26.8 + i * 1.0; ctx.strokeStyle = i % 2 ? '#ffffff' : '#dbe8fb'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.moveTo(x, -2.2); ctx.lineTo(x + (i - 4) * 0.08, -7.4 - (i % 3) * 0.25); ctx.stroke(); }
+  /** A CURAPROX CS 5460-style brush held at (hx, hy): slim faceted handle, clear neck, compact head, dense filaments. */
+  drawBlade(ctx: CanvasRenderingContext2D, hx: number, hy: number, a: number, col = BRUSH.cerise) {
+    ctx.save(); ctx.translate(hx, hy); ctx.rotate(a);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(-6, -1.9, 24, 3.8, 1.9); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(-4.5, -1.4, 21, 0.9);
+    ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fillRect(-4.5, 0.7, 21, 0.8);
+    ctx.fillStyle = 'rgba(230,240,255,0.85)'; ctx.beginPath(); ctx.moveTo(17, -1.6); ctx.lineTo(25, -2.4); ctx.lineTo(25, 0.6); ctx.lineTo(17, 1.6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(24, -2.2, 9.5, 3.4, 1.6); ctx.fill();
+    for (let i = 0; i < 9; i++) { const x = 24.8 + i * 1.0; ctx.strokeStyle = i % 2 ? '#ffffff' : '#dbe8fb'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.moveTo(x, -2.2); ctx.lineTo(x + (i - 4) * 0.08, -7.4 - (i % 3) * 0.25); ctx.stroke(); }
     ctx.restore();
   }
   drawEmissive(ctx: CanvasRenderingContext2D, g: Game) {
@@ -340,11 +381,11 @@ export class Player extends Actor implements PlayerApi {
     if (this.invuln > 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0 && this.deadT < 0) return;
     if (this.inflamed > 0) g.r.halo(ctx, this.x, this.y - 6, 40, '#E31C79', 0.25 + 0.12 * Math.sin(g.time * 9));
     // visor glow
-    const vx = this.x + f * 4 + f * 0.5, vy = this.y + this.hh - 32 * this.sy + 1.6;
-    g.r.halo(ctx, vx, vy, 16, C.sky, 0.55);
-    ctx.fillStyle = '#d8ecff'; ctx.beginPath(); ctx.roundRect(vx - 5.5, vy - 1, 11, 2.2, 1.1); ctx.fill();
+    const vx = this.x + f * 4 + f * 0.5, vy = this.y + this.hh - (32 + this.bob + this.breath * 0.5) * this.sy + 1.6, open = this.blink > 0 ? 0.25 : 1;
+    g.r.halo(ctx, vx, vy, 16, C.sky, 0.55 * open);
+    ctx.fillStyle = '#d8ecff'; ctx.beginPath(); ctx.roundRect(vx - 5.5, vy - 1.1 * open, 11, 2.2 * open, 1.1); ctx.fill();
     // bristle tuft on the blade tip
-    const a = this.bladeA * f + (f < 0 ? Math.PI : 0), bx = this.x + f * 6 + Math.cos(a) * 31 + Math.sin(a) * 5, by = this.y + this.hh - 18 + Math.sin(a) * 31 - Math.cos(a) * 5;
+    const gp = this.grip(), a = gp.a, lx = gp.hx + Math.cos(a) * 29 + Math.sin(a) * 5, ly = gp.hy - this.bob + Math.sin(a) * 29 - Math.cos(a) * 5, bx = this.x + lx * this.sx, by = this.y + this.hh + ly * this.sy;
     g.r.halo(ctx, bx, by, 14, C.sky, 0.4);
     // slash arc
     const s = this.slash; if (s) this.drawSlash(ctx, g, s);
