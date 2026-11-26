@@ -7,6 +7,7 @@ import { GameCore } from './game/game';
 import { Audio } from './engine/audio';
 import { Hud } from './ui/hud';
 import { installUi } from './ui/index';
+import { installProgress } from './game/progress/progress';
 
 declare const __BUILD_TIME__: string;
 const view = document.getElementById('view') as HTMLCanvasElement;
@@ -15,6 +16,7 @@ const root = document.getElementById('ui') as HTMLElement;
 
 const g = new GameCore(view, new Audio());
 const hud = new Hud(hudCv);
+const progress = installProgress(g);
 const ui = installUi(g, hud, root);
 g.ui = ui;
 (window as any).BRISTLE = { g, build: typeof __BUILD_TIME__ === 'string' ? __BUILD_TIME__ : 'dev' };
@@ -34,6 +36,7 @@ function frame(now: number) {
   requestAnimationFrame(frame);
   const real = Math.min(0.1, (now - last) / 1000); last = now; g.time += real;
   g.input.poll(g.time);
+  progress.update(real);
   ui.update(real);
   acc += real; let n = 0;
   while (acc >= STEP && n < 12) { g.update(STEP); acc -= STEP; n++; }

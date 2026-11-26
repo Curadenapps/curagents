@@ -20,7 +20,7 @@ interface Slash { dir: SlashDir; t: number; hit: Set<number>; cells: Set<number>
 export class Player extends Actor implements PlayerApi {
   facing: 1 | -1 = 1;
   hp = 5; maxHp = 5; fluor = 0;
-  invuln = 0; dashing = false;
+  invuln = 0; dashing = false; inflamed = 0; combo = 0; comboT = 0; airDashes = 1; dashHits = new Set<number>();
   override team = 'player' as const; override z = 20;
   // timers
   coyote = 0; atkCd = 0; dashT = 0; dashCd = 0; airDash = true; hurtT = 0; recoilT = 0; wallLock = 0; landT = 0; focusT = 0; spellT = 0; stepT = 0;
@@ -39,7 +39,9 @@ export class Player extends Actor implements PlayerApi {
   push(vx: number, vy: number) { this.vx = vx; this.vy = vy; this.recoilT = 0.12; }
   bounce(strength = 1) { this.vy = -720 * strength; this.airDash = true; this.jumpHeld = false; }
   heal(n: number) { this.hp = Math.min(this.maxHp, this.hp + n); }
-  gainFluor(n: number) { this.fluor = clamp(this.fluor + n, 0, 99); }
+  gainFluor(n: number) { this.fluor = clamp(this.fluor + (this.inflamed > 0 && n > 0 ? n * 0.5 : n), 0, 99); }
+  inflame(seconds: number) { if (!this.g) return; const g = this.g, m = g.progress.masteryLevel('gum'); const k = (g.progress.has('c2') ? 0.5 : 1) * (m >= 4 ? 0 : m >= 2 ? 0.6 : 1); if (k <= 0) return; this.inflamed = Math.max(this.inflamed, seconds * k); }
+  private g: Game | null = null;
   resetCloak() { for (let i = 0; i < this.cloak.length; i++) { const c = this.cloak[i]; c.x = c.px = this.x; c.y = c.py = this.y - 6 + i * 4; } }
 
   hurt(g: Game, dmg: number, fromX: number, kind: HitKind = 'contact') {
@@ -54,7 +56,9 @@ export class Player extends Actor implements PlayerApi {
   }
 
   update(g: Game, dt: number) {
-    const inp = g.input, busy = g.busy() || g.ui.isOpen();
+    this.g = g; const inp = g.input, busy = g.busy() || g.ui.isOpen(); const perk = (id: string) => g.progress.has(id);
+    this.inflamed = Math.max(0, this.inflamed - dt); this.comboT -= dt; if (this.comboT <= 0) this.combo = 0;
+    if (this.inflamed > 0 && Math.random() < dt * 10) g.fx.burst(this.x + (Math.random() - 0.5) * 18, this.y - 10 + (Math.random() - 0.5) * 30, { n: 1, color: ['#E31C79', '#F277C6'], speed: [10, 40], angle: -Math.PI / 2, spread: 1, size: [1, 2.2], life: [0.4, 0.8], gravity: -60, emissive: true });
     this.invuln = Math.max(0, this.invuln - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt; this.throwT -= dt;
     for (const gh of this.ghosts) gh.t -= dt; this.ghosts = this.ghosts.filter((gh) => gh.t > 0);
 
@@ -69,11 +73,15 @@ export class Player extends Actor implements PlayerApi {
     const want = (k: Parameters<typeof inp.pressed>[0], buf = 0) => !busy && this.hurtT <= 0 && inp.pressed(k, buf);
 
     // ---- grounded bookkeeping
-    if (this.grounded) { this.coyote = COYOTE; this.airDash = true; } else this.coyote -= dt;
+    if (this.grounded) { this.coyote = COYOTE; this.airDash = true; this.airDashes = perk('i3') ? 2 : 1; } else this.coyote -= dt;
 
     // ---- dash (Prime)
     if (this.dashT > 0) {
       this.dashT -= dt; this.vy = 0; this.passSlits = true;
+      if (perk('i2')) for (const e of g.entities) {
+        if (e.dead || !e.hurtable || e.team !== 'enemy' || this.dashHits.has(e.id)) continue;
+        if (Math.abs(e.x - this.x) < e.hw + this.hw && Math.abs(e.y - this.y) < e.hh + this.hh) { this.dashHits.add(e.id); if (e.onHit?.(g, { damage: 6, dirX: this.facing, dirY: 0, kind: 'slash', source: this })) { g.hitstop(0.03); if (perk('i4')) { this.gainFluor(8); this.invuln = Math.max(this.invuln, 0.3); } } }
+      }
       if (Math.random() < 0.9) this.ghosts.push({ x: this.x, y: this.y, f: this.facing, t: 0.22 });
       g.fx.burst(this.x - this.facing * 8, this.y + (Math.random() - 0.5) * 30, { n: 1, color: C.sky, shape: 'streak', speed: [40, 80], angle: this.facing > 0 ? Math.PI : 0, spread: 0.3, emissive: true, size: [1, 2], life: [0.15, 0.3] });
       if (this.dashT <= 0) { this.dashing = false; this.vx = this.facing * RUN * 0.9; if (!g.room.solidAt(this.x, this.y)) this.passSlits = false; }
@@ -82,8 +90,8 @@ export class Player extends Actor implements PlayerApi {
       if (this.passSlits && !this.insideSlit(g)) this.passSlits = false;
       if (want('dash', 0.08) && g.save.abilities.dash && this.dashCd <= 0 && (this.grounded || this.airDash || this.wallSlide)) {
         inp.consume('dash'); if (this.wallSlide) this.facing = -this.wallSlide as 1 | -1; else if (ax) this.facing = sign(ax) as 1 | -1;
-        this.dashT = DASH_T; this.dashing = true; this.dashCd = DASH_CD; this.vx = this.facing * DASH_V; this.vy = 0; this.slash = null; this.focusT = 0;
-        if (!this.grounded) this.airDash = false; this.sx = 1.35; this.sy = 0.7;
+        this.dashT = DASH_T; this.dashing = true; this.dashCd = DASH_CD * (perk('i1') ? 0.65 : 1); this.vx = this.facing * DASH_V; this.vy = 0; this.slash = null; this.focusT = 0; this.dashHits.clear();
+        if (!this.grounded) { this.airDashes--; if (this.airDashes <= 0) this.airDash = false; } this.sx = 1.35; this.sy = 0.7;
         g.audio.sfx('dash'); g.fx.burst(this.x, this.y + 12, { n: 8, color: '#9fb4d9', speed: [40, 160], angle: this.facing > 0 ? Math.PI : 0, spread: 1.2, size: [2, 5], life: [0.3, 0.6], grow: 6 });
       }
     }
@@ -117,14 +125,14 @@ export class Player extends Actor implements PlayerApi {
       inp.consume('attack');
       const dir: SlashDir = ay < -0.5 ? 'up' : ay > 0.5 && !this.grounded ? 'down' : 'side';
       this.slashFlip = dir === 'side' && this.lastSlash === 'side' && this.slash === null && this.atkCd > -0.25 ? -this.slashFlip : 1;
-      this.slash = { dir, t: 0, hit: new Set(), cells: new Set(), flip: this.slashFlip, landed: false }; this.lastSlash = dir; this.atkCd = ATK_CD; this.focusT = 0;
+      this.slash = { dir, t: 0, hit: new Set(), cells: new Set(), flip: this.slashFlip, landed: false }; this.lastSlash = dir; this.atkCd = ATK_CD * (perk('b2') ? 0.85 : 1); this.focusT = 0;
       g.audio.sfx('slash', { pitch: 0.92 + Math.random() * 0.16 });
     }
     if (this.slash) { this.slash.t += dt; if (this.slash.t < 0.11) this.slashHits(g); if (this.slash.t > 0.22) this.slash = null; }
 
     // ---- spell: throw CURAPROX toothpaste; Up + spell = Rinse wave (after the rinse relic)
     if (want('spell', 0.08) && this.dashT <= 0) {
-      const rinse = ay < -0.5 && g.save.abilities.rinse, cost = rinse ? SPELL_COST : PASTE_COST - (Number(g.save.flags.paste) ? 7 : 0);
+      const rinse = ay < -0.5 && g.save.abilities.rinse, cost = (rinse ? SPELL_COST : PASTE_COST - (Number(g.save.flags.paste) ? 7 : 0)) - (perk('c1') ? 5 : 0);
       if (this.fluor >= cost) {
         inp.consume('spell'); this.fluor -= cost; this.spellT = 0.3; this.slash = null;
         if (rinse) {
@@ -144,7 +152,7 @@ export class Player extends Actor implements PlayerApi {
       this.focusT += dt; this.vx = approach(this.vx, 0, ACC_G * dt);
       const a = Math.random() * TAU, r = 60 + Math.random() * 30;
       g.fx.burst(this.x + Math.cos(a) * r, this.y + Math.sin(a) * r, { n: 1, color: [C.sky, C.white], vx: -Math.cos(a) * r * 2.2, vy: -Math.sin(a) * r * 2.2, speed: [0, 0], drag: 0, emissive: true, size: [1, 2], life: [0.4, 0.45], shape: 'streak' });
-      if (this.focusT >= FOCUS_T) {
+      if (this.focusT >= FOCUS_T * (perk('c2') ? 0.78 : 1) * (this.inflamed > 0 ? 1.45 : 1)) {
         this.focusT = 0.0001; this.fluor -= FOCUS_COST; this.heal(1); g.audio.sfx('heal'); g.flash([0.7, 0.85, 1], 0.18);
         g.fx.burst(this.x, this.y, { n: 24, color: [C.sky, C.white], speed: [80, 260], emissive: true, size: [1, 2.5], life: [0.3, 0.7] });
       }
@@ -180,21 +188,25 @@ export class Player extends Actor implements PlayerApi {
   insideSlit(g: Game) { const r = g.room; for (const dx of [-this.hw + 1, 0, this.hw - 1]) for (const dy of [-this.hh + 1, 0, this.hh - 1]) if (r.atWorld(this.x + dx, this.y + dy) === '|') return true; return false; }
   safeGround(g: Game) { const r = g.room, y = this.y + this.hh + 4; for (const dx of [-24, 0, 24]) { if (!r.solidAt(this.x + dx, y)) return false; if (r.hazardAt(this.x + dx, this.y) || r.hazardAt(this.x + dx * 2, this.y + this.hh - 4)) return false; } return true; }
 
+  wide = 1;
   slashBox(): { x: number; y: number; hw: number; hh: number } {
-    const s = this.slash!; if (s.dir === 'up') return { x: this.x, y: this.y - 44, hw: 30, hh: 36 };
-    if (s.dir === 'down') return { x: this.x, y: this.y + 42, hw: 28, hh: 34 };
-    return { x: this.x + this.facing * 42, y: this.y - 2, hw: 40, hh: 26 };
+    const s = this.slash!, k = this.wide; if (s.dir === 'up') return { x: this.x, y: this.y - 44 * k, hw: 30 * k, hh: 36 * k };
+    if (s.dir === 'down') return { x: this.x, y: this.y + 42 * k, hw: 28 * k, hh: 34 * k };
+    return { x: this.x + this.facing * 42 * k, y: this.y - 2, hw: 40 * k, hh: 26 * k };
   }
   slashHits(g: Game) {
+    this.wide = g.progress.has('b1') ? 1.2 : 1;
     const s = this.slash!, b = this.slashBox();
     const dirX = s.dir === 'side' ? this.facing : 0, dirY = s.dir === 'up' ? -1 : s.dir === 'down' ? 1 : 0;
     for (const e of g.entities) {
       if (e.dead || !e.hurtable || e.team === 'player' || s.hit.has(e.id)) continue;
       if (Math.abs(e.x - b.x) < e.hw + b.hw && Math.abs(e.y - b.y) < e.hh + b.hh) {
         s.hit.add(e.id);
-        const hit: Hit = { damage: 5 + 2 * (Number(g.save.flags.blade) || 0), dirX: dirX || sign(e.x - this.x) || this.facing, dirY, kind: s.dir === 'down' ? 'pogo' : 'slash', source: this };
+        const hit: Hit = { damage: 5 + 2 * (Number(g.save.flags.blade) || 0) + (g.progress.has('b3') ? 2 : 0), dirX: dirX || sign(e.x - this.x) || this.facing, dirY, kind: s.dir === 'down' ? 'pogo' : 'slash', source: this };
         if (e.onHit?.(g, hit)) {
-          s.landed = true; this.gainFluor(11); g.hitstop(0.05); g.shake(3.5, 0.1);
+          s.landed = true; this.gainFluor(g.progress.has('c3') ? 15 : 11); g.hitstop(0.05); g.shake(3.5, 0.1);
+          this.combo++; this.comboT = 1.2;
+          if (g.progress.has('b4') && this.combo % 3 === 0) this.filamentStorm(g, b.x, b.y);
           const ix = (e.x + this.x + this.facing * 30) / 2;
           g.fx.burst(ix, b.y, { n: 1, color: '#ffffff', shape: 'ring', size: [4, 4], grow: 300, emissive: true, life: [0.14, 0.14] });
           if (s.dir === 'side') { this.vx = -this.facing * 260; this.recoilT = 0.08; }
@@ -216,6 +228,14 @@ export class Player extends Actor implements PlayerApi {
       }
       if (c === '^' && s.dir === 'down' && !s.cells.has(k)) { s.cells.add(k); this.bounce(0.95); g.audio.sfx('clink'); g.fx.burst((tx + 0.5) * TILE, ty * TILE, { n: 6, color: '#ffffff', emissive: true, shape: 'streak', speed: [100, 300], angle: -Math.PI / 2, spread: 1.6, size: [1, 1.5], life: [0.1, 0.2] }); }
     }
+  }
+
+  /** Oath perk: every third hit in a row releases a ring of filament sparks. */
+  filamentStorm(g: Game, x: number, y: number) {
+    g.audio.sfx('storm', { x, y }); g.shake(5, 0.14);
+    g.fx.burst(x, y, { n: 40, color: ['#ffffff', C.sky], shape: 'streak', speed: [300, 620], emissive: true, size: [1, 2], life: [0.15, 0.3] });
+    g.fx.burst(x, y, { n: 1, color: '#ffffff', shape: 'ring', size: [10, 10], grow: 520, emissive: true, life: [0.22, 0.22] });
+    for (const e of g.entities) if (!e.dead && e.hurtable && e.team === 'enemy' && Math.hypot(e.x - x, e.y - y) < 90 + e.hw) e.onHit?.(g, { damage: 8, dirX: sign(e.x - x) || 1, dirY: 0, kind: 'slash', source: this });
   }
 
   // ---- look ----
@@ -297,6 +317,7 @@ export class Player extends Actor implements PlayerApi {
     for (const gh of this.ghosts) { const a = gh.t / 0.22; ctx.globalAlpha = a * 0.35; ctx.fillStyle = C.sky; ctx.beginPath(); ctx.ellipse(gh.x, gh.y - 4, 11, 22, 0, 0, TAU); ctx.fill(); }
     ctx.globalAlpha = 1;
     if (this.invuln > 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0 && this.deadT < 0) return;
+    if (this.inflamed > 0) g.r.halo(ctx, this.x, this.y - 6, 40, '#E31C79', 0.25 + 0.12 * Math.sin(g.time * 9));
     // visor glow
     const vx = this.x + f * 4 + f * 0.5, vy = this.y + this.hh - 32 * this.sy + 1.6;
     g.r.halo(ctx, vx, vy, 16, C.sky, 0.55);

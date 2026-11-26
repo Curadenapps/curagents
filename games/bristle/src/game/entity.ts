@@ -2,7 +2,7 @@
 // hit reactions, death and drops. Content modules extend these.
 import { TILE } from '../engine/render';
 import { clamp, sign, TAU } from '../engine/math';
-import type { Entity, Game, Hit, Team } from './types';
+import type { Entity, Faction, Game, Hit, Team } from './types';
 
 export abstract class Actor implements Entity {
   id = 0; x: number; y: number; hw: number; hh: number; vx = 0; vy = 0;
@@ -64,6 +64,7 @@ export abstract class Actor implements Entity {
 export abstract class Enemy extends Actor {
   hp: number; maxHp: number;
   type: string;            // bestiary id
+  faction: Faction = 'plaque';
   shine = 3;               // currency dropped on death
   flash = 0;               // white hit flash timer
   stun = 0;                // seconds of hit-stagger
@@ -83,7 +84,8 @@ export abstract class Enemy extends Actor {
   abstract think(g: Game, dt: number): void;
   onHit(g: Game, hit: Hit): boolean {
     if (this.dead) return false;
-    this.hp -= hit.damage; this.flash = 0.12;
+    const dmg = hit.source && (hit.source.team === 'player') ? Math.round(hit.damage * (g.progress?.damageMult(this.faction) ?? 1)) : hit.damage;
+    this.hp -= dmg; this.flash = 0.12;
     const k = 1 - this.knockResist;
     if (k > 0) { this.vx = hit.dirX * 380 * k; if (hit.dirY) this.vy = hit.dirY * 260 * k; this.stun = 0.12 * k; }
     g.fx.burst(this.x, this.y, { n: 10, speed: [120, 380], angle: Math.atan2(hit.dirY, hit.dirX || 0.001), spread: 1.4, color: this.bloodColor(), size: [1.5, 3.5], gravity: 900, life: [0.25, 0.6] });
@@ -97,6 +99,7 @@ export abstract class Enemy extends Actor {
   die(g: Game, hit: Hit) {
     this.dead = true;
     g.save.killed[this.type] = (g.save.killed[this.type] || 0) + 1;
+    g.progress?.onKill(this);
     g.fx.burst(this.x, this.y, { n: 26, speed: [80, 460], color: this.bloodColor(), size: [2, 5], gravity: 1000, life: [0.4, 1.0], drag: 1.5 });
     g.fx.burst(this.x, this.y, { n: 1, speed: [0, 0], color: '#ffffff', shape: 'ring', size: [6, 6], grow: 260, emissive: true, life: [0.25, 0.25] });
     g.audio.sfx('kill', { x: this.x, y: this.y });

@@ -6,6 +6,8 @@ import type { Input } from '../engine/input';
 import type { Room } from './room';
 
 export type Team = 'player' | 'enemy' | 'neutral';
+/** Enemy families. Mastery of a faction raises your damage against it. 'gum' = inflammation. */
+export type Faction = 'plaque' | 'sugar' | 'tartar' | 'gum';
 export type HitKind = 'slash' | 'pogo' | 'spell' | 'contact' | 'projectile' | 'hazard';
 export interface Hit { damage: number; dirX: number; dirY: number; kind: HitKind; source?: Entity }
 
@@ -56,6 +58,7 @@ export interface SaveData {
   visited: Record<string, boolean>;
   settings: { master: number; music: number; sfx: number; shake: number; quality: number; aiVoices: boolean };
   playTime: number;
+  progress: { xp: number; level: number; points: number; mastery: Record<Faction, number>; perks: string[] };
 }
 
 /** What NPCs and UI can ask of the game. */
@@ -94,12 +97,27 @@ export interface Game {
   /** Story flags. */
   flag(name: string): boolean | number | string | undefined;
   setFlag(name: string, v: boolean | number | string): void;
+  /** Levelling, faction mastery and Oath perks. */
+  progress: ProgressApi;
   /** Switch rooms through a door marker. */
   goto(roomId: string, door: string): void;
   /** Fade out, run fn, fade back in. */
   transition(fn: () => void, seconds?: number): void;
   /** True while a fade or room change is running (input should be ignored). */
   busy(): boolean;
+}
+
+export interface ProgressApi {
+  /** Award XP (and faction mastery when a faction is given). */
+  gain(xp: number, faction?: Faction): void;
+  /** Called by Enemy.die. */
+  onKill(e: Entity & { faction?: Faction; maxHp?: number; type?: string }): void;
+  /** Damage multiplier for the player's hits against a faction. */
+  damageMult(faction: Faction): number;
+  /** Is an Oath perk owned? */
+  has(perk: string): boolean;
+  masteryLevel(f: Faction): number;
+  open(): void;
 }
 
 export interface PlayerApi extends Entity {
@@ -114,4 +132,7 @@ export interface PlayerApi extends Entity {
   bounce(strength?: number): void;
   heal(n: number): void;
   gainFluor(n: number): void;
+  /** Inflame the player for some seconds (gum-faction attacks): halves fluor gain, slows healing. */
+  inflame(seconds: number): void;
+  inflamed: number;
 }

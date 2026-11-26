@@ -8,7 +8,7 @@ import { Room } from './room';
 import { Player, C } from './player';
 import { Shine } from './entity';
 import { Biomes, Legend, Objects, Rooms, type Biome } from './registry';
-import type { AudioApi, Entity, Game, HitKind, SaveData, UiApi } from './types';
+import type { AudioApi, Entity, Game, HitKind, SaveData, UiApi, ProgressApi } from './types';
 import type { Light } from '../engine/render';
 
 const SAVE_KEY = 'bristle-save-v1';
@@ -19,6 +19,7 @@ export function freshSave(): SaveData {
     v: 1, room: START_ROOM, door: '@', maxHp: 5, hp: 5, fluor: 0, shine: 0,
     abilities: { dash: false, grip: false, rinse: false, pulse: false }, flags: {}, killed: {}, visited: {},
     settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, aiVoices: true }, playTime: 0,
+    progress: { xp: 0, level: 1, points: 0, mastery: { plaque: 0, sugar: 0, tartar: 0, gum: 0 }, perks: [] },
   };
 }
 
@@ -27,6 +28,9 @@ export class GameCore implements Game {
   r: Renderer; cam; fx = new Particles(); input: Input; rng = new Rng(Date.now() & 0xffff); audio: AudioApi; ui!: UiApi;
   room!: Room; player!: Player; entities: Entity[] = [];
   save: SaveData;
+  progress!: ProgressApi;
+  /** >0 while a core modal (the Oath screen) is open: the world freezes. */
+  modal = 0;
   biome!: Biome;
   state: 'title' | 'play' | 'paused' = 'title';
   private idc = 1;
@@ -57,7 +61,7 @@ export class GameCore implements Game {
   setFlag(n: string, v: boolean | number | string) { this.save.flags[n] = v; }
   busy() { return !!this.trans; }
   persist() { this.save.hp = this.player?.hp ?? this.save.hp; this.save.fluor = this.player?.fluor ?? this.save.fluor; try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.save)); } catch { /* storage blocked */ } }
-  load(): SaveData | null { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.v === 1) { const f = freshSave(); return { ...f, ...s, abilities: { ...f.abilities, ...s.abilities }, settings: { ...f.settings, ...s.settings } }; } } catch { /* corrupt */ } return null; }
+  load(): SaveData | null { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && s.v === 1) { const f = freshSave(); return { ...f, ...s, abilities: { ...f.abilities, ...s.abilities }, settings: { ...f.settings, ...s.settings }, progress: { ...f.progress, ...(s.progress || {}), mastery: { ...f.progress.mastery, ...(s.progress?.mastery || {}) } } }; } } catch { /* corrupt */ } return null; }
   hasSave() { try { return !!localStorage.getItem(SAVE_KEY); } catch { return false; } }
   wipe() { try { localStorage.removeItem(SAVE_KEY); } catch { /* */ } this.save = freshSave(); }
   transition(fn: () => void, dur = 0.28) { if (this.trans) return; this.trans = { t: 0, dur, fn, phase: 'out' }; }
@@ -101,6 +105,7 @@ export class GameCore implements Game {
     // camera snaps
     this.updateCamera(1, true);
     const first = !this.save.visited[def.id]; this.save.visited[def.id] = true;
+    if (first && !quiet) this.progress?.gain(6);
     if (!quiet && first && def.title) this.ui.areaTitle(def.title, def.subtitle);
     if (quiet && def.title && first) this.ui.areaTitle(def.title, def.subtitle);
     this.audio.music(def.music ?? this.biome.music ?? null);
@@ -121,7 +126,7 @@ export class GameCore implements Game {
       const tr = this.trans; tr.t += dt;
       if (tr.t >= tr.dur) { if (tr.phase === 'out') { tr.fn?.(); tr.phase = 'in'; tr.t = 0; } else this.trans = null; }
     }
-    if (this.state !== 'play') return;
+    if (this.state !== 'play' || this.modal > 0) return;
     this.save.playTime += dt;
     if (this.slowT > 0) { this.slowT -= dt; if (this.slowT <= 0) this.slowK = 1; }
     if (this.hitstopT > 0) { this.hitstopT -= dt; this.fx.update(dt * 0.2); return; }

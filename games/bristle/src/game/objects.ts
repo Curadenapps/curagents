@@ -19,7 +19,8 @@ export class Fountain extends Actor {
     if (n && wantsInteract(g)) {
       g.input.consume('interact'); g.input.consume('up');
       const p = g.player; p.heal(99); g.save.room = g.room.id; g.save.door = 'S'; g.save.hp = p.maxHp; g.persist();
-      this.resting = 1.4; g.audio.sfx('rest'); g.ui.toast('Rested. The fountain will bring you back here.');
+      this.resting = 1.4; g.audio.sfx('rest');
+      if (g.save.progress.points > 0) setTimeout(() => g.progress.open(), 650); else g.ui.toast('Rested. The fountain will bring you back here.');
       g.fx.burst(this.x, this.y - 10, { n: 40, color: ['#ffffff', '#8BB8E8'], shape: 'bubble', speed: [40, 220], angle: -Math.PI / 2, spread: 1.6, size: [1.5, 5], gravity: -40, life: [0.6, 1.4], emissive: true });
     }
     if (Math.random() < dt * 6) g.fx.burst(this.x + (Math.random() - 0.5) * 34, this.y - 12, { n: 1, color: '#CCD8ED', shape: 'bubble', speed: [10, 40], angle: -Math.PI / 2, spread: 0.6, size: [1, 3], gravity: -30, life: [0.8, 1.6], emissive: true });
