@@ -43,7 +43,7 @@ void main(){
   vec3 b = texture(bloomA, uv).rgb * 0.6 + texture(bloomB, uv).rgb * 0.8;
   c += b * bloom;
   c *= expo;
-  c = c / (1.0 + c * 0.18);                       // soft shoulder so highlights roll off
+  c = (1.0 - exp(-c * 1.35)) * 1.06;              // filmic shoulder: highlights roll off instead of clipping
   c = (c - 0.5) * con + 0.5;
   float l = dot(c, vec3(0.299,0.587,0.114)); c = mix(vec3(l), c, sat);
   c = c * tint + lift * (1.0 - l);

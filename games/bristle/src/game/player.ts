@@ -7,9 +7,12 @@ import type { Game, PlayerApi, Hit, HitKind } from './types';
 
 export const C = { blue: '#003DA5', blueDk: '#002E7D', blue80: '#3364B7', blue60: '#668BC9', sky: '#8BB8E8', white: '#FFFFFF', enamel: '#F3F6FC', enamelShade: '#C7D3EA', ink: '#0A1F44', ink2: '#132B57', cerise: '#E31C79', yellow: '#FCE300', orange: '#FF8200', orchid: '#F277C6', lime: '#C4D600' };
 
+export const BRUSH: Record<string, string> = { cerise: '#E31C79', blue: '#3364B7', lime: '#C4D600', orange: '#FF8200', sky: '#8BB8E8' };
+const brushColour = (g: Game) => BRUSH[String(g.save.flags['brush-colour'] ?? 'cerise')] ?? BRUSH.cerise;
+
 const RUN = 300, ACC_G = 5200, ACC_A = 3400, JUMP_V = 830, GRAV_UP = 2500, GRAV_DOWN = 3100, MAX_FALL = 820;
 const COYOTE = 0.09, JUMP_BUF = 0.13, ATK_CD = 0.36, DASH_T = 0.19, DASH_V = 820, DASH_CD = 0.5;
-const FOCUS_COST = 33, SPELL_COST = 33, FOCUS_T = 0.92;
+const FOCUS_COST = 33, SPELL_COST = 33, PASTE_COST = 25, FOCUS_T = 0.92;
 
 type SlashDir = 'side' | 'up' | 'down';
 interface Slash { dir: SlashDir; t: number; hit: Set<number>; cells: Set<number>; flip: number; landed: boolean }
@@ -21,7 +24,7 @@ export class Player extends Actor implements PlayerApi {
   override team = 'player' as const; override z = 20;
   // timers
   coyote = 0; atkCd = 0; dashT = 0; dashCd = 0; airDash = true; hurtT = 0; recoilT = 0; wallLock = 0; landT = 0; focusT = 0; spellT = 0; stepT = 0;
-  slash: Slash | null = null; lastSlash: SlashDir = 'side'; slashFlip = 1;
+  slash: Slash | null = null; throwT = 0; lastSlash: SlashDir = 'side'; slashFlip = 1;
   wallSlide = 0; // -1 left wall, 1 right wall
   jumpHeld = false; deadT = -1; hazardT = -1;
   safe = { x: 0, y: 0 };
@@ -52,7 +55,7 @@ export class Player extends Actor implements PlayerApi {
 
   update(g: Game, dt: number) {
     const inp = g.input, busy = g.busy() || g.ui.isOpen();
-    this.invuln = Math.max(0, this.invuln - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt;
+    this.invuln = Math.max(0, this.invuln - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt; this.throwT -= dt;
     for (const gh of this.ghosts) gh.t -= dt; this.ghosts = this.ghosts.filter((gh) => gh.t > 0);
 
     if (this.deadT >= 0) { this.deadT += dt; this.vx *= Math.exp(-4 * dt); this.physics(g, dt); this.animate(g, dt, 0); return; }
@@ -119,12 +122,20 @@ export class Player extends Actor implements PlayerApi {
     }
     if (this.slash) { this.slash.t += dt; if (this.slash.t < 0.11) this.slashHits(g); if (this.slash.t > 0.22) this.slash = null; }
 
-    // ---- spell (Rinse)
-    if (want('spell', 0.08) && g.save.abilities.rinse && this.fluor >= SPELL_COST && this.dashT <= 0) {
-      inp.consume('spell'); this.fluor -= SPELL_COST; this.spellT = 0.3; this.slash = null;
-      const w = g.spawn(new RinseWave(this.x + this.facing * 18, this.y - 2, this.facing));
-      w.id = g.nextId(); this.vx = -this.facing * 220; this.recoilT = 0.12;
-      g.audio.sfx('spell'); g.shake(4, 0.12); g.flash([0.55, 0.72, 0.91], 0.12);
+    // ---- spell: throw CURAPROX toothpaste; Up + spell = Rinse wave (after the rinse relic)
+    if (want('spell', 0.08) && this.dashT <= 0) {
+      const rinse = ay < -0.5 && g.save.abilities.rinse, cost = rinse ? SPELL_COST : PASTE_COST - (Number(g.save.flags.paste) ? 7 : 0);
+      if (this.fluor >= cost) {
+        inp.consume('spell'); this.fluor -= cost; this.spellT = 0.3; this.slash = null;
+        if (rinse) {
+          g.spawn(new RinseWave(this.x + this.facing * 18, this.y - 2, this.facing)); this.vx = -this.facing * 220; this.recoilT = 0.12;
+          g.audio.sfx('spell'); g.shake(4, 0.12); g.flash([0.55, 0.72, 0.91], 0.12);
+        } else {
+          const down = ay > 0.5 && !this.grounded;
+          g.spawn(new PasteGlob(this.x + this.facing * 14, this.y - 12, down ? this.facing * 120 : this.facing * 640, down ? 520 : -360));
+          this.throwT = 0.22; g.audio.sfx('throw'); this.sx = 1.12; this.sy = 0.92;
+        }
+      } else { inp.consume('spell'); g.audio.sfx('empty'); }
     }
 
     // ---- focus (heal)
@@ -213,7 +224,7 @@ export class Player extends Actor implements PlayerApi {
     if (!this.grounded && this.dashT <= 0) { const k = clamp(-this.vy / JUMP_V, -1, 1); this.sy = damp(this.sy, 1 + k * 0.12, 20, dt); this.sx = damp(this.sx, 1 - k * 0.08, 20, dt); }
     if (this.grounded && Math.abs(this.vx) > 20) { this.runPhase += Math.abs(this.vx) * dt * 0.05; this.stepT -= dt; if (this.stepT <= 0) { this.stepT = 0.27; g.audio.sfx('step', { vol: 0.35, pitch: 0.9 + Math.random() * 0.2 }); } } else this.runPhase = damp(this.runPhase, Math.round(this.runPhase / Math.PI) * Math.PI, 10, dt);
     this.lean = damp(this.lean, clamp(this.vx / RUN, -1, 1) * 0.12 * (this.grounded ? 1 : 0.5), 10, dt);
-    const s = this.slash, target = s ? (s.dir === 'up' ? -1.9 : s.dir === 'down' ? 1.6 : (s.flip > 0 ? 0.9 : -0.8)) : this.focusT > 0 ? -0.2 : 2.3;
+    const s = this.slash, target = s ? (s.dir === 'up' ? -1.9 : s.dir === 'down' ? 1.6 : (s.flip > 0 ? 0.9 : -0.8)) : this.throwT > 0 ? -1.2 : this.focusT > 0 ? -0.2 : 2.3;
     this.bladeA = damp(this.bladeA, target, s ? 40 : 12, dt);
     // cloak: verlet chain hanging from the shoulders
     const ax0 = this.x - this.facing * 2, ay0 = this.y - 7, wind = -this.vx * 0.012;
@@ -247,25 +258,38 @@ export class Player extends Actor implements PlayerApi {
     // cloak front panel
     ctx.fillStyle = C.blue; ctx.beginPath(); ctx.moveTo(-f * 9, -25); ctx.quadraticCurveTo(-f * 11, -14, -f * 7, -9); ctx.lineTo(f * 2, -12); ctx.quadraticCurveTo(f * 4, -20, f * 3, -26); ctx.closePath(); ctx.fill();
     ctx.fillStyle = C.white; ctx.globalAlpha = 0.9; ctx.fillRect(-f * 7 - 1, -10.5, f * 9, 1.6); ctx.globalAlpha = 1;
-    // brush-blade
-    this.drawBlade(ctx, f);
-    // helm: an enamel crown with two low cusps and a visor slit
+    // the brush
+    this.drawBlade(ctx, f, brushColour(g));
+    // helm: a molar crown (four cusps, fissures) seated on a gum-pink collar, visor slit across the front
     ctx.save(); ctx.translate(f * 0.5, -32);
-    const helm = () => { ctx.beginPath(); ctx.moveTo(-10, 4); ctx.quadraticCurveTo(-11.5, -6, -8, -10); ctx.quadraticCurveTo(-5.5, -13.5, -3, -10.5); ctx.quadraticCurveTo(0, -12, 3, -10.5); ctx.quadraticCurveTo(5.5, -13.5, 8, -10); ctx.quadraticCurveTo(11.5, -6, 10, 4); ctx.quadraticCurveTo(9, 9, 0, 9.5); ctx.quadraticCurveTo(-9, 9, -10, 4); ctx.closePath(); };
+    ctx.fillStyle = '#F277C6'; ctx.beginPath(); ctx.ellipse(0, 9.6, 9.5, 2.8, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#E31C79'; ctx.globalAlpha = 0.55; ctx.beginPath(); ctx.ellipse(0, 10.6, 8.5, 1.6, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+    const helm = () => { ctx.beginPath(); ctx.moveTo(-10, 6); ctx.quadraticCurveTo(-12, -4, -9.6, -9); ctx.quadraticCurveTo(-8, -14, -5.2, -11.2); ctx.quadraticCurveTo(-3.4, -14.2, -1.2, -11.4); ctx.quadraticCurveTo(1, -13.8, 3.2, -11.2); ctx.quadraticCurveTo(5.8, -14.4, 8.2, -10.6); ctx.quadraticCurveTo(12, -5, 10, 6); ctx.quadraticCurveTo(8.5, 9.6, 0, 9.8); ctx.quadraticCurveTo(-8.5, 9.6, -10, 6); ctx.closePath(); };
     helm(); ctx.fillStyle = C.enamel; ctx.fill();
-    ctx.save(); helm(); ctx.clip(); ctx.fillStyle = C.enamelShade; ctx.beginPath(); ctx.ellipse(-f * 9, 6, 13, 12, 0, 0, TAU); ctx.rect(-20, -20, 40, 40); ctx.fill('evenodd');
-    ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.85; ctx.beginPath(); ctx.ellipse(f * 3.5, -6.5, 3.2, 1.6, -0.3 * f, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
-    ctx.fillStyle = C.ink; ctx.beginPath(); ctx.roundRect(f > 0 ? -3 : -11, -1.5, 14, 4.2, 2); ctx.fill();
+    ctx.save(); helm(); ctx.clip();
+    ctx.fillStyle = C.enamelShade; ctx.beginPath(); ctx.ellipse(-f * 9, 7, 13, 12, 0, 0, TAU); ctx.rect(-20, -20, 40, 40); ctx.fill('evenodd');
+    ctx.strokeStyle = 'rgba(120,140,185,0.75)'; ctx.lineWidth = 0.8; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-4.2, -10.4); ctx.quadraticCurveTo(-3.4, -7.6, -1.6, -6.8); ctx.moveTo(2.2, -10.4); ctx.quadraticCurveTo(1.4, -7.6, -0.6, -6.8); ctx.moveTo(-1.1, -6.8); ctx.lineTo(-1.1, -4.6); ctx.stroke();
+    ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.9; ctx.beginPath(); ctx.ellipse(f * 4.5, -7.5, 2.6, 1.3, -0.3 * f, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+    ctx.fillStyle = C.ink; ctx.beginPath(); ctx.roundRect(f > 0 ? -3 : -11, -0.5, 14, 4.2, 2); ctx.fill();
     ctx.restore();
     helm(); ctx.lineWidth = 1.1; ctx.strokeStyle = '#8fa3c9'; ctx.stroke();
     ctx.restore();
     ctx.restore();
   }
-  drawBlade(ctx: CanvasRenderingContext2D, f: number) {
-    ctx.save(); ctx.translate(f * 6, -18); ctx.rotate(this.bladeA * f + (f < 0 ? Math.PI : 0)); 
-    ctx.fillStyle = '#dfe7f6'; ctx.beginPath(); ctx.roundRect(-1.3, -2, 26, 2.6, 1.3); ctx.fill();
-    ctx.fillStyle = C.blue; ctx.fillRect(-1.5, -2.4, 6, 3.4);
-    ctx.fillStyle = '#c9d8f2'; ctx.beginPath(); ctx.roundRect(24, -4.6, 9, 7.6, 2.5); ctx.fill();
+  /** A CURAPROX CS 5460-style brush: slim octagonal handle in a bold colour, angled neck, compact head, dense filaments. */
+  drawBlade(ctx: CanvasRenderingContext2D, f: number, col = BRUSH.cerise) {
+    ctx.save(); ctx.translate(f * 6, -18); ctx.rotate(this.bladeA * f + (f < 0 ? Math.PI : 0));
+    // handle: long, slim, faceted (a light band and a dark band read as an octagon)
+    ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(-4, -1.9, 24, 3.8, 1.9); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(-2.5, -1.4, 21, 0.9);
+    ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fillRect(-2.5, 0.7, 21, 0.8);
+    // neck tapers and angles slightly up, transparent like the real thing
+    ctx.fillStyle = 'rgba(230,240,255,0.85)'; ctx.beginPath(); ctx.moveTo(19, -1.6); ctx.lineTo(27, -2.4); ctx.lineTo(27, 0.6); ctx.lineTo(19, 1.6); ctx.closePath(); ctx.fill();
+    // head
+    ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(26, -2.2, 9.5, 3.4, 1.6); ctx.fill();
+    // dense filament tuft standing off the head (5,460 of them, give or take)
+    for (let i = 0; i < 9; i++) { const x = 26.8 + i * 1.0; ctx.strokeStyle = i % 2 ? '#ffffff' : '#dbe8fb'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.moveTo(x, -2.2); ctx.lineTo(x + (i - 4) * 0.08, -7.4 - (i % 3) * 0.25); ctx.stroke(); }
     ctx.restore();
   }
   drawEmissive(ctx: CanvasRenderingContext2D, g: Game) {
@@ -274,11 +298,11 @@ export class Player extends Actor implements PlayerApi {
     ctx.globalAlpha = 1;
     if (this.invuln > 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0 && this.deadT < 0) return;
     // visor glow
-    const vx = this.x + f * 4 + f * 0.5, vy = this.y + this.hh - 32 * this.sy + 0.6;
+    const vx = this.x + f * 4 + f * 0.5, vy = this.y + this.hh - 32 * this.sy + 1.6;
     g.r.halo(ctx, vx, vy, 16, C.sky, 0.55);
     ctx.fillStyle = '#d8ecff'; ctx.beginPath(); ctx.roundRect(vx - 5.5, vy - 1, 11, 2.2, 1.1); ctx.fill();
     // bristle tuft on the blade tip
-    const a = this.bladeA * f + (f < 0 ? Math.PI : 0), bx = this.x + f * 6 + Math.cos(a) * 29, by = this.y + this.hh - 18 + Math.sin(a) * 29;
+    const a = this.bladeA * f + (f < 0 ? Math.PI : 0), bx = this.x + f * 6 + Math.cos(a) * 31 + Math.sin(a) * 5, by = this.y + this.hh - 18 + Math.sin(a) * 31 - Math.cos(a) * 5;
     g.r.halo(ctx, bx, by, 14, C.sky, 0.4);
     // slash arc
     const s = this.slash; if (s) this.drawSlash(ctx, g, s);
@@ -300,7 +324,7 @@ export class Player extends Actor implements PlayerApi {
     ctx.globalAlpha = 1;
   }
   lights(g: Game) {
-    g.light({ x: this.x, y: this.y - 10, r: 300, color: '#5f7fb8', i: 0.55 });
+    g.light({ x: this.x, y: this.y - 10, r: 300, color: '#5f7fb8', i: 0.32 });
     g.light({ x: this.x + this.facing * 4, y: this.y - 12, r: 80, color: C.sky, i: 0.5 });
     if (this.slash && this.slash.t < 0.15) { const b = this.slashBox(); g.light({ x: b.x, y: b.y, r: 160, color: '#cfe2ff', i: 0.9 }); }
     if (this.focusT > 0) g.light({ x: this.x, y: this.y, r: 200, color: C.sky, i: 0.4 + this.focusT });
@@ -325,5 +349,54 @@ export class RinseWave extends Projectile {
     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
   }
   override lights(g: Game) { g.light({ x: this.x, y: this.y, r: 220, color: '#8BB8E8', i: 0.9 }); }
+}
+/** A glob of CURAPROX toothpaste: lobbed in an arc, splats into foam. */
+export class PasteGlob extends Projectile {
+  t = 0; spin = 0;
+  constructor(x: number, y: number, vx: number, vy: number) { super(x, y, vx, vy, 'player', 10, 7, 1.6, '#ffffff'); this.gravityOn = true; }
+  override update(g: Game, dt: number) {
+    this.t += dt; this.spin += dt * 14;
+    if (Math.random() < 0.6) g.fx.burst(this.x, this.y, { n: 1, color: ['#ffffff', '#CCD8ED'], shape: 'bubble', speed: [5, 30], size: [1, 2.5], life: [0.2, 0.45], gravity: -40 });
+    super.update(g, dt);
+  }
+  override pop(g: Game) {
+    this.dead = true; g.audio.sfx('splat', { x: this.x, y: this.y }); g.shake(2.5, 0.1);
+    g.fx.burst(this.x, this.y, { n: 18, color: ['#ffffff', '#8BB8E8', '#E31C79'], speed: [80, 300], size: [1.5, 4], gravity: 900, life: [0.3, 0.7] });
+    g.fx.burst(this.x, this.y, { n: 14, color: ['#ffffff', '#CCD8ED'], shape: 'bubble', speed: [30, 160], size: [2, 5], gravity: -50, life: [0.4, 1.1], emissive: true });
+    // land the foam on the floor below if there is one close by
+    let fy = this.y; for (let k = 0; k < 6; k++) { if (g.room.solidAt(this.x, fy + 10)) break; fy += 10; }
+    g.spawn(new PasteFoam(this.x - Math.sign(this.vx) * 4, fy));
+  }
+  override draw(ctx: CanvasRenderingContext2D) {
+    ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.spin);
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(0, 0, 7, 0, TAU); ctx.fill();
+    ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+    ctx.strokeStyle = '#8BB8E8'; ctx.beginPath(); ctx.arc(0, 0, 4.2, 0.2, 2.4); ctx.stroke();
+    ctx.strokeStyle = '#E31C79'; ctx.beginPath(); ctx.arc(0, 0, 4.2, 3.3, 5.4); ctx.stroke();
+    ctx.restore();
+  }
+  override drawEmissive(ctx: CanvasRenderingContext2D, g: Game) { g.r.halo(ctx, this.x, this.y, 22, '#ffffff', 0.35); }
+  override lights(g: Game) { g.light({ x: this.x, y: this.y, r: 120, color: '#CCD8ED', i: 0.5 }); }
+}
+
+/** A lingering puddle of foam that fizzes away at plaque. */
+export class PasteFoam extends Actor {
+  life = 2.6; tick = 0; t = 0;
+  constructor(x: number, y: number) { super(x, y - 12, 34, 14); this.team = 'player'; this.z = 26; }
+  update(g: Game, dt: number) {
+    this.t += dt; this.life -= dt; this.tick -= dt; if (this.life <= 0) { this.dead = true; return; }
+    if (Math.random() < dt * 22) g.fx.burst(this.x + (Math.random() - 0.5) * 60, this.y + 6, { n: 1, color: ['#ffffff', '#CCD8ED', '#8BB8E8'], shape: 'bubble', speed: [10, 50], angle: -Math.PI / 2, spread: 0.8, size: [1.5, 4], gravity: -60, life: [0.4, 0.9], emissive: Math.random() < 0.4 });
+    if (this.tick <= 0) {
+      this.tick = 0.35;
+      for (const e of g.entities) if (!e.dead && e.hurtable && e.team === 'enemy' && Math.abs(e.x - this.x) < e.hw + this.hw && Math.abs(e.y - this.y) < e.hh + this.hh) e.onHit?.(g, { damage: 3, dirX: 0, dirY: 0, kind: 'spell', source: this });
+    }
+  }
+  draw(ctx: CanvasRenderingContext2D) {
+    const k = Math.min(1, this.life / 0.6) * Math.min(1, this.t * 6), base = this.y + this.hh;
+    ctx.globalAlpha = k;
+    for (let i = 0; i < 11; i++) { const x = this.x - 30 + i * 6, r = 5 + ((i * 7) % 4) + Math.sin(this.t * 5 + i) * 0.8; ctx.fillStyle = i % 3 ? '#f4f8ff' : '#dfeaf9'; ctx.beginPath(); ctx.arc(x, base - r * 0.7, r, 0, TAU); ctx.fill(); }
+    ctx.globalAlpha = 1;
+  }
+  drawEmissive(ctx: CanvasRenderingContext2D, g: Game) { g.r.halo(ctx, this.x, this.y + 6, 50, '#CCD8ED', 0.25 * Math.min(1, this.life)); }
 }
 export { lerp };
