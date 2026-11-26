@@ -5,5 +5,6 @@ import { rooms as gumline } from './gumline';
 import { rooms as narrows } from './narrows';
 import { rooms as sugar } from './sugar';
 import { rooms as calculus } from './calculus';
+import { rooms as maw } from './maw';
 
-export const ROOMS: RoomDef[] = [...crown, ...gumline, ...narrows, ...sugar, ...calculus];
+export const ROOMS: RoomDef[] = [...crown, ...gumline, ...maw, ...narrows, ...sugar, ...calculus];

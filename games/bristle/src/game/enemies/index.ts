@@ -2,6 +2,7 @@
 //   f Filmling   s Stickler   i Sugar Imp   t Tartar Spitter   b Tartar Brute   l Gum Leech   m Mite swarm
 //   r Flare      n Swell      X Mother Calculus (boss of calculus-throne; gate cells G are hers to close)
 import { register } from '../registry';
+import { registerGlutton } from './glutton';
 import { Filmling } from './filmling';
 import { Stickler } from './stickler';
 import { SugarImp } from './imp';
@@ -43,3 +44,6 @@ export const BESTIARY: BestiaryEntry[] = [
 
 // Test arenas (?test in the URL only, never in normal play).
 if (typeof location !== 'undefined' && new URLSearchParams(location.search).has('test')) registerTestRooms();
+
+// Q The Glutton (first boss, room gumline-maw)
+registerGlutton((ch, f) => register.legend(ch, f));

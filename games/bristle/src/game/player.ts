@@ -26,7 +26,9 @@ export class Player extends Actor implements PlayerApi {
   coyote = 0; atkCd = 0; dashT = 0; dashCd = 0; airDash = true; hurtT = 0; recoilT = 0; wallLock = 0; landT = 0; focusT = 0; spellT = 0; stepT = 0;
   slash: Slash | null = null; throwT = 0;
   /** Seconds the blade button has been held after a slash (charges the Deep Clean). */
-  charge = 0; charged = false; lastSlash: SlashDir = 'side'; slashFlip = 1;
+  charge = 0; charged = false;
+  /** Without the Floss Grip relic you still get one wall jump per jump; the relic makes it unlimited and adds the slide. */
+  wallJumps = 1; lastWall = 0; lastSlash: SlashDir = 'side'; slashFlip = 1;
   wallSlide = 0; // -1 left wall, 1 right wall
   jumpHeld = false; deadT = -1; hazardT = -1;
   safe = { x: 0, y: 0 };
@@ -75,7 +77,7 @@ export class Player extends Actor implements PlayerApi {
     const want = (k: Parameters<typeof inp.pressed>[0], buf = 0) => !busy && this.hurtT <= 0 && inp.pressed(k, buf);
 
     // ---- grounded bookkeeping
-    if (this.grounded) { this.coyote = COYOTE; this.airDash = true; this.airDashes = perk('i3') ? 2 : 1; } else this.coyote -= dt;
+    if (this.grounded) { this.coyote = COYOTE; this.airDash = true; this.airDashes = perk('i3') ? 2 : 1; this.wallJumps = 1; this.lastWall = 0; } else { this.coyote -= dt; if ((this.wallL && this.lastWall === 1) || (this.wallR && this.lastWall === -1)) this.wallJumps = 1; }
 
     // ---- dash (Prime)
     if (this.dashT > 0) {
@@ -112,7 +114,7 @@ export class Player extends Actor implements PlayerApi {
       if (want('jump', JUMP_BUF)) {
         if (ay > 0.5 && this.grounded && this.onLedge(g)) { inp.consume('jump'); this.dropThrough = true; this.y += 2; this.grounded = false; }
         else if (this.coyote > 0) { inp.consume('jump'); this.vy = -JUMP_V; this.coyote = 0; this.jumpHeld = true; this.sx = 0.72; this.sy = 1.3; g.audio.sfx('jump'); this.dust(g, 6); }
-        else if (this.wallSlide) { inp.consume('jump'); this.vy = -JUMP_V * 0.92; this.vx = -this.wallSlide * 430; this.facing = -this.wallSlide as 1 | -1; this.wallLock = 0.15; this.jumpHeld = true; this.airDash = true; g.audio.sfx('walljump'); g.fx.burst(this.x + this.wallSlide * 10, this.y, { n: 6, color: '#c9d6ee', speed: [40, 140], size: [1.5, 3], life: [0.2, 0.4], angle: this.wallSlide > 0 ? Math.PI : 0, spread: 1.5 }); }
+        else if (this.wallSlide || (!this.grounded && this.wallJumps > 0 && (this.wallL || this.wallR))) { if (!this.wallSlide) { this.wallSlide = this.wallL ? -1 : 1; if (!g.save.abilities.grip) this.wallJumps--; } this.lastWall = this.wallSlide; inp.consume('jump'); this.vy = -JUMP_V * 0.92; this.vx = -this.wallSlide * 430; this.facing = -this.wallSlide as 1 | -1; this.wallLock = 0.15; this.jumpHeld = true; this.airDash = true; g.audio.sfx('walljump'); g.fx.burst(this.x + this.wallSlide * 10, this.y, { n: 6, color: '#c9d6ee', speed: [40, 140], size: [1.5, 3], life: [0.2, 0.4], angle: this.wallSlide > 0 ? Math.PI : 0, spread: 1.5 }); }
       }
       if (this.dropThrough && !g.room.oneWay(Math.floor(this.x / TILE), Math.floor((this.y + this.hh + 2) / TILE)) && !this.grounded && this.vy > 120) this.dropThrough = false;
       if (this.jumpHeld && !inp.held('jump') && this.vy < 0) { this.vy *= 0.42; this.jumpHeld = false; }
