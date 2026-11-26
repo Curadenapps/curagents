@@ -34,7 +34,7 @@ export function registerTestRoom() {
       '##################################################',
     ],
     objects: [
-      { type: 'npc', id: 'mira', x: 14, y: 12 },
+      { type: 'npc', id: 'derek', x: 14, y: 12 },
       { type: 'npc', id: 'pip', x: 24, y: 12 },
       { type: 'npc', id: 'warden', x: 36, y: 12 },
       { type: 'lore', x: 44, y: 12, text: 'A test stone. It says nothing of note, very politely.' },

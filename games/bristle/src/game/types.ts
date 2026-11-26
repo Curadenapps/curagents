@@ -9,7 +9,7 @@ export type Team = 'player' | 'enemy' | 'neutral';
 /** Enemy families. Mastery of a faction raises your damage against it. 'gum' = inflammation. */
 export type Faction = 'plaque' | 'sugar' | 'tartar' | 'gum';
 export type HitKind = 'slash' | 'pogo' | 'spell' | 'contact' | 'projectile' | 'hazard';
-export interface Hit { damage: number; dirX: number; dirY: number; kind: HitKind; source?: Entity }
+export interface Hit { damage: number; dirX: number; dirY: number; kind: HitKind; source?: Entity; /** A charged Deep Clean: breaks guards and shields. */ heavy?: boolean }
 
 export interface Entity extends Rect {
   id: number;
@@ -56,7 +56,8 @@ export interface SaveData {
   flags: Record<string, boolean | number | string>;   // story and world state
   killed: Record<string, number>;       // bestiary counts by enemy type
   visited: Record<string, boolean>;
-  settings: { master: number; music: number; sfx: number; shake: number; quality: number; aiVoices: boolean };
+  /** difficulty: 0 Gentle, 1 Knight, 2 Veteran. brightness: exposure 0.6-1.1. */
+  settings: { master: number; music: number; sfx: number; shake: number; quality: number; aiVoices: boolean; difficulty: number; brightness: number };
   playTime: number;
   progress: { xp: number; level: number; points: number; mastery: Record<Faction, number>; perks: string[] };
 }

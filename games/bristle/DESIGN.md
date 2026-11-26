@@ -24,7 +24,7 @@ only as gentle in-world flavour.
 
 | Area (biome id) | Rooms | Feel | What happens |
 |---|---|---|---|
-| Crown Gate (`crown`) | 3 | Cold enamel ruins atop a molar, white and blue, wind | Tutorial, first fountain, **Mira** the hermit hygienist |
+| Crown Gate (`crown`) | 3 | Cold enamel ruins atop a molar, white and blue, wind | Tutorial, first fountain, **Derek** the hermit hygienist |
 | Gumline Hollows (`gumline`) | 3-4 | Soft pink caverns, bioluminescent, warm | **Pip** the merchant, **Rinse** spell relic, sore gum hazards |
 | The Narrows (`narrows`) | 2-3 | Tall interdental shafts, vertical, tight | **Prime Dash** relic; slits (`|`) you can only dash through |
 | Sugar Wastes (`sugar`) | 2-3 | Crystal sugar spikes, orange haze, sticky | **Floss Grip** relic (wall cling and wall jump) |
@@ -79,7 +79,7 @@ If you need a core change, make the smallest one and say so in your report.
   (crawls around walls and ceilings), `i` Sugar Imp (flier), `t` Tartar Spitter (turret), `b` Tartar Brute
   (shielded charger), `l` Gum Leech (drops from ceilings), `m` Mite swarm (small fliers), `X` Mother Calculus.
 - Objects (world places with `objects: [...]`): `relic` {ability, title, text}, `lore` {text},
-  `npc` {id: 'mira' | 'pip' | 'warden'} (registered by the NPC/UI agent).
+  `npc` {id: 'derek' | 'pip' | 'warden'} (registered by the NPC/UI agent).
 - Sound names the core already plays: `slash hit kill jump land walljump dash hurt death heal focus spell
   splash scrub break clink shine rest relic read door step`. Music ids: `title crown gumline narrows sugar
   calculus boss ending`.

@@ -22,10 +22,10 @@ export const gradientGlow: Glow = (ctx, x, y, r, color, a) => {
 
 const breathe = (t: number, k = 1.6) => Math.sin(t * k);
 
-// ---------------------------------------------------------------- Mira, the hermit hygienist
+// ---------------------------------------------------------------- Derek, the hermit hygienist
 // Tall hooded figure in a pale enamel robe and a deep-blue shawl, round spectacles glinting in the hood,
 // leaning on a staff topped with a little round mirror.
-const mira: NpcArt = {
+const derek: NpcArt = {
   accent: '#8BB8E8', height: 66,
   portrait: { cx: 2, cy: -50, scale: 4.2, bg: ['#16336e', '#060d24'] },
   body(ctx, p) {
@@ -199,4 +199,4 @@ const warden: NpcArt = {
   },
 };
 
-export const ART: Record<string, NpcArt> = { mira, pip, warden };
+export const ART: Record<string, NpcArt> = { derek, pip, warden };

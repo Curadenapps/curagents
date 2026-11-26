@@ -1,5 +1,5 @@
-// NPCs: Mira (Crown Gate), Pip (Gumline Hollows), the Warden (Calculus Deep).
-// Rooms place them with objects: [{ type: 'npc', id: 'mira', x, y }] (x, y = the tile they stand in).
+// NPCs: Derek (Crown Gate), Pip (Gumline Hollows), the Warden (Calculus Deep).
+// Rooms place them with objects: [{ type: 'npc', id: 'derek', x, y }] (x, y = the tile they stand in).
 import { register } from '../registry';
 import { PERSONAS } from '../../../server/personas.mjs';
 import { Npc } from './npc';

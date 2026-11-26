@@ -86,7 +86,8 @@ export abstract class Enemy extends Actor {
     if (this.dead) return false;
     const dmg = hit.source && (hit.source.team === 'player') ? Math.round(hit.damage * (g.progress?.damageMult(this.faction) ?? 1)) : hit.damage;
     this.hp -= dmg; this.flash = 0.12;
-    const k = 1 - this.knockResist;
+    (this as any).lastHitAt = g.gameTime;
+    const k = (1 - this.knockResist) * (hit.heavy ? 1.6 : 1);
     if (k > 0) { this.vx = hit.dirX * 380 * k; if (hit.dirY) this.vy = hit.dirY * 260 * k; this.stun = 0.12 * k; }
     g.fx.burst(this.x, this.y, { n: 10, speed: [120, 380], angle: Math.atan2(hit.dirY, hit.dirX || 0.001), spread: 1.4, color: this.bloodColor(), size: [1.5, 3.5], gravity: 900, life: [0.25, 0.6] });
     g.fx.burst(this.x, this.y, { n: 6, speed: [250, 520], angle: Math.atan2(hit.dirY, hit.dirX || 0.001), spread: 0.8, color: '#ffffff', shape: 'streak', size: [1, 2], emissive: true, life: [0.08, 0.18] });

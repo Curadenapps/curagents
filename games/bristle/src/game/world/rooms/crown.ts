@@ -11,7 +11,7 @@ export const rooms: RoomDef[] = [
     doors: { '1': { to: "crown-ramparts", door: "1" } },
     objects: [
       { type: "lore", x: 11, y: 18, text: "Here the Order of the 5,460 kept its watch. One oath for every filament. Most of us kept it." },
-      { type: "npc", id: "mira", x: 75, y: 18 },
+      { type: "npc", id: "derek", x: 75, y: 18 },
     ],
     map: [
       '####################################################################################################',

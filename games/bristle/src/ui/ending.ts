@@ -14,7 +14,7 @@ export class EndingScreen implements Screen {
     this.lines = [
       'The last of the Calculus crumbles into quiet sand.',
       'Across Ivoria, the enamel towers catch the light again, and one by one, they begin to sing.',
-      met('mira') ? 'At the Crown Gate, Mira sets a second cup beside the fountain. Just in case.' : 'At the Crown Gate, the fountain runs clear and warm, as if it had been waiting.',
+      met('derek') ? 'At the Crown Gate, Derek sets a second cup beside the fountain. Just in case.' : 'At the Crown Gate, the fountain runs clear and warm, as if it had been waiting.',
       met('pip') ? 'Deep in the Hollows, Pip is already painting a new sign.' : 'Deep in the Hollows, the glowing gardens open their petals.',
       met('warden') ? 'And the Warden, for the first time in years, sits down.' : 'And the gates of the Deep stand open, with nothing left to guard.',
       'Bristle, last knight of the Order of the 5,460, rests at last. Twice a day, as the oath says.',
@@ -26,7 +26,7 @@ export class EndingScreen implements Screen {
       h('p', { class: 'end-tag', text: 'BRISTLE: Knight of the Crown. An original game prototype for CURAPROX.' }),
       h('dl', { class: 'credits-list' },
         h('dt', { text: 'World' }), h('dd', { text: 'Ivoria, inside the Great Smile' }),
-        h('dt', { text: 'Characters' }), h('dd', { text: 'Bristle, Mira, Pip and the Warden' }),
+        h('dt', { text: 'Characters' }), h('dd', { text: 'Bristle, Derek, Pip and the Warden' }),
         h('dt', { text: 'Art' }), h('dd', { text: 'Every shape drawn in code' }),
         h('dt', { text: 'Voices' }), h('dd', { text: 'Written lines, with optional replies by Claude' })),
       wordmark('wordmark end-mark'),

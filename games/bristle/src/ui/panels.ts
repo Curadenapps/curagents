@@ -60,6 +60,8 @@ export class SettingsPanel implements Screen {
     slider('Music', () => s.music, (v) => (s.music = v));
     slider('Effects', () => s.sfx, (v) => (s.sfx = v));
     body.append(h('div', { class: 'group-label', text: 'Display' }));
+    choice('Difficulty', [{ v: 0, t: 'Gentle' }, { v: 1, t: 'Knight' }, { v: 2, t: 'Veteran' }], () => s.difficulty ?? 1, (v) => (s.difficulty = v), () => ['Fewer hits to clear creatures, longer recovery, faster healing.', 'The intended challenge.', 'Tougher creatures and heavier blows. Applies from the next room.'][s.difficulty ?? 1]);
+    slider('Brightness', () => ((s.brightness ?? 0.85) - 0.55) / 0.55, (v) => (s.brightness = 0.55 + v * 0.55), (v) => Math.round((0.55 + v * 0.55) * 100) + '%');
     choice('Screen shake', [{ v: 0, t: 'Off' }, { v: 0.5, t: 'Gentle' }, { v: 1, t: 'Full' }], () => (s.shake >= 0.75 ? 1 : s.shake >= 0.25 ? 0.5 : 0), (v) => (s.shake = v));
     choice('Quality', [{ v: 0.5, t: 'Performance' }, { v: 0.75, t: 'Balanced' }, { v: 1, t: 'Sharp' }], () => (s.quality >= 0.9 ? 1 : s.quality >= 0.65 ? 0.75 : 0.5), (v) => (s.quality = v));
     body.append(h('div', { class: 'group-label', text: 'Voices' }));

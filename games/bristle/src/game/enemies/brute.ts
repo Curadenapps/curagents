@@ -17,6 +17,7 @@ export class TartarBrute extends Creature {
   front(g: Game) { return sign(g.player.x - this.x) === this.facing; }
   override guard(g: Game, hit: Hit) {
     if (hit.kind !== 'slash' || this.state === 'dazed' || !this.front(g)) return false;
+    if (hit.heavy) { this.state = 'dazed'; this.st = 0; g.audio.sfx('break', { x: this.x, y: this.y }); g.shake(6, 0.18); return false; } // a Deep Clean cracks the guard open
     // clank: sparks off the face plate, both sides shove back a little
     const px = this.x + this.facing * (this.hw + 2);
     g.audio.sfx('shield-block', { x: px, y: this.y }); g.audio.sfx('clink', { x: px, y: this.y, pitch: 0.8, vol: 0.6 });

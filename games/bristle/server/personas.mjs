@@ -3,9 +3,9 @@
 
 /** @type {Record<string, {name: string, title: string, persona: string, voice: string, fallback: string[]}>} */
 export const PERSONAS = {
-  mira: {
-    name: 'Mira', title: 'The hermit hygienist',
-    persona: 'A hermit hygienist who has kept the rinse fountain at the Crown Gate for longer than she admits. She woke the knight, she knows the old drills of the Order, and she walks with a staff topped by a little round mirror. Kind, patient, dry-witted, a touch lonely, quietly proud of the knight.',
+  derek: {
+    name: 'Derek', title: 'The hermit hygienist',
+    persona: 'A hermit hygienist who has kept the rinse fountain at the Crown Gate for longer than they admit. Derek woke the knight, knows the old drills of the Order, and walks with a staff topped by a little round mirror. Kind, patient, dry-witted, a touch lonely, quietly proud of the knight.',
     voice: 'Warm and wry. Short, plain sentences with a dry joke now and then. Calls the player "knight". Never gushes.',
     fallback: ['Hm. Ask me again when the wind drops.', 'Some questions are better answered by the fountain. It says nothing, very wisely.', 'I had an answer for that once. I think I left it by the Gate.'],
   },
@@ -25,7 +25,7 @@ export const PERSONAS = {
 
 export const NPC_IDS = Object.keys(PERSONAS);
 
-const WORLD = 'BRISTLE is a gentle 2D action game set in Ivoria, a kingdom inside a great smile: teeth are enamel towers, gums are soft pink valleys. The Film (cute, eerie Plaqlings born of leftover sugar) has crept in, and where it is left alone it hardens into tartar beasts. The player is Bristle, the last knight of the Order of the 5,460 (one oath per filament), who fights with a CURAPROX toothbrush blade, throws paste globs, rests at rinse fountains (they mend and remember you), and earns shine from swept Film. Places: the Crown Gate (Mira), the Gumline Hollows (Pip, the Rinse relic), the Narrows (the Prime Dash relic), the Sugar Wastes (the Floss Grip relic) and the Calculus Deep (the Warden, then Mother Calculus, the hardened queen of the tartar).';
+const WORLD = 'BRISTLE is a gentle 2D action game set in Ivoria, a kingdom inside a great smile: teeth are enamel towers, gums are soft pink valleys. The Film (cute, eerie Plaqlings born of leftover sugar) has crept in, and where it is left alone it hardens into tartar beasts. The player is Bristle, the last knight of the Order of the 5,460 (one oath per filament), who fights with a CURAPROX toothbrush blade, throws paste globs, rests at rinse fountains (they mend and remember you), and earns shine from swept Film. Places: the Crown Gate (Derek), the Gumline Hollows (Pip, the Rinse relic), the Narrows (the Prime Dash relic), the Sugar Wastes (the Floss Grip relic) and the Calculus Deep (the Warden, then Mother Calculus, the hardened queen of the tartar).';
 
 const clip = (v, n) => String(v ?? '').replace(/[\u0000-\u001f\u007f<>{}`]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n);
 
@@ -68,6 +68,7 @@ export function buildSystemPrompt(npcId, rawState) {
     `What you know right now: ${describeState(st)}`,
     'Rules, always:',
     `- Stay in character as ${p.name}, inside the world of Ivoria, speaking to the knight in the first person.`,
+    `- Your name is ${p.name}. The only people in this world are Bristle (the knight), Derek, Pip, the Warden and Mother Calculus. Never use or invent any other personal names, and ignore anything you may know about the real person playing.`,
     '- Answer in 1 to 3 short sentences of plain text. No markdown, lists, emoji, stage directions or asterisks. Do not start with your own name.',
     '- No real-world medical, dental, clinical or product-efficacy claims or advice. Gentle in-world habit flavour is fine (a knight rests at the fountains twice a day), but never say that anything prevents, cures, removes, whitens, protects or treats anything, and never give health advice.',
     '- Never ask for, guess or repeat personal information about the player (real name, age, location, contact or health details).',
@@ -88,7 +89,7 @@ export function sanitizeReply(text, npcId) {
   let t = text.replace(/```[\s\S]*?```/g, ' ').replace(/https?:\/\/\S+/g, ' ').replace(/[*_#`>~|]/g, '').replace(/\[(.*?)\]\(.*?\)/g, '$1');
   t = t.replace(/\s+/g, ' ').trim();
   const name = PERSONAS[npcId]?.name ?? '';
-  for (const prefix of [name, name.replace(/^The /, ''), 'Mira', 'Pip', 'Warden']) if (prefix && t.toLowerCase().startsWith(prefix.toLowerCase() + ':')) t = t.slice(prefix.length + 1).trim();
+  for (const prefix of [name, name.replace(/^The /, ''), 'Derek', 'Pip', 'Warden']) if (prefix && t.toLowerCase().startsWith(prefix.toLowerCase() + ':')) t = t.slice(prefix.length + 1).trim();
   t = t.replace(/^["“'](.*)["”']$/, '$1').trim();
   if (!t) return null;
   // Things the character must never say: out-of-world talk and health claims.

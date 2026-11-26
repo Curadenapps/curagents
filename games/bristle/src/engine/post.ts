@@ -12,7 +12,7 @@ export interface Grade {
 }
 export const DEFAULT_GRADE: Grade = {
   tint: [1, 1, 1], lift: [0.0, 0.01, 0.03], saturation: 1.05, contrast: 1.06, exposure: 1,
-  bloom: 0.55, bloomThreshold: 0.72, vignette: 0.55, grain: 0.035, aberration: 0.0016, fade: 0, flash: [1, 1, 1, 0],
+  bloom: 0.36, bloomThreshold: 0.82, vignette: 0.62, grain: 0.035, aberration: 0.0016, fade: 0, flash: [1, 1, 1, 0],
 };
 
 const VS = `#version 300 es

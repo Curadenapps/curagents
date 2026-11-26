@@ -27,7 +27,7 @@ export class Fountain extends Actor {
   }
   draw(ctx: CanvasRenderingContext2D) {
     const x = this.x, y = this.y + this.hh; // floor
-    ctx.fillStyle = '#d9e2f2'; ctx.beginPath(); ctx.moveTo(x - 36, y); ctx.lineTo(x - 28, y - 26); ctx.quadraticCurveTo(x, y - 34, x + 28, y - 26); ctx.lineTo(x + 36, y); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#9fb0cf'; ctx.beginPath(); ctx.moveTo(x - 36, y); ctx.lineTo(x - 28, y - 26); ctx.quadraticCurveTo(x, y - 34, x + 28, y - 26); ctx.lineTo(x + 36, y); ctx.closePath(); ctx.fill();
     ctx.fillStyle = '#aebbd6'; ctx.fillRect(x - 36, y - 4, 72, 4);
     ctx.fillStyle = '#9fb0d0'; ctx.beginPath(); ctx.ellipse(x, y - 26, 26, 5, 0, 0, TAU); ctx.fill();
     ctx.fillStyle = '#e8eef9'; ctx.beginPath(); ctx.moveTo(x - 4, y - 30); ctx.lineTo(x - 2.5, y - 62); ctx.quadraticCurveTo(x, y - 70, x + 2.5, y - 62); ctx.lineTo(x + 4, y - 30); ctx.fill();
@@ -39,7 +39,7 @@ export class Fountain extends Actor {
     g.r.halo(ctx, x, y - 66, 20, '#ffffff', 0.7);
     if (this.prompt > 0) { ctx.globalAlpha = this.prompt; ctx.fillStyle = '#ffffff'; ctx.font = '14px "Futura LT Pro", Futura, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('REST', x, y - 86); ctx.globalAlpha = 1; }
   }
-  lights(g: Game) { g.light({ x: this.x, y: this.y - 20, r: 320, color: '#8BB8E8', i: 0.85 + this.resting * 0.4 }); }
+  lights(g: Game) { g.light({ x: this.x, y: this.y - 20, r: 300, color: '#8BB8E8', i: 0.5 + this.resting * 0.4 }); }
 }
 
 /** An ability relic on a little plinth. Picking it up sets the ability and a flag. */

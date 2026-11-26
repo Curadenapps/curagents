@@ -12,10 +12,10 @@ const brushColour = (g: Game) => BRUSH[String(g.save.flags['brush-colour'] ?? 'c
 
 const RUN = 300, ACC_G = 5200, ACC_A = 3400, JUMP_V = 830, GRAV_UP = 2500, GRAV_DOWN = 3100, MAX_FALL = 820;
 const COYOTE = 0.09, JUMP_BUF = 0.13, ATK_CD = 0.36, DASH_T = 0.19, DASH_V = 820, DASH_CD = 0.5;
-const FOCUS_COST = 33, SPELL_COST = 33, PASTE_COST = 25, FOCUS_T = 0.92;
+const FOCUS_COST = 33, SPELL_COST = 33, PASTE_COST = 25, FOCUS_T = 0.92, CHARGE_T = 0.6;
 
 type SlashDir = 'side' | 'up' | 'down';
-interface Slash { dir: SlashDir; t: number; hit: Set<number>; cells: Set<number>; flip: number; landed: boolean }
+interface Slash { dir: SlashDir; t: number; hit: Set<number>; cells: Set<number>; flip: number; landed: boolean; heavy?: boolean }
 
 export class Player extends Actor implements PlayerApi {
   facing: 1 | -1 = 1;
@@ -24,7 +24,9 @@ export class Player extends Actor implements PlayerApi {
   override team = 'player' as const; override z = 20;
   // timers
   coyote = 0; atkCd = 0; dashT = 0; dashCd = 0; airDash = true; hurtT = 0; recoilT = 0; wallLock = 0; landT = 0; focusT = 0; spellT = 0; stepT = 0;
-  slash: Slash | null = null; throwT = 0; lastSlash: SlashDir = 'side'; slashFlip = 1;
+  slash: Slash | null = null; throwT = 0;
+  /** Seconds the blade button has been held after a slash (charges the Deep Clean). */
+  charge = 0; charged = false; lastSlash: SlashDir = 'side'; slashFlip = 1;
   wallSlide = 0; // -1 left wall, 1 right wall
   jumpHeld = false; deadT = -1; hazardT = -1;
   safe = { x: 0, y: 0 };
@@ -39,14 +41,14 @@ export class Player extends Actor implements PlayerApi {
   push(vx: number, vy: number) { this.vx = vx; this.vy = vy; this.recoilT = 0.12; }
   bounce(strength = 1) { this.vy = -720 * strength; this.airDash = true; this.jumpHeld = false; }
   heal(n: number) { this.hp = Math.min(this.maxHp, this.hp + n); }
-  gainFluor(n: number) { this.fluor = clamp(this.fluor + (this.inflamed > 0 && n > 0 ? n * 0.5 : n), 0, 99); }
+  gainFluor(n: number) { const d = (this.g as any)?.diff?.fluor ?? 1; this.fluor = clamp(this.fluor + (n > 0 ? n * d * (this.inflamed > 0 ? 0.5 : 1) : n), 0, 99); }
   inflame(seconds: number) { if (!this.g) return; const g = this.g, m = g.progress.masteryLevel('gum'); const k = (g.progress.has('c2') ? 0.5 : 1) * (m >= 4 ? 0 : m >= 2 ? 0.6 : 1); if (k <= 0) return; this.inflamed = Math.max(this.inflamed, seconds * k); }
   private g: Game | null = null;
   resetCloak() { for (let i = 0; i < this.cloak.length; i++) { const c = this.cloak[i]; c.x = c.px = this.x; c.y = c.py = this.y - 6 + i * 4; } }
 
   hurt(g: Game, dmg: number, fromX: number, kind: HitKind = 'contact') {
     if (this.invuln > 0 || this.deadT >= 0 || this.hazardT >= 0) return;
-    this.hp -= dmg; this.invuln = 1.3; this.hurtT = 0.24; this.slash = null; this.focusT = 0; this.dashT = 0; this.dashing = false;
+    this.hp -= dmg; this.invuln = (g as any).diff?.invuln ?? 1.3; this.charge = 0; this.hurtT = 0.24; this.slash = null; this.focusT = 0; this.dashT = 0; this.dashing = false;
     const dir = sign(this.x - fromX) || -this.facing; this.vx = dir * 340; this.vy = -430;
     g.hitstop(0.14); g.shake(11, 0.32); g.flash([1, 1, 1], 0.4); g.slowmo(0.35, 0.28); g.audio.sfx('hurt');
     g.fx.burst(this.x, this.y, { n: 18, color: [C.enamel, C.sky, C.ink2], speed: [150, 420], size: [1.5, 4], gravity: 900, life: [0.3, 0.8], shape: 'square', spin: 20 });
@@ -90,7 +92,7 @@ export class Player extends Actor implements PlayerApi {
       if (this.passSlits && !this.insideSlit(g)) this.passSlits = false;
       if (want('dash', 0.08) && g.save.abilities.dash && this.dashCd <= 0 && (this.grounded || this.airDash || this.wallSlide)) {
         inp.consume('dash'); if (this.wallSlide) this.facing = -this.wallSlide as 1 | -1; else if (ax) this.facing = sign(ax) as 1 | -1;
-        this.dashT = DASH_T; this.dashing = true; this.dashCd = DASH_CD * (perk('i1') ? 0.65 : 1); this.vx = this.facing * DASH_V; this.vy = 0; this.slash = null; this.focusT = 0; this.dashHits.clear();
+        this.dashT = DASH_T; this.dashing = true; this.invuln = Math.max(this.invuln, 0.12); this.charge = 0; this.dashCd = DASH_CD * (perk('i1') ? 0.65 : 1); this.vx = this.facing * DASH_V; this.vy = 0; this.slash = null; this.focusT = 0; this.dashHits.clear();
         if (!this.grounded) { this.airDashes--; if (this.airDashes <= 0) this.airDash = false; } this.sx = 1.35; this.sy = 0.7;
         g.audio.sfx('dash'); g.fx.burst(this.x, this.y + 12, { n: 8, color: '#9fb4d9', speed: [40, 160], angle: this.facing > 0 ? Math.PI : 0, spread: 1.2, size: [2, 5], life: [0.3, 0.6], grow: 6 });
       }
@@ -99,7 +101,7 @@ export class Player extends Actor implements PlayerApi {
     if (this.dashT <= 0) {
       // ---- horizontal
       if (this.recoilT <= 0 && this.wallLock <= 0) {
-        const target = ax * RUN * (this.focusT > 0 ? 0 : 1);
+        const target = ax * RUN * (this.focusT > 0 ? 0 : this.charge > 0.2 ? 0.55 : 1);
         this.vx = approach(this.vx, target, (this.grounded ? ACC_G : ACC_A) * dt);
         if (ax && !this.slash) this.facing = sign(ax) as 1 | -1;
       }
@@ -128,7 +130,15 @@ export class Player extends Actor implements PlayerApi {
       this.slash = { dir, t: 0, hit: new Set(), cells: new Set(), flip: this.slashFlip, landed: false }; this.lastSlash = dir; this.atkCd = ATK_CD * (perk('b2') ? 0.85 : 1); this.focusT = 0;
       g.audio.sfx('slash', { pitch: 0.92 + Math.random() * 0.16 });
     }
-    if (this.slash) { this.slash.t += dt; if (this.slash.t < 0.11) this.slashHits(g); if (this.slash.t > 0.22) this.slash = null; }
+    // hold the blade button to charge a Deep Clean; release to unleash it
+    if (!busy && inp.held('attack') && this.dashT <= 0 && this.hurtT <= 0) {
+      this.charge += dt;
+      if (!this.charged && this.charge >= CHARGE_T) { this.charged = true; g.audio.sfx('charge'); g.fx.burst(this.x, this.y - 10, { n: 14, color: ['#ffffff', C.sky], shape: 'streak', speed: [60, 160], emissive: true, size: [1, 1.6], life: [0.2, 0.4] }); }
+    } else {
+      if (this.charged && !busy) this.deepClean(g);
+      this.charge = 0; this.charged = false;
+    }
+    if (this.slash) { this.slash.t += dt; if (this.slash.t < 0.11) this.slashHits(g); if (this.slash.t > (this.slash.heavy ? 0.3 : 0.22)) this.slash = null; }
 
     // ---- spell: throw CURAPROX toothpaste; Up + spell = Rinse wave (after the rinse relic)
     if (want('spell', 0.08) && this.dashT <= 0) {
@@ -152,7 +162,7 @@ export class Player extends Actor implements PlayerApi {
       this.focusT += dt; this.vx = approach(this.vx, 0, ACC_G * dt);
       const a = Math.random() * TAU, r = 60 + Math.random() * 30;
       g.fx.burst(this.x + Math.cos(a) * r, this.y + Math.sin(a) * r, { n: 1, color: [C.sky, C.white], vx: -Math.cos(a) * r * 2.2, vy: -Math.sin(a) * r * 2.2, speed: [0, 0], drag: 0, emissive: true, size: [1, 2], life: [0.4, 0.45], shape: 'streak' });
-      if (this.focusT >= FOCUS_T * (perk('c2') ? 0.78 : 1) * (this.inflamed > 0 ? 1.45 : 1)) {
+      if (this.focusT >= FOCUS_T * (perk('c2') ? 0.78 : 1) * (this.inflamed > 0 ? 1.45 : 1) * ((g as any).diff?.focus ?? 1)) {
         this.focusT = 0.0001; this.fluor -= FOCUS_COST; this.heal(1); g.audio.sfx('heal'); g.flash([0.7, 0.85, 1], 0.18);
         g.fx.burst(this.x, this.y, { n: 24, color: [C.sky, C.white], speed: [80, 260], emissive: true, size: [1, 2.5], life: [0.3, 0.7] });
       }
@@ -190,7 +200,7 @@ export class Player extends Actor implements PlayerApi {
 
   wide = 1;
   slashBox(): { x: number; y: number; hw: number; hh: number } {
-    const s = this.slash!, k = this.wide; if (s.dir === 'up') return { x: this.x, y: this.y - 44 * k, hw: 30 * k, hh: 36 * k };
+    const s = this.slash!, k = this.wide * (s.heavy ? 1.5 : 1); if (s.dir === 'up') return { x: this.x, y: this.y - 44 * k, hw: 30 * k, hh: 36 * k };
     if (s.dir === 'down') return { x: this.x, y: this.y + 42 * k, hw: 28 * k, hh: 34 * k };
     return { x: this.x + this.facing * 42 * k, y: this.y - 2, hw: 40 * k, hh: 26 * k };
   }
@@ -202,9 +212,10 @@ export class Player extends Actor implements PlayerApi {
       if (e.dead || !e.hurtable || e.team === 'player' || s.hit.has(e.id)) continue;
       if (Math.abs(e.x - b.x) < e.hw + b.hw && Math.abs(e.y - b.y) < e.hh + b.hh) {
         s.hit.add(e.id);
-        const hit: Hit = { damage: 5 + 2 * (Number(g.save.flags.blade) || 0) + (g.progress.has('b3') ? 2 : 0), dirX: dirX || sign(e.x - this.x) || this.facing, dirY, kind: s.dir === 'down' ? 'pogo' : 'slash', source: this };
+        const hit: Hit = { damage: 5 + 2 * (Number(g.save.flags.blade) || 0) + (g.progress.has('b3') ? 2 : 0), dirX: dirX || sign(e.x - this.x) || this.facing, dirY, kind: s.dir === 'down' ? 'pogo' : 'slash', source: this, heavy: s.heavy };
+        if (s.heavy) hit.damage = Math.round(hit.damage * 2.5 + 3);
         if (e.onHit?.(g, hit)) {
-          s.landed = true; this.gainFluor(g.progress.has('c3') ? 15 : 11); g.hitstop(0.05); g.shake(3.5, 0.1);
+          s.landed = true; this.gainFluor(g.progress.has('c3') ? 15 : 11); g.hitstop(s.heavy ? 0.11 : 0.05); g.shake(s.heavy ? 8 : 3.5, s.heavy ? 0.2 : 0.1);
           this.combo++; this.comboT = 1.2;
           if (g.progress.has('b4') && this.combo % 3 === 0) this.filamentStorm(g, b.x, b.y);
           const ix = (e.x + this.x + this.facing * 30) / 2;
@@ -228,6 +239,14 @@ export class Player extends Actor implements PlayerApi {
       }
       if (c === '^' && s.dir === 'down' && !s.cells.has(k)) { s.cells.add(k); this.bounce(0.95); g.audio.sfx('clink'); g.fx.burst((tx + 0.5) * TILE, ty * TILE, { n: 6, color: '#ffffff', emissive: true, shape: 'streak', speed: [100, 300], angle: -Math.PI / 2, spread: 1.6, size: [1, 1.5], life: [0.1, 0.2] }); }
     }
+  }
+
+  /** The charged strike: a wide, heavy sweep that breaks guards and shields. */
+  deepClean(g: Game) {
+    const ay = g.input.axisY, dir: SlashDir = ay < -0.5 ? 'up' : ay > 0.5 && !this.grounded ? 'down' : 'side';
+    this.slash = { dir, t: 0, hit: new Set(), cells: new Set(), flip: 1, landed: false, heavy: true }; this.atkCd = ATK_CD;
+    if (dir === 'side') { this.vx = this.facing * 420; this.recoilT = 0.1; }
+    g.audio.sfx('slash', { pitch: 0.7 }); g.audio.sfx('storm', { vol: 0.6 }); g.flash([0.8, 0.9, 1], 0.12); g.shake(4, 0.12);
   }
 
   /** Oath perk: every third hit in a row releases a ring of filament sparks. */
@@ -328,6 +347,7 @@ export class Player extends Actor implements PlayerApi {
     // slash arc
     const s = this.slash; if (s) this.drawSlash(ctx, g, s);
     if (this.focusT > 0) { const k = this.focusT / FOCUS_T; g.r.halo(ctx, this.x, this.y, 30 + k * 40, C.sky, 0.25 + k * 0.4); }
+    if (this.charge > 0.15) { const k = Math.min(1, this.charge / CHARGE_T); g.r.halo(ctx, bx, by, 10 + k * 26, this.charged ? '#ffffff' : C.sky, 0.3 + k * 0.6 + (this.charged ? Math.sin(g.time * 30) * 0.15 : 0)); }
   }
   drawSlash(ctx: CanvasRenderingContext2D, g: Game, s: Slash) {
     const t = clamp(s.t / 0.16, 0, 1), fade = 1 - clamp((s.t - 0.06) / 0.16, 0, 1); if (fade <= 0) return;
@@ -337,7 +357,7 @@ export class Player extends Actor implements PlayerApi {
     const head = a0 + dir * span * (0.25 + 0.75 * t), tail = a0 + dir * span * Math.max(0, t - 0.55);
     ctx.lineCap = 'round';
     for (let i = 0; i < 9; i++) {
-      const r = 26 + i * 4.2 + (s.dir === 'side' ? 6 : 2), w = i === 6 ? 3.2 : 1.1 + (i % 3) * 0.5;
+      const r = (26 + i * 4.2 + (s.dir === 'side' ? 6 : 2)) * (s.heavy ? 1.45 : 1), w = (i === 6 ? 3.2 : 1.1 + (i % 3) * 0.5) * (s.heavy ? 1.4 : 1);
       ctx.globalAlpha = fade * (0.25 + 0.75 * (1 - Math.abs(i - 6) / 7)); ctx.strokeStyle = i > 4 ? '#ffffff' : C.sky; ctx.lineWidth = w;
       ctx.beginPath(); if (dir > 0) ctx.arc(cx, cy, r, tail, head); else ctx.arc(cx, cy, r, head, tail); ctx.stroke();
     }

@@ -1,5 +1,5 @@
 // POST /api/npc — NPC voices through the Claude Messages API (local play server only).
-//   body: { npc: 'mira'|'pip'|'warden', history: [{role:'knight'|'npc', text}], state: {...}, mode?: 'ask'|'greet' }
+//   body: { npc: 'derek'|'pip'|'warden', history: [{role:'knight'|'npc', text}], state: {...}, mode?: 'ask'|'greet' }
 //   200 { text }   the line to show (already cleaned)
 //   501            no ANTHROPIC_API_KEY: the game falls back to written lines
 //   400/403/405/413/429/502/504 on bad input, foreign origin, wrong method, size, rate limit, upstream trouble

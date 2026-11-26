@@ -8,16 +8,16 @@ interface Look { id: string; name: string; ambient: string; music: string; sky: 
   terrain: { base: string; deep: string; edge: string; rim: string; top: string; slab: string }; tint?: [number, number, number] }
 
 const LOOKS: Look[] = [
-  { id: 'crown', name: 'Crown Gate', ambient: '#566a96', music: 'crown', sky: ['#0d1d48', '#050b1f'], far: '#14285a', mid: '#1c3570',
-    terrain: { base: '#cdd8ee', deep: '#7f92bd', edge: '#e6edf9', rim: '#ffffff', top: '#ffffff', slab: '#dfe7f6' } },
-  { id: 'gumline', name: 'Gumline Hollows', ambient: '#6a4a68', music: 'gumline', sky: ['#3a0f33', '#14061a'], far: '#5a1849', mid: '#7a2463',
-    terrain: { base: '#b8336f', deep: '#5e1239', edge: '#e0569a', rim: '#ffb3d9', top: '#f2e6f4', slab: '#f2e9f7' }, tint: [1.04, 0.98, 1.0] },
-  { id: 'narrows', name: 'The Narrows', ambient: '#3c4a6c', music: 'narrows', sky: ['#081433', '#02050f'], far: '#0f1f47', mid: '#18305f',
-    terrain: { base: '#9fb0d4', deep: '#41507a', edge: '#c9d6ee', rim: '#eef3fb', top: '#ffffff', slab: '#d9e2f2' } },
-  { id: 'sugar', name: 'Sugar Wastes', ambient: '#6e5a5a', music: 'sugar', sky: ['#3d1a12', '#120607'], far: '#5a2617', mid: '#7a3a1c',
-    terrain: { base: '#e9c7a8', deep: '#8f5a3c', edge: '#f6dcc4', rim: '#fff4e6', top: '#fff1e2', slab: '#f7e6d6' }, tint: [1.05, 1.0, 0.95] },
-  { id: 'calculus', name: 'Calculus Deep', ambient: '#45444c', music: 'calculus', sky: ['#17161b', '#060608'], far: '#24232b', mid: '#33313a',
-    terrain: { base: '#a89f88', deep: '#4b463b', edge: '#d8cfb8', rim: '#eee6d2', top: '#e6dcc4', slab: '#d8cfb8' }, tint: [1.0, 0.98, 0.95] },
+  { id: 'crown', name: 'Crown Gate', ambient: '#3e4c6e', music: 'crown', sky: ['#0a1636', '#040915'], far: '#0f1f45', mid: '#152a57',
+    terrain: { base: '#6f7fa3', deep: '#2c3756', edge: '#93a3c6', rim: '#d9e3f5', top: '#c9d5ec', slab: '#a9b8d6' } },
+  { id: 'gumline', name: 'Gumline Hollows', ambient: '#4e3650', music: 'gumline', sky: ['#260a22', '#0c0410'], far: '#3d1033', mid: '#541a46',
+    terrain: { base: '#7a2650', deep: '#3a0e26', edge: '#9e3a6c', rim: '#e88ab8', top: '#d9b8cc', slab: '#cdb3c6' }, tint: [1.02, 0.98, 1.0] },
+  { id: 'narrows', name: 'The Narrows', ambient: '#2f3a56', music: 'narrows', sky: ['#081433', '#02050f'], far: '#0f1f47', mid: '#18305f',
+    terrain: { base: '#5d6c90', deep: '#232d4a', edge: '#7f8fb4', rim: '#c9d6ee', top: '#b9c7e3', slab: '#a3b2d1' } },
+  { id: 'sugar', name: 'Sugar Wastes', ambient: '#4f4244', music: 'sugar', sky: ['#2a120c', '#0c0405'], far: '#3f1c12', mid: '#552a17',
+    terrain: { base: '#8f6d58', deep: '#43291c', edge: '#b28a70', rim: '#ecd3bd', top: '#d9c1aa', slab: '#c9b29c' }, tint: [1.03, 1.0, 0.96] },
+  { id: 'calculus', name: 'Calculus Deep', ambient: '#34333a', music: 'calculus', sky: ['#17161b', '#060608'], far: '#24232b', mid: '#33313a',
+    terrain: { base: '#6f6a5c', deep: '#2b2822', edge: '#8f8874', rim: '#d8cfb8', top: '#c4baa3', slab: '#b3aa94' }, tint: [1.0, 0.98, 0.95] },
 ];
 
 for (const L of LOOKS) {

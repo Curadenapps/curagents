@@ -30,10 +30,10 @@ export const BRUSH_COLOURS: { id: string; name: string; hex: string }[] = [
 interface Script { first: string[]; greet: Line[]; idle: Line[]; topics: { id: string; label: string; lines: Line[] }[]; bye: string[] }
 
 const SCRIPTS: Record<string, Script> = {
-  mira: {
+  derek: {
     first: [
       'Easy now. You have been asleep a long time, knight. Long enough for the Film to move in and get comfortable.',
-      'I am Mira. I keep the fountain here at the Gate, and I talk to it more than I would like to admit.',
+      'I am Derek. I keep the fountain here at the Gate, and I talk to it more than I would like to admit.',
       'That is a CURAPROX blade in your hand. Five thousand four hundred and sixty filaments, one for each oath of the Order. Hold it like you mean it.',
       'The Film starts soft: leftover sugar, given time and nobody to sweep it. Left long enough, it hardens into tartar, and tartar holds a grudge.',
       'Rest at the fountains when you find them. They mend you, and they remember you. A sensible knight rests at one twice a day, at least.',
@@ -178,7 +178,7 @@ export interface TalkHost {
 }
 
 export const ASK_PRESETS: Record<string, string[]> = {
-  mira: ['What is the Film?', 'Where should I go next?', 'Tell me about the Order.'],
+  derek: ['What is the Film?', 'Where should I go next?', 'Tell me about the Order.'],
   pip: ['Where do you come from?', 'Heard any rumours?', 'What is your best ware?'],
   warden: ['Who is Mother Calculus?', 'How long have you stood guard?', 'Any advice before the gates?'],
 };

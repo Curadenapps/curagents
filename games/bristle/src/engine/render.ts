@@ -79,8 +79,10 @@ export class Renderer {
     g.fillStyle = grd; g.fillRect(0, 0, 128, 128); this.sprites.set(color, c); return c;
   }
   /** Draw a glow sprite into a context in world space (for emissive halos). */
+  /** Global multiplier for emissive halos (keeps glows from washing the screen). */
+  glowScale = 0.7;
   halo(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, color: string, a: number) {
-    ctx.globalAlpha = a; ctx.drawImage(this.glow(color), x - r, y - r, r * 2, r * 2); ctx.globalAlpha = 1;
+    ctx.globalAlpha = Math.min(1, a * this.glowScale); ctx.drawImage(this.glow(color), x - r, y - r, r * 2, r * 2); ctx.globalAlpha = 1;
   }
   private drawLights() {
     const li = this.li, k = this.lightScale; li.setTransform(1, 0, 0, 1, 0, 0);

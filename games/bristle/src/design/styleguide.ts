@@ -379,7 +379,7 @@ function components() {
       <div class="pad" style="border-top:1px solid var(--hair)"><h4 style="margin-bottom:14px">Charm slots</h4><div class="charms">${['crown', 'foam', 'shard'].map((k) => `<div class="slot">${a2d(64, charmIcon(k), 'art charm')}</div>`).join('')}<div class="slot empty"></div><div class="slot empty"></div></div>
       <p>Filled slots show the charm on a deep disc with a sky hairline; empty slots are a faint ring.</p></div></div>
   </div>
-  <h3>Dialogue</h3><div class="card"><div class="dialogue"><div class="portrait">${a2d(124, portrait)}</div><div><div class="who">Mira<small>Hermit hygienist</small></div>
+  <h3>Dialogue</h3><div class="card"><div class="dialogue"><div class="portrait">${a2d(124, portrait)}</div><div><div class="who">Derek<small>Hermit hygienist</small></div>
     <div class="line">You slept a long time, little knight. The towers kept their shine without you. Barely. Twice a day the old Order swept them, morning and night. Habit is a kind of armour.</div>
     <div class="choices"><button class="btn primary sm">Ask about the Film</button><button class="btn secondary sm">Rest a while</button><button class="btn ghost sm">Leave</button></div></div><span class="next"></span></div></div>
   <h3>Shop panel</h3><div class="grid g2"><div class="panel"><h4 style="margin-bottom:6px">Pip's Pocket</h4><p class="note" style="margin:0 0 6px">Shine buys charms, finishes and paste. Selected row gets a blue wash.</p>

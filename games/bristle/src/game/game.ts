@@ -12,13 +12,19 @@ import type { AudioApi, Entity, Game, HitKind, SaveData, UiApi, ProgressApi } fr
 import type { Light } from '../engine/render';
 
 const SAVE_KEY = 'bristle-save-v1';
+/** Difficulty tuning. Gentle forgives, Veteran punishes. */
+export const DIFFICULTY = [
+  { name: 'Gentle', enemyHp: 0.7, extraDamage: 0, invuln: 1.8, fluor: 1.3, focus: 0.75, xp: 1.0 },
+  { name: 'Knight', enemyHp: 1.0, extraDamage: 0, invuln: 1.3, fluor: 1.0, focus: 1.0, xp: 1.0 },
+  { name: 'Veteran', enemyHp: 1.35, extraDamage: 1, invuln: 1.0, fluor: 0.85, focus: 1.25, xp: 1.25 },
+];
 export const START_ROOM = 'crown-gate';
 
 export function freshSave(): SaveData {
   return {
     v: 1, room: START_ROOM, door: '@', maxHp: 5, hp: 5, fluor: 0, shine: 0,
     abilities: { dash: false, grip: false, rinse: false, pulse: false }, flags: {}, killed: {}, visited: {},
-    settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, aiVoices: true }, playTime: 0,
+    settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, aiVoices: true, difficulty: 1, brightness: 0.85 }, playTime: 0,
     progress: { xp: 0, level: 1, points: 0, mastery: { plaque: 0, sugar: 0, tartar: 0, gum: 0 }, perks: [] },
   };
 }
@@ -49,13 +55,21 @@ export class GameCore implements Game {
 
   // ---------- Game API ----------
   nextId() { return this.idc++; }
-  spawn<T extends Entity>(e: T): T { if (!e.id) e.id = this.nextId(); this.entities.push(e); return e; }
+  get diff() { return DIFFICULTY[Math.max(0, Math.min(2, this.save.settings.difficulty ?? 1))]; }
+  spawn<T extends Entity>(e: T): T {
+    if (!e.id) e.id = this.nextId();
+    const en = e as any; if (e.team === 'enemy' && typeof en.maxHp === 'number' && !en.__scaled) { en.__scaled = true; en.maxHp = Math.max(1, Math.round(en.maxHp * this.diff.enemyHp)); en.hp = en.maxHp; }
+    this.entities.push(e); return e;
+  }
   light(l: Light) { this.r.addLight(l); }
   shake(a: number, s = 0.2) { const k = this.save.settings.shake; if (a * k > this.shakeAmp * (this.shakeT > 0 ? 1 : 0)) { this.shakeAmp = a * k; this.shakeT = s; } }
   hitstop(s: number) { this.hitstopT = Math.max(this.hitstopT, s); }
   slowmo(k: number, s: number) { this.slowK = k; this.slowT = s; }
   flash(c: [number, number, number], a: number) { this.flashC = c; this.flashA = Math.max(this.flashA, a); }
-  hurtPlayer(d: number, fromX: number, kind: HitKind = 'contact') { this.player.hurt(this, d, fromX, kind); }
+  hurtPlayer(d: number, fromX: number, kind: HitKind = 'contact') { this.player.hurt(this, d + (kind === 'hazard' ? 0 : d >= 2 ? this.diff.extraDamage : 0), fromX, kind); }
+  /** Floating text (XP, notes). Drawn on the emissive layer. */
+  floaters: { x: number; y: number; text: string; t: number; color: string }[] = [];
+  float(x: number, y: number, text: string, color = '#CCD8ED') { this.floaters.push({ x, y, text, t: 0, color }); }
   dropShine(x: number, y: number, amount: number) { let left = amount; while (left > 0) { const v = left >= 10 ? 5 : 1; left -= v; this.spawn(new Shine(x, y, v)); } }
   flag(n: string) { return this.save.flags[n]; }
   setFlag(n: string, v: boolean | number | string) { this.save.flags[n] = v; }
@@ -189,11 +203,23 @@ export class GameCore implements Game {
     this.drawTerrainEmissive(em);
     b.drawEmissive?.(em, this);
     this.fx.draw(em, true);
+    // enemy health, shown briefly after a hit
+    for (const e of this.entities as any[]) {
+      if (e.team !== 'enemy' || e.dead || !e.maxHp || e.maxHp >= 200 || !(this.gameTime - (e.lastHitAt ?? -9) < 1.6)) continue;
+      const k = Math.min(1, (1.6 - (this.gameTime - e.lastHitAt)) * 3), w = Math.max(28, e.hw * 2), y = e.y - e.hh - 12;
+      em.globalAlpha = 0.85 * k; em.fillStyle = 'rgba(6,14,36,0.9)'; em.fillRect(e.x - w / 2 - 1, y - 1, w + 2, 4);
+      em.fillStyle = '#E8EEF9'; em.fillRect(e.x - w / 2, y, w * Math.max(0, e.hp / e.maxHp), 2); em.globalAlpha = 1;
+    }
+    // floating text
+    em.textAlign = 'center'; em.font = '400 13px "Futura LT Pro", Futura, sans-serif';
+    this.floaters = this.floaters.filter((f) => (f.t += this.dt) < 1.2);
+    for (const f of this.floaters) { em.globalAlpha = Math.min(1, (1.2 - f.t) * 2.5); em.fillStyle = f.color; em.fillText(f.text, f.x, f.y - f.t * 26); }
+    em.globalAlpha = 1;
     // lights
     b.lights?.(this);
     for (const e of list) e.lights?.(this);
     // grade
-    const gr = r.grade; Object.assign(gr, DEFAULT_GRADE, b.grade ?? {});
+    const gr = r.grade; Object.assign(gr, DEFAULT_GRADE, b.grade ?? {}); gr.exposure *= this.save.settings.brightness ?? 0.85;
     this.flashA = Math.max(0, this.flashA - this.dt * 3.2); gr.flash = [...this.flashC, this.flashA] as [number, number, number, number];
     const tr = this.trans; gr.fade = tr ? (tr.phase === 'out' ? clamp(tr.t / tr.dur, 0, 1) : 1 - clamp(tr.t / tr.dur, 0, 1)) : 0;
     if (this.player.deadT >= 0) { gr.saturation *= Math.max(0.1, 1 - this.player.deadT); gr.fade = Math.max(gr.fade, clamp((this.player.deadT - 0.6) / 0.7, 0, 1)); }

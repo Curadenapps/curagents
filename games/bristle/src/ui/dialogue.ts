@@ -8,7 +8,7 @@ import { voice, type Turn } from '../game/npc/voice';
 import { h, List, button, sfx, backTap, taps, type Screen } from './kit';
 import { TAU, hash2 } from '../engine/math';
 
-const PITCH: Record<string, number> = { mira: 1.0, pip: 1.5, warden: 0.68 };
+const PITCH: Record<string, number> = { derek: 1.0, pip: 1.5, warden: 0.68 };
 const CPS = 52;
 const MAX_ASKS = 6;
 const history: Record<string, Turn[]> = {};
