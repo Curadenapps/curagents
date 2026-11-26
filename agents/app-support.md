@@ -316,8 +316,14 @@ owner can switch it.
 
 The cloud runs never add or invite anyone: no `add_followers`. (The Asana connector
 can't invite someone new anyway: `add_followers` with an email returns "Not a valid
-actor ID", tested 12 and 13 Nov 2026.) Only the invite run on Fabian's PC does, and only
-for a Review subtask the owner ticked ("Invite run").
+actor ID", tested 12 and 13 Nov 2026.) Only the invite run on Fabian's PC does: for a
+Review subtask the owner ticked, and for a form task where a person from the team
+(Fabian, Sean or a colleague) wrote a comment by hand ("Invite run").
+
+**Ball in their court: the requester gets the task** (Fabian, 26 Nov 2026). Once the
+requester is on the task, the invite run assigns the form task to them, so it shows in
+their My Tasks and it's clear the next move is theirs. Only that one task, never the
+project. When they comment, the next hourly run assigns it back to the owner.
 
 The follower's display name can be short or partial ("Ma"), so the greeting uses the
 first name from the `Name` field instead.
@@ -512,7 +518,9 @@ too long" check asks the assignee whether to chase or close.
 
 ## 4. When the submitter answers
 
-App Support reads the new comment from the guest follower and checks it has everything
+First, if the form task is assigned to the submitter (the invite run gives it to
+them), assign it back to the owner (`update_tasks`, `assignee`): the ball is with the
+team again. Then App Support reads the new comment from the guest follower and checks it has everything
 asked for. If something's missing, it asks once for just that piece, as a Review
 draft for the owner (step 1.2: the submitter follows the task now).
 
@@ -746,7 +754,11 @@ in to Asana. Each run:
    `Route: Asana`, and that have no comment starting "Done". For each, read the form
    task link and the email from the subtask notes, and check the form task's
    `followers.email`: already a follower → skip (the hourly run finishes it).
-   At most 10 per run.
+   **Also** (Fabian, 26 Nov 2026): open form tasks on the board (not in Done) with a
+   comment written by hand by a team member (any author in the workspace who isn't the
+   submitter, and the text doesn't end with the automated sign-off "(automated)") and
+   no follower matching the form email. Comments from App Support itself still wait
+   for the ticked Review subtask. At most 10 per run in all.
 4. **Invite**, one task at a time, in the browser:
    1. Open the form task. If Asana bounces to "Opening link in Asana…", click "open
       this link in your browser".
@@ -759,7 +771,12 @@ in to Asana. Each run:
    4. Finish the line: ", I've answered your request just above. Reply here and I'll
       see it." in the same language, plus the voice file's sign-off, and post it.
    5. Check with `get_task` that a follower now matches the email. Comment "Done:
-      sent (invited {date})" on the Review subtask.
+      sent (invited {date})" on the Review subtask (when there is one).
+   6. **Assign the form task to them**: `update_tasks` with `assignee` set to that
+      follower's gid. If Asana won't assign it, leave the assignee as it is and say so
+      in the run log summary; the invite still counts.
+   For a hand-written team comment there's nothing to type in step 4.2–4.4 beyond the
+   short pointer line: the team member's comment is the answer.
 5. **Anything unexpected** (the invite option doesn't appear, the box looks different,
    the checkbox won't untick, Asana rejects the address): don't send. Comment "Invite
    failed: {reason}. Please add them by hand (+ next to the avatars, untick 'Also
@@ -769,7 +786,8 @@ in to Asana. Each run:
    invited, {m} failed". No names or emails.
 
 Hard limits: only addresses from the form's `Email address` field, only for a Review
-subtask the owner ticked, only that one task (never the project), never a password or
+subtask the owner ticked or a comment a team member wrote by hand, only that one task
+(never the project), never a password or
 sign-in, never more than 10 a run. The browser steps are the ones tested by hand on
 13 Nov 2026.
 
@@ -787,7 +805,8 @@ reaches a requester until the owner has checked it** (step 1). On its own it:
 - sends bugs and product gaps to Jira (10 Nov 2026, unchanged).
 
 The cloud runs never add a follower or invite anyone; the invite run on Fabian's PC
-adds a submitter only after the owner ticked their Review subtask. From 10 to 13 Nov 2026 replies went out
+adds a submitter only after the owner ticked their Review subtask, or after a team
+member answered them by hand on the task, and then assigns them the task. From 10 to 13 Nov 2026 replies went out
 unchecked ("everything auto"); Sean brings that back for a request type by listing it
 below by PR once its answers have proven right.
 
