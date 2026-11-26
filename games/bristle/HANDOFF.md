@@ -33,10 +33,12 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
 - 19 rooms: Crown Gate, Gumline, Narrows, Sugar Wastes (rest fountain + Pip merchant, then the Glutton boss), Calculus Deep.
 - **Brand packs** (`src/design/brands.ts`): CURAPROX by default and a made-up demo (`?brand=demo`). The game and the style
   guide read colours, fonts, product names and the Order's name from the pack; the mouth's own colours stay fixed.
-- **The Orders** (`src/design/hero.ts` art, `src/game/orders.ts` rules): one knight rig, four sets. You play the
-  Initiate until the Glutton (first boss) is rinsed away; then all three Orders unlock and a card pick chooses one. Rest
-  again at a fountain to change sets. Saves from before this rule stay Initiate until the Glutton. Each set changes health, speed, slash, Deep Clean charge, air dashes, refills carried and draw speed;
-  the Bulwark's dash blocks shots.
+- **The Orders** (`src/design/hero.ts` art, `src/game/orders.ts` rules): one knight rig, the Initiate plus four Orders, one
+  product each: Vanguard (CS 5460 as a two-handed greatsword), Duelist (two single tufts), Ranger (interdental bow), Lancer
+  (Hydrosonic lance; it replaced the Bulwark, and old saves wearing the Bulwark move to it). You play the Initiate until
+  the Glutton (first boss) is rinsed away; then all four unlock and a card pick chooses one. Rest again at a fountain to
+  change. Each set changes health, speed, slash speed and power, Deep Clean charge, air dashes, refills carried and draw
+  speed, and the weapon in hand; the Lancer's dash blocks shots. Slash hit boxes are the same for every set.
 - **Controls**: move A/D, jump Space/Z, slash J/X (hold for Deep Clean, up/down for up-slash and pogo), dash Shift/K/C (from the start;
   the Prime Dash relic now only gives the size M brush), **interdental shot** right-click or L/V (hold to draw, release
   to fire), **Up + shot = Rinse wave**, **size: mouse wheel, middle-click, R or Tab** (S/M/L),
@@ -60,7 +62,7 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
   greatsword), B Ranger (interdental holder as a bow), C Lancer = the Bulwark (Hydrosonic lance), D Sentinel (angled IDB
   handle as a scythe), E Duelist (two single-tuft brushes), F Crescent = the Kunoichi (teething rings as ring blades).
   Recommended game core: Vanguard, Duelist, Ranger, Lancer; Sentinel and Crescent as later unlocks or brand-pack sets.
-  The in-game Orders still wear the earlier Vanguard/Ranger/Bulwark sets. Product shapes and names are placeholders
+  The in-game Orders use A, E (as the Duelist), B and C. Product shapes and names are placeholders
   until the brand team checks them. The slash still needs play-testing.
 - No `H` (large) gaps placed yet, and Pip doesn't sell the L brush yet.
 - The Oath cards reuse the 12 old perks (wording updated); per-Order tracks with keystones (PLAN-v2 section 4.3) are not built.

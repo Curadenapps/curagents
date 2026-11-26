@@ -8,6 +8,7 @@ import { brand as BR, particle as PT } from '../design/tokens';
 import { ART, ORDER_STATS, currentOrder, type OrderId } from './orders';
 import { drawRig, RIG, RIG_SCALE, type RigPose } from '../design/hero';
 import { RefillShot, LOAD, DRAW, POWER, ammo, setAmmo, selectedSize, usable, cycleSize, drawHeld } from './shot';
+import { singleTuft, sonicLance, DUELIST_TUFTS } from '../design/hero';
 
 export const C = { blue: BR.blue, blueDk: BR.blueDark, blue80: BR.blue80, blue60: BR.blue60, sky: '#8BB8E8', white: '#FFFFFF', enamel: '#F3F6FC', enamelShade: '#C7D3EA', ink: '#0A1F44', ink2: '#132B57', cerise: BR.cerise, yellow: '#FCE300', orange: '#FF8200', orchid: '#F277C6', lime: '#C4D600' };
 
@@ -373,7 +374,7 @@ export class Player extends Actor implements PlayerApi {
     const K = RIG_SCALE, pose = this.rigPose(), gr = this.grip(), col = brushColour(g);
     ctx.scale(f * K, K);
     // the brush stays the game's own blade, drawn in body space between the chest and the front arm
-    drawRig(ctx, art, pose, 'scene', { blade: (c) => { c.save(); c.translate(0, pose.lift); c.scale(f / K, 1 / K); this.drawBlade(c, gr.hx, gr.hy, gr.a, col); c.restore(); } });
+    drawRig(ctx, art, pose, 'scene', { blade: (c) => { c.save(); c.translate(0, pose.lift); c.scale(f / K, 1 / K); this.drawWeapon(c, gr.hx, gr.hy, gr.a, col); c.restore(); } });
     if (this.shotT >= 0 && this.ord !== 'ranger') { ctx.scale(f / K, 1 / K); drawHeld(ctx, f * 17, -31 - this.bob, f, selectedSize(g), this.shotT >= LOAD, clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1)); }
     ctx.restore();
   }
@@ -387,6 +388,14 @@ export class Player extends Actor implements PlayerApi {
       frontHand: [(gr.hx * f) / K, gr.hy / K + lift],
       game: true, aiming: this.shotT >= 0, sway: clamp((-this.vx * f) / 500, -1, 1), open: this.blink > 0 ? 0.25 : 1,
     };
+  }
+  /** The weapon in hand, by Order: the CS 5460 as a greatsword (Vanguard), a single tuft (Duelist), the Hydrosonic
+   *  as a lance (Lancer), else the brush. Same grip and angle, so slashes read the same for every set. */
+  drawWeapon(ctx: CanvasRenderingContext2D, hx: number, hy: number, a: number, col: string) {
+    if (this.ord === 'vanguard') { ctx.save(); ctx.translate(hx, hy); ctx.scale(1.5, 1.5); this.drawBlade(ctx, 0, 0, a, BR.blue); ctx.restore(); return; }
+    if (this.ord === 'duelist') { singleTuft(ctx, hx - Math.cos(a) * 6, hy - Math.sin(a) * 6, 30, a, DUELIST_TUFTS.front[0], DUELIST_TUFTS.front[1]); return; }
+    if (this.ord === 'lancer') { sonicLance(ctx, hx - Math.cos(a) * 12, hy - Math.sin(a) * 12, 46, a); return; }
+    this.drawBlade(ctx, hx, hy, a, col);
   }
   /** A CURAPROX CS 5460-style brush held at (hx, hy): slim faceted handle, clear neck, compact head, dense filaments. */
   drawBlade(ctx: CanvasRenderingContext2D, hx: number, hy: number, a: number, col = BRUSH.cerise) {

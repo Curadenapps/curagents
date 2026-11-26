@@ -23,8 +23,8 @@ const NAME: Record<GapSize, string> = { s: 'S', m: 'M', l: 'L' };
 export const POWER: Record<GapSize, number> = { s: 5, m: 7, l: 10 }; // 5+: below 5 a hit counts as a foam tick (no shove)
 export const LOAD = idb.shot.load;
 /** Seconds of drawing to reach full power, and refills carried per size, by Order. */
-export const DRAW: Record<OrderId, number> = { initiate: 0.6, vanguard: 0.6, ranger: 0.35, bulwark: 0.8 };
-export const CARRY: Record<OrderId, number> = { initiate: 6, vanguard: 6, ranger: 9, bulwark: 3 };
+export const DRAW: Record<OrderId, number> = { initiate: 0.6, vanguard: 0.6, duelist: 0.5, ranger: 0.35, lancer: 0.8 };
+export const CARRY: Record<OrderId, number> = { initiate: 6, vanguard: 6, duelist: 6, ranger: 9, lancer: 3 };
 
 export const ammo = (g: Game, s: GapSize) => { const v = g.save.flags['ammo-' + s]; return typeof v === 'number' ? v : CARRY.initiate; };
 export const setAmmo = (g: Game, s: GapSize, n: number) => { g.save.flags['ammo-' + s] = Math.max(0, n); };

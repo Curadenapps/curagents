@@ -201,7 +201,7 @@ Equip one item per slot. Items are the CURAPROX range expressed as gameplay. Pip
 4. **Companions:** yes.
    - **Pip** fights alongside the knight: throws paste and hands out help and hints all game.
    - A second companion, **Cusp**, is a tiny living crown. Cusp lights dark rooms, points to secrets and open gaps, and teaches technique with light-touch cues.
-5. **Orders:** one hero with three earned armour sets (Vanguard, Ranger, Bulwark) on one shared rig, replacing the Oath grid and the Crown board. See section 4.
+5. **Orders:** one hero with four earned armour sets on one shared rig, one product each: Vanguard (CS 5460 greatsword), Duelist (two single tufts), Ranger (interdental bow), Lancer (Hydrosonic lance, replacing the Bulwark). They replace the Oath grid and the Crown board; section 4's table still shows the first three-set proposal. Sentinel (angled IDB scythe) and Crescent (teething rings) are kept as later unlocks or brand-pack sets.
 6. **Story (parked, thinking aloud, not planned):** each Order could have its own ending with the same lesson learnt in a different form: brushing gets you far but you need the interdental brush, the interdental brush needs brushing, and the rinse needs both. In-world habit flavour only, never a health claim.
 7. **Completion reward (idea, not planned yet):** finishing the game gives 10% off the real product your hero fought with
    (the Orders and hero options map to products: brush, interdental holder and refills, Hydrosonic, tongue cleaner,

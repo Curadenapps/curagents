@@ -12,6 +12,7 @@ import { brush, idbHolder, idbRefill, foamCluster } from '../../design/kit';
 import { brand as BR, idb, mint } from '../../design/tokens';
 import { setOrder, type OrderId } from '../orders';
 import { drawRig, staticPose } from '../../design/hero';
+import { EARNED_ORDERS } from '../../design/hero';
 
 const GUESS: [RegExp, Faction][] = [[/leech|flare|swell|gum|inflam/, 'gum'], [/imp|sugar/, 'sugar'], [/tartar|spit|brute|calculus|matriarch/, 'tartar']];
 export const nextXp = (level: number) => 12 + level * 14;
@@ -81,7 +82,7 @@ export class Progress implements ProgressApi {
     this.sel = Math.min(this.sel, Math.max(0, this.hand.length - 1));
   }
   open() {
-    if (this.el) return; const g = this.g; g.modal++; this.sel = 0; this.t = 0; if (this.mode === 'orders') this.hand = ['vanguard', 'ranger', 'bulwark']; else this.deal();
+    if (this.el) return; const g = this.g; g.modal++; this.sel = 0; this.t = 0; if (this.mode === 'orders') this.hand = [...EARNED_ORDERS]; else this.deal();
     const root = document.getElementById('ui')!; const el = document.createElement('div'); el.className = 'deal locked'; root.appendChild(el); this.el = el;
     el.addEventListener('click', (e) => {
       const c = (e.target as HTMLElement).closest('[data-card]') as HTMLElement | null;

@@ -3,7 +3,7 @@
 // real particle system and the real WebGL post pipeline, so the page cannot drift from the game.
 import * as T from './tokens';
 import { packs } from './brands';
-import { KE, plate, poly, plume, legsK, visorGlow, fnPath, softHalo, drawRig, orderArts, staticPose, ORDER_IDS, type OrderArt } from './hero';
+import { KE, plate, poly, plume, legsK, visorGlow, fnPath, softHalo, singleTuft, sonicLance, drawRig, orderArts, staticPose, ORDER_IDS, type OrderArt } from './hero';
 import { kit, idbRefill, idbHolder, blob, enamel, gumFold, glowEye, crownCap, foamCluster, crystalShard, lightShaft, fogBand, brush, pasteDollop, palateRidges, tongueSurface, salivaPool, glint, silhouetteStrip } from './kit';
 import { Player } from '../game/player';
 import { Hud } from '../ui/hud';
@@ -623,25 +623,6 @@ function knightSentinel(ctx: Ctx, mode: KMode) {
   ctx.fillStyle = B.ink; ctx.fill(SENTINEL_SLIT);
 }
 
-/** The angled single-tuft brush (CS single, after the product photo): a long faceted handle that widens toward the
- *  end, a bend near the top, a short angled head and a small round tuft in a contrasting colour. (x, y) = handle end. */
-function singleTuft(ctx: Ctx, x: number, y: number, len: number, angle: number, col: string, tuft = '#D8F24A') {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  const shaft = len * 0.82, head = len * 0.16, lite = mix(col, '#FFFFFF', 0.35), dark = mix(col, '#000000', 0.25);
-  // handle: widest at the end, narrowing up the shaft
-  ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -2.6); ctx.lineTo(shaft * 0.35, -2.2); ctx.lineTo(shaft, -1.2); ctx.lineTo(shaft, 1.2); ctx.lineTo(shaft * 0.35, 2.2); ctx.lineTo(0, 2.6); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = lite; ctx.beginPath(); ctx.moveTo(1, -2); ctx.lineTo(shaft * 0.95, -1); ctx.lineTo(shaft * 0.95, -0.4); ctx.lineTo(1, -1); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = dark; ctx.beginPath(); ctx.moveTo(1, 2); ctx.lineTo(shaft * 0.95, 1); ctx.lineTo(shaft * 0.95, 0.5); ctx.lineTo(1, 1.2); ctx.closePath(); ctx.fill();
-  // the bend and the short angled head
-  ctx.translate(shaft, 0); ctx.rotate(-1.05);
-  ctx.strokeStyle = col; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(-0.6, 0); ctx.lineTo(head, 0); ctx.stroke();
-  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(head - 1.6, -2.1, 3.4, 4.2, 1.2); ctx.fill();
-  // the tuft: a small rounded bundle standing off the head
-  ctx.fillStyle = tuft; ctx.beginPath(); ctx.roundRect(head + 1.4, -1.9, 3.6, 3.8, [0.6, 1.9, 1.9, 0.6]); ctx.fill();
-  ctx.strokeStyle = mix(tuft, '#000000', 0.15); ctx.lineWidth = 0.4; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(head + 1.6, i * 1.1); ctx.lineTo(head + 4.6, i * 1.1); ctx.stroke(); }
-  ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.arc(head + 3.6, -1.1, 0.6, 0, TAU); ctx.fill();
-  ctx.restore();
-}
 /** A toothbrush travel case as a shield: a bright rounded box, a clear lid seam with a clasp, a carry loop on top. */
 function travelCase(ctx: Ctx, x: number, y: number, w: number, h: number, col: string) {
   ctx.save(); ctx.translate(x, y);
@@ -731,19 +712,6 @@ function knightDuelist(ctx: Ctx, mode: KMode) {
   ctx.restore();
 }
 
-/** A sonic toothbrush as a lance: long white body, a grey grip band, a slim neck and a small head. Glow mode adds the buzz. */
-function sonicLance(ctx: Ctx, x: number, y: number, len: number, angle: number, glow = false) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
-  const body = len * 0.62, neck = len * 0.28, head = len * 0.1;
-  if (glow) { for (let i = 1; i <= 3; i++) { ctx.strokeStyle = `rgba(204,216,237,${0.5 - i * 0.12})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(body + neck + head * 0.5, 0, 3 + i * 3.2, -0.9, 0.9); ctx.stroke(); } softHalo(ctx, body + neck + head * 0.5, 0, 12, '#CCD8ED', 0.5); ctx.restore(); return; }
-  plate(ctx, fnPath((p) => p.roundRect(0, -2.6, body, 5.2, 2.6)), { sx: body * 0.5, sy: 1, sr: body * 0.55, gloss: [body * 0.45, -1.4, body * 0.25, 0.6] });
-  ctx.fillStyle = '#8E99A8'; ctx.fillRect(body * 0.18, -2.6, body * 0.12, 5.2);
-  ctx.fillStyle = B.blue; ctx.beginPath(); ctx.arc(body * 0.62, -2.6, 1.1, 0, TAU); ctx.fill(); // the power button
-  ctx.fillStyle = '#E8EEF9'; ctx.beginPath(); ctx.moveTo(body, -1.6); ctx.lineTo(body + neck, -0.8); ctx.lineTo(body + neck, 0.8); ctx.lineTo(body, 1.6); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.roundRect(body + neck, -1.4, head, 2.8, 1.2); ctx.fill();
-  ctx.strokeStyle = '#DDE7F6'; ctx.lineWidth = 0.6; for (let i = 0; i < 6; i++) { const fx = body + neck + 0.6 + i * (head - 1.2) / 5; ctx.beginPath(); ctx.moveTo(fx, -1.4); ctx.lineTo(fx, -4.2); ctx.stroke(); }
-  ctx.restore();
-}
 /** The baby teether (after the product photo): a soft heart-shaped loop with bumps and small dots, a clear rattle window
  *  with five coloured beads across the top, and a nubbed brush pad hanging from the bottom tip. r = half its width. */
 function teether(ctx: Ctx, x: number, y: number, r: number, spin: number, col = '#CFE3F6') {
@@ -882,22 +850,22 @@ function ordersSection() {
   };
   const bars = (st: OrderArt['stats']) => (['health', 'speed', 'reach', 'guard'] as const).map((k) => `<div class="ostat"><span>${k}</span><i>${[1, 2, 3, 4, 5].map((n) => `<b class="${n <= st[k] ? 'on' : ''}"></b>`).join('')}</i></div>`).join('');
   const slots: [string, string][] = [['Helm', 'The silhouette. Each Order has its own helm and visor glow.'], ['Shoulders', 'Plates or mantle. They set how broad the knight reads.'], ['Chest', 'Breastplate, tabard or bandolier, in the brand primary.'], ['Back', 'Cape, quiver or a slung brush. Moves after the body.'], ['Weapon / front', 'Brush longsword, the interdental bow, or the crown shield.'], ['Boots', 'Colour and knee plates; light boots for the Ranger.']];
-  const moves: [string, string, string, string, string][] = [
-    ['Brush slash', 'Base', '+2 cleaning power, longer reach', 'Base', 'Slower, +3 cleaning power'],
-    ['Deep Clean (hold slash)', '0.6 s charge', '0.4 s charge, wider arc', 'Base', 'Base'],
-    ['Interdental shot', `Base, ${T.idb.shot.carry} refills`, `Base, ${T.idb.shot.carry} refills`, 'Fast draw, 9 refills, pierces from half draw', 'Slow draw, 3 refills'],
-    ['Dash', 'Base', 'Base', '+1 air dash', 'Shield charge: blocks shots while dashing'],
-    ['Pogo', 'Base', 'Base', 'Base', 'Slam: cracks tartar floors'],
-    ['Health / run speed', '5 / 300', '5 / 300', '4 / 320', '7 / 260'],
+  const moves: string[][] = [
+    ['Weapon', 'Short brush', 'CS 5460 greatsword (two hands)', 'Two single tufts', 'Brush + interdental bow', 'Hydrosonic lance'],
+    ['Slash', 'Base', 'Slower, +3 cleaning power', 'Fastest jabs, -1 cleaning power', 'Base', 'Slower, +3 cleaning power'],
+    ['Deep Clean (hold slash)', '0.6 s charge', '0.4 s charge, wider arc', 'Base', 'Base', 'Base'],
+    ['Interdental shot', `Base, ${T.idb.shot.carry} refills`, `Base, ${T.idb.shot.carry} refills`, `Quicker draw, ${T.idb.shot.carry} refills`, 'Fast draw, 9 refills, pierces from half draw', 'Slow draw, 3 refills'],
+    ['Dash', 'Base', 'Base', 'Base', '+1 air dash', 'Lance charge: blocks shots while dashing'],
+    ['Health / run speed', '5 / 300', '5 / 290', '5 / 315', '4 / 320', '7 / 270'],
   ];
-  return `<section id="orders">${head(9, 'Orders', 'One hero, three armour sets. The knight always has the same body and the same core moves (run, jump, dash, brush slash). Each Order is earned on the route and swapped at a fountain: it changes the helm and gear and a few moves, never whether a room can be finished. Today\'s hero becomes the Initiate everyone starts as.')}
+  return `<section id="orders">${head(9, 'Orders', 'One hero, four armour sets, one product each. The knight always has the same body and the same core moves (run, jump, dash, brush slash). Each Order is earned on the route and swapped at a fountain: it changes the helm and gear and a few moves, never whether a room can be finished. Today\'s hero is the Initiate everyone plays until the first boss; then a card pick chooses an Order.')}
   <div class="grid" style="grid-template-columns:1.25fr 1fr;gap:18px;align-items:stretch">
     <div class="card">${art({ k: 'live', h: 420, fn: swap })}</div>
     <div class="card pad"><h4>One rig, six slots</h4><p>A set fills slots on a shared skeleton, so walk, run, jump and slash are animated once for every Order.</p>
       <div class="oslots">${slots.map(([n, d]) => `<div><b>${n}</b><span>${d}</span></div>`).join('')}</div>
       <p class="mono" style="margin-top:14px">Draw order: back, legs, back arm, torso, chest, weapon, front arm, front, shoulders, collar, helm. Glow pass: visor and charge.</p></div>
   </div>
-  <h3>The four sets</h3><div class="grid g4">${sets.map((st, i) => `<div class="card">${a2d(330, figure(st))}<div class="pad"><p class="eyebrow" style="margin:0 0 6px">${i === 0 ? 'Start' : 'Order ' + i}</p><h4>${st.name}</h4><p>${st.line}</p><p><b>Earned</b> ${st.earned}</p><div class="ostats">${bars(st.stats)}</div></div></div>`).join('')}</div>
+  <h3>The start and the four Orders</h3><div class="grid g5">${sets.map((st, i) => `<div class="card">${a2d(330, figure(st))}<div class="pad"><p class="eyebrow" style="margin:0 0 6px">${i === 0 ? 'Start' : 'Order ' + i}</p><h4>${st.name}</h4><p>${st.line}</p><p><b>Earned</b> ${st.earned}</p><div class="ostats">${bars(st.stats)}</div></div></div>`).join('')}</div>
   <h3>What each set changes (proposal, numbers to tune)</h3>
   <div class="card"><table class="otable"><thead><tr><th>Move</th>${sets.map((s) => `<th>${s.name}</th>`).join('')}</tr></thead><tbody>${moves.map((r) => `<tr>${r.map((c, j) => j ? `<td>${c}</td>` : `<th>${c}</th>`).join('')}</tr>`).join('')}</tbody></table></div>
   <div class="nolist" style="margin-top:18px">

@@ -12,8 +12,10 @@ import { TAU, mix, rgb } from '../engine/math';
 
 type Ctx = CanvasRenderingContext2D;
 export type V2 = [number, number];
-export type OrderId = 'initiate' | 'vanguard' | 'ranger' | 'bulwark';
-export const ORDER_IDS: OrderId[] = ['initiate', 'vanguard', 'ranger', 'bulwark'];
+export type OrderId = 'initiate' | 'vanguard' | 'duelist' | 'ranger' | 'lancer';
+export const ORDER_IDS: OrderId[] = ['initiate', 'vanguard', 'duelist', 'ranger', 'lancer'];
+/** The Orders you can earn (the Initiate is where everyone starts). */
+export const EARNED_ORDERS: OrderId[] = ['vanguard', 'duelist', 'ranger', 'lancer'];
 export const RIG_SCALE = 0.95;
 /** Rig shoulders (front, back) and hip height. */
 export const RIG = { front: [6, -34] as V2, back: [-5.5, -34] as V2, hip: -20, leg: 17, neck: [0.5, -39] as V2 };
@@ -133,13 +135,46 @@ export function drawRig(ctx: Ctx, art: OrderArt, p: RigPose, mode: 'scene' | 'gl
 // ---------------------------------------------------------------------------------------------
 const VANGUARD_VISOR = poly([-0.5, -48.6, 8.8, -48.6, 8.8, -46.6, 4.6, -46.6, 4.6, -41.8, 2.6, -41.8, 2.6, -46.6, -0.5, -46.6]);
 const RANGER_SLIT = poly([0.5, -48.4, 9.4, -51.6, 9.6, -49.4, 0.5, -46.6]);
-const BULWARK_BARS = (() => { const p = new Path2D(); for (let i = 0; i < 5; i++) p.roundRect(-0.6 + i * 2.2, -48.5, 1.2, 6.4, 0.6); return p; })();
+const LANCER_VISOR = poly([0, -48.4, 10, -48.4, 10, -46.8, 5.6, -46.8, 5.6, -43.4, 4.2, -43.4, 4.2, -46.8, 0, -46.8]);
+const DUELIST_SLIT = fnPath((p) => p.roundRect(-0.5, -46.4, 11.5, 3, 1.5));
 const INITIATE_SLIT = fnPath((p) => p.roundRect(-2.5, -49.4, 13, 3.6, 1.8));
 const shield = (c: Ctx, x: number, y: number) => {
   const pr = B.blue, dk = B.blueDark;
   plate(c, fnPath((p) => p.arc(x, y, 9.5, 0, TAU)), { sx: x + 2, sy: y - 2, sr: 9 });
   const f = fnPath((p) => p.arc(x, y, 7.6, 0, TAU)); c.fillStyle = pr; c.fill(f); c.save(); c.clip(f); c.fillStyle = dk; c.beginPath(); c.arc(x - 4, y + 4, 9, 0, TAU); c.fill(); c.restore(); crownCap(c, x, y + 3.5, 9, { cusps: 3 });
 };
+
+/** The angled single-tuft brush (CS single): a long faceted handle widening toward the end, a bend near the top, a short
+ *  angled head and a small round tuft in a contrasting colour. (x, y) = handle end, pointing along angle. */
+export function singleTuft(ctx: Ctx, x: number, y: number, len: number, angle: number, col: string, tuft = '#D8F24A') {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const shaft = len * 0.82, head = len * 0.16, lite = mix(col, '#FFFFFF', 0.35), dark = mix(col, '#000000', 0.25);
+  ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -2.6); ctx.lineTo(shaft * 0.35, -2.2); ctx.lineTo(shaft, -1.2); ctx.lineTo(shaft, 1.2); ctx.lineTo(shaft * 0.35, 2.2); ctx.lineTo(0, 2.6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = lite; ctx.beginPath(); ctx.moveTo(1, -2); ctx.lineTo(shaft * 0.95, -1); ctx.lineTo(shaft * 0.95, -0.4); ctx.lineTo(1, -1); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = dark; ctx.beginPath(); ctx.moveTo(1, 2); ctx.lineTo(shaft * 0.95, 1); ctx.lineTo(shaft * 0.95, 0.5); ctx.lineTo(1, 1.2); ctx.closePath(); ctx.fill();
+  ctx.translate(shaft, 0); ctx.rotate(-1.05);
+  ctx.strokeStyle = col; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(-0.6, 0); ctx.lineTo(head, 0); ctx.stroke();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(head - 1.6, -2.1, 3.4, 4.2, 1.2); ctx.fill();
+  ctx.fillStyle = tuft; ctx.beginPath(); ctx.roundRect(head + 1.4, -1.9, 3.6, 3.8, [0.6, 1.9, 1.9, 0.6]); ctx.fill();
+  ctx.strokeStyle = mix(tuft, '#000000', 0.15); ctx.lineWidth = 0.4; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(head + 1.6, i * 1.1); ctx.lineTo(head + 4.6, i * 1.1); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.arc(head + 3.6, -1.1, 0.6, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+/** A sonic toothbrush (Hydrosonic) as a lance: long white body, grey grip band, slim neck, small head. glow = the buzz. */
+export function sonicLance(ctx: Ctx, x: number, y: number, len: number, angle: number, glow = false, halo: HaloFn = softHalo) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+  const body = len * 0.62, neck = len * 0.28, head = len * 0.1;
+  if (glow) { for (let i = 1; i <= 3; i++) { ctx.strokeStyle = `rgba(204,216,237,${0.5 - i * 0.12})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(body + neck + head * 0.5, 0, 3 + i * 3.2, -0.9, 0.9); ctx.stroke(); } halo(ctx, body + neck + head * 0.5, 0, 12, '#CCD8ED', 0.5); ctx.restore(); return; }
+  plate(ctx, fnPath((p) => p.roundRect(0, -2.6, body, 5.2, 2.6)), { sx: body * 0.5, sy: 1, sr: body * 0.55, gloss: [body * 0.45, -1.4, body * 0.25, 0.6] });
+  ctx.fillStyle = '#8E99A8'; ctx.fillRect(body * 0.18, -2.6, body * 0.12, 5.2);
+  ctx.fillStyle = B.blue; ctx.beginPath(); ctx.arc(body * 0.62, -2.6, 1.1, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#E8EEF9'; ctx.beginPath(); ctx.moveTo(body, -1.6); ctx.lineTo(body + neck, -0.8); ctx.lineTo(body + neck, 0.8); ctx.lineTo(body, 1.6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.roundRect(body + neck, -1.4, head, 2.8, 1.2); ctx.fill();
+  ctx.strokeStyle = '#DDE7F6'; ctx.lineWidth = 0.6; for (let i = 0; i < 6; i++) { const fx = body + neck + 0.6 + i * (head - 1.2) / 5; ctx.beginPath(); ctx.moveTo(fx, -1.4); ctx.lineTo(fx, -4.2); ctx.stroke(); }
+  ctx.restore();
+}
+/** Duelist tuft colours: the pink-and-lime and blue-and-yellow pair. */
+export const DUELIST_TUFTS = { front: ['#E8519A', '#D8F24A'], back: ['#2A4FBF', '#F5E03A'] } as const;
 
 export function orderArts(): Record<OrderId, OrderArt> {
   const pr = B.blue, dk = B.blueDark, S = idb.sizes;
@@ -158,8 +193,8 @@ export function orderArts(): Record<OrderId, OrderArt> {
     glow(c, p, halo) { visorGlow(c, INITIATE_SLIT, 5, -48, 16, halo, p.open ?? 1); },
   };
   const vanguard: OrderArt = {
-    id: 'vanguard', name: 'Vanguard', line: 'The sword of the Order, master of the brush. Balanced, with the strongest strokes.', earned: 'At the first fountain rest, Crown Gate.',
-    stats: { health: 3, speed: 3, reach: 4, guard: 3 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [10, -25], back: [-8, -24] }, visor: [4.5, -47],
+    id: 'vanguard', name: 'Vanguard', line: 'The sword of the Order, master of the brush: the CS 5460 as a two-handed greatsword. Big sweeping strokes.', earned: 'When the Glutton is rinsed away: one of four Orders to choose.',
+    stats: { health: 3, speed: 2, reach: 5, guard: 3 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [7.2, -25.4], back: [4.8, -18.6] }, visor: [4.5, -47],
     cape: { color: dk, edge: pr, width: 1.25 },
     back(c, p) { if (p.game) return; const q = fnPath((q) => { q.moveTo(-5, -38); q.quadraticCurveTo(-19, -28, -19, -6); q.lineTo(-15, -8); q.lineTo(-12, -4); q.lineTo(-9, -8); q.lineTo(-6, -5); q.quadraticCurveTo(-5, -22, 1, -37); q.closePath(); }); c.fillStyle = dk; c.fill(q); c.strokeStyle = pr; c.lineWidth = 1.2; c.stroke(q); },
     chest(c) {
@@ -168,7 +203,7 @@ export function orderArts(): Record<OrderId, OrderArt> {
       c.save(); c.clip(tab); c.fillStyle = dk; c.fillRect(-6, -33, 3.2, 24); c.fillStyle = '#FFFFFF'; c.fillRect(-6, -17.5, 12, 1.7); c.restore();
       c.fillStyle = B.ink; c.fillRect(-8.2, -22.4, 16.4, 2.6); crownCap(c, 0, -20, 5.4, { cusps: 3 });
     },
-    weapon(c) { brush(c, 10, -25, 32, { angle: 1.32, handle: pr }); },
+    weapon(c) { brush(c, 4, -14, 54, { angle: -1.3, handle: pr }); },
     shoulders(c) {
       plate(c, fnPath((q) => q.ellipse(-8.2, -35.5, 3.8, 4.6, 0.3, 0, TAU)), { base: KE.shade, shade: KE.deep, sx: -7, sy: -37, sr: 3.6 });
       plate(c, fnPath((q) => { q.moveTo(4.5, -38.5); q.quadraticCurveTo(13.5, -40, 13, -33); q.quadraticCurveTo(12.4, -30.2, 9.2, -30.4); q.quadraticCurveTo(5, -31, 4.5, -38.5); }), { sx: 10, sy: -38, sr: 5, gloss: [8.8, -37, 1.8, 0.8] });
@@ -183,7 +218,7 @@ export function orderArts(): Record<OrderId, OrderArt> {
     glow(c, p, halo) { visorGlow(c, VANGUARD_VISOR, 4.5, -47, 18, halo, p.open ?? 1); },
   };
   const ranger: OrderArt = {
-    id: 'ranger', name: 'Ranger', line: 'The bow of the Order, master of the interdental brush. Light and quick, built around the shot.', earned: 'With the Prime Dash relic, in the Narrows.',
+    id: 'ranger', name: 'Ranger', line: 'The bow of the Order, master of the interdental brush. Light and quick, built around the shot.', earned: 'When the Glutton is rinsed away: one of four Orders to choose.',
     stats: { health: 2, speed: 5, reach: 5, guard: 2 }, boot: KE.base, cuff: pr, knees: false, gauntlet: true, hands: { front: [16, -33.5], back: [4, -32] }, visor: [5, -49],
     cape: { color: B.cerise, edge: mix(B.cerise, '#000000', 0.2), width: 0.4 },
     back(c, p) {
@@ -209,35 +244,44 @@ export function orderArts(): Record<OrderId, OrderArt> {
     },
     glow(c, p, halo) { visorGlow(c, RANGER_SLIT, 5, -49, 16, halo, p.open ?? 1); if (!p.game || p.aiming) halo(c, p.frontHand[0] + 9, p.frontHand[1], 7, '#FFFFFF', 0.35); },
   };
-  const bulwark: OrderArt = {
-    id: 'bulwark', name: 'Bulwark', line: 'The shield of the Order, master of the rinse. Heavy and steady: guards, charges and cracks tartar.', earned: 'When the Glutton is rinsed away, Sugar Wastes.',
-    stats: { health: 5, speed: 2, reach: 3, guard: 5 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [9, -22], back: [-9, -24] }, visor: [4, -45.5],
-    cape: { color: dk, edge: dk, width: 1.45 },
-    back(c, p) {
-      if (p.game) return;
-      brush(c, -14, -16, 40, { angle: -0.95, handle: B.blue });
-      const q = fnPath((q) => { q.moveTo(-10, -37); q.quadraticCurveTo(-15, -22, -13, -8); q.lineTo(9, -8); q.quadraticCurveTo(11, -22, 9, -37); q.closePath(); }); c.fillStyle = dk; c.fill(q);
-    },
-    offhand(c, p) { if (p.game) shield(c, p.backHand[0] + 4, p.backHand[1] + 1); },
+  const duelist: OrderArt = {
+    id: 'duelist', name: 'Duelist', line: 'The needle of the Order, master of the single tuft: one in each hand, fast precise jabs for the tight spots.', earned: 'When the Glutton is rinsed away: one of four Orders to choose.',
+    stats: { health: 3, speed: 4, reach: 2, guard: 2 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [10.5, -26], back: [-4, -22] }, visor: [5, -45],
+    cape: { color: dk, edge: pr, width: 0.8 },
+    back(c, p) { if (p.game) return; const q = fnPath((q) => { q.moveTo(-6, -33); q.quadraticCurveTo(-15, -28, -17, -15); q.lineTo(-13, -16); q.lineTo(-11, -12); q.quadraticCurveTo(-8, -22, -2, -30); q.closePath(); }); c.fillStyle = dk; c.fill(q); c.strokeStyle = pr; c.lineWidth = 1.2; c.stroke(q); },
+    offhand(c, p) { singleTuft(c, p.backHand[0], p.backHand[1] + 0.5, 30, -0.25, DUELIST_TUFTS.back[0], DUELIST_TUFTS.back[1]); },
     chest(c) {
-      const ch = fnPath((q) => { q.moveTo(-10.5, -37); q.quadraticCurveTo(-13, -27, -9.5, -17.5); q.lineTo(9.5, -17.5); q.quadraticCurveTo(13, -27, 10.5, -37); q.quadraticCurveTo(0, -40, -10.5, -37); q.closePath(); });
-      plate(c, ch, { sx: 4, sy: -31, sr: 13, gloss: [5, -33.5, 2.6, 1.2] });
-      c.save(); c.clip(ch); c.fillStyle = pr; c.fillRect(-14, -27.5, 28, 6); c.fillStyle = '#FFFFFF'; c.fillRect(-14, -23.2, 28, 1.4); c.restore();
+      c.fillStyle = pr; c.beginPath(); c.moveTo(-8, -22); c.lineTo(8, -22); c.lineTo(9, -14); c.quadraticCurveTo(0, -12, -9, -14); c.closePath(); c.fill();
+      plate(c, fnPath((q) => { q.moveTo(-8, -37); q.quadraticCurveTo(-10.5, -28, -7.5, -21); q.lineTo(7.5, -21); q.quadraticCurveTo(10.5, -28, 8, -37); q.quadraticCurveTo(0, -39.5, -8, -37); }), { sx: 3, sy: -32, sr: 9.5, gloss: [4, -33, 2, 1] });
+      c.fillStyle = B.ink; c.fillRect(-8, -22.4, 16, 2.4); crownCap(c, 0, -20.2, 5, { cusps: 3 });
     },
-    front(c, p) { if (!p.game) shield(c, 10, -20); },
-    shoulders(c) {
-      for (const [sx, k] of [[-11, -1], [11, 1]] as V2[]) {
-        const q = fnPath((q) => { q.moveTo(sx - 5.5, -33); q.quadraticCurveTo(sx - 6.5, -40, sx - 3, -40); q.quadraticCurveTo(sx - 1.5, -42.6, sx, -40.2); q.quadraticCurveTo(sx + 1.6, -42.6, sx + 3, -40); q.quadraticCurveTo(sx + 6.5, -40, sx + 5.5, -33); q.quadraticCurveTo(sx, -31, sx - 5.5, -33); q.closePath(); });
-        plate(c, q, k < 0 ? { base: KE.shade, shade: KE.deep, sx: sx + 2, sy: -38, sr: 5 } : { sx: sx + 1.5, sy: -38, sr: 5.5, gloss: [sx + 1.5, -38.6, 1.6, 0.8] });
-      }
-    },
+    weapon(c, p) { singleTuft(c, p.frontHand[0], p.frontHand[1], 34, -0.95, DUELIST_TUFTS.front[0], DUELIST_TUFTS.front[1]); },
+    shoulders(c) { plate(c, fnPath((q) => q.ellipse(6.5, -35.5, 4.4, 3.6, -0.3, 0, TAU)), { sx: 8, sy: -37, sr: 4, gloss: [6.5, -37, 1.4, 0.6] }); },
     helm(c) {
-      plate(c, fnPath((q) => { q.moveTo(-10.5, -39); q.quadraticCurveTo(-12.5, -46, -10.5, -51); q.quadraticCurveTo(-8.5, -55.4, -5.4, -52.8); q.quadraticCurveTo(-3, -55.6, -0.4, -53); q.quadraticCurveTo(2.4, -55.6, 5, -52.8); q.quadraticCurveTo(8.6, -55.2, 10.6, -50.6); q.quadraticCurveTo(12.6, -45, 10.8, -39); q.quadraticCurveTo(0, -36.6, -10.5, -39); q.closePath(); }), { sx: 5, sy: -47, sr: 12.5, gloss: [6, -51, 2.6, 1.1] });
-      c.fillStyle = B.ink; c.beginPath(); c.roundRect(-1.8, -49.4, 12, 8.2, 2.2); c.fill(); c.fillStyle = mix(B.ink, '#FFFFFF', 0.25); c.fill(BULWARK_BARS);
+      plate(c, fnPath((q) => { q.moveTo(-11, -39.5); q.quadraticCurveTo(-13.5, -50, -10, -56); q.quadraticCurveTo(-8, -62, -4, -58); q.quadraticCurveTo(0.5, -60, 4.5, -58); q.quadraticCurveTo(9, -62, 10.6, -55.5); q.quadraticCurveTo(13.5, -49, 11, -39.5); q.quadraticCurveTo(0, -37, -11, -39.5); q.closePath(); }), { sx: 5, sy: -49, sr: 12.5, gloss: [5, -54, 2.6, 1.2] });
+      c.fillStyle = B.ink; c.fill(DUELIST_SLIT);
     },
-    glow(c, p, halo) { visorGlow(c, BULWARK_BARS, 4, -45.5, 17, halo, p.open ?? 1); },
+    glow(c, p, halo) { visorGlow(c, DUELIST_SLIT, 5, -45, 15, halo, p.open ?? 1); },
   };
-  return { initiate, vanguard, ranger, bulwark };
+  const lancer: OrderArt = {
+    id: 'lancer', name: 'Lancer', line: 'The lance of the Order, master of the sonic brush. Heavy and steady: charges, pierces and holds the line.', earned: 'When the Glutton is rinsed away: one of four Orders to choose.',
+    stats: { health: 5, speed: 2, reach: 4, guard: 5 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [12.5, -26.5], back: [1, -25.5] }, visor: [5, -46.5],
+    cape: { color: dk, edge: dk, width: 1.1 },
+    back(c, p) { if (p.game) return; const q = fnPath((q) => { q.moveTo(-6, -37); q.quadraticCurveTo(-15, -30, -16, -17); q.lineTo(-11, -19); q.lineTo(-9, -15); q.quadraticCurveTo(-6, -25, -1, -36); q.closePath(); }); c.fillStyle = dk; c.fill(q); },
+    chest(c) {
+      plate(c, fnPath((q) => { q.moveTo(-9, -37); q.quadraticCurveTo(-11, -28, -8, -19); q.lineTo(8, -19); q.quadraticCurveTo(11, -28, 9, -37); q.quadraticCurveTo(0, -39.5, -9, -37); }), { sx: 3, sy: -32, sr: 11, gloss: [4.5, -33.5, 2.2, 1] });
+      c.fillStyle = pr; c.fillRect(-9.6, -30, 19.2, 5.4); c.fillStyle = '#FFFFFF'; c.fillRect(-9.6, -26, 19.2, 1.4); c.fillStyle = B.ink; c.fillRect(-8.6, -21, 17.2, 2.4);
+    },
+    weapon(c) { sonicLance(c, -2, -25, 52, -0.06); },
+    shoulders(c) { for (const [sx, k] of [[-9, -1], [9, 1]] as V2[]) plate(c, fnPath((q) => q.ellipse(sx, -35.5, 5, 4.2, 0, 0, TAU)), k < 0 ? { base: KE.shade, shade: KE.deep, sx: sx + 1.5, sy: -37, sr: 4.5 } : { sx: sx + 1.5, sy: -37, sr: 4.8, gloss: [sx + 1, -37, 1.6, 0.8] }); },
+    helm(c) {
+      plume(c, 0.5, -55.5, 9, pr, 9, -2.1, -1.0, 0);
+      plate(c, fnPath((q) => { q.moveTo(-9.5, -39.5); q.quadraticCurveTo(-11.5, -48, -9, -53); q.quadraticCurveTo(-6, -57.5, 0.5, -56.5); q.quadraticCurveTo(7, -57.5, 10, -53); q.quadraticCurveTo(12, -47, 10.4, -39.5); q.quadraticCurveTo(0.5, -37.2, -9.5, -39.5); q.closePath(); }), { sx: 5, sy: -48, sr: 11.5, gloss: [5, -53, 2.4, 1.1] });
+      c.fillStyle = B.ink; c.fill(LANCER_VISOR);
+    },
+    glow(c, p, halo) { visorGlow(c, LANCER_VISOR, 5, -46.5, 16, halo, p.open ?? 1); if (!p.game) sonicLance(c, -2, -25, 52, -0.06, true, halo); },
+  };
+  return { initiate, vanguard, duelist, ranger, lancer };
 }
 
 /** A still pose for sheets and cards: planted stance, the Order's own hand positions. */

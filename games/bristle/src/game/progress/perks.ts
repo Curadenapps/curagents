@@ -4,7 +4,7 @@ export interface Perk { id: string; branch: 'brush' | 'gap' | 'care'; name: stri
 export const BRANCHES = [
   { id: 'brush', name: 'Brushing', blurb: 'The brush and its strokes.', order: 'vanguard' },
   { id: 'gap', name: 'Interdental', blurb: 'The holder, the refills and the narrow ways between.', order: 'ranger' },
-  { id: 'care', name: 'Rinse and care', blurb: 'Rinse, healing and calm gums.', order: 'bulwark' },
+  { id: 'care', name: 'Rinse and care', blurb: 'Rinse, healing and calm gums.', order: 'lancer' },
 ] as const;
 export const PERKS: Perk[] = [
   { id: 'b1', branch: 'brush', name: 'Wide head', text: 'Your slashes reach 20% further.' },
