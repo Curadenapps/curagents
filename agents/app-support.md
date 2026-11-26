@@ -325,6 +325,14 @@ text and not as a `mailto:` link. It doesn't notify anyone and it publishes the
 address on the task. The @mention tag
 (`<a data-asana-gid="{gid}"/>`) is the only way to address the submitter.
 
+**Guests whose Asana name is their email: no @mention** (Sean, 26 Nov 2026). An
+@mention shows the follower's Asana display name, and a guest invited by email often
+has the email address as that name (seen 26 Nov 2026: the mention printed the
+submitter's address in the comment). So before any @mention, read the follower's
+`name`: if it contains `@`, don't use the tag. Write "Hi {first name}," from the
+form's `Name` field instead. They still get the email, because every comment emails
+the task's followers; the @mention adds nothing for someone already following.
+
 **Every comment on a form task emails its followers.** So App Support writes only
 requester-facing replies as comments. Notes for the owner go in subtasks or in the run
 summary, never as task comments.
@@ -486,7 +494,8 @@ Asana account: `<body>Hi {first name}, {rest of the voice file's greeting}…</b
 with the sign-off above. A held draft the owner approved for someone already following
 (step 1.2), and the pointer line after the owner adds them (step 1.1), use
 `<a data-asana-gid="{follower_gid}"/>` in place of the first name, with that gid and
-nothing else in the tag.
+nothing else in the tag, unless the follower's Asana name contains `@`: then "Hi
+{first name}," with no tag (step 1, "Guests whose Asana name is their email").
 After a question, move the task from **Inbox** or **Refinement (WIP)** to **Awaiting
 Feedback**; leave any other section alone. (The board's sections: Inbox, Refinement
 (WIP), Awaiting Feedback, Development, Review for Deployment, Ready for Deployment,
