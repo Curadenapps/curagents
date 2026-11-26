@@ -26,11 +26,11 @@ only as gentle in-world flavour.
 |---|---|---|---|
 | Crown Gate (`crown`) | 3 | Cold enamel ruins atop a molar, white and blue, wind | Tutorial, first fountain, **Derek** the hermit hygienist |
 | Gumline Hollows (`gumline`) | 3-4 | Soft pink caverns, bioluminescent, warm | **Pip** the merchant, **Rinse** spell relic, sore gum hazards |
-| The Narrows (`narrows`) | 2-3 | Tall interdental shafts, vertical, tight | **Prime Dash** relic; slits (`|`) you can only dash through |
+| The Narrows (`narrows`) | 2-3 | Tall interdental shafts, vertical, tight | **Prime Dash** relic (also gives the size M interdental brush); clogged interdental gaps cleaned with the matching IDB |
 | Sugar Wastes (`sugar`) | 2-3 | Crystal sugar spikes, orange haze, sticky | **Floss Grip** relic (wall cling and wall jump) |
 | Calculus Deep (`calculus`) | 2 + arena | Bone-grey tartar caves, dark, heavy | **The Warden** (lore), boss **Mother Calculus** in `calculus-throne` |
 
-Gating: dash opens the slits to the Sugar Wastes; grip lets you climb out of the Wastes into the Calculus Deep.
+Gating: the size M IDB (from the Prime Dash relic) cleans the gap to the Sugar Wastes; grip lets you climb out of the Wastes into the Calculus Deep.
 Beating the boss sets flag `calculus-defeated` and calls `g.ui.ending()`.
 
 Start room id: `crown-gate` (marker `@`). Room ids use the biome as prefix: `gumline-1`, `narrows-shaft`...
@@ -74,7 +74,7 @@ If you need a core change, make the smallest one and say so in your report.
 
 - World units: 1 tile = 32. The camera shows 17 tiles of height (`VIEW_H`).
 - Rooms are ASCII maps registered with `register.room(...)`. Core chars: `#` rock, `=` ledge, `^` spikes,
-  `|` slit, `P` plaque wall, `S` fountain, `@` new-game start, `1`-`9` doors (edge cells; links in `doors`).
+  `|` `I` `H` clogged interdental gap size S / M / L (src/game/gaps.ts), `P` plaque wall, `S` fountain, `@` new-game start, `1`-`9` doors (edge cells; links in `doors`).
 - Enemy chars (bestiary registers them, world places them): `f` Filmling (ground crawler), `s` Stickler
   (crawls around walls and ceilings), `i` Sugar Imp (flier), `t` Tartar Spitter (turret), `b` Tartar Brute
   (shielded charger), `l` Gum Leech (drops from ceilings), `m` Mite swarm (small fliers), `X` Mother Calculus.
