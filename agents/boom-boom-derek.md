@@ -207,6 +207,12 @@ One source failing never stops the run: mark it `unavailable` and carry on.
    Khanh Nguyen"), **Marker** `Boom Boom: {Weekday d Mon}`, **Agent**
    `boom-boom-derek`, **Status** `Queued`, **Expires** today 18:00, **Source** the
    page. If a row for today exists, replace its body instead of adding a second one.
+   Create it **inside the outbox**: `notion-create-pages` with parent
+   `{"type": "data_source_id", "data_source_id": "f73b099a-ad3e-45ed-bb7e-31da773ab08d"}`,
+   never a standalone page. Then read it back in the outbox (view mode) and check
+   Space, Status and Mentions are set. A row that isn't in the outbox is never
+   posted (26 Nov: an orphan page, so Thursday's ping only went out because the PC
+   run made a real row).
    The Webex courier on Sean's PC posts it (`RUNTIME.md` "Webex courier": checks the
    space for replies first, then posts, verifies with the marker and writes the ping
    history line).
