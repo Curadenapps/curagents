@@ -1,15 +1,15 @@
 // Keyboard, mouse and gamepad, mapped to named actions. Presses are buffered so a jump pressed a few
 // frames early still counts (see Input.pressed(action, buffer)).
-export type Action = 'left' | 'right' | 'up' | 'down' | 'jump' | 'attack' | 'dash' | 'spell' | 'focus' | 'interact' | 'pause' | 'confirm' | 'back';
+export type Action = 'left' | 'right' | 'up' | 'down' | 'jump' | 'attack' | 'dash' | 'spell' | 'focus' | 'interact' | 'pause' | 'confirm' | 'back' | 'size';
 
 const KEYS: Record<string, Action[]> = {
   ArrowLeft: ['left'], KeyA: ['left'], ArrowRight: ['right'], KeyD: ['right'], ArrowUp: ['up'], KeyW: ['up'], ArrowDown: ['down'], KeyS: ['down'],
   Space: ['jump', 'confirm'], KeyZ: ['jump'], KeyJ: ['attack'], KeyX: ['attack'], KeyK: ['dash'], KeyC: ['dash'], ShiftLeft: ['dash'], ShiftRight: ['dash'],
-  KeyL: ['spell'], KeyV: ['spell'], KeyF: ['focus'], KeyQ: ['focus'], KeyE: ['interact'], Enter: ['confirm', 'interact'],
+  KeyL: ['spell'], KeyV: ['spell'], KeyF: ['focus'], KeyQ: ['focus'], KeyE: ['interact'], Enter: ['confirm', 'interact'], KeyR: ['size'], Tab: ['size'],
   Escape: ['pause', 'back'], KeyP: ['pause'], Backspace: ['back'],
 };
 // Standard gamepad layout: 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 9 Start, 12-15 d-pad
-const PAD: Record<number, Action[]> = { 0: ['jump', 'confirm'], 1: ['dash', 'back'], 2: ['attack'], 3: ['spell'], 4: ['focus'], 5: ['dash'], 6: ['focus'], 7: ['dash'], 9: ['pause'], 8: ['interact'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'] };
+const PAD: Record<number, Action[]> = { 0: ['jump', 'confirm'], 1: ['dash', 'back'], 2: ['attack'], 3: ['spell'], 4: ['focus'], 5: ['dash'], 6: ['focus'], 7: ['dash'], 9: ['pause'], 8: ['interact'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'], 10: ['size'], 11: ['size'] };
 
 export class Input {
   private down = new Set<Action>();

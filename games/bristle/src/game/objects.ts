@@ -7,6 +7,8 @@ import type { Room } from './room';
 import { ART, owned, ownedOrders, nextOrder, setOrder, unlockOrder } from './orders';
 import { particle as PT } from '../design/tokens';
 import { rewardOnce, XP } from './xp';
+import { refillAll } from './shot';
+import { currentOrder } from './orders';
 
 const near = (g: Game, x: number, y: number, rx: number, ry: number) => Math.abs(g.player.x - x) < rx && Math.abs(g.player.y - y) < ry;
 const wantsInteract = (g: Game) => !g.busy() && !g.ui.isOpen() && (g.input.pressed('interact', 0.05) || g.input.pressed('up', 0.05)) && g.player.grounded;
@@ -29,7 +31,7 @@ export class Fountain extends Actor {
       g.input.consume('interact'); g.input.consume('up');
       const p = g.player; p.heal(99); g.save.room = g.room.id; g.save.door = 'S'; g.save.hp = p.maxHp; g.persist();
       this.resting = 1.4; g.audio.sfx('rest');
-      this.rested = true; rewardOnce(g, `rest:${g.room.def.id}`, XP.rest, this.x, this.y - 60, 'Fountain');
+      this.rested = true; refillAll(g, currentOrder(g)); rewardOnce(g, `rest:${g.room.def.id}`, XP.rest, this.x, this.y - 60, 'Fountain');
       const first = !owned(g, 'vanguard'); if (first) unlockOrder(g, 'vanguard', true);
       if (g.save.progress.points > 0) setTimeout(() => g.progress.open(), 650);
       else if (!first) g.ui.toast(ownedOrders(g).length > 1 ? 'Rested. Rest again to change your Order.' : 'Rested. The fountain will bring you back here.');

@@ -114,11 +114,11 @@ export function wordmark(cls = 'wordmark') {
 }
 
 /** Keyboard or gamepad glyph for an action, for hints. */
-export function keyName(g: GameCore, a: 'confirm' | 'back' | 'move' | 'jump' | 'attack' | 'spell' | 'dash' | 'interact' | 'focus') {
+export function keyName(g: GameCore, a: 'confirm' | 'back' | 'move' | 'jump' | 'attack' | 'spell' | 'dash' | 'interact' | 'focus' | 'size') {
   const pad = g.input.usingPad;
   const K: Record<string, [string, string]> = {
     confirm: ['Enter', 'A'], back: ['Esc', 'B'], move: ['A / D', 'Left stick'], jump: ['Space', 'A'], attack: ['J', 'X'],
-    spell: ['L', 'Y'], dash: ['K', 'RB'], interact: ['E', 'Up'], focus: ['F', 'LB'],
+    spell: ['L', 'Y'], dash: ['K', 'RB'], interact: ['E', 'Up'], focus: ['F', 'LB'], size: ['R', 'R3'],
   };
   return K[a][pad ? 1 : 0];
 }

@@ -7,6 +7,7 @@ import type { Game, PlayerApi, Hit, HitKind } from './types';
 import { brand as BR, particle as PT } from '../design/tokens';
 import { ART, ORDER_STATS, currentOrder, type OrderId } from './orders';
 import { drawRig, RIG, RIG_SCALE, type RigPose } from '../design/hero';
+import { RefillShot, LOAD, DRAW, POWER, ammo, setAmmo, selectedSize, usable, cycleSize, drawHeld } from './shot';
 
 export const C = { blue: BR.blue, blueDk: BR.blueDark, blue80: BR.blue80, blue60: BR.blue60, sky: '#8BB8E8', white: '#FFFFFF', enamel: '#F3F6FC', enamelShade: '#C7D3EA', ink: '#0A1F44', ink2: '#132B57', cerise: BR.cerise, yellow: '#FCE300', orange: '#FF8200', orchid: '#F277C6', lime: '#C4D600' };
 
@@ -30,6 +31,8 @@ export class Player extends Actor implements PlayerApi {
   // timers
   coyote = 0; atkCd = 0; dashT = 0; dashCd = 0; airDash = true; hurtT = 0; recoilT = 0; wallLock = 0; landT = 0; focusT = 0; spellT = 0; stepT = 0;
   slash: Slash | null = null; throwT = 0;
+  /** Seconds the shot has been held (load, then draw); -1 when not aiming. */
+  shotT = -1;
   /** The Order worn (armour set), refreshed every update from the save. */
   ord: OrderId = 'initiate';
   /** Seconds the blade button has been held after a slash (charges the Deep Clean). */
@@ -116,7 +119,7 @@ export class Player extends Actor implements PlayerApi {
     if (this.dashT <= 0) {
       // ---- horizontal
       if (this.recoilT <= 0 && this.wallLock <= 0) {
-        const target = ax * RUN * ORDER_STATS[this.ord].run * (this.focusT > 0 ? 0 : this.charge > 0.2 ? 0.55 : this.crouching ? 0.42 : 1);
+        const target = ax * RUN * ORDER_STATS[this.ord].run * (this.focusT > 0 ? 0 : this.shotT >= 0 ? 0.45 : this.charge > 0.2 ? 0.55 : this.crouching ? 0.42 : 1);
         this.vx = approach(this.vx, target, (this.grounded ? ACC_G : ACC_A) * dt);
         if (ax && !this.slash) this.facing = sign(ax) as 1 | -1;
       }
@@ -155,21 +158,39 @@ export class Player extends Actor implements PlayerApi {
     }
     if (this.slash) { this.slash.t += dt; if (this.slash.t < 0.11) this.slashHits(g); if (this.slash.t > (this.slash.heavy ? 0.3 : 0.22)) this.slash = null; }
 
-    // ---- spell: throw CURAPROX toothpaste; Up + spell = Rinse wave (after the rinse relic)
-    if (want('spell', 0.08) && this.dashT <= 0) {
-      const rinse = ay < -0.5 && g.save.abilities.rinse, cost = (rinse ? SPELL_COST : PASTE_COST - (Number(g.save.flags.paste) ? 7 : 0)) - (perk('c1') ? 5 : 0);
+    // ---- spell: Up + spell = Rinse wave (after the rinse relic); spell alone = the interdental shot (src/game/shot.ts)
+    const rinseWant = ay < -0.5 && g.save.abilities.rinse;
+    if (want('spell', 0.08) && this.dashT <= 0 && rinseWant) {
+      const cost = SPELL_COST - (perk('c1') ? 5 : 0);
+      inp.consume('spell');
       if (this.fluor >= cost) {
-        inp.consume('spell'); this.fluor -= cost; this.spellT = 0.3; this.slash = null;
-        if (rinse) {
-          g.spawn(new RinseWave(this.x + this.facing * 18, this.y - 2, this.facing)); this.vx = -this.facing * 220; this.recoilT = 0.12;
-          g.audio.sfx('spell'); g.shake(4, 0.12); g.flash([0.55, 0.72, 0.91], 0.12);
-        } else {
-          const down = ay > 0.5 && !this.grounded;
-          g.spawn(new PasteGlob(this.x + this.facing * 14, this.y - 12, down ? this.facing * 120 : this.facing * 640, down ? 520 : -360));
-          this.throwT = 0.22; g.audio.sfx('throw'); this.sx = 1.12; this.sy = 0.92;
-        }
-      } else { inp.consume('spell'); g.audio.sfx('empty'); }
+        this.fluor -= cost; this.spellT = 0.3; this.slash = null; this.shotT = -1;
+        g.spawn(new RinseWave(this.x + this.facing * 18, this.y - 2, this.facing)); this.vx = -this.facing * 220; this.recoilT = 0.12;
+        g.audio.sfx('spell'); g.shake(4, 0.12); g.flash([0.55, 0.72, 0.91], 0.12);
+      } else g.audio.sfx('empty');
+    } else if (want('spell', 0.08) && this.dashT <= 0 && this.shotT < 0 && !busy) {
+      inp.consume('spell'); const sz = selectedSize(g);
+      if (usable(g).length && ammo(g, sz) > 0) { this.shotT = 0; this.slash = null; g.audio.sfx('clink', { pitch: 1.2, vol: 0.45 }); }
+      else { g.audio.sfx('empty'); g.ui.toast(`No size ${sz.toUpperCase()} refills left. Pick fired ones back up, or rest at a fountain.`, 3200); }
     }
+    if (this.shotT >= 0) {
+      if (busy || this.hurtT > 0 || this.dashT > 0 || this.deadT >= 0) this.shotT = -1;
+      else if (inp.held('spell')) {
+        const before = this.shotT; this.shotT += dt;
+        if (before < LOAD && this.shotT >= LOAD) g.audio.sfx('scrub', { pitch: 1.4, vol: 0.5 }); // the refill clicks in
+        const full = LOAD + DRAW[this.ord]; if (before < full && this.shotT >= full) { g.audio.sfx('charge', { pitch: 1.3, vol: 0.5 }); g.fx.burst(this.x + this.facing * 26, this.y - 8, { ...PT.cleanGlint, n: 1 }); }
+      } else {
+        if (this.shotT >= LOAD) {
+          const sz = selectedSize(g), k = clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1), sp = 520 + 460 * k;
+          g.spawn(new RefillShot(this.x + this.facing * 24, this.y - 8, this.facing * sp, k < 0.6 ? -140 * (1 - k) : 0, sz, POWER[sz] + Math.round(3 * k), k >= (this.ord === 'ranger' ? 0.5 : 1), k < 0.6, this.ord));
+          setAmmo(g, sz, ammo(g, sz) - 1); this.throwT = 0.18; this.vx -= this.facing * 80 * k; this.sx = 1.1; this.sy = 0.94;
+          g.audio.sfx('throw', { pitch: 1.3 }); g.shake(1 + 2 * k, 0.08);
+          if (!g.save.flags['shot-tip']) { g.save.flags['shot-tip'] = true; g.ui.toast('Hold to draw further, release to shoot. R changes the refill size. Fired refills can be picked back up.', 5600); }
+        }
+        this.shotT = -1;
+      }
+    }
+    if (!busy && inp.pressed('size', 0.05)) { inp.consume('size'); cycleSize(g); }
 
     // ---- focus (heal)
     if (!busy && inp.held('focus') && this.grounded && this.fluor >= FOCUS_COST && this.hp < this.maxHp && this.hurtT <= 0 && !this.slash && this.dashT <= 0) {
@@ -353,6 +374,7 @@ export class Player extends Actor implements PlayerApi {
     ctx.scale(f * K, K);
     // the brush stays the game's own blade, drawn in body space between the chest and the front arm
     drawRig(ctx, art, pose, 'scene', { blade: (c) => { c.save(); c.translate(0, pose.lift); c.scale(f / K, 1 / K); this.drawBlade(c, gr.hx, gr.hy, gr.a, col); c.restore(); } });
+    if (this.shotT >= 0 && this.ord !== 'ranger') { ctx.scale(f / K, 1 / K); drawHeld(ctx, f * 17, -31 - this.bob, f, selectedSize(g), this.shotT >= LOAD, clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1)); }
     ctx.restore();
   }
   /** The rig pose from the animation state (rig space: facing right, at RIG_SCALE). */
@@ -363,7 +385,7 @@ export class Player extends Actor implements PlayerApi {
       legA: this.legA, legB: this.legB, lift, headTilt: this.headTilt * f,
       backHand: [RIG.back[0] - Math.cos(ba) * 12, RIG.back[1] + Math.sin(ba) * 12],
       frontHand: [(gr.hx * f) / K, gr.hy / K + lift],
-      game: true, aiming: false, sway: clamp((-this.vx * f) / 500, -1, 1), open: this.blink > 0 ? 0.25 : 1,
+      game: true, aiming: this.shotT >= 0, sway: clamp((-this.vx * f) / 500, -1, 1), open: this.blink > 0 ? 0.25 : 1,
     };
   }
   /** A CURAPROX CS 5460-style brush held at (hx, hy): slim faceted handle, clear neck, compact head, dense filaments. */

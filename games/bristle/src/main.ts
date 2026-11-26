@@ -10,6 +10,7 @@ import { installUi } from './ui/index';
 import { installProgress } from './game/progress/progress';
 import { Tips } from './game/tips';
 import { brand as BR, font as FT } from './design/tokens';
+import { installShotHud } from './game/shot';
 { const rs = document.documentElement.style; rs.setProperty('--blue', BR.blue); rs.setProperty('--cerise', BR.cerise); rs.setProperty('--ink', BR.ink); rs.setProperty('--display', FT.display); rs.setProperty('--body', FT.body); }
 
 declare const __BUILD_TIME__: string;
@@ -28,6 +29,7 @@ window.addEventListener('pointerdown', () => g.audio.unlock());
 window.addEventListener('keydown', () => g.audio.unlock());
 
 // Dev helpers: ?room=<id>&door=<marker>&all (all abilities) &god (no damage)
+installShotHud(g as any);
 const qs = new URLSearchParams(location.search);
 if (qs.get('room')) { g.save.room = qs.get('room')!; g.save.door = qs.get('door') ?? '@'; }
 if (qs.has('all')) { Object.keys(g.save.abilities).forEach((k) => ((g.save.abilities as any)[k] = true)); for (const o of ['vanguard', 'ranger', 'bulwark']) g.save.flags['order-' + o] = true; }
