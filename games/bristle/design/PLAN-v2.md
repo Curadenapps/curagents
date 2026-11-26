@@ -14,6 +14,30 @@ The slice works: five areas, a boss, an Oath tree, Pip's shop, Claude-voiced NPC
 
 **Our one-line identity:** *A tiny crowned knight and friends restore the worlds of a giant smile, with a CURAPROX brush, gentle technique and the right tool for every gap.*
 
+## 2a. Three non-negotiables (client direction, 26 Nov)
+
+1. **Clean, don't harm.** No violence. Plaque creatures are never killed or hurt: they are loosened, lifted and rinsed away, and they leave happily (they pop into foam and float off, wave, or turn into sparkles). Bosses are calmed or rinsed loose. The vocabulary follows:
+
+   | Instead of | Use |
+   |---|---|
+   | HP | **grip** (how stuck a creature is) |
+   | damage | **cleaning power** |
+   | killed | **cleared** |
+   | enemies | **the Film** or **Plaqlings** |
+
+   The player is **knocked** or **chipped**, not wounded. Rough scrubbing makes creatures cling harder; gentle technique makes them let go.
+2. **Educational, sneakily.** Real habits are the mechanics that win, with no lectures and no clinical claims:
+   - gentle pressure and small rhythmic strokes
+   - angling at the gumline
+   - the right interdental size for each gap
+   - two minutes, twice a day
+   - sugar feeds plaque
+   - plaque hardens into tartar that needs a professional (Derek)
+   - cleaning the tongue
+
+   Learning moments live in drills, lore stones, item cards and boss mechanics. All wording is flagged for compliance review.
+3. **Products help.** Every CURAPROX tool gives a clear in-game benefit for its job, so players learn what each product is for by using it. Benefits are described as in-game effects only, never as real-world results.
+
 ## 2. Design pillars
 
 1. **Gentle is strong.** The best build is careful technique: rhythmic brushing plus precise interdental strikes. Mashing works but is weaker. This is the game's thesis, true to CURAPROX, and it must be the most *fun* way to play, not the safe way.
