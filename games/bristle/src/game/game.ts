@@ -202,6 +202,7 @@ export class GameCore implements Game {
     for (const e of list) if (e.drawEmissive && cam.visible(e.x, e.y, 260)) e.drawEmissive(em, this);
     this.drawTerrainEmissive(em);
     b.drawEmissive?.(em, this);
+    this.drawExits(em);
     this.fx.draw(em, true);
     // enemy health, shown briefly after a hit
     for (const e of this.entities as any[]) {
@@ -217,6 +218,7 @@ export class GameCore implements Game {
     em.globalAlpha = 1;
     // lights
     b.lights?.(this);
+    for (const d of Object.values(this.room.doors)) if (d.edge !== 'inside') this.light({ x: d.x + (d.edge === 'left' ? 30 : d.edge === 'right' ? -30 : 0), y: d.y + (d.edge === 'top' ? 30 : d.edge === 'bottom' ? -30 : 0), r: 170, color: '#8BB8E8', i: 0.45 });
     for (const e of list) e.lights?.(this);
     // grade
     const gr = r.grade; Object.assign(gr, DEFAULT_GRADE, b.grade ?? {}); gr.exposure *= this.save.settings.brightness ?? 0.85;
@@ -260,6 +262,40 @@ export class GameCore implements Game {
         ctx.fillStyle = '#f2d9ec'; for (let i = 0; i < 4; i++) { const sx = x + 2 + i * 8, h = 12 + ((tx * 5 + i * 7) % 9); ctx.beginPath(); ctx.moveTo(sx, y + TILE); ctx.lineTo(sx + 4, y + TILE - h); ctx.lineTo(sx + 8, y + TILE); ctx.fill(); }
       }
     }
+  }
+  /** Exits: a soft light band, chevrons pointing out, and the next area's name when you are close. */
+  drawExits(ctx: CanvasRenderingContext2D) {
+    const room = this.room, p = this.player, t = this.time;
+    for (const [k, d] of Object.entries(room.doors)) {
+      if (d.edge === 'inside' || !this.cam.visible(d.x, d.y, 200)) continue;
+      const horiz = d.edge === 'left' || d.edge === 'right', out = d.edge === 'left' || d.edge === 'top' ? -1 : 1;
+      const dist = Math.hypot(p.x - d.x, p.y - d.y), near = Math.max(0, 1 - dist / 260);
+      const pulse = 0.55 + 0.25 * Math.sin(t * 3 + d.x * 0.01);
+      // light band along the opening
+      ctx.save(); ctx.translate(d.x, d.y); if (!horiz) ctx.rotate(Math.PI / 2);
+      const dir = horiz ? out : out; // +1 points to +x in the rotated frame
+      const grd = ctx.createLinearGradient(dir * 16, 0, -dir * 70, 0); grd.addColorStop(0, 'rgba(139,184,232,0.55)'); grd.addColorStop(1, 'rgba(139,184,232,0)');
+      ctx.globalAlpha = 0.55 + near * 0.35; ctx.fillStyle = grd; ctx.fillRect(Math.min(dir * 16, -dir * 70), -46, 86, 92);
+      // three chevrons drifting toward the exit
+      ctx.strokeStyle = '#E8F1FF'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      for (let i = 0; i < 3; i++) {
+        const ph = ((t * 0.9 + i / 3) % 1), x = -dir * 54 + dir * ph * 44;
+        ctx.globalAlpha = (pulse + near * 0.4) * Math.sin(ph * Math.PI);
+        ctx.beginPath(); ctx.moveTo(x - dir * 6, -9); ctx.lineTo(x + dir * 3, 0); ctx.lineTo(x - dir * 6, 9); ctx.stroke();
+      }
+      ctx.restore();
+      // where it leads
+      const link = room.def.doors[k], to = link ? Rooms[link.to] : null;
+      if (to && near > 0.05) {
+        const name = to.title ?? Biomes[to.biome]?.name ?? '', here = Biomes[room.def.biome]?.name ?? '';
+        const label = name && name !== here ? name : (this.save.visited[to.id] ? 'Onward' : 'Unexplored');
+        ctx.globalAlpha = Math.min(1, near * 1.6); ctx.fillStyle = '#E8F1FF'; ctx.font = '400 14px "Futura LT Pro", Futura, sans-serif';
+        ctx.textAlign = d.edge === 'left' ? 'left' : d.edge === 'right' ? 'right' : 'center';
+        const lx = d.x + (d.edge === 'left' ? 20 : d.edge === 'right' ? -20 : 0), ly = d.y + (d.edge === 'top' ? 64 : d.edge === 'bottom' ? -64 : -58);
+        ctx.fillText(label.toUpperCase(), lx, ly); ctx.globalAlpha = 1;
+      }
+    }
+    ctx.globalAlpha = 1;
   }
   drawTerrainEmissive(ctx: CanvasRenderingContext2D) {
     const room = this.room;
