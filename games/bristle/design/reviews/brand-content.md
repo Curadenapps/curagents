@@ -1,10 +1,10 @@
 # BRISTLE v2: brand and content review
 
-Reviewer: brand and content lead, CURAPROX. Scope: `design/PLAN-v2.md` §5, `src/game/npc/defs.ts`, `server/personas.mjs`, `src/ui/panels.ts`, `DESIGN.md`, plus the client direction (clean, don't harm; educational, sneakily; products help). **[verify]** marks product facts I am not sure of. Every learning line and "In real life" line goes to Legal/Compliance before any public build (SCOPE.md).
+Brand and content lead, CURAPROX. Covers PLAN-v2 §5, NPC lines, the AI prompt, UI copy and the client direction (clean, don't harm; educational, sneakily; products help). **[verify]** = product fact to check with the brand team. Every learning and "In real life" line goes to Legal/Compliance before any public build (SCOPE.md).
 
 ## 1. Verdict
 
-The frame is on-brand: "gentle is strong" and "the right tool for every gap" are the brand's own story, and turning each product into a verb teaches what it is for without preaching. Still to fix: combat is written as violence (kill, damage, slain, "her children"), and a few mappings and lines imply product benefits: the soothing rinse, fountains that "mend enamel", firm or sharp bristles, "smaller Prime crits harder". Ship it with the cleaning vocabulary, the human-written learning moments below, real names behind one approved name map, an AI voice that never names products or gives advice, and the Daily Tide only as an opt-in, cosmetic feature stored on the device.
+The frame is on-brand: "gentle is strong" and "the right tool for every gap" are our own story, and products as verbs teach without preaching. To fix: combat copy reads as violence (kill, damage, "her children"), and a few lines imply product benefits (soothing rinse, fountains that "mend enamel", firm bristles, "smaller Primes crit harder"). Ship it with a cleaning vocabulary, human-written learning moments, real names behind one approved name map, an AI voice that never names products or advises, and the Daily Tide as an opt-in, on-device, cosmetic feature.
 
 ## 2. Product-to-gameplay map (each tool teaches its purpose)
 
@@ -21,15 +21,14 @@ The frame is on-brand: "gentle is strong" and "the right tool for every gap" are
 | **Be You** paste, flavour/colour variants **[verify names]** | Flavours as elements | Good | Element follows colour, not flavour properties. |
 | **Black charcoal paste** (Black is White **[verify]**) | Heavy, big splash | Good mechanically | Never boosts Shine, Gleam or any "brighten" effect; avoid "white" wording: reads as whitening. |
 | **Mouthwash** (Perio Plus, chlorhexidine **[verify]**) | Rinse wave; soothing rinse "heals, calms inflammation" | **No** | Rinse stays a generic, unbranded spell that reaches everywhere. Therapeutic rinses stay out. |
-| **Hydrosonic** (Pro / Easy **[verify]**) | Rhythm auto-strokes | Good | Keep; don't imply it "does the work for you". |
+| **Hydrosonic** (Pro / Easy **[verify]**) | Rhythm auto-strokes | Good | Keep; never "does the work for you". |
 | **Tongue cleaner** (CTC 203 **[verify]**) | Clears "coated-tongue terrain" | Partly | Clears **Fuzz** on the Tongue Plains, revealing paths: teaches that the tongue gets cleaned too. |
-| **Kids' lines** (CS kids, CS baby **[verify]**) | Gentle-mode helper | Good | "Little Bristle" charm, never framed as the lesser choice. |
+| **Kids' lines** (CS kids, CS baby **[verify]**) | Gentle-mode helper | Good | "Little Bristle" charm, never the lesser choice. |
 
-**When game benefits start to sound like real claims.** These are the risks, and the fix for each:
-- No real-world units or results on item cards: no "% of Film removed", no "3x cleaner", no "kills germs".
-- Write trade-offs, not rankings, between real products.
-- Keep game stats in game words: power, reach, timing.
-- A generic statement of what a tool category is for ("interdental brushes are made for the spaces between teeth") is fine after review. A brand plus a result ("CPS removes plaque between teeth") is a claim: never.
+**When game benefits read as real claims:**
+- No real-world results on cards ("% of Film removed", "3x cleaner", "kills germs"); game stats stay in game words (power, reach, timing).
+- Trade-offs, not rankings, between real products.
+- What a tool category is for ("interdental brushes are made for the spaces between teeth") is fine after review; brand plus result ("CPS removes plaque between teeth") is a claim: never.
 - Never restate a game effect as a product property.
 
 ## 3. Claims, safety and "clean, don't harm" audit
@@ -44,7 +43,6 @@ The frame is on-brand: "gentle is strong" and "the right tool for every gap" are
 | defs.ts Derek | "Hold it like you mean it." | Force | "Hold it lightly. It knows the way." |
 | defs.ts Edge | "hits harder"; "Sharp! Well. Firm." | Firm/sharp contradicts brand | **Filament Bloom**: "More filaments, finer tips. More cleaning power." Pip: "Never firm! Just more of them." |
 | defs.ts Warden | "swept… of her children"; "fewer come back" | Violence, death | "You have cleared {n} of her Film to stand here." / "Some turned back. Your brush is gentler than theirs." |
-| defs.ts Derek | "swing first. Apologise later" | Violence | "Sweep first. It will thank you later." |
 | personas.mjs | "has been defeated" | Slaying | "has been rinsed loose and calmed". |
 | panels.ts | "Defeated", "Bestiary/beasts" | Slaying, monsters | "Calmed"; tab **Film Guide**. |
 
@@ -58,31 +56,18 @@ The frame is on-brand: "gentle is strong" and "the right tool for every gap" are
 | stagger, launch | loosen, lift |
 | death, you fell | knocked back to the fountain |
 | blade, slash | brush, stroke |
-| "Film swept" count | keep "swept" or "cleared" |
-| boss time to kill | time to calm |
 
-Cleared Plaqlings wave, pop into bubbles and drift off happy. Bosses end calmed, rinsed loose and smiling.
+Cleared Plaqlings pop into bubbles and drift off happy; bosses end calmed and smiling.
 
-**"In real life" lines.**
-- Written by people and approved by brand plus Legal per market, with an approval ID. Never AI-generated.
-- Only identity and description: name, type, verified features.
-- No benefit verbs: prevents, protects, removes, whitens, strengthens, soothes, heals, fights, freshens.
-- No results, conditions, comparisons or "recommended by".
-- No prices, links, codes or "ask your parents". Legal to check the EU rule against direct exhortation of children to buy.
-- Off by default; a toggle in settings shows them.
+**"In real life" lines:**
+- Human-written, approved by brand plus Legal per market, with an approval ID; never AI-generated.
+- Name, type and verified features only. No benefit verbs (prevents, protects, removes, whitens, strengthens, soothes, heals, freshens), results, conditions, comparisons or "recommended by".
+- No prices, links, codes or "ask your parents" (Legal: EU rule against direct exhortation of children to buy).
+- Off by default; a settings toggle shows them.
 
-**AI-voiced NPCs must never:**
-- name or describe real products, prices or where to buy them (Pip's AI sells only for shine);
-- give health or technique advice. Even the learning moments in §4 are written lines only;
-- mention symptoms, pain, decay, blood, dentists or bad breath;
-- comment on the player's real mouth or habits, or know the Daily Tide state;
-- judge looks or mention competitors;
-- use violent words.
+**AI-voiced NPCs must never:** name or describe real products, prices or shops (Pip's AI sells only for shine); give health or technique advice (§4 learning moments are written lines only); mention symptoms, pain, decay, blood, dentists or breath; comment on the player's real mouth or habits, or see Daily Tide state; judge looks; mention competitors; use violent words.
 
-Engineering asks:
-- Add these to the `sanitizeReply` block list: white*, sensitiv*, bleed*, bacteria, germ*, decay, caries, breath, protect*, strengthen*, remineral*, kill*, slay*, slain, %, and the mapped product names.
-- Log blocked replies for review.
-- Retitle Derek "keeper of the fountain": a real job title invites real advice.
+Engineering asks: add white*, sensitiv*, bleed*, bacteria, germ*, decay, caries, breath, protect*, strengthen*, remineral*, kill*, slay*, slain, % and the mapped product names to `sanitizeReply`; log blocked replies for review; retitle Derek "keeper of the fountain" (a real job title invites real advice).
 
 ## 4. Habits: learning moments and the Daily Tide
 
@@ -99,18 +84,17 @@ The habits are the mechanics that win. Every line is written by people and flagg
 | Tartar needs a professional | Calculus Deep: you can't lift old tartar alone; Derek calls in the Order's Polishers | Warden: "Hardened tartar is beyond one knight's brush. That is what the Polishers are for." (**highest review priority**: implies a visit to the dentist) |
 | Tongue cleaning | Tongue Plains Fuzz | Card: "The tongue needs tending too." |
 
-No learning line names a product or promises a result. Product cards show the tool's in-game purpose; the habit lives in the world.
+No learning line names a product or promises a result.
 
-**Daily Tide: keep, reshaped as the Tide Bell.** You ring a bell at the hub morning and evening if you have done your own routine.
-- Opt-in, off by default, on trust.
-- Cosmetic rewards only (a chime, a sparkle on the handle, a greeting from Pip). Never Crown points or power.
+**Daily Tide: keep, as the Tide Bell.** Ring a hub bell morning and evening if you did your own routine.
+- Opt-in, off by default, on trust. Cosmetic rewards only (chime, handle sparkle, Pip greeting), never power.
 - No streaks, losses, reminders or "you missed one".
 - Wording: "Done your real-life routine? Ring the bell!"
-- GDPR: two booleans for today in the local save. No history, timestamps, analytics or account, and never sent to the AI voice. Brushing logs tied to a person could count as health data; keeping this on the device means we process none.
+- GDPR: two booleans for today in the local save; no history, timestamps, analytics or account; never sent to the AI. A brushing log tied to a person could be health data; on-device, we process none.
 
 ## 5. Proposed Pip catalogue (claim-free)
 
-Price bands in shine: S 40-90, M 120-250, L 300-500. Names are placeholders until the name map is approved.
+Shine bands: S 40-90, M 120-250, L 300-500. Names are placeholders.
 
 | Name (placeholder) | Slot | In-game benefit (what it teaches) | Band | Unlock |
 |---|---|---|---|---|
@@ -120,7 +104,7 @@ Price bands in shine: S 40-90, M 120-250, L 300-500. Names are placeholders unti
 | Ortho brush **[verify]** | Brush | Cleans along bracket rails, rides them | M | Sugar Wastes |
 | Prime S / M / L **[verify codes, colours]** | Prime | Full clean-through on matching Gaps | S/S/M | Narrows, Pip, Sugar Wastes |
 | Single tuft **[verify]** | Single tuft | Reaches behind armour seams and last towers | M | Derek drill |
-| Enzycal-style paste **[verify]** | Paste | Steady foam, cheapest throw | S | Start |
+| Enzycal-style paste **[verify]** | Paste | Steady foam, cheapest | S | Start |
 | Be You colour A/B/C **[verify]** | Paste | Slow / bounce / spread foam | M each | One per world |
 | Black paste **[verify]** | Paste | Heavy, big splash | L | Calculus Deep |
 | Calm Tide | Rinse | Settles Flare grime, +1 crown point | M | First boss |
@@ -135,21 +119,6 @@ Price bands in shine: S 40-90, M 120-250, L 300-500. Names are placeholders unti
 
 ## 6. Tone notes
 
-**Charming:**
-- Plaqlings as giggly guests who leave happy.
-- Pip's honest-salesman patter and Derek's dry wit.
-- Gap puns ("Mind the gaps, I live in them").
-- Sugar as playful chaos, not evil.
-- Mother Calculus as stubborn and, in the end, relieved.
+**Charming:** Plaqlings as giggly guests who leave happy; Pip's honest patter; Derek's dry wit; gap puns ("Mind the gaps, I live in them"); sugar as playful chaos; Mother Calculus stubborn, then relieved.
 
-**Off-brand:**
-- Gross-out: slime, rot, breath, blood.
-- Fear: drills, pain, lost teeth, scary dentists.
-- Shaming the player, kids, braces, gaps or crooked teeth.
-- Looks jokes (white = pretty).
-- Force jokes ("scrub harder").
-- Moralising about sweets.
-- Digs at other brands.
-- Any violence.
-
-If a joke needs a real tooth to land, cut it.
+**Off-brand:** gross-out (slime, rot, breath, blood); fear (drills, pain, lost teeth, scary dentists); shaming players, braces, gaps or crooked teeth; looks jokes (white = pretty); force jokes ("scrub harder"); moralising about sweets; digs at other brands; any violence. If a joke needs a real tooth to land, cut it.
