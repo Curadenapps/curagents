@@ -1,6 +1,7 @@
 // CROWN rooms (world agent). ASCII maps: see room.ts for the core chars and DESIGN.md for enemy chars.
 // G = boss gate cell (empty until the boss closes it). Objects use tile coords of the cell they stand in.
 import type { RoomDef } from '../../registry';
+import { brandText as BT } from '../../../design/tokens';
 
 export const rooms: RoomDef[] = [
   {
@@ -10,7 +11,7 @@ export const rooms: RoomDef[] = [
     subtitle: "The Smile at Dawn",
     doors: { '1': { to: "crown-ramparts", door: "1" } },
     objects: [
-      { type: "lore", x: 11, y: 18, text: "Here the Order of the 5,460 kept its watch. One oath for every filament. Most of us kept it." },
+      { type: "lore", x: 11, y: 18, text: `Here the ${BT.order} kept its watch. One oath for every filament. Most of us kept it.` },
       { type: "npc", id: "derek", x: 75, y: 18 },
     ],
     map: [

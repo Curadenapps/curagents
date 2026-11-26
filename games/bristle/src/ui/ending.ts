@@ -2,6 +2,7 @@
 // then back to the title with the save intact.
 import type { GameCore } from '../game/game';
 import { h, wordmark, backTap, taps, type Screen } from './kit';
+import { brandText as BT } from '../design/tokens';
 
 const LINE_S = 4.6;
 
@@ -17,13 +18,13 @@ export class EndingScreen implements Screen {
       met('derek') ? 'At the Crown Gate, Derek sets a second cup beside the fountain. Just in case.' : 'At the Crown Gate, the fountain runs clear and warm, as if it had been waiting.',
       met('pip') ? 'Deep in the Hollows, Pip is already painting a new sign.' : 'Deep in the Hollows, the glowing gardens open their petals.',
       met('warden') ? 'And the Warden, for the first time in years, sits down.' : 'And the gates of the Deep stand open, with nothing left to guard.',
-      'Bristle, last knight of the Order of the 5,460, rests at last. Twice a day, as the oath says.',
+      `Bristle, last knight of the ${BT.order}, rests at last. Twice a day, as the oath says.`,
     ];
     this.lineEls = this.lines.map((l) => h('p', { class: 'end-line', text: l }));
     this.veil = h('div', { class: 'end-veil' });
     this.credits = h('div', { class: 'end-credits' },
       h('div', { class: 'end-logo', text: 'BRISTLE' }), h('div', { class: 'end-sub', text: 'Knight of the Crown' }),
-      h('p', { class: 'end-tag', text: 'BRISTLE: Knight of the Crown. An original game prototype for CURAPROX.' }),
+      h('p', { class: 'end-tag', text: BT.credit }),
       h('dl', { class: 'credits-list' },
         h('dt', { text: 'World' }), h('dd', { text: 'Ivoria, inside the Great Smile' }),
         h('dt', { text: 'Characters' }), h('dd', { text: 'Bristle, Derek, Pip and the Warden' }),

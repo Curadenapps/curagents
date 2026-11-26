@@ -22,6 +22,7 @@ export interface BrandPack {
   product: {
     brush: string;              // the hero's brush-blade is this brush
     filaments: number;          // lore: one oath per filament
+    filamentsSpoken: string;    // the same number in words, for dialogue
     order: string;              // the hero's order
     handles: { id: string; name: string; handle: string; filament: string }[]; // cosmetic brush finishes
     idb: { holder: string; body: string; shade: string; hi: string; sizes: { s: IdbSize; m: IdbSize; l: IdbSize } };
@@ -40,7 +41,7 @@ export const curaprox: BrandPack = {
     files: ['FuturaLTPro-Book.otf', 'FuturaLTPro-Bold.otf', 'InfoDisplayPro-Book.otf'],
   },
   product: {
-    brush: 'CS 5460', filaments: 5460, order: 'Order of the 5,460',
+    brush: 'CS 5460', filaments: 5460, filamentsSpoken: 'Five thousand four hundred and sixty', order: 'Order of the 5,460',
     handles: [
       { id: 'curaprox-blue', name: 'Curaprox Blue', handle: '#003DA5', filament: '#E8F1FF' },
       { id: 'cerise', name: 'Cerise', handle: '#E31C79', filament: '#FFE3F0' },
@@ -69,7 +70,7 @@ export const demo: BrandPack = {
     canvas: '"Century Gothic", "Avenir Next", sans-serif',
   },
   product: {
-    brush: 'Soft brush', filaments: 1000, order: 'Order of the Thousand Bristles',
+    brush: 'Soft brush', filaments: 1000, filamentsSpoken: 'A thousand', order: 'Order of the Thousand Bristles',
     handles: [
       { id: 'green', name: 'House Green', handle: '#2E7D5B', filament: '#E9F7F0' },
       { id: 'coral', name: 'Coral', handle: '#FF6B4A', filament: '#FFEDE8' },

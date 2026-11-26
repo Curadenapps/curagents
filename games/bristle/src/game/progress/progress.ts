@@ -6,6 +6,7 @@
 import type { GameCore } from '../game';
 import type { Entity, Faction, ProgressApi } from '../types';
 import { PERKS, BRANCHES, FACTIONS } from './perks';
+import { brandText as BT } from '../../design/tokens';
 
 const GUESS: [RegExp, Faction][] = [[/leech|flare|swell|gum|inflam/, 'gum'], [/imp|sugar/, 'sugar'], [/tartar|spit|brute|calculus|matriarch/, 'tartar']];
 export const nextXp = (level: number) => 12 + level * 14;
@@ -76,7 +77,7 @@ export class Progress implements ProgressApi {
     const bar = (v: number, max: number, c: string) => `<i style="width:${Math.min(100, (v / Math.max(1, max)) * 100).toFixed(1)}%;background:${c}"></i>`;
     this.el.innerHTML = `
       <div class="oath-card">
-        <header><div><p class="oath-eyebrow">The Oath of the 5,460</p><h1>Level ${p.level}</h1></div>
+        <header><div><p class="oath-eyebrow">The Oath of the ${BT.orderShort}</p><h1>Level ${p.level}</h1></div>
           <div class="oath-points"><b>${p.points}</b><span>skill point${p.points === 1 ? '' : 's'}</span></div></header>
         <div class="oath-xp"><span>${p.xp} / ${nextXp(p.level)} to level ${p.level + 1}</span><div class="oath-bar">${bar(p.xp, nextXp(p.level), '#8BB8E8')}</div></div>
         <div class="oath-tree">${BRANCHES.map((b) => `<section><h2>${b.name}</h2><p>${b.blurb}</p>${PERKS.filter((k) => k.branch === b.id).map((k) => {

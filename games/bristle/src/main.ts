@@ -9,6 +9,8 @@ import { Hud } from './ui/hud';
 import { installUi } from './ui/index';
 import { installProgress } from './game/progress/progress';
 import { Tips } from './game/tips';
+import { brand as BR, font as FT } from './design/tokens';
+{ const rs = document.documentElement.style; rs.setProperty('--blue', BR.blue); rs.setProperty('--cerise', BR.cerise); rs.setProperty('--ink', BR.ink); rs.setProperty('--display', FT.display); rs.setProperty('--body', FT.body); }
 
 declare const __BUILD_TIME__: string;
 const view = document.getElementById('view') as HTMLCanvasElement;

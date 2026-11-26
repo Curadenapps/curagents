@@ -8,6 +8,7 @@
 import { Actor } from './entity';
 import { TILE } from '../engine/render';
 import type { Game } from './types';
+import { particle as PT } from '../design/tokens';
 
 export type GapSize = 's' | 'm' | 'l';
 export const GAP_CHARS = '|IH';
@@ -70,8 +71,8 @@ export class Gap extends Actor {
     for (const [x, y] of this.cells) { r.grid[y][x] = '.'; g.save.flags[`gap:${r.def.id}:${x},${y}`] = true; }
     r.version++; r.rebuild(); this.dead = true;
     g.audio.sfx('break'); g.hitstop(0.08); g.shake(5, 0.25);
-    for (const [x, y] of this.cells) g.fx.burst((x + 0.5) * TILE, (y + 0.5) * TILE, { n: 10, color: ['#d8c48a', '#bfa863', '#ffffff'], speed: [80, 300], size: [1.5, 4], gravity: 900, life: [0.4, 0.9] });
-    g.fx.burst(this.x, this.y, { n: 24, color: ['#ffffff', this.size.col], shape: 'bubble', speed: [30, 160], angle: -Math.PI / 2, spread: 2, size: [1, 3], gravity: -60, emissive: true, life: [0.6, 1.2] });
+    for (const [x, y] of this.cells) g.fx.burst((x + 0.5) * TILE, (y + 0.5) * TILE, { n: 10, color: ['#d8c48a', '#bfa863', '#ffffff'], shape: 'crumb', spin: 8, speed: [80, 300], size: [1.5, 3.6], gravity: 900, life: [0.4, 0.9] });
+    g.fx.burst(this.x, this.y, { n: 24, color: ['#ffffff', this.size.col], shape: 'bubble', speed: [30, 160], angle: -Math.PI / 2, spread: 2, size: [1, 3], gravity: -60, emissive: true, life: [0.6, 1.2] }); g.fx.burst(this.x, this.y, PT.cleanGlint);
     g.progress?.gain(8); (g as any).float?.(this.x, this.y0 - 8, '+8 XP', '#8BB8E8');
     if (!g.save.flags['gap-first']) { g.save.flags['gap-first'] = true; g.ui.toast('Gap clean. The right size slides in without forcing: in and out, gently, once for every space.', 5200); }
     g.persist();

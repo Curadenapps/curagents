@@ -3,6 +3,7 @@
 import { TILE } from '../engine/render';
 import { clamp, sign, TAU } from '../engine/math';
 import type { Entity, Faction, Game, Hit, Team } from './types';
+import { particle as PT } from '../design/tokens';
 
 export abstract class Actor implements Entity {
   id = 0; x: number; y: number; hw: number; hh: number; vx = 0; vy = 0;
@@ -89,8 +90,8 @@ export abstract class Enemy extends Actor {
     (this as any).lastHitAt = g.gameTime;
     const k = (1 - this.knockResist) * (hit.heavy ? 1.6 : 1);
     if (k > 0) { this.vx = hit.dirX * 380 * k; if (hit.dirY) this.vy = hit.dirY * 260 * k; this.stun = 0.12 * k; }
-    g.fx.burst(this.x, this.y, { n: 10, speed: [120, 380], angle: Math.atan2(hit.dirY, hit.dirX || 0.001), spread: 1.4, color: this.bloodColor(), size: [1.5, 3.5], gravity: 900, life: [0.25, 0.6] });
-    g.fx.burst(this.x, this.y, { n: 6, speed: [250, 520], angle: Math.atan2(hit.dirY, hit.dirX || 0.001), spread: 0.8, color: '#ffffff', shape: 'streak', size: [1, 2], emissive: true, life: [0.08, 0.18] });
+    g.fx.burst(this.x, this.y, { n: 10, speed: [120, 380], angle: Math.atan2(hit.dirY, hit.dirX || 0.001), spread: 1.4, color: this.bloodColor(), size: [1.5, 3.2], gravity: 900, shape: 'crumb', spin: 8, life: [0.25, 0.6] });
+    g.fx.burst(this.x, this.y, { ...PT.spark, angle: Math.atan2(hit.dirY, hit.dirX || 0.001) });
     g.audio.sfx('hit', { x: this.x, y: this.y });
     if (this.hp <= 0) this.die(g, hit);
     return true;
@@ -101,7 +102,7 @@ export abstract class Enemy extends Actor {
     this.dead = true;
     g.save.killed[this.type] = (g.save.killed[this.type] || 0) + 1;
     g.progress?.onKill(this);
-    g.fx.burst(this.x, this.y, { n: 26, speed: [80, 460], color: this.bloodColor(), size: [2, 5], gravity: 1000, life: [0.4, 1.0], drag: 1.5 });
+    g.fx.burst(this.x, this.y, { n: 26, speed: [80, 460], color: this.bloodColor(), size: [2, 4.5], gravity: 1000, shape: 'crumb', spin: 10, life: [0.4, 1.0], drag: 1.5 });
     g.fx.burst(this.x, this.y, { n: 1, speed: [0, 0], color: '#ffffff', shape: 'ring', size: [6, 6], grow: 260, emissive: true, life: [0.25, 0.25] });
     g.audio.sfx('kill', { x: this.x, y: this.y });
     g.shake(5, 0.15);
@@ -125,7 +126,7 @@ export class Shine extends Actor {
     this.t += dt; const p = g.player, dx = p.x - this.x, dy = p.y - this.y, d = Math.hypot(dx, dy);
     if (this.t > 0.45 && d < 150) { this.collide = false; this.vx += (dx / d) * 2600 * dt; this.vy += (dy / d) * 2600 * dt; this.vx *= 0.94; this.vy *= 0.94; this.x += this.vx * dt; this.y += this.vy * dt; }
     else { const vy = this.vy; this.physics(g, dt); if (this.grounded && vy > 120) this.vy = -vy * 0.45; this.vx *= this.grounded ? 0.86 : 0.995; }
-    if (d < 20 && this.t > 0.3) { this.dead = true; g.save.shine += this.value; g.audio.sfx('shine', { pitch: 0.9 + Math.random() * 0.25, vol: 0.5 }); g.fx.burst(this.x, this.y, { n: 5, color: '#FCE300', emissive: true, size: [1, 2], speed: [40, 120], life: [0.2, 0.4] }); }
+    if (d < 20 && this.t > 0.3) { this.dead = true; g.save.shine += this.value; g.audio.sfx('shine', { pitch: 0.9 + Math.random() * 0.25, vol: 0.5 }); g.fx.burst(this.x, this.y, PT.shine); }
     if (this.t > 20) this.dead = true;
   }
   draw() {}

@@ -1,8 +1,9 @@
 // In-play HUD on its own crisp canvas: enamel shards (health), the fluor vessel, shine, area titles, toasts.
 import type { GameCore } from '../game/game';
 import { TAU, clamp } from '../engine/math';
+import { font as FT } from '../design/tokens';
 
-const FONT = '"Futura LT Pro", Futura, "Century Gothic", sans-serif';
+const FONT = FT.canvas;
 
 export class Hud {
   cv: HTMLCanvasElement; ctx: CanvasRenderingContext2D;

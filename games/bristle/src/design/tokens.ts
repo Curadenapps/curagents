@@ -13,6 +13,12 @@ import { mix } from '../engine/math';
 import { pack } from './brands';
 
 export { pack };
+/** Brand words the game says. `orderShort` is what follows "the": "5,460" or "Thousand Bristles". */
+export const brandText = {
+  name: pack.name, brush: pack.product.brush, order: pack.product.order, orderShort: pack.product.order.replace(/^Order of the /, ''),
+  filaments: pack.product.filaments.toLocaleString('en'), filamentsSpoken: pack.product.filamentsSpoken,
+  credit: `BRISTLE: Knight of the Crown. An original game prototype for ${pack.name}.`,
+};
 
 // ---------------------------------------------------------------------------------------------
 // 1. Brand roots. Two layers:

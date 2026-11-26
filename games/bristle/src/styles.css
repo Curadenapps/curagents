@@ -28,14 +28,14 @@ html, body { height: 100%; margin: 0; background: #000; overflow: hidden; }
 .oath-tree section { display: flex; flex-direction: column; gap: 8px; } .oath-tree section > p { margin: 0 0 4px; font: 14px/1.4 var(--body); color: var(--mist); }
 .perk { text-align: left; font: inherit; color: #E8EEF9; background: rgba(19,43,87,0.55); border: 1px solid rgba(139,184,232,0.18); border-radius: 12px; padding: 9px 13px; display: grid; gap: 4px; cursor: pointer; transition: transform 160ms, border-color 160ms, background 160ms; }
 .perk b { font-weight: 400; font-size: 16px; letter-spacing: 0.06em; } .perk span { font: 14px/1.4 var(--body); color: var(--mist); } .perk em { font-style: normal; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #8BB8E8; }
-.perk.own { background: rgba(0,61,165,0.55); border-color: #8BB8E8; } .perk.own em { color: #FCE300; }
+.perk.own { background: color-mix(in srgb, var(--blue) 55%, transparent); border-color: #8BB8E8; } .perk.own em { color: #FCE300; }
 .perk.can em { color: #ffffff; } .perk.locked { opacity: 0.45; }
 .perk.on { border-color: #ffffff; transform: translateX(4px); box-shadow: 0 0 0 1px #ffffff inset; }
 .oath-mastery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; } .oath-mastery h2 { grid-column: 1 / -1; }
 .oath-mastery .m-head { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; } .oath-mastery .m-head b { font-weight: 400; letter-spacing: 0.08em; } .oath-mastery .m-head span { color: var(--mist); font-size: 12px; }
 .oath-mastery p { margin: 6px 0 0; font: 13px/1.35 var(--body); color: var(--mist); }
 .oath footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; letter-spacing: 0.12em; color: var(--mist); text-transform: uppercase; }
-.oath footer button { font: inherit; letter-spacing: 0.12em; color: #003DA5; background: #ffffff; border: 0; border-radius: 99px; padding: 10px 20px; cursor: pointer; }
+.oath footer button { font: inherit; letter-spacing: 0.12em; color: var(--blue); background: #ffffff; border: 0; border-radius: 99px; padding: 10px 20px; cursor: pointer; }
 @media (max-width: 760px) { .oath-tree, .oath-mastery { grid-template-columns: 1fr; } }
 
 /* ===================================================================== UI (menus, dialogue, shop, ending) */

@@ -5,6 +5,7 @@ import * as Enemies from '../game/enemies/index';
 import { RELICS, BALLAD, BRUSH_COLOURS, kills } from '../game/npc/defs';
 import { voice } from '../game/npc/voice';
 import { h, List, Nav, button, wordmark, sfx, saveSettings, backTap, confirmTap, type Screen, type Item } from './kit';
+import { brandText as BT } from '../design/tokens';
 
 export interface PanelHost { pop(s: Screen): void; push(s: Screen): void }
 
@@ -105,7 +106,7 @@ export function controlsPanel(g: GameCore, host: PanelHost) {
 export function creditsPanel(g: GameCore, host: PanelHost) {
   const body = h('div', { class: 'credits' },
     h('div', { class: 'credits-logo', text: 'BRISTLE' }), h('div', { class: 'credits-sub', text: 'Knight of the Crown' }),
-    h('p', { class: 'credits-line', text: 'BRISTLE: Knight of the Crown. An original game prototype for CURAPROX.' }),
+    h('p', { class: 'credits-line', text: BT.credit }),
     h('dl', { class: 'credits-list' },
       h('dt', { text: 'World' }), h('dd', { text: 'Ivoria, the kingdom inside the Great Smile' }),
       h('dt', { text: 'Art' }), h('dd', { text: 'Every shape drawn in code. No image files.' }),
@@ -154,7 +155,7 @@ export class FieldNotes implements Screen {
     const colour = BRUSH_COLOURS.find((c) => c.id === String(g.flag('brush-colour') ?? 'blue')) ?? BRUSH_COLOURS[0];
     return h('div', { class: 'stats' },
       this.stat('Enamel', `${g.player?.hp ?? s.hp} / ${s.maxHp}`, 'shards of health'),
-      this.stat('Brush-blade', blade ? `Bristle Edge ${blade === 1 ? 'I' : 'II'}` : 'Standard tuft', 'CURAPROX, 5,460 filaments'),
+      this.stat('Brush-blade', blade ? `Bristle Edge ${blade === 1 ? 'I' : 'II'}` : 'Standard tuft', `${BT.name}, ${BT.filaments} filaments`),
       this.stat('Paste', g.flag('paste') ? 'Paste Tube' : 'Standard', g.flag('paste') ? 'throws cost less fluor' : 'thrown with spell'),
       this.stat('Colourway', colour.name),
       this.stat('Shine', String(s.shine)),
@@ -191,7 +192,7 @@ export class FieldNotes implements Screen {
       h('span', { class: 'beast-name', text: n ? e.name : '???' }), h('span', { class: 'beast-count', text: n ? '× ' + n : '' }),
       h('span', { class: 'beast-blurb', text: n ? e.blurb ?? '' : 'Sweep one to learn more.' })); }));
   }
-  pages() { return h('div', { class: 'ballad' }, h('h3', { text: 'Ballad of the 5,460' }), ...BALLAD.map((l) => h('p', { text: l })), h('p', { class: 'ballad-sign', text: 'copied out by Pip, from memory' })); }
+  pages() { return h('div', { class: 'ballad' }, h('h3', { text: `Ballad of the ${BT.orderShort}` }), ...BALLAD.map((l) => h('p', { text: l })), h('p', { class: 'ballad-sign', text: 'copied out by Pip, from memory' })); }
   close() { sfx.back(this.g); this.host.pop(this); }
   update(dt: number) {
     const inp = this.g.input, { dx, dy } = this.nav.read(inp, dt);

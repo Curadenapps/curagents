@@ -4,6 +4,7 @@ import { Enemy } from '../entity';
 import { TAU, clamp, damp } from '../../engine/math';
 import type { Game, Hit } from '../types';
 import type { BurstOpts } from '../../engine/particles';
+import { particle as PT } from '../../design/tokens';
 
 export const PAL = {
   yellow: '#FCE300', yellowSoft: '#F4DC4A', plaque: '#E9CF2E', plaqueDk: '#B89A1A', citrus: '#C4D600', orange: '#FF8200', tangerine: '#FFA040',
@@ -213,8 +214,8 @@ export abstract class Creature extends Enemy {
       if (hit.dirY) { this.sy = 0.7; this.sx = 1.3; } else { this.sx = 0.72; this.sy = 1.22; }
       this.jitter = 0.12;
       const ang = Math.atan2(hit.dirY, hit.dirX || 0.001);
-      g.fx.burst(this.x, this.y, { n: 10, speed: [120, 380], angle: ang, spread: 1.4, color: this.bloodColor(), size: [1.5, 3.5], gravity: 900, life: [0.25, 0.6] });
-      g.fx.burst(this.x, this.y, { n: 6, speed: [250, 520], angle: ang, spread: 0.8, color: '#ffffff', shape: 'streak', size: [1, 2], emissive: true, life: [0.08, 0.18] });
+      g.fx.burst(this.x, this.y, { n: 10, speed: [120, 380], angle: ang, spread: 1.4, color: this.bloodColor(), size: [1.5, 3.2], gravity: 900, shape: 'crumb', spin: 8, life: [0.25, 0.6] });
+      g.fx.burst(this.x, this.y, { ...PT.spark, angle: ang });
     }
     if (hit.kind === 'spell') this.pasted(g, hit, tick);
     else g.audio.sfx('hit', { x: this.x, y: this.y });
@@ -249,7 +250,7 @@ export abstract class Creature extends Enemy {
     this.dead = true;
     g.save.killed[this.type] = (g.save.killed[this.type] || 0) + 1;
     const c = this.bloodColor();
-    g.fx.burst(this.x, this.y, { n: 26, speed: [80, 460], color: c, size: [2, 5], gravity: 1000, life: [0.4, 1.0], drag: 1.5 });
+    g.fx.burst(this.x, this.y, { ...PT.plaqueBurst, color: c }); g.fx.burst(this.x, this.y, PT.rinseAway); g.fx.burst(this.x, this.y - 6, PT.cleanGlint);
     g.fx.burst(this.x, this.y, { n: 1, speed: [0, 0], color: '#ffffff', shape: 'ring', size: [6, 6], grow: 260, emissive: true, life: [0.25, 0.25] });
     g.fx.burst(this.x, this.y, { n: 10, speed: [40, 200], color: Array.isArray(c) ? c[0] : c, size: [1, 2.5], emissive: true, life: [0.3, 0.7], drag: 2 });
     this.deathBurst(g);

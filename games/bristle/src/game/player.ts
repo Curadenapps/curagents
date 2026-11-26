@@ -4,10 +4,11 @@ import { Actor, Projectile } from './entity';
 import { TILE } from '../engine/render';
 import { approach, clamp, damp, sign, TAU, lerp } from '../engine/math';
 import type { Game, PlayerApi, Hit, HitKind } from './types';
+import { brand as BR, particle as PT } from '../design/tokens';
 
-export const C = { blue: '#003DA5', blueDk: '#002E7D', blue80: '#3364B7', blue60: '#668BC9', sky: '#8BB8E8', white: '#FFFFFF', enamel: '#F3F6FC', enamelShade: '#C7D3EA', ink: '#0A1F44', ink2: '#132B57', cerise: '#E31C79', yellow: '#FCE300', orange: '#FF8200', orchid: '#F277C6', lime: '#C4D600' };
+export const C = { blue: BR.blue, blueDk: BR.blueDark, blue80: BR.blue80, blue60: BR.blue60, sky: '#8BB8E8', white: '#FFFFFF', enamel: '#F3F6FC', enamelShade: '#C7D3EA', ink: '#0A1F44', ink2: '#132B57', cerise: BR.cerise, yellow: '#FCE300', orange: '#FF8200', orchid: '#F277C6', lime: '#C4D600' };
 
-export const BRUSH: Record<string, string> = { cerise: '#E31C79', blue: '#3364B7', lime: '#C4D600', orange: '#FF8200', sky: '#8BB8E8' };
+export const BRUSH: Record<string, string> = { cerise: BR.cerise, blue: BR.blue80, lime: '#C4D600', orange: '#FF8200', sky: '#8BB8E8' };
 const brushColour = (g: Game) => BRUSH[String(g.save.flags['brush-colour'] ?? 'cerise')] ?? BRUSH.cerise;
 
 const RUN = 300, ACC_G = 5200, ACC_A = 3400, JUMP_V = 830, GRAV_UP = 2500, GRAV_DOWN = 3100, MAX_FALL = 820;
@@ -55,7 +56,7 @@ export class Player extends Actor implements PlayerApi {
     this.hp -= dmg; this.invuln = (g as any).diff?.invuln ?? 1.3; this.charge = 0; this.hurtT = 0.24; this.slash = null; this.focusT = 0; this.dashT = 0; this.dashing = false;
     const dir = sign(this.x - fromX) || -this.facing; this.vx = dir * 340; this.vy = -430;
     g.hitstop(0.14); g.shake(11, 0.32); g.flash([1, 1, 1], 0.4); g.slowmo(0.35, 0.28); g.audio.sfx('hurt');
-    g.fx.burst(this.x, this.y, { n: 18, color: [C.enamel, C.sky, C.ink2], speed: [150, 420], size: [1.5, 4], gravity: 900, life: [0.3, 0.8], shape: 'square', spin: 20 });
+    g.fx.burst(this.x, this.y, PT.hurtShards);
     g.fx.burst(this.x, this.y, { n: 1, color: '#ffffff', shape: 'ring', size: [8, 8], grow: 420, emissive: true, life: [0.3, 0.3] });
     if (kind === 'hazard') { this.hazardT = 0; this.invuln = 1.6; }
     if (this.hp <= 0) { this.hp = 0; this.deadT = 0; g.slowmo(0.25, 0.8); g.audio.sfx('death'); }
@@ -100,7 +101,7 @@ export class Player extends Actor implements PlayerApi {
         inp.consume('dash'); if (this.wallSlide) this.facing = -this.wallSlide as 1 | -1; else if (ax) this.facing = sign(ax) as 1 | -1;
         this.dashT = DASH_T; this.dashing = true; this.invuln = Math.max(this.invuln, 0.12); this.charge = 0; this.dashCd = DASH_CD * (perk('i1') ? 0.65 : 1); this.vx = this.facing * DASH_V; this.vy = 0; this.slash = null; this.focusT = 0; this.dashHits.clear();
         if (!this.grounded) { this.airDashes--; if (this.airDashes <= 0) this.airDash = false; } this.sx = 1.35; this.sy = 0.7;
-        g.audio.sfx('dash'); g.fx.burst(this.x, this.y + 12, { n: 8, color: '#9fb4d9', speed: [40, 160], angle: this.facing > 0 ? Math.PI : 0, spread: 1.2, size: [2, 5], life: [0.3, 0.6], grow: 6 });
+        g.audio.sfx('dash'); g.fx.burst(this.x, this.y + 12, { ...PT.dashPuff, angle: this.facing > 0 ? Math.PI : 0 });
       }
     }
 
@@ -170,7 +171,7 @@ export class Player extends Actor implements PlayerApi {
       g.fx.burst(this.x + Math.cos(a) * r, this.y + Math.sin(a) * r, { n: 1, color: [C.sky, C.white], vx: -Math.cos(a) * r * 2.2, vy: -Math.sin(a) * r * 2.2, speed: [0, 0], drag: 0, emissive: true, size: [1, 2], life: [0.4, 0.45], shape: 'streak' });
       if (this.focusT >= FOCUS_T * (perk('c2') ? 0.78 : 1) * (this.inflamed > 0 ? 1.45 : 1) * ((g as any).diff?.focus ?? 1)) {
         this.focusT = 0.0001; this.fluor -= FOCUS_COST; this.heal(1); g.audio.sfx('heal'); g.flash([0.7, 0.85, 1], 0.18);
-        g.fx.burst(this.x, this.y, { n: 24, color: [C.sky, C.white], speed: [80, 260], emissive: true, size: [1, 2.5], life: [0.3, 0.7] });
+        g.fx.burst(this.x, this.y, PT.heal);
       }
     } else this.focusT = 0;
 
@@ -199,7 +200,7 @@ export class Player extends Actor implements PlayerApi {
     if (vy > 300) { g.audio.sfx('land', { vol: k }); this.dust(g, 4 + Math.round(k * 8)); }
     if (vy > 780) g.shake(3, 0.1);
   }
-  dust(g: Game, n: number) { g.fx.burst(this.x, this.y + this.hh - 2, { n, color: ['#a7b6d6', '#7e8fb7'], speed: [30, 140], angle: -Math.PI / 2, spread: 2.6, size: [2, 4.5], grow: 5, gravity: -60, drag: 4, life: [0.3, 0.6] }); }
+  dust(g: Game, n: number) { g.fx.burst(this.x, this.y + this.hh - 2, { ...PT.dust, n }); }
   /** Down + jump on a ledge drops through it, so don't crouch while jump is held on one. */
   onLedgeDrop(g: Game) { return this.onLedge(g) && g.input.held('jump'); }
   /** Is there room to stand up (42 units tall) from a crouch? */
@@ -240,9 +241,9 @@ export class Player extends Actor implements PlayerApi {
       const c = r.at(tx, ty), k = ty * 10000 + tx;
       if (c === 'P' && !s.cells.has(k)) {
         s.cells.add(k); const cx = (tx + 0.5) * TILE, cy = (ty + 0.5) * TILE; g.hitstop(0.03); g.shake(2, 0.08); this.gainFluor(3);
-        g.fx.burst(cx, cy, { n: 12, color: [C.yellow, C.lime, C.orange], speed: [80, 300], size: [2, 4.5], gravity: 900, life: [0.3, 0.7] });
+        g.fx.burst(cx, cy, PT.plaqueSplat);
         g.audio.sfx('scrub', { x: cx, y: cy });
-        if (r.scrub(tx, ty)) { g.dropShine(cx, cy, 2); g.fx.burst(cx, cy, { n: 20, color: [C.yellow, C.orange], speed: [60, 340], size: [2, 5], gravity: 1000, life: [0.5, 1] }); g.audio.sfx('break'); }
+        if (r.scrub(tx, ty)) { g.dropShine(cx, cy, 2); g.fx.burst(cx, cy, { ...PT.plaqueBurst, n: 20 }); g.fx.burst(cx, cy, PT.rinseAway); g.audio.sfx('break'); }
         if (s.dir === 'side') { this.vx = -this.facing * 200; this.recoilT = 0.06; }
         if (s.dir === 'down') this.bounce(0.9);
       }

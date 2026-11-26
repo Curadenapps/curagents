@@ -2,6 +2,7 @@
 // the conversation scripts drive the dialogue box through the TalkHost the UI provides.
 import type { GameCore } from '../game';
 import { PERSONAS, type VoiceState } from '../../../server/personas.mjs';
+import { brand as BR, brandText as BT } from '../../design/tokens';
 
 type Cond = (g: GameCore) => boolean;
 interface Line { text: string | ((g: GameCore) => string); when?: Cond }
@@ -20,7 +21,7 @@ export const RELICS: { id: keyof GameCore['save']['abilities']; name: string; te
 ];
 
 export const BRUSH_COLOURS: { id: string; name: string; hex: string }[] = [
-  { id: 'blue', name: 'Curaprox Blue', hex: '#003DA5' },
+  { id: 'blue', name: BT.name + ' primary', hex: BR.blue },
   { id: 'cerise', name: 'Cerise', hex: '#E31C79' },
   { id: 'lime', name: 'Lime', hex: '#C4D600' },
   { id: 'orange', name: 'Tangerine', hex: '#FF8200' },
@@ -34,7 +35,7 @@ const SCRIPTS: Record<string, Script> = {
     first: [
       'Easy now. You have been asleep a long time, knight. Long enough for the Film to move in and get comfortable.',
       'I am Derek. I keep the fountain here at the Gate, and I talk to it more than I would like to admit.',
-      'That is a CURAPROX blade in your hand. Five thousand four hundred and sixty filaments, one for each oath of the Order. Hold it like you mean it.',
+      `That is a ${BT.name} blade in your hand. ${BT.filamentsSpoken} filaments, one for each oath of the Order. Hold it like you mean it.`,
       'The Film starts soft: leftover sugar, given time and nobody to sweep it. Left long enough, it hardens into tartar, and tartar holds a grudge.',
       'Rest at the fountains when you find them. They mend you, and they remember you. A sensible knight rests at one twice a day, at least.',
       'The way on is down, through the Gumline Hollows. Follow the warm light, not the yellow one.',
@@ -55,7 +56,7 @@ const SCRIPTS: Record<string, Script> = {
       { text: 'New colour on the handle. The Film will not notice. I did.', when: (g) => !!g.flag('brush-colour') && g.flag('brush-colour') !== 'blue' },
       { text: 'The towers used to sing when the light hit them. Give them a reason to sing again.', when: notBoss },
       { text: 'The fountain water is free. Everything else in Ivoria costs shine, mostly to Pip.' },
-      { text: 'A CURAPROX blade, 5,460 filaments, the Order\'s oath. Every one of them still standing. Unlike my knees.' },
+      { text: `A ${BT.name} blade, ${BT.filaments} filaments, the Order's oath. Every one of them still standing. Unlike my knees.` },
       { text: 'Mother Calculus, gone. I shall have to find something else to worry about. I am sure I will manage.', when: boss },
       { text: 'The air is lighter now. I can hear the enamel ringing all the way down the Gate.', when: boss },
     ],
@@ -252,7 +253,7 @@ export const WARES: Ware[] = [
     price: (g) => (ownedColours(g).includes(BRUSH_COLOURS[colourIndex.v].id) ? 0 : 60),
     owned: (g) => String(g.flag('brush-colour') ?? 'blue') === BRUSH_COLOURS[colourIndex.v].id,
     buy: (g) => { const c = BRUSH_COLOURS[colourIndex.v].id, own = ownedColours(g); if (!own.includes(c)) own.push(c); g.setFlag('brush-colours-owned', own.join(',')); g.setFlag('brush-colour', c); } },
-  { id: 'ballad', name: 'Ballad of the 5,460', icon: 'scroll', blurb: 'An old song of the Order, copied out by Pip. You can read it in your field notes.', pip: 'Pip wrote it down from memory! Some of the words are even the right ones.',
+  { id: 'ballad', name: `Ballad of the ${BT.orderShort}`, icon: 'scroll', blurb: 'An old song of the Order, copied out by Pip. You can read it in your field notes.', pip: 'Pip wrote it down from memory! Some of the words are even the right ones.',
     price: () => 40, owned: (g) => !!g.flag('lore-ballad'), buy: (g) => g.setFlag('lore-ballad', true) },
 ];
 export const colourOwned = (g: GameCore, id: string) => ownedColours(g).includes(id);
