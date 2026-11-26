@@ -621,7 +621,7 @@ function knightSentinel(ctx: Ctx, mode: KMode) {
 }
 
 // E. Squire Knight: stout and bouncy, caught mid-hop. A big round two-cusp helm (today's, grown up) with a raised visor
-//    lid over two glowing eye slits, a short flared cape, the brush wound up overhead, the back arm out for balance.
+//    lid over two glowing eye slits, a short flared cape, and two brushes: one wound up overhead, one low behind.
 const SQUIRE_EYES = (() => { const p = new Path2D(); p.roundRect(1.5, -46, 2.6, 4.4, 1.3); p.roundRect(6.4, -46.2, 2.6, 4.4, 1.3); return p; })();
 function knightSquire(ctx: Ctx, mode: KMode) {
   const pr = B.blue, dk = B.blueDark;
@@ -639,6 +639,7 @@ function knightSquire(ctx: Ctx, mode: KMode) {
   ctx.fillStyle = B.ink; ctx.fillRect(-8, -22.4, 16, 2.4); crownCap(ctx, 0, -20.2, 5, { cusps: 3 });
   // back arm out for balance, front arm raises the brush overhead
   ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.6; ctx.beginPath(); ctx.moveTo(-6, -32); ctx.quadraticCurveTo(-12, -32, -15, -27); ctx.stroke();
+  brush(ctx, -15, -27, 30, { angle: 2.35, handle: B.cerise }); // the second brush, low and back
   plate(ctx, fnPath((p) => p.roundRect(-18, -29.5, 5.4, 5.2, 1.8)), { base: KE.shade, shade: KE.deep, sx: -15, sy: -29, sr: 3 });
   brush(ctx, 12, -40, 34, { angle: -2.5, handle: pr });
   ctx.strokeStyle = KE.cloth; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(6, -32); ctx.quadraticCurveTo(12, -36, 12, -41); ctx.stroke();
@@ -652,9 +653,22 @@ function knightSquire(ctx: Ctx, mode: KMode) {
   ctx.fillStyle = mix(B.ink, '#FFFFFF', 0.3); ctx.fill(SQUIRE_EYES);
 }
 
-// F. Duelist: lean, in a fencing lunge. A sleek elongated helm with a long bristle horsetail down the back, one shoulder
-//    plate on the back shoulder, a half cape off that shoulder, and two brushes: one thrust forward like a rapier, one
-//    raised behind to parry (the off-hand brush in the accent colour).
+/** A tongue cleaner as a crescent glaive: a thick translucent arc with rounded tips and a grip at its middle. */
+function crescent(ctx: Ctx, x: number, y: number, r: number, angle: number) {
+  const col = '#F6A5CB', shade = '#D95A9E', a0 = -1.7, a1 = 1.7;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+  const arc = fnPath((p) => { p.arc(0, 0, r, a0, a1); p.arc(0, 0, r * 0.68, a1, a0, true); p.closePath(); });
+  ctx.globalAlpha = 0.88; ctx.fillStyle = col; ctx.fill(arc); ctx.globalAlpha = 1;
+  ctx.save(); ctx.clip(arc); ctx.fillStyle = shade; ctx.globalAlpha = 0.5; ctx.beginPath(); ctx.arc(-r * 0.15, 0, r * 0.95, 0, TAU); ctx.arc(-r * 0.3, 0, r * 1.2, 0, TAU, true); ctx.fill('evenodd'); ctx.restore();
+  ctx.strokeStyle = shade; ctx.lineWidth = 0.8; ctx.stroke(arc);
+  for (const t of [a0, a1]) { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(Math.cos(t) * r * 0.84, Math.sin(t) * r * 0.84, r * 0.17, 0, TAU); ctx.fill(); }
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, r * 0.9, -0.9, -0.2); ctx.stroke();
+  ctx.fillStyle = B.blue; ctx.beginPath(); ctx.roundRect(-r * 1.05, -2.2, r * 0.42, 4.4, 2); ctx.fill(); // grip wrap where the hand holds it
+  ctx.restore();
+}
+
+// F. Crescent: lean, in a lunge. A sleek elongated helm with a long bristle horsetail down the back, one shoulder
+//    plate on the back shoulder, a half cape off that shoulder, and a tongue cleaner held like a crescent glaive.
 const DUELIST_SLIT = poly([1.5, -50, 11.5, -50, 11.5, -48.4, 6.8, -48.4, 6.8, -44.6, 5.4, -44.6, 5.4, -48.4, 1.5, -48.4]);
 function knightDuelist(ctx: Ctx, mode: KMode) {
   const pr = B.blue, dk = B.blueDark;
@@ -673,9 +687,8 @@ function knightDuelist(ctx: Ctx, mode: KMode) {
   ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-6, -27, 12, 1.4); ctx.fillStyle = B.ink; ctx.fillRect(-6.6, -21.4, 13.2, 2.2);
   plate(ctx, fnPath((p) => { p.moveTo(-10.5, -33); p.quadraticCurveTo(-11, -40.5, -5, -40.5); p.quadraticCurveTo(-1, -40.5, -1.5, -36); p.quadraticCurveTo(-4, -32, -10.5, -33); }), { base: KE.shade, shade: KE.deep, sx: -6, sy: -38, sr: 5 });
   ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(-5, -36); ctx.quadraticCurveTo(-11, -39, -13, -44); ctx.stroke();
-  brush(ctx, -13, -45, 34, { angle: -2.55, handle: B.cerise }); // the second brush, raised behind to parry
   plate(ctx, fnPath((p) => p.roundRect(-15.6, -47.5, 5, 5, 1.8)), { base: KE.shade, shade: KE.deep, sx: -13, sy: -47, sr: 3 });
-  brush(ctx, 20, -32.5, 42, { angle: 0.04, handle: pr });
+  crescent(ctx, 23, -37, 12, -0.35);
   ctx.strokeStyle = KE.cloth; ctx.lineWidth = 3.8; ctx.beginPath(); ctx.moveTo(4.5, -35.5); ctx.quadraticCurveTo(12, -35, 19, -33); ctx.stroke();
   plate(ctx, fnPath((p) => p.roundRect(17.4, -35.5, 5.6, 5.2, 1.9)), { sx: 20, sy: -35, sr: 3.4 });
   ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(1, -39, 6.6, 1.8, 0, 0, TAU); ctx.fill();
@@ -704,8 +717,8 @@ function heroOptions() {
     ['B', 'Ranger', knightRanger, 'The archer of the Order, built around the interdental bow. A swept canine-tooth sallet with an angled slit, a short hooded mantle lined in gum pink, a bandolier and quiver of colour-coded refills, tall boots, and the ring holder raised to shoot.', 'Most original silhouette and the best fit for the shot mechanic. The slimmest build, so it needs strong poses to feel heroic.'],
     ['C', 'Bulwark', knightBulwark, 'The shield of the Order. Short and broad, with a flat-cusped molar helm and a visor of glowing bristle bars. Molar-cusp shoulder plates, a round shield in the brand colour with the crown on it, and the brush-blade slung across the back.', 'Reads instantly at 1 tile and feels sturdy and safe. The heaviest look, so it moves slower and plays less nimbly than today.'],
     ['D', 'Sentinel', knightSentinel, 'Tall and calm. Long legs, a long brand tabard to the knee, a wide-brimmed crown helm with three tall cusps (the slit sits in the shadow of the brim), one round shoulder plate, and the brush carried upright like a spear.', 'The most noble silhouette and the easiest to read from far away. The tallest, so low gaps and crawling need care.'],
-    ['E', 'Squire Knight', knightSquire, 'Stout and bouncy, caught mid-hop: the round two-cusp helm of today, grown up, its visor lid raised over two glowing eye slits, a short flared cape, the brush wound up overhead and the back arm out for balance.', 'The most lively and closest to a young audience while staying a knight. The eye slits read as a face, so keep them small.'],
-    ['F', 'Duelist', knightDuelist, 'Lean, in a fencing lunge. A sleek long helm with a horsetail of bristles from the crest, one plate on the back shoulder, a half cape off it, and two brushes: one thrust forward like a rapier, one raised behind to parry.', 'The most agile and the best fit for precise, quick slashes. The lightest look, so it needs strong animation to feel heroic.'],
+    ['E', 'Squire Knight', knightSquire, 'Stout and bouncy, caught mid-hop: the round two-cusp helm of today, grown up, its visor lid raised over two glowing eye slits, a short flared cape, and two brushes: one wound up overhead, one held low behind for the follow-up.', 'The most lively and closest to a young audience while staying a knight. The eye slits read as a face, so keep them small.'],
+    ['F', 'Crescent', knightDuelist, 'Lean, in a lunge. A sleek long helm with a horsetail of bristles from the crest, one plate on the back shoulder, a half cape off it. Fights with a tongue cleaner held like a crescent glaive: wide sweeping arcs, and it can be thrown and caught again.', 'The most original weapon, and a product many players have never used, so it teaches something. Needs its own throw-and-return move; product shape and name are placeholders until the brand team checks them.'],
   ];
   return `<section id="options">${head(8, 'Hero options', 'Six deviations of today\'s knight. The crown helm and visor glow stay; there is no face. Each one fixes the body (knight proportions, about 2.5-3 heads tall instead of 1.6, real armour) and gives the helm its own silhouette, with dental gear in place of borrowed shapes. Large figure for the look, small one at 1 tile for the read in game. Sketches, not final art.')}
   <div class="grid" style="grid-template-columns:0.7fr 1fr 1fr 1fr;gap:18px">
