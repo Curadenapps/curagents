@@ -268,6 +268,15 @@ item has a screenshot or file, the triage task says so in its first line
 ("📎 Screenshot in the chat: attach before moving to In Development") with the message
 link, since the Asana connector can't upload files.
 
+**No Jira on creation (26 Nov).** Jira tickets come only from Asana's rule on a move to
+**In Development**; a new Webex inbox task must never get one. At the end of the run,
+re-read each triage task created this run: if Asana attached a `BA-` issue while the
+task is still in Webex inbox, the BOB App rule is firing on task creation again (it did
+on 26 Nov, BA-346). Then create no more triage tasks this run, log `partial` with
+"Asana rule made {BA-key} on task creation", and write one Inbox row (Source `agent`,
+P1) asking Sean to check the BOB App Jira rule and delete the ticket. The items still
+go into the Notion Inbox log.
+
 **Keep the log in step:** each run, for every log row with Status `pushed` and an
 `Asana link`, read the task: **completed → Status `done`** (wherever it was completed,
 so Sean sees what got closed); deleted or not found → `skip`; moved to In Development →
