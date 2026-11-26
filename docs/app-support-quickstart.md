@@ -232,9 +232,9 @@ bob-admin CLI on Fabian's own BOB Admin sign-in. What a run does:
 - **Folder:** the `curagents` folder
 - **Schedule:** Monday to Friday at 08:50, 12:50 and 16:50 (cron
   `50 8,12,16 * * 1-5`, local time)
-- **Agent registry:** a row with Started by "Practice approvals (Fabian)", Account
-  `Fabian`, Where PC, Spec `skills/bob-admin/SKILL.md`, Run log name
-  `practice-approvals` (Sean adds it; until then each run logs `no-op`)
+- **Agent registry:** the row "Practice approvals (Fabian)" is already there (26 Nov),
+  Account `Fabian`. Set it to `Paused` to stop automatic approvals. Run-log rows use
+  Agent `other` with Run `practice-approvals {date time}`
 - **Prompt:**
 
 > Account: Fabian. In my curagents folder run `git fetch origin main`. If the
@@ -266,8 +266,8 @@ day does the work.
   environment and key as "App Support (Fabian)"
 - **Model:** Claude Sonnet
 - **Schedule:** weekdays at 07:45 Zurich. Routines use UTC: `45 6 * * 1-5`
-- **Agent registry:** a row with Started by "Orchestrator daily (Fabian)", Account
-  `Fabian`, Where Cloud, Spec `agents/orchestrator.md` §8, Run log name `orchestrator`
+- **Agent registry:** the row "Orchestrator daily (Fabian)" is already there (26 Nov),
+  Account `Fabian`. Run-log rows use Agent `other` with Run `orchestrator {date time}`
 - **Prompt:**
 
 > Account: Fabian. Fetch `Curadenapps/curagents` and read every file from

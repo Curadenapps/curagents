@@ -50,10 +50,14 @@ twice turned into an Asana conversation.
   ticked subtask is the OK to move it. It has to work from several instances (Sean,
   26 Nov), so the first run of the day does the work and the others stop. It runs as
   Fabian's Routine "Orchestrator daily (Fabian)"; a Curaden copy is an optional backup.
-- **Open (Fabian, with Sean for the registry):** quickstart sections 4 (practice
-  approvals: install, prod sign-in, `BOB_ADMIN_AUTO_APPROVE`, the PC task) and 5 (the
-  orchestrator Routine), plus Agent registry rows "Practice approvals (Fabian)" and
-  "Orchestrator daily (Fabian)" with Account `Fabian`. Training date and IDB fields are
+- **Agent registry rows added 26 Nov:** "Practice approvals (Fabian)"
+  (`4247e8aabbb481b09d9ac5793e51c3fa`) and "Orchestrator daily (Fabian)"
+  (`4247e8aabbb481449f42d5a28b475b85`), both Account `Fabian`, Run log name `other`
+  (the run log's Agent select has no `orchestrator` or `practice-approvals` option yet).
+  They have no runs until Fabian sets them up, so the run-log check may call them
+  missed once.
+- **Open (Fabian):** quickstart sections 4 (practice approvals: install, prod
+  sign-in, `BOB_ADMIN_AUTO_APPROVE`, the PC task) and 5 (the orchestrator Routine). Training date and IDB fields are
   placeholders until Phinamic moves that checklist after approval (BA-324). The
   old BOB App task "Practice validation after sign-up: agree the approval logic with
   Suncica" (1220306765390995, In Development) is superseded by 1220905863349438: the

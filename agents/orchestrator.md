@@ -396,8 +396,9 @@ board's replies and columns), roadmap-watch and the practice approvals run.
 1. **First of the day?** The switch (`RUNTIME.md`): find the registry row whose
    Started by names this Routine or task; Account `Paused` or another account → log
    `no-op` and stop. Then read the Agent run log (Fabian: the API query on the run
-   log data source; others: view mode) for an `orchestrator` row from today (Zurich)
-   with Outcome `ok` or `no-op` (a `failed` row doesn't count: try again). One exists →
+   log data source; others: view mode) for a row from today (Zurich) whose Run starts
+   with `orchestrator ` (Agent is `other` until the select gets an `orchestrator`
+   option) and whose Outcome is `ok` or `no-op` (a `failed` row doesn't count: try again). One exists →
    another instance already did today's run: stop at once, no row. Then read `dream.md` §2–3. Two instances starting in the
    same minute is harmless: a move made twice lands in the same column, and step 3
    searches before it adds anything.
