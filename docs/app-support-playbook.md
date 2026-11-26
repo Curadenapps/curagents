@@ -36,7 +36,7 @@
 5. Each coach gets "Your temporary BOB App password" from support@bobscore.com and has to change it at first login.
 
 Points to repeat when they come up:
-- **The Main BOB User gets no app login** unless they also add themselves as a coach in step 3 of the form.
+- **The main contact (step 2) gets access to BOB** as coach or Practice Admin, so they don't add themselves again. **Step 3 is only for adding colleagues** who will use BOB too (Sean, 26 Nov 2026; the older "add yourself as a coach in step 3" advice was wrong).
 - **Country not in the list:** choose "Other countries" and submit anyway, and the team gets in touch.
 - **No email after 24 hours:** check spam first, then check the address entered. Password emails bounce silently on a mistyped address, which is a known issue (Derek is checking it).
 - **Demos and practice:** use anonymous sessions ("Skip & start anonymous session"), so nobody needs a fake patient.
@@ -82,7 +82,7 @@ Japan's clinics are a point of treatment and a point of sale, and they want to k
 - In-clinic purchases **can't be tracked automatically**, because they happen offline, by word of mouth at the chair.
 - **Proposal:** the clinician, or someone in the Admin Console, marks after the BOB that the patient "took on the recommendation", meaning they bought it.
 - Ask about their workflow: who recommends, who sells, when in the visit, and who would mark it.
-- Offer a call, and ideally a visit to see it in a clinic. Japan's needs are very different from other markets.
+- Ask them to write down their workflow in the reply; don't offer a call or meeting (no calls anywhere, Sean 25 Nov 2026). Japan's needs are very different from other markets.
 
 ### F. Someone asks for a presentation or KPI deck
 - **The board presentation (with the KPI slides) is internal and is never shared.**
@@ -116,7 +116,7 @@ Sean rejected the long version.
 >
 > You can register here: https://curaprox-apps.com/contact-form
 >
-> The form has four short steps. Please add yourself as a coach in step 3 as well, since that's what gives you a login for the app. If your country isn't in the list, choose "Other countries" and submit it anyway.
+> The form has four short steps. Step 2 is you, the main contact: you get access to BOB with that email. Step 3 is only for adding colleagues who will use BOB too. If your country isn't in the list, choose "Other countries" and submit it anyway.
 >
 > After you submit, you'll get a confirmation email saying the registration is under review. This first email has no login details in it. Once approved, a second email follows with your credentials, which can take up to 24 hours (please check your spam folder first if nothing arrives).
 >
@@ -217,7 +217,7 @@ person is, and links the BOB Academy page "Partner onboarding: BOB setup and tra
 | The password email bounces on a wrong address, and nobody is notified | Ask them to check the address they registered with, then Sean resends | Derek (Phinamic) is checking it |
 | Practices wait days for approval (the local partner doesn't respond) | "We're on it." Automatic approval is being built | Derek and Khanh |
 | The acknowledgement email is mistaken for the login | The login comes in a second email after approval | |
-| The Main BOB User has no login | They need to be added as a coach | |
+| The main contact thinks they need to be added as a coach | No: step 2 (main contact) already gets access; step 3 is for colleagues | Fixed in the docs 26 Nov 2026 |
 | The FAQ says to search "BOB Score" | Send the direct store links instead | FAQ and Webflow need fixing |
 | Two different support emails in the docs | Settled 12 Nov: info@bobscore.com (BOB) and curaden.apps@curaden.ch (Curaprox app). Docs that still say support@ or info@curaprox.app need fixing | Sean (website, FAQ) |
 | The Approve button needs a training date first (an old checklist item) | This is internal. Don't mention it to practices | Proposed to move it after approval |
