@@ -623,17 +623,23 @@ function knightSentinel(ctx: Ctx, mode: KMode) {
   ctx.fillStyle = B.ink; ctx.fill(SENTINEL_SLIT);
 }
 
-/** A single-tuft brush as a short sword: slim coloured handle, a clear neck and one tapered tuft for the point. */
-function singleTuft(ctx: Ctx, x: number, y: number, len: number, angle: number, col: string) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
-  const h = len * 0.56, n = len * 0.22, t = len * 0.22;
-  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(0, -1.9, h, 3.8, 1.9); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.fillRect(1.5, -1.4, h - 3, 0.9);
-  ctx.fillStyle = 'rgba(230,240,255,0.85)'; ctx.beginPath(); ctx.moveTo(h, -1.4); ctx.lineTo(h + n, -0.9); ctx.lineTo(h + n, 0.9); ctx.lineTo(h, 1.4); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(h + n - 0.5, -1.6, 2.4, 3.2, 1); ctx.fill();
-  // the tuft: a tight bundle tapering to a soft point
-  ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(h + n + 1.6, -3.4); ctx.quadraticCurveTo(h + n + t * 0.75, -2.8, h + n + t + 1.6, 0); ctx.quadraticCurveTo(h + n + t * 0.75, 2.8, h + n + 1.6, 3.4); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = '#D2DDEB'; ctx.lineWidth = 0.5; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(h + n + 2, i * 1.1); ctx.lineTo(h + n + t, i * 0.3); ctx.stroke(); }
+/** The angled single-tuft brush (CS single, after the product photo): a long faceted handle that widens toward the
+ *  end, a bend near the top, a short angled head and a small round tuft in a contrasting colour. (x, y) = handle end. */
+function singleTuft(ctx: Ctx, x: number, y: number, len: number, angle: number, col: string, tuft = '#D8F24A') {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const shaft = len * 0.82, head = len * 0.16, lite = mix(col, '#FFFFFF', 0.35), dark = mix(col, '#000000', 0.25);
+  // handle: widest at the end, narrowing up the shaft
+  ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, -2.6); ctx.lineTo(shaft * 0.35, -2.2); ctx.lineTo(shaft, -1.2); ctx.lineTo(shaft, 1.2); ctx.lineTo(shaft * 0.35, 2.2); ctx.lineTo(0, 2.6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = lite; ctx.beginPath(); ctx.moveTo(1, -2); ctx.lineTo(shaft * 0.95, -1); ctx.lineTo(shaft * 0.95, -0.4); ctx.lineTo(1, -1); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = dark; ctx.beginPath(); ctx.moveTo(1, 2); ctx.lineTo(shaft * 0.95, 1); ctx.lineTo(shaft * 0.95, 0.5); ctx.lineTo(1, 1.2); ctx.closePath(); ctx.fill();
+  // the bend and the short angled head
+  ctx.translate(shaft, 0); ctx.rotate(-1.05);
+  ctx.strokeStyle = col; ctx.lineWidth = 2.6; ctx.beginPath(); ctx.moveTo(-0.6, 0); ctx.lineTo(head, 0); ctx.stroke();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(head - 1.6, -2.1, 3.4, 4.2, 1.2); ctx.fill();
+  // the tuft: a small rounded bundle standing off the head
+  ctx.fillStyle = tuft; ctx.beginPath(); ctx.roundRect(head + 1.4, -1.9, 3.6, 3.8, [0.6, 1.9, 1.9, 0.6]); ctx.fill();
+  ctx.strokeStyle = mix(tuft, '#000000', 0.15); ctx.lineWidth = 0.4; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(head + 1.6, i * 1.1); ctx.lineTo(head + 4.6, i * 1.1); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.beginPath(); ctx.arc(head + 3.6, -1.1, 0.6, 0, TAU); ctx.fill();
   ctx.restore();
 }
 /** A toothbrush travel case as a shield: a bright rounded box, a clear lid seam with a clasp, a carry loop on top. */
@@ -662,14 +668,14 @@ function knightSquire(ctx: Ctx, mode: KMode) {
   plate(ctx, fnPath((p) => { p.moveTo(-8, -34); p.quadraticCurveTo(-10.5, -26, -7.5, -20.5); p.lineTo(7.5, -20.5); p.quadraticCurveTo(10.5, -26, 8, -34); p.quadraticCurveTo(0, -36.5, -8, -34); }), { sx: 3, sy: -30, sr: 9.5, gloss: [4, -31, 2, 1] });
   ctx.fillStyle = B.ink; ctx.fillRect(-8, -22.4, 16, 2.4); crownCap(ctx, 0, -20.2, 5, { cusps: 3 });
   // front hand: the single-tuft sword, raised and ready
-  singleTuft(ctx, 10.5, -25, 38, -0.95, B.cerise);
+  singleTuft(ctx, 10.5, -25, 38, -0.95, '#E8519A', '#D8F24A');
   ctx.strokeStyle = KE.cloth; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(6, -32); ctx.quadraticCurveTo(10, -30, 10.5, -26); ctx.stroke();
   plate(ctx, fnPath((p) => p.roundRect(7.8, -28.4, 5.6, 5.4, 1.9)), { sx: 10.5, sy: -28, sr: 3.4 });
   plate(ctx, fnPath((p) => p.ellipse(6.5, -32.5, 4.4, 3.6, -0.3, 0, TAU)), { sx: 8, sy: -34, sr: 4, gloss: [6.5, -34, 1.4, 0.6] });
   // back hand: the travel case held across the body as a shield
   // the second single tuft in the back hand, low and forward, ready to follow up
   ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.6; ctx.beginPath(); ctx.moveTo(-6, -32); ctx.quadraticCurveTo(-8, -26, -4, -22); ctx.stroke();
-  singleTuft(ctx, -4, -21.5, 34, -0.25, '#C4D600');
+  singleTuft(ctx, -4, -21.5, 34, -0.25, '#2A4FBF', '#F5E03A');
   plate(ctx, fnPath((p) => p.roundRect(-6.8, -24.4, 5.4, 5.2, 1.8)), { base: KE.shade, shade: KE.deep, sx: -4, sy: -24, sr: 3 });
   ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -35, 8, 2.1, 0, 0, TAU); ctx.fill();
   // helm: big round two-cusp crown with a closed slit, like today's hero grown up
@@ -697,7 +703,7 @@ function crescent(ctx: Ctx, x: number, y: number, r: number, angle: number) {
 const DUELIST_SLIT = poly([1.5, -50, 11.5, -50, 11.5, -48.4, 6.8, -48.4, 6.8, -44.6, 5.4, -44.6, 5.4, -48.4, 1.5, -48.4]);
 function knightDuelist(ctx: Ctx, mode: KMode) {
   const pr = B.blue, dk = B.blueDark;
-  if (mode === 'glow') { ctx.save(); ctx.translate(1, -19); ctx.rotate(0.16); ctx.translate(-1, 19); visorGlow(ctx, DUELIST_SLIT, 6, -48, 16); for (let i = 0; i < 3; i++) { ctx.strokeStyle = `rgba(159,216,240,${0.45 - i * 0.12})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(13, -60, 8.5 + i * 3, 1.6, 3.2); ctx.stroke(); } ctx.restore(); return; }
+  if (mode === 'glow') { ctx.save(); ctx.translate(1, -19); ctx.rotate(0.16); ctx.translate(-1, 19); visorGlow(ctx, DUELIST_SLIT, 6, -48, 16); for (let i = 0; i < 3; i++) { ctx.strokeStyle = `rgba(159,216,240,${0.45 - i * 0.12})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(23, -66, 11 + i * 3, 1.8, 3.4); ctx.stroke(); } ctx.restore(); return; }
   ctx.save(); ctx.translate(0, 0);
   const cape = fnPath((p) => { p.moveTo(-6, -38); p.quadraticCurveTo(-20, -34, -25, -22); p.lineTo(-20, -23); p.lineTo(-22, -16); p.quadraticCurveTo(-12, -25, -3, -33); p.closePath(); }); ctx.fillStyle = dk; ctx.fill(cape); ctx.strokeStyle = pr; ctx.lineWidth = 1.1; ctx.stroke(cape);
   // lunge: back leg straight behind, front knee bent far forward
@@ -713,8 +719,8 @@ function knightDuelist(ctx: Ctx, mode: KMode) {
   plate(ctx, fnPath((p) => { p.moveTo(-10.5, -33); p.quadraticCurveTo(-11, -40.5, -5, -40.5); p.quadraticCurveTo(-1, -40.5, -1.5, -36); p.quadraticCurveTo(-4, -32, -10.5, -33); }), { base: KE.shade, shade: KE.deep, sx: -6, sy: -38, sr: 5 });
   ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(-5, -36); ctx.quadraticCurveTo(-11, -39, -13, -44); ctx.stroke();
   plate(ctx, fnPath((p) => p.roundRect(-15.6, -47.5, 5, 5, 1.8)), { base: KE.shade, shade: KE.deep, sx: -13, sy: -47, sr: 3 });
-  teether(ctx, 23, -35, 5.5, 0.3, '#F6A5CB'); // held ready in the front hand
-  teether(ctx, 13, -60, 6, 1.1, '#9FD8F0'); // thrown, spinning up and out
+  teether(ctx, 26, -34, 8.5, 0.2, '#F4C6D7'); // held ready in the front hand
+  teether(ctx, 23, -66, 8.5, 0.9, '#CFE3F6'); // thrown, spinning up and out
   ctx.strokeStyle = KE.cloth; ctx.lineWidth = 3.8; ctx.beginPath(); ctx.moveTo(4.5, -35.5); ctx.quadraticCurveTo(12, -35, 19, -33); ctx.stroke();
   plate(ctx, fnPath((p) => p.roundRect(17.4, -35.5, 5.6, 5.2, 1.9)), { sx: 20, sy: -35, sr: 3.4 });
   ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(1, -39, 6.6, 1.8, 0, 0, TAU); ctx.fill();
@@ -738,15 +744,29 @@ function sonicLance(ctx: Ctx, x: number, y: number, len: number, angle: number, 
   ctx.strokeStyle = '#DDE7F6'; ctx.lineWidth = 0.6; for (let i = 0; i < 6; i++) { const fx = body + neck + 0.6 + i * (head - 1.2) / 5; ctx.beginPath(); ctx.moveTo(fx, -1.4); ctx.lineTo(fx, -4.2); ctx.stroke(); }
   ctx.restore();
 }
-/** A baby teething ring as a ring blade: a soft pastel loop with nubs around it. `spin` turns the nubs. */
-function teether(ctx: Ctx, x: number, y: number, r: number, spin: number, col = '#9FD8F0') {
-  // a ring of overlapping rounded bumps (outer and inner edge both scalloped), like the soft baby teething ring
-  ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
-  const n = 12, shade = mix(col, '#1A3A5C', 0.3), hi = mix(col, '#FFFFFF', 0.45), mid = r * 0.78, bump = r * 0.3;
-  const ring = new Path2D(); for (let i = 0; i < n; i++) { const a = (i / n) * TAU; ring.moveTo(Math.cos(a) * mid + bump, Math.sin(a) * mid); ring.arc(Math.cos(a) * mid, Math.sin(a) * mid, bump, 0, TAU); }
-  ctx.globalAlpha = 0.9; ctx.fillStyle = col; ctx.fill(ring, 'nonzero'); ctx.globalAlpha = 1;
-  for (let i = 0; i < n; i++) { const a = (i / n) * TAU, bx = Math.cos(a) * mid, by = Math.sin(a) * mid; ctx.fillStyle = shade; ctx.globalAlpha = 0.35; ctx.beginPath(); ctx.arc(bx + bump * 0.25, by + bump * 0.25, bump * 0.7, 0, TAU); ctx.fill(); ctx.globalAlpha = 0.9; ctx.fillStyle = hi; ctx.beginPath(); ctx.arc(bx - bump * 0.3, by - bump * 0.3, bump * 0.28, 0, TAU); ctx.fill(); }
-  ctx.globalAlpha = 1; ctx.restore();
+/** The baby teether (after the product photo): a soft heart-shaped loop with bumps and small dots, a clear rattle window
+ *  with five coloured beads across the top, and a nubbed brush pad hanging from the bottom tip. r = half its width. */
+function teether(ctx: Ctx, x: number, y: number, r: number, spin: number, col = '#CFE3F6') {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(spin); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const k = r / 16, dark = mix(col, '#5A3A5C', 0.25), hi = mix(col, '#FFFFFF', 0.5), dot = mix(col, '#C2185B', 0.45);
+  const at = (t: number): [number, number] => { const st = Math.sin(t); return [16 * st * st * st * k, -(12 * Math.cos(t) - 4 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * k * 0.82]; };
+  // brush pad below the tip, drawn first so the loop sits over its root
+  const [, ty] = at(Math.PI);
+  ctx.fillStyle = mix(col, '#E91E63', 0.18); ctx.beginPath(); ctx.ellipse(0, ty + 3.6 * k, 3.2 * k, 5.2 * k, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = dark; for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.arc(((i % 3) - 1) * 1.6 * k, ty + (1.6 + Math.floor(i / 3) * 1.9) * k, 0.45 * k, 0, TAU); ctx.fill(); }
+  // the loop: a thick soft stroke along a heart, with a darker underside
+  const loop = new Path2D(); for (let i = 0; i <= 64; i++) { const [px, py] = at((i / 64) * TAU); if (i) loop.lineTo(px, py); else loop.moveTo(px, py); }
+  ctx.strokeStyle = dark; ctx.lineWidth = 5.2 * k; ctx.save(); ctx.translate(0.5 * k, 0.6 * k); ctx.stroke(loop); ctx.restore();
+  ctx.strokeStyle = col; ctx.lineWidth = 4.6 * k; ctx.stroke(loop);
+  ctx.strokeStyle = hi; ctx.lineWidth = 1.2 * k; ctx.globalAlpha = 0.8; ctx.save(); ctx.translate(-0.7 * k, -0.9 * k); ctx.stroke(loop); ctx.restore(); ctx.globalAlpha = 1;
+  // bumps and the little dots along the sides
+  for (let i = 3; i <= 29; i++) { if (i > 13 && i < 19) continue; const [px, py] = at((i / 32) * TAU); ctx.fillStyle = i % 3 ? hi : dot; ctx.beginPath(); ctx.arc(px, py, (i % 3 ? 1.1 : 0.7) * k, 0, TAU); ctx.fill(); }
+  // the rattle window across the top with its five beads
+  const wy = at(0)[1] - 1 * k;
+  ctx.fillStyle = col; ctx.beginPath(); ctx.roundRect(-8.5 * k, wy - 3.6 * k, 17 * k, 7.2 * k, 2.4 * k); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.roundRect(-6.8 * k, wy - 2.4 * k, 13.6 * k, 4.8 * k, 1.4 * k); ctx.fill();
+  ['#2F6FD6', '#E53935', '#FF8F1F', '#7CC243', '#F5D31B'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc((-4.8 + i * 2.4) * k, wy + 0.5 * k, 1 * k, 0, TAU); ctx.fill(); });
+  ctx.restore();
 }
 
 // G. Lancer: planted and charging, the sonic brush levelled from the hip in both hands like a lance. Round shoulder
