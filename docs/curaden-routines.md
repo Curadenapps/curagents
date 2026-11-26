@@ -132,6 +132,37 @@ Schedule: Fridays 10:10.
 > Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
 > describes (Agent `feedback-qa`, Where Cloud, Account Curaden).
 
+### Growth pulse (Curaden)
+
+Schedule: Mondays 09:10. New 25 Nov: create it on the Curaden account when you're
+ready; until then "growth pulse" works by hand.
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "Growth pulse (Curaden)"; if its
+> Account isn't Curaden, log `no-op` and stop.
+> Then run "growth pulse" as `agents/growth.md` and `skills/growth/references/funnel.md`
+> describe (on the first Monday of the month, the monthly "growth review" instead).
+> Write only in the BOB Growth area of Notion. Never publish, post, email or send.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `growth` or `other`, Where Cloud, Account Curaden).
+
+### Orchestrator daily (optional Curaden copy)
+
+The daily orchestrator runs on Fabian's account while Sean is away ("Orchestrator
+daily (Fabian)", `docs/app-support-quickstart.md` section 5). It works from any
+instance: the first run of the day does the work and the others stop
+(`agents/orchestrator.md` §8 step 1), so a Curaden copy is a safe backup. Schedule:
+weekdays 08:15 (after Fabian's 07:45). Connectors: Notion, Asana.
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Do the daily run exactly as
+> `agents/orchestrator.md` §8 describes, starting with step 1 (switch on the registry
+> row whose Started by names "Orchestrator daily (Curaden)", then stop if another
+> instance already ran today). Live: don't ask first. Read Notion in view mode only.
+> Don't commit or push. Last step, always, also on failure: one row in the Agent run
+> log (Agent `orchestrator`, Where Cloud, Account Curaden).
+
 ### App Support (Curaden)
 
 Schedule: hourly 07:20–19:20 on weekdays (cron `20 6-18 * * 1-5` UTC). Connectors: Asana, Notion

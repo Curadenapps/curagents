@@ -106,7 +106,7 @@ plain words. The humour wraps that; it never replaces it.
 | 😇 Shooby doo | Nothing overdue, just things coming up | Friendly, a light "shooby doo" opener |
 | 🥖 Bánh mì tax | An overdue promise, or a Jira ticket quiet for 14+ days | "That's one bánh mì you owe the team." One per item; the running total sits at the top of the message and the page |
 | 🧺 Fruit basket | The same item nudged twice | "We're in fruit basket territory now." |
-| 🚨 Shooby alert | Third nudge with no movement | "Shooby alert: Sean's taking this one to the next call." The item stops being nudged |
+| 🚨 Shooby alert | Third nudge with no movement | "Shooby alert: Sean's taking this one up with you directly." The item stops being nudged |
 
 - Paying off: a delivered item clears its bánh mì. Say so ("🥖 debt cleared, nice").
 - Credit work done since the last ping, by ticket or deliverable. It keeps the

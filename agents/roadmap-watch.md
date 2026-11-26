@@ -122,6 +122,7 @@ Otherwise classify each change:
 | Asana task completed, due date moved, or moved section | Changed |
 | Jira status or fixVersion changed on a linked issue | Changed |
 | Asana/Jira says done, Notion row not Done (or the reverse) | Drift |
+| Linked Jira issue is In Progress / In Code Review while the row is Not Started (fix: In Progress), or QA Validation / Ready for Review while the row is Not Started or In Progress (fix: In Review) | Drift |
 | Asana due date or Jira duedate ≠ Notion Date by more than 7 days | Drift |
 | Milestone date within 21 days and a row that Blocks it is not Done | At-risk milestones |
 | Milestone date passed and Status ≠ Done | At-risk milestones |
@@ -129,6 +130,7 @@ Otherwise classify each change:
 | New Asana BOB V2 subtask or BA issue with no roadmap row linking it | New untracked work |
 | Roadmap row with no Asana Link and no Jira Key, Release not Future/Parked | Unlinked roadmap rows |
 | Open Feature (Status not Done/Cut) with empty Priority, Difficulty, Release or Epic | Missing info |
+| Open Task with empty Release or Epic (new rows made from Jira tickets often arrive without them) | Missing info |
 | Notes still contain "DRAFT by Claude" (priority/difficulty not yet confirmed) | Missing info (count only) |
 
 ### Step 4 — Write the report

@@ -21,6 +21,48 @@ finish one of the items, so the next session starts from the truth.
 - **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
   (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
 
+## 26 Nov: orchestrator runs daily, automatic practice approval, duplicate sign-ups
+
+Sean asked for the orchestrator to run on its own and for the bob-admin CLI to approve
+sensible practice registrations automatically (BA-324), with people who signed up
+twice turned into an Asana conversation.
+
+- **CLI** (`tools/bob-admin`): `practices check` (read-only verdicts),
+  `practices auto-approve` (approves only what passes every check, notes it as
+  automatic; `--max 10` a run) and `practices duplicates` (read-only). Rules and the
+  run: `skills/bob-admin/SKILL.md` "Automatic approval" and "Practice approvals run".
+  `BOB_ADMIN_AUTO_APPROVE=1` unlocks only auto-approve on prod. 103 tests pass (bob-admin + bob-qa).
+- **First read-only run on prod (26 Nov):** 1 pending (84008, BR), held as a strong
+  duplicate of the approved 84007 (the double sign-up Sean spotted). 13 duplicate
+  groups with a practice from the last 30 days, all strong; 3 are internal (Curaden
+  staff addresses), several pair a migrated old-app practice (25–28 Sep) with a new
+  sign-up, so those people registered again instead of logging in.
+- **The US is approved automatically too** (Sean, 26 Nov: "fine HIPAA-wise"). The
+  manual-country list is empty by default; `BOB_ADMIN_MANUAL_COUNTRIES` can add one.
+- **Runs on Fabian's PC** ("Practice approvals (Fabian)", weekdays 08:50/12:50/16:50,
+  setup `docs/app-support-quickstart.md` section 4): he owns support and BA-324, and
+  Sean is away. Exceptions go on his "needs you" task; duplicates become App Tasks
+  board tasks that App Support answers through his Review and invite flow.
+- **Orchestrator daily** (weekdays 07:45, `agents/orchestrator.md` §8): moves tasks
+  only by rules M1–M3 (completed but in an open column; Jira Done; assigned Webex
+  Inbox tasks after 2 working days); everything else becomes a subtask on the Asana
+  task "Orchestrator: board moves to decide" (Fabian now, Sean from January), and a
+  ticked subtask is the OK to move it. It has to work from several instances (Sean,
+  26 Nov), so the first run of the day does the work and the others stop. It runs as
+  Fabian's Routine "Orchestrator daily (Fabian)"; a Curaden copy is an optional backup.
+- **Agent registry rows added 26 Nov:** "Practice approvals (Fabian)"
+  (`4247e8aabbb481b09d9ac5793e51c3fa`) and "Orchestrator daily (Fabian)"
+  (`4247e8aabbb481449f42d5a28b475b85`), both Account `Fabian`, Run log name `other`
+  (the run log's Agent select has no `orchestrator` or `practice-approvals` option yet).
+  They have no runs until Fabian sets them up, so the run-log check may call them
+  missed once.
+- **Open (Fabian):** quickstart sections 4 (practice approvals: install, prod
+  sign-in, `BOB_ADMIN_AUTO_APPROVE`, the PC task) and 5 (the orchestrator Routine). Training date and IDB fields are
+  placeholders until Phinamic moves that checklist after approval (BA-324). The
+  old BOB App task "Practice validation after sign-up: agree the approval logic with
+  Suncica" (1220306765390995, In Development) is superseded by 1220905863349438: the
+  first daily run will list it under moves to decide.
+
 ## 25 Nov: bob-support, the support command line (Fabian)
 
 `bob-support` ships with bob-admin (`tools/bob-admin/agent-harness/cli_anything/bobsupport/`,
@@ -33,8 +75,7 @@ Support's replies use them, spec step 3 source 0); every Admin Console change ru
 loop. 25 unit tests; live read-only checks on six real requests.
 
 Open:
-- **Fabian:** make an Asana Personal Access Token (`bob-support setup`), save it as
-  `ASANA_TOKEN`, then `bob-support schedule install`. Until then `check --from-json` works.
+- **Fabian:** done 25 Nov: `ASANA_TOKEN` set, hourly sweep installed and running.
 - **Sean:** add the Agent registry row "Support sweep (Fabian)" (Account `Fabian`, Where
   PC) so the run log check expects its runs; it writes run-log rows once `NOTION_API_KEY`
   is set on Fabian's PC.
@@ -72,10 +113,18 @@ Decisions (Sean, 25 Nov):
 - **Gisèle's account change** was answered by Fabian on 24 Nov; the held Review subtask
   1220715857418450 is closed.
 
+- **New agent: Growth** (`agents/growth.md`, `skills/growth/`). Marketing no longer
+  supports BOB, so user acquisition runs from it. Notion home is BOB Growth
+  `4237e8aabbb4810f80ede5c7f3decc1f`, with the Growth experiments and Content calendar
+  databases. It drafts only. Open for Sean: create the "Growth pulse (Curaden)" Routine
+  (prompt in `docs/curaden-routines.md`), then flip its registry row to Curaden. The
+  first useful run is "growth plan UAE".
+- **Courier double firing is expected** (Sean switches sessions): step 0 in `RUNTIME.md`
+  "Webex courier" now claims the slot, and a second copy stops before opening Webex.
+
 Courier and Boom Boom should run on their own. Open on the Personal PC:
-- Two courier sessions fired for the 25 Nov 09:02 slot. With two copies, Webex shows
-  "Another tab has been opened" and the built-in browser freezes. Keep exactly one
-  "Webex courier (Personal)" task.
+- Two courier sessions fired for the 25 Nov 09:02 slot. That's fine now: the slot
+  claim (RUNTIME step 0) stops the second copy before it opens Webex.
 - The old `boom-boom-derek` PC task still runs (24 and 25 Nov, no double posts). Switch
   it off.
 - The 17:02 and 08:02 slots are often missed (PC asleep or app closed).

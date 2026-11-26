@@ -72,3 +72,22 @@ above test), so it reads the real platform. No write was sent and
 ```
 53 passed
 ```
+
+## Automatic approval (26 Nov 2026)
+
+`test_approval.py` covers the checks and duplicate matching on made-up practices (the
+double sign-up with "Jr." and two email providers, common names, two real practices
+on one email, rejected ones ignored, test words as whole words only, internal and
+throwaway domains, the manual-country list, a domain with no mail server) and the
+three commands: `practices check` sends only a GET, `auto-approve --dry-run` sends no
+POST, `--yes` approves at most `--max`, a practice decided meanwhile is skipped, prod
+stays locked without a flag, and `BOB_ADMIN_AUTO_APPROVE=1` unlocks approvals only.
+Results never contain names, emails or phone numbers.
+
+Live, read-only on prod (26 Nov): `practices check` (1 pending, held as a strong
+duplicate), `practices duplicates --days 30` (13 groups) and `--dry-run practices
+auto-approve` (nothing sent). About 3 s for all 1,827 practices.
+
+```
+103 passed (bob-admin + bob-qa)
+```

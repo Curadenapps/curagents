@@ -11,7 +11,7 @@ setup(
         "cli_anything.bobsupport": ["skills/*.md", "README.md"],
     },
     python_requires=">=3.10",
-    install_requires=["click>=8.0", "requests>=2.28", "tzdata; platform_system == 'Windows'"],
+    install_requires=["click>=8.0", "requests>=2.28", "dnspython>=2.3", "tzdata; platform_system == 'Windows'"],
     extras_require={"test": ["pytest>=7"]},
     entry_points={
         "console_scripts": [
