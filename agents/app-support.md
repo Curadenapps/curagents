@@ -56,6 +56,7 @@ memory:
     - docs/app-support-voice-sean.md     # how Sean's Routine writes
     - docs/app-support-voice-fabian.md   # how Fabian's Routine writes
     - docs/app-support-playbook.md       # recurring BOB request types, facts, templates and Sean's corrections (Nov 2026)
+    - "asana: the 'Admin Console check' subtasks and comments the support sweep (skills/bob-support) leaves on form tasks: what the Admin Console shows for the requester"
     - "notion: Support replies 3287e8aabbb480b79f16f460a1c35a00 (📋 Support, Knowledge Wiki), read-only: the team's copy-and-paste replies"
     - "notion: the product FAQs, read-only: BOB: FAQ 3217e8aabbb480289be7f8bbf6260528 (source of the curaprox-apps.com FAQ), Curaprox — FAQ 2e77e8aabbb4809699f8ca3225f4a310, Curaden — FAQ 2e77e8aabbb48099b047df4e620a272b, and the How-To Documents they link (index: BOB Kit 1fb7e8aabbb480d29c88cbd43aaee5fc; interdental brush facts: How to BOB 3087e8aabbb480b48701f105c7d932c0, "Using interdental brushes"). Never cite a page that is in Notion's Trash: the IDB & BOB FAQs, System Requirements, Legacy Sign-Up and Mobile User Guide were archived on 18 Nov"
     - "web: curaprox-apps.com app pages (public FAQ, e.g. https://curaprox-apps.com/app-pages/bob-app), read-only, the link a reply gives"
@@ -160,6 +161,7 @@ and Sean has no PC task for it ("I cannot handle this many agents").
 | **App Support (Fabian)**: cloud Routine | Fabian's | Hourly 07:20–19:20, Mon–Thu | Everything in "Scheduled run", for every request |
 | **App Support invites (Fabian)**: desktop-app scheduled task on Fabian's PC | Fabian's | 09:10, 13:10 and 16:10, Mon–Thu | Adds the submitters whose Review subtask was ticked ("Invite run") |
 | **App Support (Curaden)**: cloud Routine | Sean's Curaden account | Hourly 07:50–19:50, **Fridays only** | Sean's Friday cover (below) |
+| **Support sweep (Fabian)**: Windows scheduled task on Fabian's PC, `bob-support sweep --all --post --close-solved --scheduled` (`skills/bob-support`) | Fabian's Admin Console sign-in and Asana token | Hourly 07:30–19:30, Mon–Thu | Looks every open request on the board up in the Admin Console (`--all`, Fabian owns them all), **read-only**, and leaves the facts in Asana: a comment on the "Fabian: change in BOB Admin" subtask, or an "Admin Console check" subtask on the form task (no email addresses), only when they changed. Closes an **Awaiting Feedback** ticket on its own when the requester has signed in to BOB **after** sending it (registration, activation and login requests; account active, temporary password replaced, practice active; Fabian, 25 Nov), with the reason in the check note. Never changes the Admin Console and never writes to a requester |
 
 Setup for Fabian: [`docs/app-support-quickstart.md`](../docs/app-support-quickstart.md).
 
@@ -279,8 +281,10 @@ with no account). Whether a person has an account, which email it uses, whether 
 active or has signed in, can only be read with the bob-admin CLI (`users list
 --search {email}`, `users get`), which the cloud Routines don't have. So a reply that
 depends on it is never standard: it goes to the owner as a "Check in BOB Admin…"
-subtask, and the owner (or a PC session) checks with the CLI before ticking. A
-completed "change in BOB Admin" subtask is not proof the account exists.
+subtask, and the owner (or a PC session) checks with the CLI before ticking. The
+Support sweep's "Admin Console check" note on the form task (Fabian's PC, hourly)
+counts as checked when it's from the last 24 hours. A completed "change in BOB Admin"
+subtask is not proof the account exists.
 
 **Getting the reply to the submitter.** A comment only emails the people following
 the task, and the form doesn't add the submitter as a follower, so:
@@ -352,8 +356,14 @@ owner can switch it.
 
 The cloud runs never add or invite anyone: no `add_followers`. (The Asana connector
 can't invite someone new anyway: `add_followers` with an email returns "Not a valid
-actor ID", tested 12 and 13 Nov 2026.) Only the invite run on Fabian's PC does, and only
-for a Review subtask the owner ticked ("Invite run").
+actor ID", tested 12 and 13 Nov 2026.) Only the invite run on Fabian's PC does: for a
+Review subtask the owner ticked, and for a form task where a person from the team
+(Fabian, Sean or a colleague) wrote a comment by hand ("Invite run").
+
+**Ball in their court: the requester gets the task** (Fabian, 26 Nov 2026). Once the
+requester is on the task, the invite run assigns the form task to them, so it shows in
+their My Tasks and it's clear the next move is theirs. Only that one task, never the
+project. When they comment, the next hourly run assigns it back to the owner.
 
 The follower's display name can be short or partial ("Ma"), so the greeting uses the
 first name from the `Name` field instead.
@@ -494,6 +504,14 @@ and never stop at the first source that comes up empty. Work through all of thes
 and use what the newest, most authoritative source says (details in "FAQ: answering
 and getting smarter"):
 
+0. **What the Admin Console shows for this requester**: the "Admin Console check"
+   subtask on the form task, or the "Admin Console check" comment on its change
+   subtask, written by the support sweep on Fabian's PC (`skills/bob-support`). It
+   is the newest word on the account (exists or not, practice pending or active,
+   signed in yet or not, who approved). Build the reply on it ("your practice is
+   active, so…", "I've sent you a new temporary password" only after Fabian ran
+   it), never quote its ids or internal notes to the requester. No such note yet:
+   answer as below, and don't guess the account's state.
 1. **The product FAQs in Notion** (BOB: FAQ, Curaprox — FAQ, Curaden — FAQ; interdental
    brushes: How to BOB) and the How-To pages they link. They're what Curaden tells users,
    so the reply uses their facts and on-screen paths word for word.
@@ -576,7 +594,9 @@ too long" check asks the assignee whether to chase or close.
 
 ## 4. When the submitter answers
 
-App Support reads the new comment from the guest follower and checks it has everything
+First, if the form task is assigned to the submitter (the invite run gives it to
+them), assign it back to the owner (`update_tasks`, `assignee`): the ball is with the
+team again. Then App Support reads the new comment from the guest follower and checks it has everything
 asked for. If something's missing, it asks once for just that piece, as a Review
 draft for the owner (step 1.2: the submitter follows the task now).
 
@@ -589,7 +609,15 @@ HubSpot"), with the exact change:
 Where: BOB Admin → Practices → {practice name} → Address
 Change: replace with {street and number}, {postcode}, {city}, {country}
 From: the submitter's reply on {date} (link)
+Run: bob-support do {this subtask's gid} --street "…" --zip "…" --city "…"
 ```
+
+Write a new name or value in quotes after `replace with` ("Change: replace with
+"{new name}""): `bob-support` reads it from there. The `Run:` line is the change as
+one command for the owner's PC (`skills/bob-support`): it checks the Admin Console,
+shows what it will send, asks, makes the change and ticks this subtask, which is the
+owner's "done" below. Types it handles: practice name, address and contact, delete,
+new temporary password, account email. For anything else leave the `Run:` line out.
 
 The subtask has no guest follower, so the submitter isn't emailed about it. The same
 line goes into `changes_for_sean`. If the change needs Phinamic (the field can't be
@@ -605,7 +633,7 @@ the subtask, App Support:
    or Awaiting Feedback. A task in Development, Review or Ready for Deployment stays
    where it is (it's tracking dev work); App Support only lists it for the owner.
 
-It never closes a task its owner hasn't confirmed, and never reopens one.
+It never closes a task its owner hasn't confirmed, and never reopens one. The one exception is the support sweep's "solved" rule above (Fabian, 25 Nov): an Awaiting Feedback ticket whose requester has signed in since asking.
 
 ## 5. Dev hand-off (class b)
 
@@ -805,7 +833,11 @@ in to Asana. Each run:
    whose notes say `Route: Asana` and that have no comment starting "Done". For each, read the form
    task link and the email from the subtask notes, and check the form task's
    `followers.email`: already a follower → skip (the hourly run finishes it).
-   At most 10 per run.
+   **Also** (Fabian, 26 Nov 2026): open form tasks on the board (not in Done) with a
+   comment written by hand by a team member (any author in the workspace who isn't the
+   submitter, and the text doesn't end with the automated sign-off "(automated)") and
+   no follower matching the form email. Comments from App Support itself still wait
+   for the ticked Review subtask. At most 10 per run in all.
 4. **Invite**, one task at a time, in the browser:
    1. Open the form task. If Asana bounces to "Opening link in Asana…", click "open
       this link in your browser".
@@ -818,7 +850,12 @@ in to Asana. Each run:
    4. Finish the line: ", I've answered your request just above. Reply here and I'll
       see it." in the same language, plus the voice file's sign-off, and post it.
    5. Check with `get_task` that a follower now matches the email. Comment "Done:
-      sent (invited {date})" on the Review subtask.
+      sent (invited {date})" on the Review subtask (when there is one).
+   6. **Assign the form task to them**: `update_tasks` with `assignee` set to that
+      follower's gid. If Asana won't assign it, leave the assignee as it is and say so
+      in the run log summary; the invite still counts.
+   For a hand-written team comment there's nothing to type in step 4.2–4.4 beyond the
+   short pointer line: the team member's comment is the answer.
 5. **Anything unexpected** (the invite option doesn't appear, the box looks different,
    the checkbox won't untick, Asana rejects the address): don't send. Comment "Invite
    failed: {reason}. Please add them by hand (+ next to the avatars, untick 'Also
@@ -828,7 +865,8 @@ in to Asana. Each run:
    invited, {m} failed". No names or emails.
 
 Hard limits: only addresses from the form's `Email address` field, only for a Review
-subtask the owner ticked, only that one task (never the project), never a password or
+subtask the owner ticked or a comment a team member wrote by hand, only that one task
+(never the project), never a password or
 sign-in, never more than 10 a run. The browser steps are the ones tested by hand on
 13 Nov 2026.
 
@@ -888,7 +926,8 @@ it:
 - sends bugs and product gaps to Jira (10 Nov 2026, unchanged).
 
 The cloud runs never add a follower or invite anyone; the invite run on Fabian's PC
-adds a submitter only after the owner ticked their Review subtask. From 10 to 13 Nov 2026 replies went out
+adds a submitter only after the owner ticked their Review subtask, or after a team
+member answered them by hand on the task, and then assigns them the task. From 10 to 13 Nov 2026 replies went out
 unchecked ("everything auto"); from 13 to 26 Nov every reply waited for the owner.
 
 The hard rules still apply to every post, automated or not: never a password, code or

@@ -23,6 +23,12 @@ The production admin makes exactly the same API calls as test (checked 18 Nov
 (test.bobscore.app) on a coach's sign-in, writes on test only. See
 [`agent-harness/cli_anything/bobqa/README.md`](agent-harness/cli_anything/bobqa/README.md).
 
+**bob-support** ships in it too: the App Support board (Asana) against the Admin
+Console. For each request assigned to you it says what the Admin Console shows and
+what to change (practice rename, address, delete, new temporary password, email);
+an hourly sweep does the read-only checks on its own, every change runs on your yes.
+See [`agent-harness/cli_anything/bobsupport/README.md`](agent-harness/cli_anything/bobsupport/README.md).
+
 ## Install
 
 **Windows (Sean, Fabian):** one script. It puts bob-admin in

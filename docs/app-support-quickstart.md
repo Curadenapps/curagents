@@ -92,6 +92,29 @@ Then:
 Nothing new is assigned to you Friday to Sunday. On Fridays Sean's Routine writes the
 replies and Sean checks them.
 
+## The support command line (`bob-support`)
+
+For the Admin Console side there's a command line on your PC. It ships with
+bob-admin, so it's already installed if you have bob-admin (update:
+`powershell -ExecutionPolicy Bypass -File .\tools\bob-admin\install.ps1`).
+
+- **Every hour** (07:30 to 19:30, Monday to Thursday, Windows Task Scheduler) it
+  looks every open request on the board up in the Admin Console, read-only, and writes
+  what it found into Asana: a comment on your "Fabian: change in BOB Admin" subtask,
+  or an "Admin Console check" subtask on the form task. For example: "practice
+  active, account never signed in", "no account under that email", "the account is
+  in two practices". App Support's replies use it.
+- **You make the changes**: `bob-support do <task link>` shows what it will change
+  (practice name, address, delete, new temporary password, account email), asks, makes
+  it and ticks the change subtask, so App Support tells the requester and closes the task.
+
+Set up once: `bob-admin --env prod auth login`, then `bob-support setup` (an Asana
+token as the Windows variable `ASANA_TOKEN`), `bob-support status`, and
+`bob-support schedule install`. Everyday: `bob-support inbox`, `bob-support check
+<task>`, `bob-support do <task>`. Production changes need
+`$env:BOB_ADMIN_PROD_WRITES = "1"` in that terminal first. Full guide:
+[`tools/bob-admin/agent-harness/cli_anything/bobsupport/README.md`](../tools/bob-admin/agent-harness/cli_anything/bobsupport/README.md).
+
 ## Your voice
 
 Your runs write every reply the way
