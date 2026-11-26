@@ -6,8 +6,10 @@ Read this first when you pick BRISTLE up in a new session. Sean asked: do not bu
 
 - **Do not start new features, agents or refactors on your own.** Wait for Sean's next ask, then do exactly that.
 - Branch: `claude/dazzling-meitner-9fo696` (pushed, so the PC and the laptop can both work on it).
-  Claude app (artifact, private): https://claude.ai/artifact/7RrzdiT1yUeCX34PiECaJD
-  (publish `dist/fragment.html` to that URL; it keeps the `sample` capability for Claude-voiced NPCs).
+  Claude app (artifact, private): https://claude.ai/artifact/GTBfaF4p87mhx4Dc3BNfz5, in the Claude account this PC
+  session uses (published 26 Nov). Build with `node build.mjs --fragment` and publish `dist/fragment.html` to that URL;
+  it declares the `sample` capability for Claude-voiced NPCs. The older artifact
+  https://claude.ai/artifact/7RrzdiT1yUeCX34PiECaJD lives in Sean's other Claude account and is out of date.
 - Brand guardrails: the brand pack's palette and type; no violence (plaque is loosened and rinsed away, never hurt;
   say "cleaning power", not "damage"); no clinical or efficacy claims; real product names and IDB sizes/colours are
   placeholders until the brand team verifies them.
