@@ -78,7 +78,7 @@ export class GameCore implements Game {
   enter(roomId: string, door: string, quiet = false) {
     for (const e of this.entities) e.dispose?.(this);
     const def = Rooms[roomId] ?? Rooms[START_ROOM] ?? Object.values(Rooms)[0];
-    this.room = new Room(def); this.biome = Biomes[def.biome] ?? Biomes['default'];
+    this.room = new Room(def); this.biome = Biomes[def.biome] ?? Biomes['default'] ?? Object.values(Biomes)[0];
     this.entities = []; this.fx.list.length = 0;
     const p = this.player; p.vx = 0; p.vy = 0; p.dashT = 0; p.dashing = false; p.passSlits = false; p.slash = null;
     // place the player

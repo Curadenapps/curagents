@@ -76,6 +76,8 @@ export class Hud {
       c.fillStyle = 'rgba(6,14,36,0.82)'; c.beginPath(); c.roundRect(vw / 2 - Math.min(660, vw - 40) / 2, ty - h, Math.min(660, vw - 40), h, 12); c.fill();
       c.fillStyle = '#E8EEF9'; lines.forEach((l, k) => c.fillText(l, vw / 2, ty - h + 21 + k * 24)); ty -= h + 10; c.globalAlpha = 1;
     }
+    // content hooks (boss bars...): same scaled space, view size = canvas size / transform scale
+    for (const h of g.hudHooks) { c.save(); h(c, g); c.restore(); }
   }
 }
 export function wrap(c: CanvasRenderingContext2D, text: string, max: number) {
