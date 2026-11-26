@@ -56,10 +56,12 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
 
 ## Known gaps (only when Sean asks)
 
-- Hero art (style guide, Hero options): A Vanguard (brush), B Ranger (interdental bow), C Lancer = the Bulwark (Hydrosonic
-  lance), D Sentinel (angled IDB handle as a scythe), E Squire Knight (travel-case shield, single-tuft sword), F Crescent =
-  the Kunoichi (teething rings as ring blades). The in-game Orders still wear the earlier Vanguard/Ranger/Bulwark sets.
-  Product shapes and names are placeholders until the brand team checks them. The slash still needs play-testing.
+- Hero lineup (style guide, Hero options; Sean, 26 Nov), one product per class: A Vanguard (CS 5460 as a two-handed
+  greatsword), B Ranger (interdental holder as a bow), C Lancer = the Bulwark (Hydrosonic lance), D Sentinel (angled IDB
+  handle as a scythe), E Duelist (two single-tuft brushes), F Crescent = the Kunoichi (teething rings as ring blades).
+  Recommended game core: Vanguard, Duelist, Ranger, Lancer; Sentinel and Crescent as later unlocks or brand-pack sets.
+  The in-game Orders still wear the earlier Vanguard/Ranger/Bulwark sets. Product shapes and names are placeholders
+  until the brand team checks them. The slash still needs play-testing.
 - No `H` (large) gaps placed yet, and Pip doesn't sell the L brush yet.
 - The Oath cards reuse the 12 old perks (wording updated); per-Order tracks with keystones (PLAN-v2 section 4.3) are not built.
 - The Bulwark's slam that cracks tartar floors is not built (there are no tartar floor tiles).

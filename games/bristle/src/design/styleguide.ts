@@ -517,7 +517,7 @@ type KMode = 'scene' | 'glow';
 function knightVanguard(ctx: Ctx, mode: KMode) {
   const pr = B.blue, dk = B.blueDark;
   const visor = poly([-0.5, -48.6, 8.8, -48.6, 8.8, -46.6, 4.6, -46.6, 4.6, -41.8, 2.6, -41.8, 2.6, -46.6, -0.5, -46.6]);
-  if (mode === 'glow') { visorGlow(ctx, visor, 4.5, -47, 18); halo(ctx, 14, 0, 10, B.sky, 0.35); return; }
+  if (mode === 'glow') { visorGlow(ctx, visor, 4.5, -47, 18); halo(ctx, 18.5, -66, 12, B.sky, 0.4); return; }
   const cape = new Path2D(); cape.moveTo(-5, -38); cape.quadraticCurveTo(-19, -28, -19, -6); cape.lineTo(-15, -8); cape.lineTo(-12, -4); cape.lineTo(-9, -8); cape.lineTo(-6, -5); cape.quadraticCurveTo(-5, -22, 1, -37); cape.closePath();
   ctx.fillStyle = dk; ctx.fill(cape); ctx.strokeStyle = pr; ctx.lineWidth = 1.2; ctx.stroke(cape);
   legsK(ctx, -20, 17, 4.6, [-3.2, -5.5], [2.6, 4.5], KE.cloth, true);
@@ -527,9 +527,12 @@ function knightVanguard(ctx: Ctx, mode: KMode) {
   ctx.save(); ctx.clip(tab); ctx.fillStyle = dk; ctx.fillRect(-6, -33, 3.2, 24); ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-6, -17.5, 12, 1.7); ctx.restore();
   ctx.fillStyle = B.ink; ctx.fillRect(-8.2, -22.4, 16.4, 2.6); crownCap(ctx, 0, -20, 5.4, { cusps: 3 });
   plate(ctx, (() => { const p = new Path2D(); p.ellipse(-8.2, -35.5, 3.8, 4.6, 0.3, 0, TAU); return p; })(), { base: KE.shade, shade: KE.deep, sx: -7, sy: -37, sr: 3.6 });
-  brush(ctx, 9, -25, 32, { angle: 1.32, handle: pr });
-  ctx.strokeStyle = KE.cloth; ctx.lineWidth = 4.2; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(7.5, -34); ctx.quadraticCurveTo(11, -30, 9.5, -25.5); ctx.stroke();
-  plate(ctx, (() => { const p = new Path2D(); p.roundRect(7, -28, 5.6, 5.4, 2); return p; })(), { sx: 10, sy: -27, sr: 3.4 });
+  // the CS 5460 as a two-handed greatsword: upright in guard, both gauntlets on the handle
+  brush(ctx, 4, -14, 54, { angle: -1.3, handle: pr });
+  ctx.lineCap = 'round'; ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.8; ctx.beginPath(); ctx.moveTo(-5.5, -34); ctx.quadraticCurveTo(-4, -22, 4.2, -18.2); ctx.stroke();
+  plate(ctx, fnPath((p) => p.roundRect(2, -21, 5.6, 5.4, 1.9)), { base: KE.shade, shade: KE.deep, sx: 5, sy: -20.5, sr: 3.2 });
+  ctx.strokeStyle = KE.cloth; ctx.lineWidth = 4.2; ctx.beginPath(); ctx.moveTo(7.5, -34); ctx.quadraticCurveTo(10, -29, 7, -25.2); ctx.stroke();
+  plate(ctx, fnPath((p) => p.roundRect(4.2, -28, 5.6, 5.4, 1.9)), { sx: 7.2, sy: -27.5, sr: 3.4 });
   plate(ctx, (() => { const p = new Path2D(); p.moveTo(4.5, -38.5); p.quadraticCurveTo(13.5, -40, 13, -33); p.quadraticCurveTo(12.4, -30.2, 9.2, -30.4); p.quadraticCurveTo(5, -31, 4.5, -38.5); return p; })(), { sx: 10, sy: -38, sr: 5, gloss: [8.8, -37, 1.8, 0.8] });
   plume(ctx, -5.5, -56, 15, pr, 11, -2.2, -3.6, -0.5);
   ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -38.6, 8.6, 2.2, 0, 0, TAU); ctx.fill();
@@ -647,8 +650,8 @@ function travelCase(ctx: Ctx, x: number, y: number, w: number, h: number, col: s
   ctx.restore();
 }
 
-// E. Squire Knight: stout and young, the closest to today's hero. A round two-cusp helm with a closed slit, a short flared
-//    cape, a toothbrush travel case for a shield and a single-tuft brush for a short sword, ready stance.
+// E. Duelist (the Squire Knight body): stout and quick, the closest to today's hero. A round two-cusp helm with a closed
+//    slit, a short flared cape, and a single-tuft brush in each hand.
 const SQUIRE_SLIT = fnPath((p) => p.roundRect(-0.5, -46.4, 11.5, 3, 1.5));
 function knightSquire(ctx: Ctx, mode: KMode) {
   const pr = B.blue, dk = B.blueDark;
@@ -664,8 +667,10 @@ function knightSquire(ctx: Ctx, mode: KMode) {
   plate(ctx, fnPath((p) => p.roundRect(7.8, -28.4, 5.6, 5.4, 1.9)), { sx: 10.5, sy: -28, sr: 3.4 });
   plate(ctx, fnPath((p) => p.ellipse(6.5, -32.5, 4.4, 3.6, -0.3, 0, TAU)), { sx: 8, sy: -34, sr: 4, gloss: [6.5, -34, 1.4, 0.6] });
   // back hand: the travel case held across the body as a shield
-  ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.6; ctx.beginPath(); ctx.moveTo(-6, -32); ctx.quadraticCurveTo(-5, -26, 0, -24); ctx.stroke();
-  travelCase(ctx, 1.5, -22, 15, 11, '#FF8200');
+  // the second single tuft in the back hand, low and forward, ready to follow up
+  ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.6; ctx.beginPath(); ctx.moveTo(-6, -32); ctx.quadraticCurveTo(-8, -26, -4, -22); ctx.stroke();
+  singleTuft(ctx, -4, -21.5, 34, -0.25, '#C4D600');
+  plate(ctx, fnPath((p) => p.roundRect(-6.8, -24.4, 5.4, 5.2, 1.8)), { base: KE.shade, shade: KE.deep, sx: -4, sy: -24, sr: 3 });
   ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -35, 8, 2.1, 0, 0, TAU); ctx.fill();
   // helm: big round two-cusp crown with a closed slit, like today's hero grown up
   plate(ctx, fnPath((p) => { p.moveTo(-11, -37); p.quadraticCurveTo(-13.5, -48, -10, -54); p.quadraticCurveTo(-8, -60, -4, -56); p.quadraticCurveTo(0.5, -58, 4.5, -56); p.quadraticCurveTo(9, -60, 10.6, -53.5); p.quadraticCurveTo(13.5, -47, 11, -37); p.quadraticCurveTo(0, -34.5, -11, -37); p.closePath(); }), { sx: 5, sy: -47, sr: 12.5, gloss: [5, -52, 2.6, 1.2] });
@@ -813,11 +818,11 @@ function heroOptions() {
     scene(ctx) { const g = ctx.createRadialGradient(x, h * 0.45, 10, x, h * 0.45, w); g.addColorStop(0, '#1A2747'); g.addColorStop(1, '#070F2A'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h); ctx.fillStyle = '#132B57'; ctx.fillRect(0, gy, w, h - gy); hero(ctx, 'idle', x, gy, s); },
     emissive(ctx) { heroEm(ctx, 'idle', x, gy, s); } }; };
   const O: [string, string, (c: Ctx, m: KMode) => void, string, string][] = [
-    ['A', 'Vanguard', knightVanguard, 'Today\'s knight grown up. The helm keeps its four cusps but rises into a coronet, with a T-visor instead of the horizontal slit and a bristle plume off the back cusp. Incisor-shaped shoulder plates, a breastplate over the brand tabard with the white stripe, a half cape, and the brush-blade carried point down like a longsword.', 'The safest step: everyone still reads the same hero. The T-visor and plume carry the originality.'],
+    ['A', 'Vanguard', knightVanguard, 'The hero of today grown up, master of the brush. The helm keeps its four cusps but rises into a coronet, with a T-visor and a bristle plume off the back cusp. Incisor-shaped shoulder plates, a breastplate over the brand tabard with the white stripe, a half cape, and the CS 5460 wielded two-handed as a greatsword.', 'The safest step: everyone still reads the same hero. Big sweeping strokes and the strongest Deep Clean; slower between swings.'],
     ['B', 'Ranger', knightRanger, 'The archer of the Order, built around the interdental bow. A swept canine-tooth sallet with an angled slit, a short hooded mantle lined in gum pink, a bandolier and quiver of colour-coded refills, tall boots, and the ring holder raised to shoot.', 'Most original silhouette and the best fit for the shot mechanic. The slimmest build, so it needs strong poses to feel heroic.'],
     ['C', 'Lancer (the Bulwark)', knightLancer, 'Sean, 26 Nov: replaces the Bulwark. Planted and charging, a sonic toothbrush levelled from the hip in both hands like a lance, its head humming. Round shoulder plates, a short cape, a helm with a short upright crest of bristles and a cross visor.', 'Heavy, direct and easy to read: charge, pierce, hold the line. Based on the Hydrosonic; product shape and name are placeholders until the brand team checks them.'],
     ['D', 'Sentinel', knightSentinel, 'Tall and calm. Long legs, a long brand tabard to the knee, a wide-brimmed crown helm with three tall cusps (the slit sits in the shadow of the brim), one round shoulder plate, and the long angled interdental handle carried as a scythe, a large refill at the bend for the blade.', 'The most noble silhouette and the easiest to read from far away. The tallest, so low gaps and crawling need care.'],
-    ['E', 'Squire Knight', knightSquire, 'Stout and young, the closest to the hero of today: a big round two-cusp helm with a closed slit, a short flared cape, a toothbrush travel case held as a shield and a single-tuft brush as a short sword.', 'The friendliest sword-and-shield and the easiest first knight for a young audience. Product shapes are placeholders until the brand team checks them.'],
+    ['E', 'Duelist', knightSquire, 'Stout and quick, the closest to the hero of today: a big round two-cusp helm with a closed slit, a short flared cape, and a single-tuft brush in each hand, one raised, one low and ready to follow up.', 'Fast, precise jabs for the tight spots the big brush cannot reach. Small reach, so it lives up close. Product shape is a placeholder until the brand team checks it.'],
     ['F', 'Crescent (the Kunoichi)', knightDuelist, 'Lean, in a lunge, the one ninja class. A sleek long helm with a horsetail of bristles from the crest, one plate on the back shoulder, a half cape off it, and teething rings as ring blades: one held ready, one thrown spinning up and out.', 'The fastest and most playful, with a ranged weapon that comes back. Based on the baby teething ring: keep it clearly a soft toy, never sharp. Product shape is a placeholder until the brand team checks it.'],
   ];
   return `<section id="options">${head(8, 'Hero options', 'Six deviations of today\'s knight. The crown helm and visor glow stay; there is no face. Each one fixes the body (knight proportions, about 2.5-3 heads tall instead of 1.6, real armour) and gives the helm its own silhouette, with dental gear in place of borrowed shapes. Large figure for the look, small one at 1 tile for the read in game. Sketches, not final art.')}
