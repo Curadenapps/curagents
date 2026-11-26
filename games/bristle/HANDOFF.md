@@ -56,7 +56,10 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
 
 ## Known gaps (only when Sean asks)
 
-- Hero art: six variants in the style guide (A-F); Sean picks before the art is final. The slash still needs play-testing.
+- Hero art: eight variants in the style guide (A-H). Product weapons: D Sentinel = long angled IDB handle as a scythe,
+  E Squire Knight = two brushes, F Crescent = tongue cleaner as a glaive, G Lancer = Hydrosonic as a lance,
+  H Kunoichi = teething rings as ring blades. Sean: G Lancer is the look for the Bulwark Order (in-game Bulwark not
+  rebuilt yet). Product shapes and names are placeholders until the brand team checks them. The slash still needs play-testing.
 - No `H` (large) gaps placed yet, and Pip doesn't sell the L brush yet.
 - The Oath cards reuse the 12 old perks (wording updated); per-Order tracks with keystones (PLAN-v2 section 4.3) are not built.
 - The Bulwark's slam that cracks tartar floors is not built (there are no tartar floor tiles).

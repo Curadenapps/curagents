@@ -3,7 +3,7 @@
 // real particle system and the real WebGL post pipeline, so the page cannot drift from the game.
 import * as T from './tokens';
 import { packs } from './brands';
-import { KE, plate, poly, plume, legsK, visorGlow, fnPath, drawRig, orderArts, staticPose, ORDER_IDS, type OrderArt } from './hero';
+import { KE, plate, poly, plume, legsK, visorGlow, fnPath, softHalo, drawRig, orderArts, staticPose, ORDER_IDS, type OrderArt } from './hero';
 import { kit, idbRefill, idbHolder, blob, enamel, gumFold, glowEye, crownCap, foamCluster, crystalShard, lightShaft, fogBand, brush, pasteDollop, palateRidges, tongueSurface, salivaPool, glint, silhouetteStrip } from './kit';
 import { Player } from '../game/player';
 import { Hud } from '../ui/hud';
@@ -508,7 +508,7 @@ function proportions(ctx: Ctx, w: number, h: number) {
 }
 
 // ---- hero options ----
-// Six deviations of today's knight. Same crown helm and visor glow, no face. What changes is the body
+// Eight deviations of today's knight. Same crown helm and visor glow, no face. What changes is the body
 // (knight proportions: about 2.5-3 heads instead of 1.6), the helm's silhouette and the dental gear.
 // Feet at (0,0), facing right, about 58 units tall. mode 'scene' draws the body, 'glow' the emissive parts.
 type KMode = 'scene' | 'glow';
@@ -595,7 +595,7 @@ function knightBulwark(ctx: Ctx, mode: KMode) {
   ctx.fillStyle = mix(B.ink, '#FFFFFF', 0.25); ctx.fill(bars);
 }
 // D. Sentinel: tall and calm. Long legs, a long tabard to the knee, a wide-brimmed crown helm (three tall cusps above
-//    the brim, the slit in its shadow), one round pauldron, the brush carried upright like a spear.
+//    the brim, the slit in its shadow), one round pauldron, and the long angled interdental handle carried as a scythe.
 const SENTINEL_SLIT = poly([0, -45.6, 10.5, -45.6, 10.5, -44, 0, -44]);
 function knightSentinel(ctx: Ctx, mode: KMode) {
   const pr = B.blue, dk = B.blueDark;
@@ -608,7 +608,7 @@ function knightSentinel(ctx: Ctx, mode: KMode) {
   // back arm hangs, front hand holds the spear upright
   ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-5, -38); ctx.quadraticCurveTo(-8, -31, -7, -25); ctx.stroke();
   plate(ctx, fnPath((p) => p.roundRect(-9.5, -26.5, 5, 5, 1.8)), { base: KE.shade, shade: KE.deep, sx: -6, sy: -26, sr: 3 });
-  brush(ctx, 11, 4, 70, { angle: -Math.PI / 2 + 0.04, handle: pr });
+  idbHolder(ctx, 9, 6, 74, { kind: 'angled', angle: -0.05, loaded: T.idb.sizes.l.col, refillSize: 30 }); // the long angled IDB handle as a scythe
   ctx.strokeStyle = KE.cloth; ctx.lineWidth = 3.8; ctx.beginPath(); ctx.moveTo(5, -38); ctx.quadraticCurveTo(9, -35, 10.5, -30); ctx.stroke();
   plate(ctx, fnPath((p) => p.roundRect(8, -32.5, 5.6, 5.4, 1.9)), { sx: 11, sy: -32, sr: 3.4 });
   plate(ctx, fnPath((p) => p.ellipse(6.5, -38.5, 5, 4, 0.2, 0, TAU)), { sx: 8, sy: -40, sr: 4.5, gloss: [6.5, -40, 1.5, 0.7] });
@@ -699,6 +699,85 @@ function knightDuelist(ctx: Ctx, mode: KMode) {
   ctx.restore();
 }
 
+/** A sonic toothbrush as a lance: long white body, a grey grip band, a slim neck and a small head. Glow mode adds the buzz. */
+function sonicLance(ctx: Ctx, x: number, y: number, len: number, angle: number, glow = false) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+  const body = len * 0.62, neck = len * 0.28, head = len * 0.1;
+  if (glow) { for (let i = 1; i <= 3; i++) { ctx.strokeStyle = `rgba(204,216,237,${0.5 - i * 0.12})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(body + neck + head * 0.5, 0, 3 + i * 3.2, -0.9, 0.9); ctx.stroke(); } softHalo(ctx, body + neck + head * 0.5, 0, 12, '#CCD8ED', 0.5); ctx.restore(); return; }
+  plate(ctx, fnPath((p) => p.roundRect(0, -2.6, body, 5.2, 2.6)), { sx: body * 0.5, sy: 1, sr: body * 0.55, gloss: [body * 0.45, -1.4, body * 0.25, 0.6] });
+  ctx.fillStyle = '#8E99A8'; ctx.fillRect(body * 0.18, -2.6, body * 0.12, 5.2);
+  ctx.fillStyle = B.blue; ctx.beginPath(); ctx.arc(body * 0.62, -2.6, 1.1, 0, TAU); ctx.fill(); // the power button
+  ctx.fillStyle = '#E8EEF9'; ctx.beginPath(); ctx.moveTo(body, -1.6); ctx.lineTo(body + neck, -0.8); ctx.lineTo(body + neck, 0.8); ctx.lineTo(body, 1.6); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.roundRect(body + neck, -1.4, head, 2.8, 1.2); ctx.fill();
+  ctx.strokeStyle = '#DDE7F6'; ctx.lineWidth = 0.6; for (let i = 0; i < 6; i++) { const fx = body + neck + 0.6 + i * (head - 1.2) / 5; ctx.beginPath(); ctx.moveTo(fx, -1.4); ctx.lineTo(fx, -4.2); ctx.stroke(); }
+  ctx.restore();
+}
+/** A baby teething ring as a ring blade: a soft pastel loop with nubs around it. `spin` turns the nubs. */
+function teether(ctx: Ctx, x: number, y: number, r: number, spin: number, col = '#9FD8F0') {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
+  const shade = mix(col, '#1A3A5C', 0.35), ring = fnPath((p) => { p.arc(0, 0, r, 0, TAU); p.arc(0, 0, r * 0.58, 0, TAU, true); });
+  for (let i = 0; i < 10; i++) { const a = (i / 10) * TAU; ctx.fillStyle = i % 2 ? col : mix(col, '#FFFFFF', 0.3); ctx.beginPath(); ctx.arc(Math.cos(a) * r * 1.02, Math.sin(a) * r * 1.02, r * 0.17, 0, TAU); ctx.fill(); }
+  ctx.globalAlpha = 0.92; ctx.fillStyle = col; ctx.fill(ring, 'evenodd'); ctx.globalAlpha = 1;
+  ctx.save(); ctx.clip(ring, 'evenodd'); ctx.fillStyle = shade; ctx.globalAlpha = 0.45; ctx.beginPath(); ctx.arc(r * 0.25, r * 0.25, r * 1.1, 0, TAU); ctx.arc(-r * 0.1, -r * 0.1, r * 1.05, 0, TAU, true); ctx.fill('evenodd'); ctx.restore();
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(0, 0, r * 0.8, 3.6, 4.6); ctx.stroke();
+  ctx.restore();
+}
+
+// G. Lancer: planted and charging, the sonic brush levelled from the hip in both hands like a lance. Round shoulder
+//    plates, a short cape, a helm with a short upright crest of bristles and a cross visor. The lance head buzzes.
+const LANCER_VISOR = poly([0, -48.4, 10, -48.4, 10, -46.8, 5.6, -46.8, 5.6, -43.4, 4.2, -43.4, 4.2, -46.8, 0, -46.8]);
+function knightLancer(ctx: Ctx, mode: KMode) {
+  const pr = B.blue, dk = B.blueDark;
+  if (mode === 'glow') { visorGlow(ctx, LANCER_VISOR, 5, -46.5, 16); sonicLance(ctx, -2, -25, 52, -0.06, true); return; }
+  const cape = fnPath((p) => { p.moveTo(-6, -37); p.quadraticCurveTo(-15, -30, -16, -17); p.lineTo(-11, -19); p.lineTo(-9, -15); p.quadraticCurveTo(-6, -25, -1, -36); p.closePath(); }); ctx.fillStyle = dk; ctx.fill(cape);
+  legsK(ctx, -19, 16, 4.8, [-3, -8], [3, 7], KE.cloth, true);
+  plate(ctx, fnPath((p) => { p.moveTo(-9, -37); p.quadraticCurveTo(-11, -28, -8, -19); p.lineTo(8, -19); p.quadraticCurveTo(11, -28, 9, -37); p.quadraticCurveTo(0, -39.5, -9, -37); }), { sx: 3, sy: -32, sr: 11, gloss: [4.5, -33.5, 2.2, 1] });
+  ctx.save(); ctx.clip(fnPath((p) => p.rect(-12, -30, 24, 6))); ctx.fillStyle = pr; ctx.fillRect(-12, -30, 24, 6); ctx.restore();
+  ctx.fillStyle = '#FFFFFF'; ctx.fillRect(-9.6, -26, 19.2, 1.4); ctx.fillStyle = B.ink; ctx.fillRect(-8.6, -21, 17.2, 2.4);
+  // both hands on the lance at the hip
+  sonicLance(ctx, -2, -25, 52, -0.06);
+  ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-6, -34); ctx.quadraticCurveTo(-6, -28, 1, -25.5); ctx.stroke();
+  plate(ctx, fnPath((p) => p.roundRect(-1.5, -28, 5.4, 5.2, 1.8)), { base: KE.shade, shade: KE.deep, sx: 1, sy: -27.5, sr: 3 });
+  ctx.strokeStyle = KE.cloth; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(6, -34); ctx.quadraticCurveTo(10, -30, 12.5, -26.5); ctx.stroke();
+  plate(ctx, fnPath((p) => p.roundRect(10.4, -29, 5.6, 5.4, 1.9)), { sx: 13, sy: -28.5, sr: 3.4 });
+  for (const [sx, k] of [[-9, -1], [9, 1]] as [number, number][]) plate(ctx, fnPath((p) => p.ellipse(sx, -35.5, 5, 4.2, 0, 0, TAU)), k < 0 ? { base: KE.shade, shade: KE.deep, sx: sx + 1.5, sy: -37, sr: 4.5 } : { sx: sx + 1.5, sy: -37, sr: 4.8, gloss: [sx + 1, -37, 1.6, 0.8] });
+  ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -38.6, 8.6, 2.2, 0, 0, TAU); ctx.fill();
+  plume(ctx, 0.5, -55.5, 9, pr, 9, -2.1, -1.0, 0);
+  plate(ctx, fnPath((p) => { p.moveTo(-9.5, -39.5); p.quadraticCurveTo(-11.5, -48, -9, -53); p.quadraticCurveTo(-6, -57.5, 0.5, -56.5); p.quadraticCurveTo(7, -57.5, 10, -53); p.quadraticCurveTo(12, -47, 10.4, -39.5); p.quadraticCurveTo(0.5, -37.2, -9.5, -39.5); p.closePath(); }), { sx: 5, sy: -48, sr: 11.5, gloss: [5, -53, 2.4, 1.1] });
+  ctx.fillStyle = B.ink; ctx.fill(LANCER_VISOR);
+}
+
+// H. Kunoichi: low and quick, crouched to spring. A narrow crown helm wrapped in a long scarf, light boots, and teething
+//    rings as ring blades: one held back ready, one already spinning out ahead.
+const KUNOICHI_SLIT = poly([1.5, -38.6, 10, -40, 10, -38.6, 1.5, -37.4]);
+function knightKunoichi(ctx: Ctx, mode: KMode) {
+  const pr = B.blue, dk = B.blueDark;
+  if (mode === 'glow') { visorGlow(ctx, KUNOICHI_SLIT, 6, -38.5, 14); for (let i = 0; i < 3; i++) { ctx.strokeStyle = `rgba(159,216,240,${0.45 - i * 0.12})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(30, -26, 8 + i * 3, 2.4, 3.9); ctx.stroke(); } return; }
+  // long scarf streaming back
+  const scarf = fnPath((p) => { p.moveTo(-4, -33); p.quadraticCurveTo(-16, -34, -27, -27); p.lineTo(-25, -24); p.quadraticCurveTo(-15, -29, -5, -30); p.closePath(); p.moveTo(-5, -31); p.quadraticCurveTo(-14, -26, -22, -18); p.lineTo(-19, -17); p.quadraticCurveTo(-12, -24, -4, -29); p.closePath(); });
+  ctx.fillStyle = B.cerise; ctx.fill(scarf);
+  // crouch: knees bent wide
+  ctx.lineCap = 'round'; ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-2, -14); ctx.quadraticCurveTo(-12, -11, -9, -3); ctx.stroke();
+  ctx.strokeStyle = KE.leg; ctx.beginPath(); ctx.moveTo(3, -14); ctx.quadraticCurveTo(13, -14, 10, -3); ctx.stroke();
+  for (const [bx, d] of [[-9.5, true], [10.5, false]] as [number, boolean][]) { ctx.fillStyle = d ? mix(KE.base, '#000000', 0.22) : KE.base; ctx.beginPath(); ctx.ellipse(bx + 1.5, -1.8, 4.6, 1.9, 0, 0, TAU); ctx.fill(); ctx.fillStyle = pr; ctx.fillRect(bx - 1.6, -6.2, 4.2, 1.6); }
+  // light body, wrapped
+  ctx.fillStyle = KE.cloth; ctx.beginPath(); ctx.roundRect(-6.5, -31, 13, 18, 4); ctx.fill();
+  ctx.fillStyle = pr; ctx.beginPath(); ctx.moveTo(-6.5, -29); ctx.lineTo(6.5, -29); ctx.lineTo(5.5, -15); ctx.lineTo(-5.5, -15); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = B.ink2; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-6, -27); ctx.lineTo(6, -18); ctx.moveTo(6, -27); ctx.lineTo(-6, -18); ctx.stroke();
+  ctx.fillStyle = B.ink; ctx.fillRect(-6.6, -16.4, 13.2, 2);
+  // back hand holds a ring ready behind; front arm follows through from the throw
+  ctx.strokeStyle = '#0D1430'; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.moveTo(-5, -28); ctx.quadraticCurveTo(-12, -31, -14, -36); ctx.stroke();
+  teether(ctx, -16, -40, 5.5, 0.4, '#F6A5CB');
+  plate(ctx, fnPath((p) => p.roundRect(-16.5, -38.6, 5, 4.8, 1.8)), { base: KE.shade, shade: KE.deep, sx: -14, sy: -38, sr: 3 });
+  ctx.strokeStyle = KE.cloth; ctx.lineWidth = 3.8; ctx.beginPath(); ctx.moveTo(5, -28); ctx.quadraticCurveTo(12, -28, 17, -25); ctx.stroke();
+  plate(ctx, fnPath((p) => p.roundRect(15.6, -27.6, 5.4, 5, 1.9)), { sx: 18, sy: -27, sr: 3.2 });
+  teether(ctx, 30, -26, 6.2, 1.2, '#9FD8F0');
+  // narrow crown helm, the scarf wrapped round its lower edge
+  plate(ctx, fnPath((p) => { p.moveTo(-7, -33); p.quadraticCurveTo(-9, -41, -7, -45.5); p.quadraticCurveTo(-5.5, -49.5, -2.6, -46.5); p.quadraticCurveTo(0.5, -50, 3.4, -46.5); p.quadraticCurveTo(6.5, -49.5, 8.4, -45); p.quadraticCurveTo(10.6, -40, 9.4, -33); p.quadraticCurveTo(1, -31.4, -7, -33); p.closePath(); }), { sx: 5, sy: -41, sr: 9, gloss: [4.5, -45, 2, 0.9] });
+  ctx.fillStyle = B.ink; ctx.fill(KUNOICHI_SLIT);
+  ctx.fillStyle = B.cerise; ctx.beginPath(); ctx.moveTo(-7.4, -36); ctx.quadraticCurveTo(1, -33.6, 9.8, -35.6); ctx.lineTo(9.6, -32.4); ctx.quadraticCurveTo(1, -30.4, -7.2, -32.6); ctx.closePath(); ctx.fill();
+}
+
 function heroOptions() {
   const tile = (fn: (c: Ctx, m: KMode) => void) => (ctx: Ctx, w: number, h: number) => { // flat sketch: no bloom, so shapes and slits stay readable
     const s = Math.min(3.6, w / 46), x = w * 0.44, gy = h * 0.9, tx = w - 26;
@@ -716,12 +795,14 @@ function heroOptions() {
     ['A', 'Vanguard', knightVanguard, 'Today\'s knight grown up. The helm keeps its four cusps but rises into a coronet, with a T-visor instead of the horizontal slit and a bristle plume off the back cusp. Incisor-shaped shoulder plates, a breastplate over the brand tabard with the white stripe, a half cape, and the brush-blade carried point down like a longsword.', 'The safest step: everyone still reads the same hero. The T-visor and plume carry the originality.'],
     ['B', 'Ranger', knightRanger, 'The archer of the Order, built around the interdental bow. A swept canine-tooth sallet with an angled slit, a short hooded mantle lined in gum pink, a bandolier and quiver of colour-coded refills, tall boots, and the ring holder raised to shoot.', 'Most original silhouette and the best fit for the shot mechanic. The slimmest build, so it needs strong poses to feel heroic.'],
     ['C', 'Bulwark', knightBulwark, 'The shield of the Order. Short and broad, with a flat-cusped molar helm and a visor of glowing bristle bars. Molar-cusp shoulder plates, a round shield in the brand colour with the crown on it, and the brush-blade slung across the back.', 'Reads instantly at 1 tile and feels sturdy and safe. The heaviest look, so it moves slower and plays less nimbly than today.'],
-    ['D', 'Sentinel', knightSentinel, 'Tall and calm. Long legs, a long brand tabard to the knee, a wide-brimmed crown helm with three tall cusps (the slit sits in the shadow of the brim), one round shoulder plate, and the brush carried upright like a spear.', 'The most noble silhouette and the easiest to read from far away. The tallest, so low gaps and crawling need care.'],
+    ['D', 'Sentinel', knightSentinel, 'Tall and calm. Long legs, a long brand tabard to the knee, a wide-brimmed crown helm with three tall cusps (the slit sits in the shadow of the brim), one round shoulder plate, and the long angled interdental handle carried as a scythe, a large refill at the bend for the blade.', 'The most noble silhouette and the easiest to read from far away. The tallest, so low gaps and crawling need care.'],
     ['E', 'Squire Knight', knightSquire, 'Stout and bouncy, caught mid-hop: the round two-cusp helm of today, grown up, its visor lid raised over two glowing eye slits, a short flared cape, and two brushes: one wound up overhead, one held low behind for the follow-up.', 'The most lively and closest to a young audience while staying a knight. The eye slits read as a face, so keep them small.'],
     ['F', 'Crescent', knightDuelist, 'Lean, in a lunge. A sleek long helm with a horsetail of bristles from the crest, one plate on the back shoulder, a half cape off it. Fights with a tongue cleaner held like a crescent glaive: wide sweeping arcs, and it can be thrown and caught again.', 'The most original weapon, and a product many players have never used, so it teaches something. Needs its own throw-and-return move; product shape and name are placeholders until the brand team checks them.'],
+    ['G', 'Lancer (the Bulwark)', knightLancer, 'Sean, 26 Nov: this is the look for the Bulwark Order. Planted and charging, a sonic toothbrush levelled from the hip in both hands like a lance, its head humming. Round shoulder plates, a short cape, a helm with a short upright crest of bristles and a cross visor.', 'Heavy, direct and easy to read: charge, pierce, hold the line. Based on the Hydrosonic; product shape and name are placeholders until the brand team checks them.'],
+    ['H', 'Kunoichi', knightKunoichi, 'Low and quick, crouched to spring. A narrow crown helm wrapped in a long scarf, light boots, and teething rings as ring blades: one held back ready, one already spinning out ahead.', 'The fastest and most playful, with a ranged weapon that comes back like a boomerang. Based on the baby teething ring; keep it clearly a soft toy, never sharp. Placeholder until the brand team checks it.'],
   ];
-  return `<section id="options">${head(8, 'Hero options', 'Six deviations of today\'s knight. The crown helm and visor glow stay; there is no face. Each one fixes the body (knight proportions, about 2.5-3 heads tall instead of 1.6, real armour) and gives the helm its own silhouette, with dental gear in place of borrowed shapes. Large figure for the look, small one at 1 tile for the read in game. Sketches, not final art.')}
-  <div class="grid" style="grid-template-columns:0.7fr 1fr 1fr 1fr;gap:18px">
+  return `<section id="options">${head(8, 'Hero options', 'Eight deviations of today\'s knight. The crown helm and visor glow stay; there is no face. Each one fixes the body (knight proportions, about 2.5-3 heads tall instead of 1.6, real armour) and gives the helm its own silhouette, with dental gear in place of borrowed shapes. Large figure for the look, small one at 1 tile for the read in game. Sketches, not final art.')}
+  <div class="grid" style="grid-template-columns:repeat(4,minmax(0,1fr));gap:18px">
   <div class="card">${aLit(380, today)}<div class="pad"><h4>Today</h4><p>For comparison: 1.6 tiles, helm about a third of the height on a small body. The round helm and horizontal visor are what read as a mask.</p></div></div>
   ${O.map(([k, n, fn, d, trade]) => `<div class="card">${a2d(380, tile(fn))}<div class="pad"><h4>${k} &nbsp;&middot;&nbsp; ${n}</h4><p>${d}</p><p><b>Trade-off</b> ${trade}</p></div></div>`).join('')}</div></section>`;
 }
