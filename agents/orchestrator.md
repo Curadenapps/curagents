@@ -1,11 +1,14 @@
 ---
 name: curaden-orchestrator
 description: >
-  Master router and entry point for interactive Curaden agent activity. Classifies
-  incoming triggers (user request, webhook) and dispatches to the correct specialist
-  agent, collects their structured results and reports. Answers "agent status" and
-  "inbox check-up" itself from the Notion Agent control room and the Inbox. Scheduled
-  runs (cloud Routines, the Webex courier) call specialists directly (RUNTIME.md).
+  Master router and entry point for Curaden agent activity. Classifies incoming
+  triggers (user request, webhook) and dispatches to the correct specialist agent,
+  collects their structured results and reports. Answers "agent status" and "inbox
+  check-up" itself from the Notion Agent control room and the Inbox. Since 26 Nov 2026
+  it also runs on its own every weekday ("Orchestrator daily", §8), from whichever
+  instance fires first: it moves Asana tasks that are plainly in the wrong column and
+  lists the ones that need a decision, with registrations waiting on a person. Other scheduled runs (cloud Routines, the Webex
+  courier, Fabian's PC tasks) call their specialists directly (RUNTIME.md).
 model: claude-sonnet-5-5
 tools: Read, Write, AsanaAPI, NotionAPI, JiraAPI, Bash
 trigger:
@@ -13,7 +16,11 @@ trigger:
   - type: manual
     phrases: ["run agents", "orchestrate", "what needs attention", "agent status", "dispatch", "inbox check-up", "check the inbox", "what did the agents pick up"]
   - type: schedule
-    note: "None of its own. Cloud Routines and the Webex courier call specialist agents directly (§1 'Schedules', RUNTIME.md)"
+    cron: "CRON_TZ=Europe/Zurich 45 7 * * 1-5"
+    label: 'Claude Routine "Orchestrator daily (Fabian)" while Sean is away (any account may run a copy; the first of the day works, the rest stop), weekdays 07:45: board moves, moves to decide (§8)'
+  - type: manual
+    phrases: ["do the board moves", "board moves"]
+    note: "§8 now, including the 'moves to decide' subtasks someone ticked"
   - type: webhook
     note: "See §1 — asana.task.*, github.pull_request.*, github.push"
 memory:
@@ -28,6 +35,7 @@ memory:
   write:
     - "notion: 🚩 Inbox, rows with Source `agent` only (escalations and flags for Sean, §5)"
     - "notion: one Agent run log row per run (Agent `orchestrator`, or `other` if the registry has no such option)"
+    - "asana (through asana-maintenance, §8): section moves on BOB App, App Tasks, Requests & Feedback and BOB Market Rollouts, by the move rules or a ticked subtask only; the standing task 'Orchestrator: board moves to decide' and its subtasks"
     - .truth-cache/dispatch-log.json        # local interactive runs only
 idempotency_key: "orchestrator:{trigger_label}:{date}"
 dry_run: false
@@ -71,7 +79,9 @@ comes from Notion instead of `dream.md` §4, and escalations go to the Inbox.
 | `triage feedback` / `what should we build next` / `send qa report` | feedback-qa |
 | `meeting notes` / `summarise meeting` / `webex recap` / `log the webex meeting` / `fetch from fireflies` | meeting-notes (PC; Webex Meeting recap via `skills/webex-web`, Fireflies or paste as fallbacks) |
 | `rollout status` / `onboard * for *` / `super user for *` / `admin access for *` / `build module *` / `training plan for *` / `partner prep *` / `partner follow-up *` / `audience brief *` / `what can Blanca take` / `rollout watch` / `rock n rollout` | market-rollout (signs in Asana as "Rock 'n' Rollout 🎸"; structural board edits only after Sean says go) |
-| `bob admin *` / `admin console *` / `pending registrations` / `approve practice *` / `reject practice *` / `create super user *` / `add a coach *` / `practice usage` / `export bob scores` / `admin report *` / `post news in the app` | Orchestrator itself with `skills/bob-admin` (the `bob-admin` CLI). PC only: it runs on Sean's own sign-in. Reads straight away; every write as `--dry-run` first, sent only after Sean's yes for that action; prod writes stay locked unless Sean unlocks his shell |
+| `bob admin *` / `admin console *` / `pending registrations` / `approve practice *` / `reject practice *` / `create super user *` / `add a coach *` / `practice usage` / `export bob scores` / `admin report *` / `post news in the app` | Orchestrator itself with `skills/bob-admin` (the `bob-admin` CLI). PC only: it runs on the person's own sign-in. Reads straight away; every write as `--dry-run` first, sent only after a yes for that action; prod writes stay locked unless the person unlocks their shell |
+| `practice approvals` / `auto-approve` / `duplicate sign-ups` / `who signed up twice` | `skills/bob-admin` "Practice approvals run" (PC with BOB Admin prod signed in; scheduled on Fabian's PC). `pending registrations` alone stays read-only (`practices check`) |
+| `do the board moves` / `board moves` | Orchestrator itself, §8 steps 2–4 now (any instance; it still writes its run-log row) |
 | `qa the bob app` / `bob-qa *` / `run the qa scenario` / `smoke test bob` / `check the coach flow` | Orchestrator itself with `skills/bob-qa` (the `bob-qa` CLI). PC only, on Sean's own coach sign-in on test. `qa run smoke` straight away; `qa run coach-loop` and other writes only after Sean's yes for that run; never on prod |
 | `growth plan *` / `acquisition plan *` / `growth review` / `growth pulse` / `content calendar` / `draft post *` / `partner kit *` / `event prep *` / `website check` / `store listing check` / `follow up sign-ups *` / `new experiment *` / `campaign brief *` / `how do we get more clinics` | growth (drafts in BOB Growth only; website fixes via webflow, clinical wording via brand-asset, approved clinics to market-rollout) |
 | `sync revolvenote` / `push revolvenote` | curaden-communications › revolvenote-sync |
@@ -97,6 +107,8 @@ Times are Zurich.
 
 | When | Started by | Agent |
 |------|------------|-------|
+| Weekdays 07:45 | Routine "Orchestrator daily (Fabian)" (any instance; first of the day works) | orchestrator §8: board moves, the "board moves to decide" task, registrations waiting on a person |
+| Weekdays 08:50, 12:50, 16:50 | PC task "Practice approvals (Fabian)" on Fabian's PC | `skills/bob-admin` "Practice approvals run": auto-approve, exceptions to Fabian, duplicate sign-up tasks |
 | Weekdays 07:58 + 13:58 | Routine "Truth Catcher scan" (Curaden) | truth-catcher |
 | Weekdays 08:20 | Routine "Boom Boom Derek (Curaden)" | boom-boom-derek, ping to the Webex outbox |
 | Weekdays 08:02, 09:02, 12:02, 17:02 | PC task "Webex courier (Personal)" | outbox posts, then webex-sweep |
@@ -342,7 +354,8 @@ grouped by Status (pushed, done, info only, skip). The agents use the unfiltered
 ## 7. Hard Rules
 
 - Never perform domain actions directly. The orchestrator's only writes are Inbox rows
-  with Source `agent` (§5), its run-log row and, locally, `dispatch-log.json`.
+  with Source `agent` (§5), its run-log row, the §8 section moves (through
+  asana-maintenance) and, locally, `dispatch-log.json`.
 - Never edit specs, `dream.md` included, during a run. Spec fixes go through a PR.
 - Never skip an agent because its last run was recent: respect the trigger schedule.
 - Never run destructive Asana operations (task delete, project archive): not in scope
@@ -357,3 +370,87 @@ grouped by Status (pushed, done, info only, skip). The agents use the unfiltered
   automated agent; never present an agent's message as Sean personally.
 - Inbox rows never hold patient data, phone numbers or email addresses, and partner
   messages stay internal (same rule as Webex Sweep).
+
+---
+
+## 8. Daily run (scheduled, any instance)
+
+Sean, 26 Nov 2026: the orchestrator runs on its own, not only on request, and has to
+work from more than one instance (Sean's Curaden and Personal accounts, Fabian's
+account, a session someone opens by hand). So the daily run doesn't belong to one
+account: **any instance may start it, the first one of the day does the work, the
+others stop** (step 1). While Sean is away it is Fabian's Claude Routine
+**"Orchestrator daily (Fabian)"**, weekdays 07:45 Zurich (setup:
+`docs/app-support-quickstart.md`, "Setup details" section 5). Another account can run
+a copy too, with its own name in Started by.
+
+It needs only the Asana connector and Notion **reading plus inserting** (the run log),
+so it works with Fabian's Notion API key (read and insert only). It writes nothing
+else to Notion. It never waits for anyone: what the rules below settle, it does; the
+rest goes on one list in Asana.
+
+It doesn't repeat what has its own schedule: Truth Catcher (alignment, closing done
+tasks), the run-log check (missed and failed runs, the Inbox), App Support (the form
+board's replies and columns), roadmap-watch and the practice approvals run.
+
+1. **First of the day?** The switch (`RUNTIME.md`): find the registry row whose
+   Started by names this Routine or task; Account `Paused` or another account → log
+   `no-op` and stop. Then read the Agent run log (Fabian: the API query on the run
+   log data source; others: view mode) for a row from today (Zurich) whose Run starts
+   with `orchestrator ` (Agent is `other` until the select gets an `orchestrator`
+   option) and whose Outcome is `ok` or `no-op` (a `failed` row doesn't count: try again). One exists →
+   another instance already did today's run: stop at once, no row. Then read `dream.md` §2–3. Two instances starting in the
+   same minute is harmless: a move made twice lands in the same column, and step 3
+   searches before it adds anything.
+2. **Board moves.** Read the open tasks (and tasks completed in the last 14 days) on
+   BOB App `1204489225205419`, App Tasks, Requests & Feedback `1200298616652229` and
+   BOB Market Rollouts `1220436356920176`, with their section, assignee, completed
+   flag, `Jira status` field and the date they came into their section (stories). A
+   board this account can't read: skip it and say so in the summary. Move a task only
+   when one of these rules fits it exactly, through asana-maintenance ("Route Task",
+   one call at a time, no comment, no completion):
+
+   | Rule | Board | Task | Moves to |
+   |------|-------|------|----------|
+   | M1 | Any of the three | Completed, but still in an open section | The board's done section: BOB App Complete `1204489225205425`; App Tasks Done `1200681385779297`; Market Rollouts its done column, if it has one |
+   | M2 | BOB App | `Jira status` is Done, task still in To-Do, In Progress or In Development | Complete `1204489225205425` (not ticked: completing stays with Truth Catcher and the owner) |
+   | M3 | BOB App | In Webex Inbox `1220482901563173` for 2+ working days **and** has an assignee (an owner means it was triaged) | To-Do `1211121666490879` |
+
+   M1 is the only rule on BOB Market Rollouts (market-rollout owns that board's
+   structure). A section that doesn't exist: skip the move and note it in the summary.
+   App Support's own moves on the form board (Awaiting Feedback, closing) stay with it.
+   Each move goes in the run summary as "{task link}: {from} → {to} ({rule})".
+3. **Moves to decide.** Anything else that looks out of place goes on a list, not
+   moved:
+   - two open tasks about the same thing (for example an older "agree the approval
+     logic" task next to its replacement): which one to keep;
+   - a task in In Development that isn't Phinamic tech work (the dev-vs-internal
+     rule: In Development = Jira, Phinamic only): where it belongs;
+   - an open task sitting in Complete or Done, unassigned tasks in Webex Inbox for 5+
+     working days, and In Progress tasks with no activity for 30 days;
+   - a practice registration waiting on a person for 2+ working days: an open
+     "Approve or reject: practice" subtask (the practice approvals run makes them)
+     that old.
+
+   The list is **one standing Asana task, "Orchestrator: board moves to decide"**,
+   in no project, assigned to Fabian while Sean is away (to Sean from 4 Jan 2027).
+   Search for it first (`search_tasks`, that text, `completed: false`); create it only
+   when there's none; never a second one. Each finding is one subtask, unless an open
+   subtask already links that task: name "{task title}: {where it is} → {where it
+   should go}", notes with the task link and why in one or two lines. No names or
+   emails of clinicians. **Ticking a subtask is the OK**: the next run (or "do the
+   board moves" in any session) makes that move through asana-maintenance and
+   comments "Moved {date}" on the subtask. Commenting "skip" drops it. A subtask whose
+   task has since moved or closed by itself: comment "Done: settled" and tick it.
+   Registration subtasks are information only; they close when the practice is
+   decided.
+4. **Ticked moves.** Make the moves from subtasks ticked since the last run (step 3).
+5. **Run log**, always, also on failure: one row, Run `orchestrator {YYYY-MM-DD
+   HH:mm}`, Agent `orchestrator` (`other` if the select lacks it), Where and Account
+   of this instance, Outcome `ok` (moves made or subtasks added), `no-op` (nothing to
+   do) or `failed`, Summary "{n} moved ({rules}), {m} to decide, {k} registrations
+   waiting", the moves list in the row's body.
+
+Never: delete, complete, reassign or comment on a board task, create sections, touch
+a task's dates or followers, or move anything a rule or a ticked subtask doesn't name.
+On a "dry run" request it lists the moves instead of making them.

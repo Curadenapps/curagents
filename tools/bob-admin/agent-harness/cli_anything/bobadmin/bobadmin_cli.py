@@ -18,7 +18,7 @@ from typing import Any
 
 import click
 
-from cli_anything.bobadmin.core import spec
+from cli_anything.bobadmin.core import approval, spec
 from cli_anything.bobadmin.core.client import (
     DEFAULT_ENV,
     ENVIRONMENTS,
@@ -566,6 +566,159 @@ def practices_decisions(ctx, practice_id, outcome, subsidiary_id, search, page, 
         "practiceId": practice_id, "outcome": outcome, "subsidiaryId": subsidiary_id, "search": search,
         "page": page, "limit": limit})),
         ["id", "practiceId", "practiceName", "countryCode", "outcome", "actorName", "decisionAt", "reason"])
+
+
+# ---- automatic approval (BA-324) -------------------------------------------
+CHECK_COLS = ["id", "countryCode", "verdict", "failed", "duplicate", "createdAt"]
+
+
+def _all_practices(c: Client) -> list[dict[str, Any]]:
+    req = Request("GET", "/practices", params={"limit": 100})
+    data = unwrap(fetch_all(c, req, c.call(req)))
+    rows = data.get("items") or data.get("rows") if isinstance(data, dict) else data
+    return [r for r in (rows or []) if isinstance(r, dict)]
+
+
+def _manual_countries(manual: tuple[str, ...]) -> list[str]:
+    if manual:
+        return [m for item in manual for m in item.split(",")]
+    env = os.environ.get("BOB_ADMIN_MANUAL_COUNTRIES")
+    return env.split(",") if env is not None else list(approval.DEFAULT_MANUAL_COUNTRIES)
+
+
+def _check_pending(c: Client, practice_ids: tuple[str, ...], manual: tuple[str, ...], countries: tuple[str, ...],
+                   mx: bool) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    everything = _all_practices(c)
+    wanted = {str(i) for i in practice_ids}
+    only = {x.strip().lower() for item in countries for x in item.split(",") if x.strip()}
+    pending = [p for p in everything if p.get("status") == "pending"
+               and (not wanted or str(p.get("id")) in wanted)
+               and (not only or approval.country(p) in only)]
+    lookup = approval.dns_mx_lookup() if mx else None
+    results = [approval.check_practice(p, everything, _manual_countries(manual), lookup) for p in pending]
+    return results, everything
+
+
+def check_options(f):
+    f = click.option("--no-mx", is_flag=True, help="Skip the mail-server lookup for the contact email's domain.")(f)
+    f = click.option("--country", "countries", multiple=True, metavar="CC",
+                     help="Only these countries (repeat or comma-separate), e.g. --country AE.")(f)
+    f = click.option("--manual-country", "manual", multiple=True, metavar="CC",
+                     help="Countries a person always approves (default: none, or BOB_ADMIN_MANUAL_COUNTRIES).")(f)
+    return f
+
+
+@practices.command("check")
+@click.argument("practice_ids", nargs=-1)
+@check_options
+@click.pass_context
+def practices_check(ctx, practice_ids, manual, countries, no_mx):
+    """Run the automatic-approval checks on pending registrations. Read-only.
+
+    Each one gets verdict 'approve' (every check passed) or 'exception' (a person
+    decides; 'failed' says why). Duplicates are matched against every practice
+    on the platform. Output has IDs, countries and reasons, no names or emails.
+    """
+    results, _ = _check_pending(client(ctx), practice_ids, manual, countries, not no_mx)
+    summary = {"pending": len(results), "approve": sum(r["verdict"] == "approve" for r in results),
+               "exception": sum(r["verdict"] == "exception" for r in results), "items": results}
+    if ctx.obj.get("json") or ctx.obj.get("fields") or ctx.obj.get("ids"):
+        emit(ctx, summary)
+    else:
+        rows = [{**r, "failed": ",".join(r["failed"]) or "-"} for r in results]
+        click.echo(f"{summary['pending']} pending: {summary['approve']} would be approved, "
+                   f"{summary['exception']} go to a person.")
+        if rows:
+            emit(ctx, rows, CHECK_COLS)
+        for r in results:
+            for chk in r["checks"]:
+                if not chk["ok"]:
+                    click.echo(f"  {r['id']}: {chk['check']}: {chk['detail']}")
+
+
+@practices.command("auto-approve")
+@check_options
+@click.option("--max", "max_approvals", type=int, default=10, show_default=True,
+              help="Approve at most this many in one run; the rest wait for the next.")
+@click.option("--training-in-days", type=int, default=14, show_default=True,
+              help="Placeholder training date, days from today (the API still requires one).")
+@click.pass_context
+def practices_auto_approve(ctx, manual, countries, no_mx, max_approvals, training_in_days):
+    """Approve every pending registration that passes all checks (BA-324).
+
+    The rest stay pending for a person, with the failed checks listed. Each
+    approval records a note saying it was automatic and which checks passed.
+    Use --dry-run first. On prod this needs BOB_ADMIN_PROD_WRITES=1, or the
+    narrower BOB_ADMIN_AUTO_APPROVE=1 that unlocks only this command.
+    """
+    c = client(ctx)
+    dry = bool(ctx.obj.get("dry_run"))
+    if not dry:
+        c.write_scope = "auto-approve"
+        c.check_write_allowed(Request("POST", "/practices/0/decisions/approve"))
+        if not ctx.obj.get("yes"):
+            raise BobAdminError("This approves practices. Re-run with --yes (or --dry-run to preview).")
+    results, _ = _check_pending(c, (), manual, countries, not no_mx)
+    passing = [r for r in results if r["verdict"] == "approve"]
+    approved, skipped, decided, errors, planned = [], [], [], [], []
+    for r in passing:
+        if len(approved) + len(planned) >= max_approvals:
+            skipped.append(r["id"])
+            continue
+        body = {"isIdbOffice": False, "hasIdbKit": False,
+                "appTrainingDate": approval.training_date(training_in_days), "note": approval.approval_note(r)}
+        req = Request("POST", f"/practices/{r['id']}/decisions/approve", body=body)
+        if dry:
+            planned.append({"id": r["id"], **req.describe(c.base)})
+            continue
+        try:
+            fresh = unwrap(c.call(Request("GET", f"/practices/{r['id']}")))
+            if isinstance(fresh, dict) and fresh.get("status") not in (None, "pending"):
+                decided.append(r["id"])
+                continue
+            c.call(req)
+            approved.append(r["id"])
+        except BobAdminError as e:
+            errors.append({"id": r["id"], "error": str(e)})
+    out = {
+        "env": c.env, "dryRun": dry, "pending": len(results),
+        "approved": approved, "wouldApprove": planned,
+        "exceptions": [{"id": r["id"], "countryCode": r["countryCode"], "failed": r["failed"],
+                        "duplicate": r["duplicate"], "duplicates": r["duplicates"],
+                        "details": [f"{x['check']}: {x['detail']}" for x in r["checks"] if not x["ok"]]}
+                       for r in results if r["verdict"] == "exception"],
+        "waitingForNextRun": skipped, "alreadyDecided": decided, "errors": errors,
+    }
+    emit(ctx, out)
+    if errors:
+        ctx.exit(1)
+
+
+@practices.command("duplicates")
+@click.option("--since", help="Only groups with a practice created on or after this date (YYYY-MM-DD). Default: 30 days ago.")
+@click.option("--days", type=int, default=30, show_default=True, help="Same as --since, counted back from today.")
+@click.option("--include-possible", is_flag=True, help="Also list weaker matches (a common name, a shared phone).")
+@click.pass_context
+def practices_duplicates(ctx, since, days, include_possible):
+    """Find people who signed up more than once (pending or already approved). Read-only.
+
+    'strong' groups are the same person or practice (same contact name plus the
+    same city, postcode, phone, similar email or practice name; or the same
+    email for the same practice). Output has IDs and reasons only; the 'key' is
+    stable, so a run can tell a group it already raised.
+    """
+    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    start = (_dt.fromisoformat(since).replace(tzinfo=_tz.utc) if since
+             else _dt.now(_tz.utc) - _td(days=days))
+    groups = approval.duplicate_groups(_all_practices(client(ctx)), start, include_possible)
+    out = {"since": start.date().isoformat(), "groups": len(groups), "items": groups}
+    if ctx.obj.get("json") or ctx.obj.get("fields") or ctx.obj.get("ids"):
+        emit(ctx, out)
+    else:
+        click.echo(f"{len(groups)} duplicate group(s) with a practice created since {out['since']}.")
+        for g in groups:
+            ids = ", ".join(f"{p['id']} ({p['status']})" for p in g["practices"])
+            click.echo(f"  {g['match']:8} {ids}  [{'; '.join(g['reasons'])}]{'  internal' if g['internal'] else ''}")
 
 
 @practices.command("create")

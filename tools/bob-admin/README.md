@@ -86,6 +86,9 @@ bob-admin users temp-password 42
 bob-admin practices pending
 bob-admin practices approve 12 --idb-office --idb-kit --training-date 2027-01-15
 bob-admin practices reject 13 --reason "Duplicate of practice 9"
+bob-admin practices check                                 # would each pending one auto-approve? (read-only)
+bob-admin --dry-run practices auto-approve                # then --yes to approve the ones that pass
+bob-admin practices duplicates --days 30                  # people who signed up twice (read-only)
 bob-admin practices members add 12 --type coach --first-name C --last-name D --email c@example.com
 
 # Products, news
@@ -103,6 +106,22 @@ Run `bob-admin` with no command for the interactive shell. Every command has
 
 Watch out: `users create` / `superusers create` **email an invite by default**
 (the API's default). Pass `--no-send-invite` if you don't want that.
+
+## Automatic approval and duplicate sign-ups
+
+`practices auto-approve` approves every pending registration that passes all the
+checks (complete, a real email that takes mail, not a test entry, not a Curaden or
+Phinamic address, a launched market not on the manual list, not a duplicate) and
+leaves the rest pending for a person, with the reasons. Each approval carries a note
+saying it was automatic and which checks passed. `practices check` shows the same
+verdicts without changing anything; `practices duplicates` finds people who signed up
+more than once, pending or already approved. Output holds IDs and reasons only, no
+names or emails. The rules are in `skills/bob-admin/SKILL.md`, "Automatic approval".
+
+On prod, `BOB_ADMIN_AUTO_APPROVE=1` unlocks `practices auto-approve` and nothing
+else; every other prod write still needs `BOB_ADMIN_PROD_WRITES=1`. Every launched
+market is approved automatically, the US included. To make a market manual:
+`--manual-country JP`, or `BOB_ADMIN_MANUAL_COUNTRIES=JP` on the PC that runs it.
 
 ## Every endpoint: `call`
 
