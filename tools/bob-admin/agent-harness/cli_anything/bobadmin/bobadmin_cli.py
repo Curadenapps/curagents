@@ -604,7 +604,7 @@ def check_options(f):
     f = click.option("--country", "countries", multiple=True, metavar="CC",
                      help="Only these countries (repeat or comma-separate), e.g. --country AE.")(f)
     f = click.option("--manual-country", "manual", multiple=True, metavar="CC",
-                     help="Countries a person always approves (default: US, or BOB_ADMIN_MANUAL_COUNTRIES).")(f)
+                     help="Countries a person always approves (default: none, or BOB_ADMIN_MANUAL_COUNTRIES).")(f)
     return f
 
 

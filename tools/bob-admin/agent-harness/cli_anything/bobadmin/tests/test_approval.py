@@ -114,12 +114,14 @@ def test_word_test_inside_a_name_is_fine():
 
 
 def test_market_checks():
+    # US is approved automatically by default (Sean, 26 Nov 2026)
     us = approval.check_practice(practice(7, status="pending", countryCode="US"), [], mx_lookup=mx_yes)
-    assert us["failed"] == ["market"]
+    assert us["verdict"] == "approve"
     none = approval.check_practice(practice(8, status="pending", subsidiaryId=None), [], mx_lookup=mx_yes)
     assert none["failed"] == ["market"]
-    ok = approval.check_practice(practice(7, status="pending", countryCode="US"), [], manual_countries=[], mx_lookup=mx_yes)
-    assert ok["verdict"] == "approve"
+    manual = approval.check_practice(practice(7, status="pending", countryCode="JP"), [], manual_countries=["jp"],
+                                     mx_lookup=mx_yes)
+    assert manual["failed"] == ["market"]
 
 
 def test_email_domain_without_mail_server():

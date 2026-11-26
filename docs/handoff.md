@@ -37,18 +37,23 @@ twice turned into an Asana conversation.
   groups with a practice from the last 30 days, all strong; 3 are internal (Curaden
   staff addresses), several pair a migrated old-app practice (25–28 Sep) with a new
   sign-up, so those people registered again instead of logging in.
+- **The US is approved automatically too** (Sean, 26 Nov: "fine HIPAA-wise"). The
+  manual-country list is empty by default; `BOB_ADMIN_MANUAL_COUNTRIES` can add one.
 - **Runs on Fabian's PC** ("Practice approvals (Fabian)", weekdays 08:50/12:50/16:50,
   setup `docs/app-support-quickstart.md` section 4): he owns support and BA-324, and
   Sean is away. Exceptions go on his "needs you" task; duplicates become App Tasks
   board tasks that App Support answers through his Review and invite flow.
-- **Orchestrator daily** (cloud, weekdays 07:45, `agents/orchestrator.md` §8): moves
-  tasks only by rules M1–M3 (completed but in an open column; Jira Done; assigned
-  Webex Inbox tasks after 2 working days), the rest on a weekly "Board moves to
-  decide" Inbox row.
-- **Open (Sean or Fabian):** create the Routine "Orchestrator daily (Curaden)"
-  (`docs/curaden-routines.md`) and the Agent registry rows "Orchestrator daily
-  (Curaden)" and "Practice approvals (Fabian)"; Fabian does section 4 (install, prod
-  sign-in, `BOB_ADMIN_AUTO_APPROVE`, the task). Training date and IDB fields are
+- **Orchestrator daily** (weekdays 07:45, `agents/orchestrator.md` §8): moves tasks
+  only by rules M1–M3 (completed but in an open column; Jira Done; assigned Webex
+  Inbox tasks after 2 working days); everything else becomes a subtask on the Asana
+  task "Orchestrator: board moves to decide" (Fabian now, Sean from January), and a
+  ticked subtask is the OK to move it. It has to work from several instances (Sean,
+  26 Nov), so the first run of the day does the work and the others stop. It runs as
+  Fabian's Routine "Orchestrator daily (Fabian)"; a Curaden copy is an optional backup.
+- **Open (Fabian, with Sean for the registry):** quickstart sections 4 (practice
+  approvals: install, prod sign-in, `BOB_ADMIN_AUTO_APPROVE`, the PC task) and 5 (the
+  orchestrator Routine), plus Agent registry rows "Practice approvals (Fabian)" and
+  "Orchestrator daily (Fabian)" with Account `Fabian`. Training date and IDB fields are
   placeholders until Phinamic moves that checklist after approval (BA-324). The
   old BOB App task "Practice validation after sign-up: agree the approval logic with
   Suncica" (1220306765390995, In Development) is superseded by 1220905863349438: the

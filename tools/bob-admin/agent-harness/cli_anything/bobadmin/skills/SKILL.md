@@ -107,7 +107,7 @@ pending for a person):
 | `email` | Not an address, a throwaway or placeholder domain, or the domain can't receive mail (DNS) |
 | `not_test` | "test", "demo", "qa", "asdf", "xxx" and the like as a word in the name, contact, address or email |
 | `not_internal` | A Curaden, Curaprox, bobscore or Phinamic address: staff set-ups go to a person |
-| `market` | No subsidiary for the country (not launched), or the country is on the manual list (default `US`: no BAA yet) |
+| `market` | No subsidiary for the country (not launched), or the country is on the manual list (empty by default: the US is approved automatically too, Sean 26 Nov 2026) |
 | `not_duplicate` | It matches another practice (below), pending or approved; rejected ones don't count |
 
 **Duplicates.** Same person or practice: the same contact name in the same country

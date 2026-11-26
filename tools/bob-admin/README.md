@@ -119,8 +119,9 @@ more than once, pending or already approved. Output holds IDs and reasons only, 
 names or emails. The rules are in `skills/bob-admin/SKILL.md`, "Automatic approval".
 
 On prod, `BOB_ADMIN_AUTO_APPROVE=1` unlocks `practices auto-approve` and nothing
-else; every other prod write still needs `BOB_ADMIN_PROD_WRITES=1`. The manual list
-defaults to `US` (`--manual-country`, or `BOB_ADMIN_MANUAL_COUNTRIES=US,JP`).
+else; every other prod write still needs `BOB_ADMIN_PROD_WRITES=1`. Every launched
+market is approved automatically, the US included. To make a market manual:
+`--manual-country JP`, or `BOB_ADMIN_MANUAL_COUNTRIES=JP` on the PC that runs it.
 
 ## Every endpoint: `call`
 

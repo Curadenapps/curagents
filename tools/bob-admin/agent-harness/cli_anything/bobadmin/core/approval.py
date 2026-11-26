@@ -25,8 +25,9 @@ from typing import Any, Callable, Iterable
 # --------------------------------------------------------------------------
 # settings (overridable from the CLI)
 # --------------------------------------------------------------------------
-# Countries that always go to a person. US: BAAs aren't in place yet (concept, Stage 3).
-DEFAULT_MANUAL_COUNTRIES = ("us",)
+# Countries that always go to a person. Empty: every launched market is approved
+# automatically, the US included (Sean, 26 Nov 2026: fine HIPAA-wise).
+DEFAULT_MANUAL_COUNTRIES: tuple[str, ...] = ()
 
 # Staff and partner-tech addresses: someone at Curaden or Phinamic registering a
 # practice is almost always a test or a set-up that needs a person ("Setup the

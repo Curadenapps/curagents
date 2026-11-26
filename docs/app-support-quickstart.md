@@ -250,6 +250,38 @@ bob-admin CLI on Fabian's own BOB Admin sign-in. What a run does:
 The PC has to be on, with the Claude desktop app open and BOB Admin prod signed in.
 A missed run is caught up by the next one; a registration waits a few hours at most.
 
+### 5. Cloud Routine "Orchestrator daily (Fabian)"
+
+The orchestrator's daily run (`agents/orchestrator.md` §8): it moves Asana tasks that
+are plainly in the wrong column (completed but still open, Jira Done, triaged Webex
+Inbox tasks) and puts everything else on one task for you, **"Orchestrator: board
+moves to decide"**, one subtask per move. Tick a subtask and the next run makes that
+move; comment "skip" to drop it. It also lists registrations that have waited on a
+person for 2+ working days. Any other instance may run it too; the first run of the
+day does the work.
+
+- **Name:** `Orchestrator daily (Fabian)`
+- **Repository:** `Curadenapps/curagents`
+- **Connectors:** Asana (signed in as Fabian). Notion through the API, same
+  environment and key as "App Support (Fabian)"
+- **Model:** Claude Sonnet
+- **Schedule:** weekdays at 07:45 Zurich. Routines use UTC: `45 6 * * 1-5`
+- **Agent registry:** a row with Started by "Orchestrator daily (Fabian)", Account
+  `Fabian`, Where Cloud, Spec `agents/orchestrator.md` §8, Run log name `orchestrator`
+- **Prompt:**
+
+> Account: Fabian. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Do the daily run exactly as
+> `agents/orchestrator.md` §8 describes, starting with step 1: switch on the Agent
+> registry row whose Started by names "Orchestrator daily (Fabian)", then stop if
+> another instance already ran today. Move only what its rules or a ticked subtask
+> name; never delete, complete, reassign or comment on a board task. Live: don't ask
+> me first. Don't commit or push. Use the Asana connector for Asana. For Notion use
+> the REST API with `NOTION_API_KEY` exactly as `docs/app-support-quickstart.md`
+> "Notion through the API" says, and never print the key. Last step, always, also on
+> failure: one row in the Agent run log (Agent `orchestrator`, Where Cloud, Account
+> Fabian).
+
 ## Running it yourself (optional)
 
 In a session on the `curagents` folder (pull first: `git -C curagents pull`):
@@ -259,6 +291,7 @@ In a session on the `curagents` folder (pull first: `git -C curagents pull`):
 | `my support requests` | Runs App Support now |
 | `invite <Asana task link>` | Adds that task's requester now (Chrome signed in to Asana) |
 | `practice approvals` | Runs the practice approval run now (BOB Admin prod signed in) |
+| `do the board moves` | Runs the orchestrator's board moves now, including the subtasks you ticked |
 | `pending registrations` | Shows what's waiting and why, read-only (`bob-admin --env prod practices check`) |
 | `support faq <question>` | Answers from the FAQs and what App Support has learned |
 | `teach support: <question> → <answer>` | Adds your answer to the learned FAQ (a PR) |
