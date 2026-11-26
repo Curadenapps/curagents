@@ -21,7 +21,7 @@ export class Progress implements ProgressApi {
   damageMult(f: Faction) { return 1 + 0.1 * this.masteryLevel(f); }
   onKill(e: Entity & { faction?: Faction; maxHp?: number; type?: string }) {
     const f: Faction = e.faction && e.faction !== 'plaque' ? e.faction : (GUESS.find(([re]) => re.test(e.type || ''))?.[1] ?? e.faction ?? 'plaque');
-    const xp = Math.round((3 + (e.maxHp ?? 15) / 4) * ((this.g as any).diff?.xp ?? 1)); this.gain(xp, f);
+    const xp = Math.round((3 + ((e as any).__baseMaxHp ?? e.maxHp ?? 15) / 4) * ((this.g as any).diff?.xp ?? 1)); this.gain(xp, f);
     this.g.float(e.x, e.y - (e.hh ?? 10) - 6, '+' + xp + ' XP', '#8BB8E8');
   }
   gain(xp: number, f?: Faction) {

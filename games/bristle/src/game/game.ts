@@ -58,7 +58,7 @@ export class GameCore implements Game {
   get diff() { return DIFFICULTY[Math.max(0, Math.min(2, this.save.settings.difficulty ?? 1))]; }
   spawn<T extends Entity>(e: T): T {
     if (!e.id) e.id = this.nextId();
-    const en = e as any; if (e.team === 'enemy' && typeof en.maxHp === 'number' && !en.__scaled) { en.__scaled = true; en.maxHp = Math.max(1, Math.round(en.maxHp * this.diff.enemyHp)); en.hp = en.maxHp; }
+    const en = e as any; if (e.team === 'enemy' && typeof en.maxHp === 'number' && !en.__scaled) { en.__scaled = true; en.__baseMaxHp = en.maxHp; en.maxHp = Math.max(1, Math.round(en.maxHp * this.diff.enemyHp)); en.hp = en.maxHp; }
     this.entities.push(e); return e;
   }
   light(l: Light) { this.r.addLight(l); }
