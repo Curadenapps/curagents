@@ -8,6 +8,7 @@ import { Audio } from './engine/audio';
 import { Hud } from './ui/hud';
 import { installUi } from './ui/index';
 import { installProgress } from './game/progress/progress';
+import { Tips } from './game/tips';
 
 declare const __BUILD_TIME__: string;
 const view = document.getElementById('view') as HTMLCanvasElement;
@@ -17,6 +18,7 @@ const root = document.getElementById('ui') as HTMLElement;
 const g = new GameCore(view, new Audio());
 const hud = new Hud(hudCv);
 const progress = installProgress(g);
+const tips = new Tips(g); (window as any).BRISTLE_TIPS = tips;
 const ui = installUi(g, hud, root);
 g.ui = ui;
 (window as any).BRISTLE = { g, build: typeof __BUILD_TIME__ === 'string' ? __BUILD_TIME__ : 'dev' };
@@ -41,6 +43,7 @@ function frame(now: number) {
   acc += real; let n = 0;
   while (acc >= STEP && n < 12) { g.update(STEP); acc -= STEP; n++; }
   if (n === 12) acc = 0;
+  if (!g.modal) tips.update(real);
   g.dt = real;
   g.draw();
   hud.draw(g, real);

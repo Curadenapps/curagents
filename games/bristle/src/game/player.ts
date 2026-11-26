@@ -28,7 +28,7 @@ export class Player extends Actor implements PlayerApi {
   /** Seconds the blade button has been held after a slash (charges the Deep Clean). */
   charge = 0; charged = false;
   /** Without the Floss Grip relic you still get one wall jump per jump; the relic makes it unlimited and adds the slide. */
-  wallJumps = 1; lastWall = 0;
+  wallJumps = 1; lastWall = 0; workT = 0;
   /** Crouching: hold Down on the ground to duck under low gaps (hitbox 26 tall instead of 42). */
   crouching = false; crouchK = 1; lastSlash: SlashDir = 'side'; slashFlip = 1;
   wallSlide = 0; // -1 left wall, 1 right wall
@@ -62,10 +62,10 @@ export class Player extends Actor implements PlayerApi {
   }
 
   update(g: Game, dt: number) {
-    this.g = g; const inp = g.input, busy = g.busy() || g.ui.isOpen(); const perk = (id: string) => g.progress.has(id);
+    this.g = g; const inp = g.input, busy = g.busy() || g.ui.isOpen() || this.workT > 0; const perk = (id: string) => g.progress.has(id);
     this.inflamed = Math.max(0, this.inflamed - dt); this.comboT -= dt; if (this.comboT <= 0) this.combo = 0;
     if (this.inflamed > 0 && Math.random() < dt * 10) g.fx.burst(this.x + (Math.random() - 0.5) * 18, this.y - 10 + (Math.random() - 0.5) * 30, { n: 1, color: ['#E31C79', '#F277C6'], speed: [10, 40], angle: -Math.PI / 2, spread: 1, size: [1, 2.2], life: [0.4, 0.8], gravity: -60, emissive: true });
-    this.invuln = Math.max(0, this.invuln - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt; this.throwT -= dt;
+    this.invuln = Math.max(0, this.invuln - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt; this.workT -= dt; this.throwT -= dt;
     for (const gh of this.ghosts) gh.t -= dt; this.ghosts = this.ghosts.filter((gh) => gh.t > 0);
 
     if (this.deadT >= 0) { this.deadT += dt; this.vx *= Math.exp(-4 * dt); this.physics(g, dt); this.animate(g, dt, 0); return; }
@@ -87,17 +87,15 @@ export class Player extends Actor implements PlayerApi {
 
     // ---- dash (Prime)
     if (this.dashT > 0) {
-      this.dashT -= dt; this.vy = 0; this.passSlits = true;
+      this.dashT -= dt; this.vy = 0;
       if (perk('i2')) for (const e of g.entities) {
         if (e.dead || !e.hurtable || e.team !== 'enemy' || this.dashHits.has(e.id)) continue;
         if (Math.abs(e.x - this.x) < e.hw + this.hw && Math.abs(e.y - this.y) < e.hh + this.hh) { this.dashHits.add(e.id); if (e.onHit?.(g, { damage: 6, dirX: this.facing, dirY: 0, kind: 'slash', source: this })) { g.hitstop(0.03); if (perk('i4')) { this.gainFluor(8); this.invuln = Math.max(this.invuln, 0.3); } } }
       }
       if (Math.random() < 0.9) this.ghosts.push({ x: this.x, y: this.y, f: this.facing, t: 0.22 });
       g.fx.burst(this.x - this.facing * 8, this.y + (Math.random() - 0.5) * 30, { n: 1, color: C.sky, shape: 'streak', speed: [40, 80], angle: this.facing > 0 ? Math.PI : 0, spread: 0.3, emissive: true, size: [1, 2], life: [0.15, 0.3] });
-      if (this.dashT <= 0) { this.dashing = false; this.vx = this.facing * RUN * 0.9; if (!g.room.solidAt(this.x, this.y)) this.passSlits = false; }
+      if (this.dashT <= 0) { this.dashing = false; this.vx = this.facing * RUN * 0.9; }
     } else {
-      // stay ghosted while still inside a slit
-      if (this.passSlits && !this.insideSlit(g)) this.passSlits = false;
       if (want('dash', 0.08) && g.save.abilities.dash && this.dashCd <= 0 && (this.grounded || this.airDash || this.wallSlide)) {
         inp.consume('dash'); if (this.wallSlide) this.facing = -this.wallSlide as 1 | -1; else if (ax) this.facing = sign(ax) as 1 | -1;
         this.dashT = DASH_T; this.dashing = true; this.invuln = Math.max(this.invuln, 0.12); this.charge = 0; this.dashCd = DASH_CD * (perk('i1') ? 0.65 : 1); this.vx = this.facing * DASH_V; this.vy = 0; this.slash = null; this.focusT = 0; this.dashHits.clear();
@@ -207,7 +205,6 @@ export class Player extends Actor implements PlayerApi {
   /** Is there room to stand up (42 units tall) from a crouch? */
   headroom(g: Game) { const top = this.y + this.hh - 42 + 1; for (const dx of [-this.hw + 1, 0, this.hw - 1]) if (g.room.solidAt(this.x + dx, top) || g.room.solidAt(this.x + dx, top + 14)) return false; return true; }
   onLedge(g: Game) { const ty = Math.floor((this.y + this.hh + 2) / TILE); return g.room.oneWay(Math.floor(this.x / TILE), ty); }
-  insideSlit(g: Game) { const r = g.room; for (const dx of [-this.hw + 1, 0, this.hw - 1]) for (const dy of [-this.hh + 1, 0, this.hh - 1]) if (r.atWorld(this.x + dx, this.y + dy) === '|') return true; return false; }
   safeGround(g: Game) { const r = g.room, y = this.y + this.hh + 4; for (const dx of [-24, 0, 24]) { if (!r.solidAt(this.x + dx, y)) return false; if (r.hazardAt(this.x + dx, this.y) || r.hazardAt(this.x + dx * 2, this.y + this.hh - 4)) return false; } return true; }
 
   wide = 1;
@@ -276,7 +273,7 @@ export class Player extends Actor implements PlayerApi {
     this.sx = damp(this.sx, 1, 14, dt); this.sy = damp(this.sy, 1, 14, dt);
     if (!this.grounded && this.dashT <= 0) { const k = clamp(-this.vy / JUMP_V, -1, 1); this.sy = damp(this.sy, 1 + k * 0.12, 20, dt); this.sx = damp(this.sx, 1 - k * 0.08, 20, dt); }
     const running = this.grounded && Math.abs(this.vx) > 20;
-    if (running) { this.runPhase += Math.abs(this.vx) * dt * 0.055; this.stepT -= dt; if (this.stepT <= 0) { this.stepT = 0.27; g.audio.sfx('step', { vol: 0.35, pitch: 0.9 + Math.random() * 0.2 }); } }
+    if (running) { this.runPhase += Math.abs(this.vx) * dt * (this.crouching ? 0.09 : 0.055); this.stepT -= dt; if (this.stepT <= 0) { this.stepT = 0.27; g.audio.sfx('step', { vol: 0.35, pitch: 0.9 + Math.random() * 0.2 }); } }
     else this.runPhase = damp(this.runPhase, Math.round(this.runPhase / Math.PI) * Math.PI, 10, dt);
     // body: run bob, idle breathing, lunges and flinches
     this.bob = damp(this.bob, running ? Math.abs(Math.sin(this.runPhase)) * 2.4 : 0, 18, dt);
@@ -289,13 +286,14 @@ export class Player extends Actor implements PlayerApi {
     this.headTilt = damp(this.headTilt, (this.grounded ? 0 : clamp(this.vy / 900, -1, 1) * 0.12 * this.facing) + (this.hurtT > 0 ? -this.facing * 0.2 : 0) + Math.sin(this.animT * 1.1) * 0.02, 10, dt);
     // legs: swing from the hip when running, tuck when rising, dangle when falling
     const sw = Math.sin(this.runPhase), rising = !this.grounded && this.vy < 0;
-    const la = running ? sw * 0.7 : !this.grounded ? (rising ? 0.45 : -0.25) : 0, lb = running ? -sw * 0.7 : !this.grounded ? (rising ? -0.15 : 0.3) : 0;
+    const crawling = this.crouching, crawlSw = Math.sin(this.runPhase * 1.6);
+    const la = crawling ? -0.9 + crawlSw * 0.35 : running ? sw * 0.7 : !this.grounded ? (rising ? 0.45 : -0.25) : 0, lb = crawling ? -1.2 - crawlSw * 0.35 : running ? -sw * 0.7 : !this.grounded ? (rising ? -0.15 : 0.3) : 0;
     this.legA = damp(this.legA, la, 20, dt); this.legB = damp(this.legB, lb, 20, dt);
     // visor blink
     this.blinkT -= dt; if (this.blinkT <= 0) { this.blink = 0.13; this.blinkT = 2.5 + Math.random() * 3; } this.blink = Math.max(0, this.blink - dt);
     // the brush: held in the hand; resting pose depends on what the knight is doing
     const s = this.slash;
-    const rest = this.focusT > 0 ? -1.45 : running ? 2.55 + Math.sin(this.runPhase * 2) * 0.12 : !this.grounded ? (rising ? 2.85 : 1.95) : 1.8 + this.breath * 0.04;
+    const rest = this.crouching ? -1.0 + Math.sin(this.runPhase * 1.6) * 0.2 : this.focusT > 0 ? -1.45 : running ? 2.55 + Math.sin(this.runPhase * 2) * 0.12 : !this.grounded ? (rising ? 2.85 : 1.95) : 1.8 + this.breath * 0.04;
     const target = s ? (s.dir === 'up' ? -1.9 : s.dir === 'down' ? 1.6 : (s.flip > 0 ? 0.9 : -0.8)) : this.throwT > 0 ? -1.2 : this.charge > 0.15 ? 2.9 : rest;
     this.bladeA = damp(this.bladeA, target, s ? 40 : 12, dt);
     // cloak: verlet chain hanging from the shoulders
@@ -306,6 +304,13 @@ export class Player extends Actor implements PlayerApi {
     void ax;
   }
 
+  /** 0 standing .. 1 fully down on hands and knees. */
+  crawlK() { return clamp((1 - this.crouchK) / 0.38, 0, 1); }
+  /** Body-space point (origin at the feet) to world space, through crawl tilt and squash. */
+  bodyToWorld(lx: number, ly: number) {
+    const f = this.facing, c = this.crawlK(), a = this.lean + f * 1.18 * c, X = lx * this.sx, Y = ly * this.sy;
+    return { x: this.x - f * 19 * c + X * Math.cos(a) - Y * Math.sin(a), y: this.y + this.hh + X * Math.sin(a) + Y * Math.cos(a) };
+  }
   /** Shoulder and hand in body space (origin at the feet, +y down), and the brush's angle. */
   grip() {
     const f = this.facing, a = this.bladeA * f + (f < 0 ? Math.PI : 0);
@@ -328,7 +333,7 @@ export class Player extends Actor implements PlayerApi {
     ctx.closePath(); ctx.fillStyle = C.blueDk; ctx.fill();
     ctx.lineWidth = 1.5; ctx.strokeStyle = C.blue; ctx.stroke();
     // body transform (squash at the feet)
-    ctx.translate(x, y); ctx.rotate(this.lean); ctx.scale(this.sx * (1 + (1 - this.crouchK) * 0.35), this.sy * this.crouchK);
+    const crawl = this.crawlK(); ctx.translate(x - f * 19 * crawl, y); ctx.rotate(this.lean + f * 1.18 * crawl); ctx.scale(this.sx, this.sy);
     const lift = -this.bob;
     // legs, swinging from the hip
     ctx.fillStyle = '#121a36';
@@ -391,11 +396,11 @@ export class Player extends Actor implements PlayerApi {
     if (this.invuln > 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0 && this.deadT < 0) return;
     if (this.inflamed > 0) g.r.halo(ctx, this.x, this.y - 6, 40, '#E31C79', 0.25 + 0.12 * Math.sin(g.time * 9));
     // visor glow
-    const vx = this.x + f * 4 + f * 0.5, vy = this.y + this.hh - (32 + this.bob + this.breath * 0.5) * this.sy * this.crouchK + 1.6, open = this.blink > 0 ? 0.25 : 1;
+    const vp = this.bodyToWorld(f * 4.5, -(32 + this.bob + this.breath * 0.5) + 1.6), vx = vp.x, vy = vp.y, open = this.blink > 0 ? 0.25 : 1;
     g.r.halo(ctx, vx, vy, 16, C.sky, 0.55 * open);
     ctx.fillStyle = '#d8ecff'; ctx.beginPath(); ctx.roundRect(vx - 5.5, vy - 1.1 * open, 11, 2.2 * open, 1.1); ctx.fill();
     // bristle tuft on the blade tip
-    const gp = this.grip(), a = gp.a, lx = gp.hx + Math.cos(a) * 29 + Math.sin(a) * 5, ly = gp.hy - this.bob + Math.sin(a) * 29 - Math.cos(a) * 5, bx = this.x + lx * this.sx, by = this.y + this.hh + ly * this.sy * this.crouchK;
+    const gp = this.grip(), a = gp.a, lx = gp.hx + Math.cos(a) * 29 + Math.sin(a) * 5, ly = gp.hy - this.bob + Math.sin(a) * 29 - Math.cos(a) * 5, tp = this.bodyToWorld(lx, ly), bx = tp.x, by = tp.y;
     g.r.halo(ctx, bx, by, 14, C.sky, 0.4);
     // slash arc
     const s = this.slash; if (s) this.drawSlash(ctx, g, s);

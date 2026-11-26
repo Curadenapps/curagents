@@ -1,4 +1,5 @@
 // The running game: loop, rooms, camera, combat glue, transitions, saving, drawing order.
+import { GAPS, setupGaps } from './gaps';
 import { Renderer, TILE } from '../engine/render';
 import { Input } from '../engine/input';
 import { Particles } from '../engine/particles';
@@ -94,7 +95,7 @@ export class GameCore implements Game {
     const def = Rooms[roomId] ?? Rooms[START_ROOM] ?? Object.values(Rooms)[0];
     this.room = new Room(def); this.biome = Biomes[def.biome] ?? Biomes['default'] ?? Object.values(Biomes)[0];
     this.entities = []; this.fx.list.length = 0;
-    const p = this.player; p.vx = 0; p.vy = 0; p.dashT = 0; p.dashing = false; p.passSlits = false; p.slash = null;
+    const p = this.player; p.vx = 0; p.vy = 0; p.dashT = 0; p.dashing = false; p.slash = null; (p as any).workT = 0;
     // place the player
     let px = this.room.pw / 2, py = this.room.ph / 2, placed = false;
     const findChar = (ch: string) => { for (let y = 0; y < this.room.h; y++) for (let x = 0; x < this.room.w; x++) if (this.room.grid[y][x] === ch) return { x: (x + 0.5) * TILE, y: (y + 0.5) * TILE }; return null; };
@@ -112,14 +113,14 @@ export class GameCore implements Game {
     // spawn map contents
     for (let y = 0; y < this.room.h; y++) for (let x = 0; x < this.room.w; x++) {
       const ch = this.room.grid[y][x], f = Legend[ch];
-      if (f) { const e = f(this, (x + 0.5) * TILE, (y + 0.5) * TILE, this.room); if (e) this.spawn(e); if (ch !== 'S' && !'#=^|P'.includes(ch)) this.room.grid[y][x] = '.'; }
+      if (f) { const e = f(this, (x + 0.5) * TILE, (y + 0.5) * TILE, this.room); if (e) this.spawn(e); if (ch !== 'S' && !'#=^|IHP'.includes(ch)) this.room.grid[y][x] = '.'; }
       else if (ch === '@') this.room.grid[y][x] = '.';
     }
     for (const o of def.objects ?? []) { const f = Objects[o.type]; if (f) { const e = f(this, o, this.room); if (e) this.spawn(e); } else console.warn('unknown object ' + o.type); }
+    setupGaps(this as any);
     // camera snaps
     this.updateCamera(1, true);
     const first = !this.save.visited[def.id]; this.save.visited[def.id] = true;
-    if (first && !quiet) this.progress?.gain(6);
     if (!quiet && first && def.title) this.ui.areaTitle(def.title, def.subtitle);
     if (quiet && def.title && first) this.ui.areaTitle(def.title, def.subtitle);
     this.audio.music(def.music ?? this.biome.music ?? null);
@@ -247,7 +248,7 @@ export class GameCore implements Game {
     }
     // plaque walls, slits and spikes
     for (let ty = 0; ty < room.h; ty++) for (let tx = 0; tx < room.w; tx++) {
-      const c = room.grid[ty][tx]; if (c !== 'P' && c !== '|' && c !== '^') continue;
+      const c = room.grid[ty][tx]; if (c !== 'P' && c !== '^' && !GAPS[c]) continue;
       const x = tx * TILE, y = ty * TILE;
       if (!this.cam.visible(x + 16, y + 16, 40)) continue;
       if (c === 'P') {
@@ -255,9 +256,13 @@ export class GameCore implements Game {
         ctx.fillStyle = '#b89a1a'; ctx.fillRect(x, y, TILE, TILE);
         for (let i = 0; i < 5; i++) { const bx = x + 6 + ((i * 7 + tx * 3) % 20), by = y + 6 + ((i * 11 + ty * 5) % 20); ctx.fillStyle = i % 2 ? C.yellow : '#d9c400'; ctx.beginPath(); ctx.arc(bx, by, 7 * s, 0, Math.PI * 2); ctx.fill(); }
         ctx.fillStyle = 'rgba(255,130,0,0.6)'; ctx.beginPath(); ctx.arc(x + 20, y + 22, 3.5 * s, 0, Math.PI * 2); ctx.fill();
-      } else if (c === '|') {
-        ctx.fillStyle = st.slab; ctx.fillRect(x + 2, y, 11, TILE); ctx.fillRect(x + 19, y, 11, TILE);
-        ctx.fillStyle = '#060c1f'; ctx.fillRect(x + 13, y, 6, TILE);
+      } else if (GAPS[c]) {
+        // two enamel walls with a clogged interdental space between them; the clog's width shows the size
+        const gs = GAPS[c], w = gs.channel, l = x + 16 - w / 2, open = (k: string) => GAPS[room.at(tx, ty + (k === 'u' ? -1 : 1))] === gs;
+        ctx.fillStyle = st.slab; ctx.beginPath(); ctx.roundRect(x + 1, y - (open('u') ? 2 : 0), l - x - 2, TILE + (open('d') ? 4 : 0), open('u') ? 0 : 5); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(l + w + 1, y - (open('u') ? 2 : 0), x + TILE - l - w - 2, TILE + (open('d') ? 4 : 0), open('u') ? 0 : 5); ctx.fill();
+        ctx.fillStyle = '#bfa863'; ctx.fillRect(l, y, w, TILE);
+        for (let i = 0; i < 4; i++) { const by = y + 4 + ((i * 9 + tx * 5 + ty * 3) % 26), bx = l + w / 2 + (((i + tx + ty) % 3) - 1) * w * 0.22; ctx.fillStyle = i % 2 ? '#d8c48a' : '#a88f4c'; ctx.beginPath(); ctx.arc(bx, by, w * 0.42, 0, Math.PI * 2); ctx.fill(); }
       } else {
         ctx.fillStyle = '#f2d9ec'; for (let i = 0; i < 4; i++) { const sx = x + 2 + i * 8, h = 12 + ((tx * 5 + i * 7) % 9); ctx.beginPath(); ctx.moveTo(sx, y + TILE); ctx.lineTo(sx + 4, y + TILE - h); ctx.lineTo(sx + 8, y + TILE); ctx.fill(); }
       }
@@ -300,10 +305,10 @@ export class GameCore implements Game {
   drawTerrainEmissive(ctx: CanvasRenderingContext2D) {
     const room = this.room;
     for (let ty = 0; ty < room.h; ty++) for (let tx = 0; tx < room.w; tx++) {
-      const c = room.grid[ty][tx]; if (c !== 'P' && c !== '|' && c !== '^') continue;
+      const c = room.grid[ty][tx]; if (c !== 'P' && c !== '^' && !GAPS[c]) continue;
       const x = (tx + 0.5) * TILE, y = (ty + 0.5) * TILE; if (!this.cam.visible(x, y, 40)) continue;
       if (c === 'P') this.r.halo(ctx, x, y, 30, '#FCE300', 0.16);
-      else if (c === '|') { ctx.fillStyle = 'rgba(139,184,232,' + (0.35 + 0.2 * Math.sin(this.time * 3 + ty)) + ')'; ctx.fillRect(x - 1, y - 16, 2, 32); }
+      else if (GAPS[c]) { const gs = GAPS[c]; ctx.globalAlpha = 0.25 + 0.15 * Math.sin(this.time * 3 + ty); ctx.fillStyle = gs.col; ctx.fillRect(x - gs.channel / 2 - 1.5, y - 16, 1.5, 32); ctx.fillRect(x + gs.channel / 2, y - 16, 1.5, 32); ctx.globalAlpha = 1; }
       else if ((tx + ty + Math.floor(this.time * 2)) % 5 === 0) this.r.halo(ctx, x, y + 6, 10, '#ffffff', 0.5);
     }
   }

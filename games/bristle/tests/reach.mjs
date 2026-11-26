@@ -22,7 +22,11 @@ const { ROOMS } = await import('data:text/javascript;base64,' + Buffer.from(res.
 const byId = Object.fromEntries(ROOMS.map((r) => [r.id, r]));
 
 // ---- physics constants (keep in sync with player.ts / entity.ts)
-const T = 32, RUN = 300, ACC_G = 5200, ACC_A = 3400, JUMP_V = 830, GRAV_UP = 2500, GRAV_DOWN = 3100, MAX_FALL = 820;
+// --no-pogo: check the route without bouncing off spikes and plaque (pogo must be a shortcut, never required)
+const NO_POGO = process.argv.includes('--no-pogo');
+// --human: leave room for human timing (93% jump speed, 90% run speed), so tight pixel-perfect routes fail
+const HUMAN = process.argv.includes('--human');
+const T = 32, RUN = HUMAN ? 270 : 300, ACC_G = 5200, ACC_A = 3400, JUMP_V = HUMAN ? 772 : 830, GRAV_UP = 2500, GRAV_DOWN = 3100, MAX_FALL = 820;
 const COYOTE = 0.09, JUMP_BUF = 0.13, DASH_T = 0.19, DASH_V = 820, HW = 10, HH = 21, DT = 1 / 120, ATK_CD = 0.36;
 
 const problems = [], warnings = [];
@@ -52,7 +56,7 @@ class Grid {
     }
     return this.g[ty][tx];
   }
-  solid(tx, ty, pass) { const c = this.at(tx, ty); return c === '#' || c === 'P' || (c === '|' && !pass); }
+  solid(tx, ty, pass) { const c = this.at(tx, ty); return c === '#' || c === 'P' || (c === 'I' && !this.hasM) || c === 'H'; } // '|' (size S) is always cleanable
   solidAt(x, y, pass) { return this.solid(Math.floor(x / T), Math.floor(y / T), pass); }
   oneWay(tx, ty) { return this.at(tx, ty) === '='; }
   hazardAt(x, y) { return this.at(Math.floor(x / T), Math.floor(y / T)) === '^'; }
@@ -204,7 +208,7 @@ const cloneS = (s) => ({ ...s });
 
 /** BFS inside one room from an entry. Returns { exits:Set, relics:Set(ability), touched objects, nodes } */
 function searchRoom(def, entry, ab) {
-  let G = new Grid(def);
+  let G = new Grid(def); G.hasM = !!ab.dash;
   const exits = new Set(), relics = new Set(), near = new Set();
   const objs = (def.objects ?? []).map((o, i) => ({ i, o, x: (o.x + 0.5) * T, y: (o.y + 0.5) * T }));
   const seen = new Map(); const queue = [];
@@ -242,7 +246,7 @@ function searchRoom(def, entry, ab) {
       }
     }
     if (!scrubbed) break;
-    G.hasPogo = G.g.some((r) => r.includes('P') || r.includes('^'));
+    G.hasPogo = !NO_POGO && G.g.some((r) => r.includes('P') || r.includes('^'));
     const old = [...seen.keys()]; for (const k of old) queue.push(k); // re-run from known spots on the opened grid
   }
   return { exits, relics, near, nodes: seen.size, grid: G, keys: [...seen.keys()] };

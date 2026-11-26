@@ -50,7 +50,7 @@ export class Relic extends Actor {
     this.t += dt;
     if (g.save.abilities[this.ability]) { this.dead = true; return; }
     if (near(g, this.x, this.y, 26, 40)) {
-      g.save.abilities[this.ability] = true; g.setFlag(this.flagId, true); g.persist(); this.dead = true;
+      g.save.abilities[this.ability] = true; g.setFlag(this.flagId, true); if (this.ability === 'dash') g.setFlag('prime-m', true); g.persist(); this.dead = true;
       g.audio.sfx('relic'); g.hitstop(0.2); g.flash([1, 1, 1], 0.6); g.shake(8, 0.4);
       g.fx.burst(this.x, this.y, { n: 60, color: ['#ffffff', '#8BB8E8', '#FCE300'], speed: [80, 520], emissive: true, size: [1, 3], life: [0.4, 1.2], shape: 'streak' });
       g.ui.areaTitle(this.title, this.text);

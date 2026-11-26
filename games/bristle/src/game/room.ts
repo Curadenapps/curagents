@@ -12,7 +12,7 @@ import { TILE } from '../engine/render';
 import { hash2 } from '../engine/math';
 import type { RoomDef } from './registry';
 
-export const SOLID = new Set(['#', '|', 'P']);
+export const SOLID = new Set(['#', '|', 'I', 'H', 'P']);
 
 export class Room {
   def: RoomDef;
@@ -53,8 +53,8 @@ export class Room {
     return this.grid[ty][tx];
   }
   atWorld(x: number, y: number) { return this.at(Math.floor(x / TILE), Math.floor(y / TILE)); }
-  /** Solid for movement. Dashing through slits is allowed when passSlits is true. */
-  solid(tx: number, ty: number, passSlits = false) { const c = this.at(tx, ty); return c === '#' || c === 'P' || (c === '|' && !passSlits); }
+  /** Solid for movement. Clogged interdental gaps ('|' 'I' 'H') stay solid until cleaned with the right IDB. */
+  solid(tx: number, ty: number, _passSlits = false) { const c = this.at(tx, ty); return c === '#' || c === 'P' || c === '|' || c === 'I' || c === 'H'; }
   solidAt(x: number, y: number, passSlits = false) { return this.solid(Math.floor(x / TILE), Math.floor(y / TILE), passSlits); }
   oneWay(tx: number, ty: number) { return this.at(tx, ty) === '='; }
   hazardAt(x: number, y: number) { return this.atWorld(x, y) === '^'; }
