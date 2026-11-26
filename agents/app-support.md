@@ -169,7 +169,10 @@ Setup for Fabian: [`docs/app-support-quickstart.md`](../docs/app-support-quickst
 - Fabian's registry row "App Support (Fabian)" is missing, or its **Account** is
   `Paused`;
 - Fabian's last run is missing or more than 2 hours old during his hours (his
-  Routine isn't set up yet, is off, or is failing). Read it from the run-log view,
+  Routine isn't set up yet, is off, or is failing). **Not at the 07:20 run**: Fabian's
+  Routine starts a minute later, so his newest run is always the evening before and
+  both would answer the same form task (double reply on 26 Nov). The 08:20 run is the
+  first that can cover on this ground. Read it from the run-log view,
   newest first (`RUNTIME.md` "Reading Notion"): the newest row with Agent
   `app-support` and Account `Fabian`. The registry's **Last run** rollup can't be read
   through the connector, and never use SQL for this. It says so in its run-log row
