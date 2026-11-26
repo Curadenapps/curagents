@@ -34,13 +34,15 @@ $Bin     = Join-Path $Home2 "bin"
 $Local   = Join-Path $PSScriptRoot "agent-harness"
 
 # 1. Python 3.10+
+# (skips the Microsoft Store "python" placeholder, which exists but isn't Python)
 $py = $null
+$ver = $null
 foreach ($cand in @("py", "python", "python3")) {
-    if (Get-Command $cand -ErrorAction SilentlyContinue) { $py = $cand; break }
+    if (-not (Get-Command $cand -ErrorAction SilentlyContinue)) { continue }
+    try { $v = & $cand -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>$null } catch { $v = $null }
+    if ($v -match '^\d+\.\d+$' -and [version]$v -ge [version]"3.10") { $py = $cand; $ver = $v; break }
 }
-if (-not $py) { throw "Python 3.10 or newer is needed. Install it from https://www.python.org/downloads/ and run this again." }
-$ver = & $py -c "import sys; print('%d.%d' % sys.version_info[:2])"
-if ([version]$ver -lt [version]"3.10") { throw "Python $ver found; bob-admin needs 3.10 or newer." }
+if (-not $py) { throw "Python 3.10 or newer is needed. Install it (winget install Python.Python.3.12, or https://www.python.org/downloads/), open a new terminal and run this again." }
 
 # 2. Private environment
 New-Item -ItemType Directory -Force -Path $Home2, $Bin | Out-Null
@@ -66,6 +68,9 @@ Set-Content -Path (Join-Path $Bin "bob-admin.cmd") -Encoding ascii -Value "@echo
 # bob-qa (BOB web app QA) ships in the same package
 $qaExe = Join-Path $Venv "Scripts\bob-qa.exe"
 Set-Content -Path (Join-Path $Bin "bob-qa.cmd") -Encoding ascii -Value "@echo off`r`n`"$qaExe`" %*"
+# bob-support (App Support requests against the Admin Console) too
+$supExe = Join-Path $Venv "Scripts\bob-support.exe"
+Set-Content -Path (Join-Path $Bin "bob-support.cmd") -Encoding ascii -Value "@echo off`r`n`"$supExe`" %*"
 
 # 5. PATH
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
@@ -85,3 +90,4 @@ if ($AddToPath -and -not $onPath) {
 Write-Host ""
 Write-Host "Done. Next: bob-admin auth login   (test)   or   bob-admin --env prod auth login"
 Write-Host "BOB web app QA: bob-qa auth login   (your coach login on test), then: bob-qa qa run smoke"
+Write-Host "App Support: bob-support setup   (connect Asana once), then: bob-support inbox"
