@@ -28,7 +28,9 @@ export class Player extends Actor implements PlayerApi {
   /** Seconds the blade button has been held after a slash (charges the Deep Clean). */
   charge = 0; charged = false;
   /** Without the Floss Grip relic you still get one wall jump per jump; the relic makes it unlimited and adds the slide. */
-  wallJumps = 1; lastWall = 0; lastSlash: SlashDir = 'side'; slashFlip = 1;
+  wallJumps = 1; lastWall = 0;
+  /** Crouching: hold Down on the ground to duck under low gaps (hitbox 26 tall instead of 42). */
+  crouching = false; crouchK = 1; lastSlash: SlashDir = 'side'; slashFlip = 1;
   wallSlide = 0; // -1 left wall, 1 right wall
   jumpHeld = false; deadT = -1; hazardT = -1;
   safe = { x: 0, y: 0 };
@@ -74,6 +76,10 @@ export class Player extends Actor implements PlayerApi {
     }
 
     const ax = busy || this.hurtT > 0 ? 0 : g.input.axisX, ay = busy ? 0 : g.input.axisY;
+    // ---- crouch: duck while holding down on the ground; stay down while something is overhead
+    const wantCrouch = this.grounded && ay > 0.5 && this.dashT <= 0 && !this.onLedgeDrop(g);
+    if (wantCrouch && !this.crouching) { this.crouching = true; this.y += 21 - 13; this.hh = 13; }
+    else if (this.crouching && (!wantCrouch || !this.grounded) && this.headroom(g)) { this.crouching = false; this.y -= 21 - 13; this.hh = 21; }
     const want = (k: Parameters<typeof inp.pressed>[0], buf = 0) => !busy && this.hurtT <= 0 && inp.pressed(k, buf);
 
     // ---- grounded bookkeeping
@@ -103,7 +109,7 @@ export class Player extends Actor implements PlayerApi {
     if (this.dashT <= 0) {
       // ---- horizontal
       if (this.recoilT <= 0 && this.wallLock <= 0) {
-        const target = ax * RUN * (this.focusT > 0 ? 0 : this.charge > 0.2 ? 0.55 : 1);
+        const target = ax * RUN * (this.focusT > 0 ? 0 : this.charge > 0.2 ? 0.55 : this.crouching ? 0.42 : 1);
         this.vx = approach(this.vx, target, (this.grounded ? ACC_G : ACC_A) * dt);
         if (ax && !this.slash) this.facing = sign(ax) as 1 | -1;
       }
@@ -196,6 +202,10 @@ export class Player extends Actor implements PlayerApi {
     if (vy > 780) g.shake(3, 0.1);
   }
   dust(g: Game, n: number) { g.fx.burst(this.x, this.y + this.hh - 2, { n, color: ['#a7b6d6', '#7e8fb7'], speed: [30, 140], angle: -Math.PI / 2, spread: 2.6, size: [2, 4.5], grow: 5, gravity: -60, drag: 4, life: [0.3, 0.6] }); }
+  /** Down + jump on a ledge drops through it, so don't crouch while jump is held on one. */
+  onLedgeDrop(g: Game) { return this.onLedge(g) && g.input.held('jump'); }
+  /** Is there room to stand up (42 units tall) from a crouch? */
+  headroom(g: Game) { const top = this.y + this.hh - 42 + 1; for (const dx of [-this.hw + 1, 0, this.hw - 1]) if (g.room.solidAt(this.x + dx, top) || g.room.solidAt(this.x + dx, top + 14)) return false; return true; }
   onLedge(g: Game) { const ty = Math.floor((this.y + this.hh + 2) / TILE); return g.room.oneWay(Math.floor(this.x / TILE), ty); }
   insideSlit(g: Game) { const r = g.room; for (const dx of [-this.hw + 1, 0, this.hw - 1]) for (const dy of [-this.hh + 1, 0, this.hh - 1]) if (r.atWorld(this.x + dx, this.y + dy) === '|') return true; return false; }
   safeGround(g: Game) { const r = g.room, y = this.y + this.hh + 4; for (const dx of [-24, 0, 24]) { if (!r.solidAt(this.x + dx, y)) return false; if (r.hazardAt(this.x + dx, this.y) || r.hazardAt(this.x + dx * 2, this.y + this.hh - 4)) return false; } return true; }
@@ -262,7 +272,7 @@ export class Player extends Actor implements PlayerApi {
   // ---- look ----
   animT = 0; bob = 0; breath = 0; blinkT = 2.5; blink = 0; headTilt = 0; legA = 0; legB = 0;
   animate(g: Game, dt: number, ax: number) {
-    this.animT += dt;
+    this.animT += dt; this.crouchK = damp(this.crouchK, this.crouching ? 0.62 : 1, 22, dt);
     this.sx = damp(this.sx, 1, 14, dt); this.sy = damp(this.sy, 1, 14, dt);
     if (!this.grounded && this.dashT <= 0) { const k = clamp(-this.vy / JUMP_V, -1, 1); this.sy = damp(this.sy, 1 + k * 0.12, 20, dt); this.sx = damp(this.sx, 1 - k * 0.08, 20, dt); }
     const running = this.grounded && Math.abs(this.vx) > 20;
@@ -318,7 +328,7 @@ export class Player extends Actor implements PlayerApi {
     ctx.closePath(); ctx.fillStyle = C.blueDk; ctx.fill();
     ctx.lineWidth = 1.5; ctx.strokeStyle = C.blue; ctx.stroke();
     // body transform (squash at the feet)
-    ctx.translate(x, y); ctx.rotate(this.lean); ctx.scale(this.sx, this.sy);
+    ctx.translate(x, y); ctx.rotate(this.lean); ctx.scale(this.sx * (1 + (1 - this.crouchK) * 0.35), this.sy * this.crouchK);
     const lift = -this.bob;
     // legs, swinging from the hip
     ctx.fillStyle = '#121a36';
@@ -381,11 +391,11 @@ export class Player extends Actor implements PlayerApi {
     if (this.invuln > 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0 && this.deadT < 0) return;
     if (this.inflamed > 0) g.r.halo(ctx, this.x, this.y - 6, 40, '#E31C79', 0.25 + 0.12 * Math.sin(g.time * 9));
     // visor glow
-    const vx = this.x + f * 4 + f * 0.5, vy = this.y + this.hh - (32 + this.bob + this.breath * 0.5) * this.sy + 1.6, open = this.blink > 0 ? 0.25 : 1;
+    const vx = this.x + f * 4 + f * 0.5, vy = this.y + this.hh - (32 + this.bob + this.breath * 0.5) * this.sy * this.crouchK + 1.6, open = this.blink > 0 ? 0.25 : 1;
     g.r.halo(ctx, vx, vy, 16, C.sky, 0.55 * open);
     ctx.fillStyle = '#d8ecff'; ctx.beginPath(); ctx.roundRect(vx - 5.5, vy - 1.1 * open, 11, 2.2 * open, 1.1); ctx.fill();
     // bristle tuft on the blade tip
-    const gp = this.grip(), a = gp.a, lx = gp.hx + Math.cos(a) * 29 + Math.sin(a) * 5, ly = gp.hy - this.bob + Math.sin(a) * 29 - Math.cos(a) * 5, bx = this.x + lx * this.sx, by = this.y + this.hh + ly * this.sy;
+    const gp = this.grip(), a = gp.a, lx = gp.hx + Math.cos(a) * 29 + Math.sin(a) * 5, ly = gp.hy - this.bob + Math.sin(a) * 29 - Math.cos(a) * 5, bx = this.x + lx * this.sx, by = this.y + this.hh + ly * this.sy * this.crouchK;
     g.r.halo(ctx, bx, by, 14, C.sky, 0.4);
     // slash arc
     const s = this.slash; if (s) this.drawSlash(ctx, g, s);
