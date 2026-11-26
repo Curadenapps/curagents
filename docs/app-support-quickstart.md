@@ -14,6 +14,10 @@ What it does for you:
 - **Three times a day** (09:10, 13:10, 16:10, on your PC) it adds the people whose
   reply you approved to their task, so Asana emails them the answer.
 - Bugs and product gaps go straight to Jira for Phinamic.
+- **Three times a day** (08:50, 12:50, 16:50, on your PC) it approves new BOB
+  practice registrations that pass every check (BA-324), puts the rest on your
+  "needs you" task, and opens a task when someone signed up twice, so App Support asks
+  them which account to keep ("Setup details" section 4).
 
 The full rules are in [`agents/app-support.md`](../agents/app-support.md).
 
@@ -202,6 +206,50 @@ only ever creates its run-log row. A `401` means the key is wrong or missing; a 
 on a page means it isn't shared with the integration: log `failed` with the page id
 so Sean can share it.
 
+### 4. Desktop scheduled task "Practice approvals (Fabian)"
+
+Automatic practice approval (BA-324) and the duplicate sign-up check, with the
+bob-admin CLI on Fabian's own BOB Admin sign-in. What a run does:
+`skills/bob-admin/SKILL.md`, "Practice approvals run".
+
+**Once, by Fabian himself** (Claude never does these):
+
+1. Install or update bob-admin from the curagents folder:
+   `powershell -ExecutionPolicy Bypass -File .\tools\bob-admin\install.ps1 -AddToPath`
+2. Sign in to production in a terminal: `bob-admin --env prod auth login` (your own
+   BOB Admin account; the password goes into a hidden prompt and isn't stored).
+3. Allow automatic approvals on prod, and nothing else: Start → "Edit environment
+   variables for your account" → New → `BOB_ADMIN_AUTO_APPROVE` = `1`. Then restart
+   the Claude desktop app. (`BOB_ADMIN_PROD_WRITES` stays unset: every other prod
+   write stays locked.) To stop automatic approvals, delete the variable or set the
+   registry row to `Paused`.
+4. Check what it would do: `bob-admin --env prod practices check` (read-only) and
+   `bob-admin --env prod --dry-run practices auto-approve`.
+
+**The task:**
+
+- **Name:** `Practice approvals (Fabian)`
+- **Folder:** the `curagents` folder
+- **Schedule:** Monday to Friday at 08:50, 12:50 and 16:50 (cron
+  `50 8,12,16 * * 1-5`, local time)
+- **Agent registry:** a row with Started by "Practice approvals (Fabian)", Account
+  `Fabian`, Where PC, Spec `skills/bob-admin/SKILL.md`, Run log name
+  `practice-approvals` (Sean adds it; until then each run logs `no-op`)
+- **Prompt:**
+
+> Account: Fabian. In my curagents folder run `git fetch origin main`. If the
+> checkout is on `main` and clean, `git pull --ff-only`; otherwise don't merge
+> anything and read every file from `origin/main`. Do the "Practice approvals run"
+> exactly as `skills/bob-admin/SKILL.md` describes. Live: don't ask me first. Never
+> type a password, never set an environment variable, and never reject, deactivate
+> or delete a practice. For Notion use the REST API with `NOTION_API_KEY` as
+> `docs/app-support-quickstart.md` "Notion through the API" says, and never print the
+> key. End with one row in the Agent run log (Agent `practice-approvals`, Where PC,
+> Account Fabian).
+
+The PC has to be on, with the Claude desktop app open and BOB Admin prod signed in.
+A missed run is caught up by the next one; a registration waits a few hours at most.
+
 ## Running it yourself (optional)
 
 In a session on the `curagents` folder (pull first: `git -C curagents pull`):
@@ -210,6 +258,8 @@ In a session on the `curagents` folder (pull first: `git -C curagents pull`):
 |---------|--------------|
 | `my support requests` | Runs App Support now |
 | `invite <Asana task link>` | Adds that task's requester now (Chrome signed in to Asana) |
+| `practice approvals` | Runs the practice approval run now (BOB Admin prod signed in) |
+| `pending registrations` | Shows what's waiting and why, read-only (`bob-admin --env prod practices check`) |
 | `support faq <question>` | Answers from the FAQs and what App Support has learned |
 | `teach support: <question> → <answer>` | Adds your answer to the learned FAQ (a PR) |
 | `done on <Asana task link>` | You've made the change: it tells the requester and closes the task |

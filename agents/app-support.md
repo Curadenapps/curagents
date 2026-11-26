@@ -233,7 +233,10 @@ Requests & Feedback", and that have either:
 - a story newer than App Support's last action (a reply from the submitter, or the
   owner confirming a change).
 
-Tasks pushed to the board by webex-sweep or created by people are out of scope.
+Tasks pushed to the board by webex-sweep or created by people are out of scope. One
+exception: tasks whose notes end with "This task was created by the practice approval
+run (bob-admin)" are in scope, read like a form submission ("Duplicate sign-ups"
+below).
 
 **Read the form fields from the notes** (each label on its own line, the value on the
 next): `Name`, `Email address`, `Title`, `App Country`, `Application(s)`, `Operating
@@ -328,6 +331,33 @@ address on the task. The @mention tag
 **Every comment on a form task emails its followers.** So App Support writes only
 requester-facing replies as comments. Notes for the owner go in subtasks or in the run
 summary, never as task comments.
+
+### Duplicate sign-ups (from the practice approval run)
+
+The practice approval run on Fabian's PC (`skills/bob-admin/SKILL.md`, "Practice
+approvals run") creates a task on this board when the same person registered BOB more
+than once, often with two email addresses. Its notes use the form's layout; `Name`
+and `Email address` are the newest registration's, and "Describe your request" lists
+the practices, their emails and what matched. Handle it as a class (a) request with
+these differences:
+
+- **Route: Asana**, always: the reply asks them something, and their answer decides
+  a change in BOB Admin. The invite run adds them once the owner ticks Review.
+- **The reply** (voice and sign-off as usual, in the language of their country):
+  they registered BOB {twice / n times}, with two different email addresses
+  (never write the addresses in the comment); ask which email address they want to
+  sign in with and, when the practice names differ, whether it's one practice or
+  two. If one came over from the old BOB app (the notes say so), say their account
+  from the old app was moved over, so they can keep using it. Say nothing is lost
+  either way, and that you'll tidy it up once they reply.
+- **Their answer → a change subtask** "Fabian: change in BOB Admin" with the exact
+  change: reject the pending duplicate with reason "duplicate of {id}", or, for two
+  approved practices, move the coaches (`bob-admin practices members move`) and set
+  the other practice inactive. Never delete a practice. Then confirm and close as
+  usual (step 4).
+- One practice really is two (a group with two sites): no change; tell them it's
+  fine and close the task. The duplicate key in the notes keeps the run from raising
+  the same group again.
 
 ## 2. Classify
 

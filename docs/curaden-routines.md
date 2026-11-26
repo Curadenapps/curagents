@@ -147,6 +147,24 @@ ready; until then "growth pulse" works by hand.
 > Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
 > describes (Agent `growth` or `other`, Where Cloud, Account Curaden).
 
+### Orchestrator daily (Curaden)
+
+Schedule: weekdays 07:45. Connectors: Notion, Asana. Added 26 Nov 2026 (Sean: the orchestrator runs on its own).
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "Orchestrator daily (Curaden)";
+> if its Account isn't Curaden, log `no-op` and stop.
+> Then do the daily run exactly as `agents/orchestrator.md` §8 describes: move only
+> the Asana tasks its move rules name (through asana-maintenance, no comments, no
+> completions), add what needs a decision to this week's "Board moves to decide"
+> Inbox row, check the practice approvals waiting on a person, and on Mondays
+> dispatch market-rollout's rollout watch. Live: don't ask first. Read Notion in
+> view mode only. Don't commit or push.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `orchestrator`, Where Cloud, Account Curaden), with the moves in
+> its body.
+
 ### App Support (Curaden)
 
 Schedule: hourly 07:20–19:20 on weekdays (cron `20 6-18 * * 1-5` UTC). Connectors: Asana, Notion
