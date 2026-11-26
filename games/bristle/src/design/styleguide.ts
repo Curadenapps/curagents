@@ -3,6 +3,7 @@
 // real particle system and the real WebGL post pipeline, so the page cannot drift from the game.
 import * as T from './tokens';
 import { packs } from './brands';
+import { KE, plate, poly, plume, legsK, visorGlow, drawRig, orderArts, staticPose, ORDER_IDS, type OrderArt } from './hero';
 import { kit, idbRefill, idbHolder, blob, enamel, gumFold, glowEye, crownCap, foamCluster, crystalShard, lightShaft, fogBand, brush, pasteDollop, palateRidges, tongueSurface, salivaPool, glint, silhouetteStrip } from './kit';
 import { Player } from '../game/player';
 import { Hud } from '../ui/hud';
@@ -511,37 +512,6 @@ function proportions(ctx: Ctx, w: number, h: number) {
 // (knight proportions: about 2.5-3 heads instead of 1.6), the helm's silhouette and the dental gear.
 // Feet at (0,0), facing right, about 58 units tall. mode 'scene' draws the body, 'glow' the emissive parts.
 type KMode = 'scene' | 'glow';
-const KE = { base: '#F3F6FC', shade: '#C7D3EA', deep: '#9FB0D0', stroke: '#8FA3C9', gloss: '#FFFFFF', cloth: '#18244A', leg: '#121A36', boot: '#0B1128' };
-/** Enamel plate in the house style: flat fill, one stepped shade on the back side, hairline outline, one gloss spot. */
-function plate(ctx: Ctx, path: Path2D, o: { base?: string; shade?: string; sx: number; sy: number; sr: number; gloss?: [number, number, number, number] }) {
-  ctx.fillStyle = o.base ?? KE.base; ctx.fill(path);
-  ctx.save(); ctx.clip(path); ctx.fillStyle = o.shade ?? KE.shade; ctx.beginPath(); ctx.rect(-200, -200, 400, 400); ctx.arc(o.sx, o.sy, o.sr, 0, TAU, true); ctx.fill('evenodd');
-  if (o.gloss) { ctx.globalAlpha = 0.85; ctx.fillStyle = KE.gloss; ctx.beginPath(); ctx.ellipse(o.gloss[0], o.gloss[1], o.gloss[2], o.gloss[3], -0.35, 0, TAU); ctx.fill(); }
-  ctx.restore(); ctx.strokeStyle = KE.stroke; ctx.lineWidth = 0.9; ctx.stroke(path);
-}
-function poly(pts: number[]) { const p = new Path2D(); p.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) p.lineTo(pts[i], pts[i + 1]); p.closePath(); return p; }
-/** A plume or tuft of filaments: white roots, coloured tips, swept by `sweep` (radians, negative = backwards). */
-function plume(ctx: Ctx, x: number, y: number, len: number, tip: string, n: number, a0: number, a1: number, curl: number) {
-  ctx.lineCap = 'round';
-  for (let i = 0; i < n; i++) {
-    const t = i / (n - 1), a = a0 + (a1 - a0) * t, L = len * (0.8 + 0.25 * Math.sin(i * 2.3)), ex = x + Math.cos(a) * L, ey = y + Math.sin(a) * L;
-    const cx = x + Math.cos(a - curl) * L * 0.55, cy = y + Math.sin(a - curl) * L * 0.55;
-    ctx.lineWidth = 1.1; ctx.strokeStyle = i % 2 ? '#FFFFFF' : '#E3ECF8'; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(cx, cy, (cx + ex) / 2, (cy + ey) / 2); ctx.stroke();
-    ctx.strokeStyle = tip; ctx.beginPath(); ctx.moveTo((cx + ex) / 2, (cy + ey) / 2); ctx.quadraticCurveTo(ex - Math.cos(a) * 1, ey, ex, ey); ctx.stroke();
-  }
-}
-function legsK(ctx: Ctx, hip: number, len: number, w: number, back: [number, number], front: [number, number], boot: string, knee: boolean) {
-  for (const [hx, fx, col] of [[back[0], back[1], '#0D1430'], [front[0], front[1], KE.leg]] as [number, number, string][]) {
-    ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hx, hip); ctx.quadraticCurveTo((hx + fx) / 2, hip + len * 0.5, fx, -3); ctx.stroke();
-    if (knee) plate(ctx, (() => { const p = new Path2D(); p.ellipse((hx + fx) / 2 + 0.6, hip + len * 0.5, w * 0.62, w * 0.75, 0, 0, TAU); return p; })(), { sx: (hx + fx) / 2 + 1.5, sy: hip + len * 0.5 - 1, sr: w * 0.7 });
-    const b = new Path2D(); b.moveTo(fx - w * 0.75, -4.5); b.quadraticCurveTo(fx - w * 0.9, 0, fx - w * 0.6, 0); b.lineTo(fx + w * 1.7, 0); b.quadraticCurveTo(fx + w * 1.7, -2.6, fx + w * 0.5, -4.2); b.closePath();
-    ctx.fillStyle = col === KE.leg ? boot : mix(boot, '#000000', 0.25); ctx.fill(b);
-  }
-}
-function visorGlow(ctx: Ctx, path: Path2D, hx: number, hy: number, r: number) {
-  halo(ctx, hx, hy, r * 0.7, B.sky, 0.3); ctx.globalAlpha = 0.55; ctx.fillStyle = B.sky; ctx.fill(path); ctx.globalAlpha = 1;
-}
-
 // A. Vanguard: today's hero grown up. Taller coronet helm with a T-visor, a bristle plume, incisor pauldrons,
 //    brand tabard with the white stripe, half cape, the brush-blade carried as a longsword.
 function knightVanguard(ctx: Ctx, mode: KMode) {
@@ -649,149 +619,17 @@ function heroOptions() {
 }
 
 // ---- orders ----
-// One hero, one rig, three earned armour sets (Orders) plus the Initiate the game starts with.
-// The rig owns the skeleton (legs, torso, arms, gauntlets, collar) and draws in a fixed order; a set only
-// fills slots: back, chest, shoulders, weapon, front, helm, boots. Feet at (0,0), facing right.
-type V2 = [number, number];
-interface OrderSet {
-  id: 'initiate' | 'vanguard' | 'ranger' | 'bulwark'; name: string; line: string; earned: string;
-  stats: { health: number; speed: number; reach: number; guard: number }; // 1-5, for the bars
-  boot: string; knees: boolean; gauntlet: boolean; hands: { front: V2; back: V2 };
-  back?(c: Ctx): void; legs?(c: Ctx): void; chest(c: Ctx): void; weapon?(c: Ctx): void; front?(c: Ctx): void; shoulders?(c: Ctx): void;
-  helm(c: Ctx): void; glow(c: Ctx): void;
-}
-function arm(ctx: Ctx, from: V2, to: V2, col: string, w: number, bend: number) {
-  const mx = (from[0] + to[0]) / 2 + bend, my = (from[1] + to[1]) / 2 + Math.abs(bend) * 0.4;
-  ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(from[0], from[1]); ctx.quadraticCurveTo(mx, my, to[0], to[1]); ctx.stroke();
-}
-function hand(ctx: Ctx, at: V2, gauntlet: boolean, dark = false) {
-  if (!gauntlet) { ctx.fillStyle = dark ? KE.shade : KE.base; ctx.beginPath(); ctx.arc(at[0], at[1], 2.6, 0, TAU); ctx.fill(); ctx.strokeStyle = KE.stroke; ctx.lineWidth = 0.7; ctx.stroke(); return; }
-  const p = new Path2D(); p.roundRect(at[0] - 2.8, at[1] - 2.7, 5.6, 5.4, 1.9);
-  plate(ctx, p, dark ? { base: KE.shade, shade: KE.deep, sx: at[0] + 1, sy: at[1] - 1, sr: 3 } : { sx: at[0] + 1, sy: at[1] - 1, sr: 3.4 });
-  ctx.strokeStyle = 'rgba(120,140,185,0.7)'; ctx.lineWidth = 0.6; ctx.beginPath(); ctx.moveTo(at[0] - 1.6, at[1] - 0.6); ctx.lineTo(at[0] + 1.8, at[1] - 0.6); ctx.stroke();
-}
-function rig(ctx: Ctx, set: OrderSet, mode: KMode, bob = 0) {
-  if (mode === 'glow') { ctx.save(); ctx.translate(0, bob); set.glow(ctx); ctx.restore(); return; }
-  set.back?.(ctx);
-  legsK(ctx, -20, 17, 4.4, [-3.2, -5.5], [2.6, 4.5], set.boot, set.knees); set.legs?.(ctx);
-  ctx.save(); ctx.translate(0, bob);
-  arm(ctx, [-5.5, -34], set.hands.back, '#0D1430', 3.8, -2); hand(ctx, set.hands.back, set.gauntlet, true);
-  ctx.fillStyle = KE.cloth; ctx.beginPath(); ctx.roundRect(-7.6, -38, 15.2, 19, 4); ctx.fill();
-  set.chest(ctx); set.weapon?.(ctx);
-  arm(ctx, [6, -34], set.hands.front, KE.cloth, 4, 1.5); hand(ctx, set.hands.front, set.gauntlet);
-  set.front?.(ctx); set.shoulders?.(ctx);
-  ctx.fillStyle = B.orchid; ctx.beginPath(); ctx.ellipse(0.5, -38.6, 8.6, 2.2, 0, 0, TAU); ctx.fill();
-  set.helm(ctx); ctx.restore();
-}
-const fnPath = (f: (p: Path2D) => void) => { const p = new Path2D(); f(p); return p; };
-function orderSets(): OrderSet[] {
-  const pr = B.blue, dk = B.blueDark, S = T.idb.sizes;
-  const initiate: OrderSet = {
-    id: 'initiate', name: 'Initiate', line: 'Today\'s hero: a round helm, a plain cloak, a short brush. Where everyone starts.', earned: 'Start of the game, Crown Gate.',
-    stats: { health: 3, speed: 3, reach: 2, guard: 1 }, boot: '#0B1128', knees: false, gauntlet: false, hands: { front: [10, -26], back: [-8, -25] },
-    back(c) { const p = fnPath((p) => { p.moveTo(-4, -37); p.quadraticCurveTo(-14, -24, -13, -8); p.lineTo(-3, -10); p.quadraticCurveTo(-2, -24, 2, -37); p.closePath(); }); c.fillStyle = dk; c.fill(p); c.strokeStyle = pr; c.lineWidth = 1.2; c.stroke(p); },
-    chest(c) { c.fillStyle = pr; c.beginPath(); c.moveTo(-8, -37); c.quadraticCurveTo(-10, -27, -6.5, -20); c.lineTo(2, -22); c.quadraticCurveTo(3.5, -30, 3, -37.5); c.closePath(); c.fill(); c.fillStyle = '#FFFFFF'; c.fillRect(-6.8, -21.6, 8, 1.4); },
-    weapon(c) { brush(c, 9, -24, 24, { angle: -1.15, handle: B.cerise }); },
-    helm(c) {
-      c.save(); c.translate(0.5, -49.2);
-      const h = fnPath((p) => { p.moveTo(-10, 6); p.quadraticCurveTo(-12, -4, -9.6, -9); p.quadraticCurveTo(-8, -14, -5.2, -11.2); p.quadraticCurveTo(-3.4, -14.2, -1.2, -11.4); p.quadraticCurveTo(1, -13.8, 3.2, -11.2); p.quadraticCurveTo(5.8, -14.4, 8.2, -10.6); p.quadraticCurveTo(12, -5, 10, 6); p.quadraticCurveTo(8.5, 9.6, 0, 9.8); p.quadraticCurveTo(-8.5, 9.6, -10, 6); p.closePath(); });
-      plate(c, h, { sx: 4, sy: -1, sr: 12, gloss: [4.5, -7.5, 2.6, 1.3] }); c.fillStyle = B.ink; c.beginPath(); c.roundRect(-3, -0.5, 14, 4.2, 2); c.fill(); c.restore();
-    },
-    glow(c) { const v = fnPath((p) => p.roundRect(-2.5, -49.4, 13, 3.6, 1.8)); visorGlow(c, v, 5, -48, 16); },
-  };
-  const vanguard: OrderSet = {
-    id: 'vanguard', name: 'Vanguard', line: 'The sword of the Order, master of the brush. Balanced, with the strongest strokes.', earned: 'From Derek at the first fountain, Crown Gate.',
-    stats: { health: 3, speed: 3, reach: 4, guard: 3 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [10, -25], back: [-8, -24] },
-    back(c) { const p = fnPath((p) => { p.moveTo(-5, -38); p.quadraticCurveTo(-19, -28, -19, -6); p.lineTo(-15, -8); p.lineTo(-12, -4); p.lineTo(-9, -8); p.lineTo(-6, -5); p.quadraticCurveTo(-5, -22, 1, -37); p.closePath(); }); c.fillStyle = dk; c.fill(p); c.strokeStyle = pr; c.lineWidth = 1.2; c.stroke(p); },
-    chest(c) {
-      plate(c, fnPath((p) => { p.moveTo(-8.4, -37.5); p.quadraticCurveTo(-10, -29, -7, -22); p.lineTo(7.5, -22); p.quadraticCurveTo(10.2, -29, 8.4, -37.5); p.quadraticCurveTo(0, -39.6, -8.4, -37.5); }), { sx: 3, sy: -33, sr: 10.5, gloss: [4.5, -34.5, 2.4, 1.1] });
-      const tab = poly([-4.6, -33, 4.6, -33, 5.6, -13, 0, -9.5, -5.6, -13]); c.fillStyle = pr; c.fill(tab);
-      c.save(); c.clip(tab); c.fillStyle = dk; c.fillRect(-6, -33, 3.2, 24); c.fillStyle = '#FFFFFF'; c.fillRect(-6, -17.5, 12, 1.7); c.restore();
-      c.fillStyle = B.ink; c.fillRect(-8.2, -22.4, 16.4, 2.6); crownCap(c, 0, -20, 5.4, { cusps: 3 });
-    },
-    weapon(c) { brush(c, 10, -25, 32, { angle: 1.32, handle: pr }); },
-    shoulders(c) {
-      plate(c, fnPath((p) => p.ellipse(-8.2, -35.5, 3.8, 4.6, 0.3, 0, TAU)), { base: KE.shade, shade: KE.deep, sx: -7, sy: -37, sr: 3.6 });
-      plate(c, fnPath((p) => { p.moveTo(4.5, -38.5); p.quadraticCurveTo(13.5, -40, 13, -33); p.quadraticCurveTo(12.4, -30.2, 9.2, -30.4); p.quadraticCurveTo(5, -31, 4.5, -38.5); }), { sx: 10, sy: -38, sr: 5, gloss: [8.8, -37, 1.8, 0.8] });
-    },
-    helm(c) {
-      plume(c, -5.5, -56, 15, pr, 11, -2.2, -3.6, -0.5);
-      plate(c, fnPath((p) => { p.moveTo(-9, -39.5); p.quadraticCurveTo(-11.4, -47, -9.6, -52.5); p.quadraticCurveTo(-9, -59.6, -5.6, -54.6); p.quadraticCurveTo(-3.6, -60.4, -1, -55.2); p.quadraticCurveTo(1.8, -60.4, 4.2, -55); p.quadraticCurveTo(7.6, -59.2, 9, -52.4); p.quadraticCurveTo(11.4, -46, 9.8, -39.5); p.quadraticCurveTo(0.4, -37.4, -9, -39.5); p.closePath(); }), { sx: 5, sy: -50, sr: 11.5, gloss: [5, -53.5, 2.6, 1.2] });
-      c.strokeStyle = 'rgba(120,140,185,0.75)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(-3.6, -55); c.quadraticCurveTo(-3, -52.5, -1.5, -51.5); c.moveTo(1.8, -55); c.quadraticCurveTo(1.2, -52.5, -0.4, -51.5); c.stroke();
-      c.fillStyle = B.ink; c.fill(VANGUARD_VISOR);
-    },
-    glow(c) { visorGlow(c, VANGUARD_VISOR, 4.5, -47, 18); },
-  };
-  const ranger: OrderSet = {
-    id: 'ranger', name: 'Ranger', line: 'The bow of the Order, master of the interdental brush. Light and quick, built around the shot.', earned: 'In the Narrows, with the holder, beside the first clogged gaps.',
-    stats: { health: 2, speed: 5, reach: 5, guard: 2 }, boot: KE.base, knees: false, gauntlet: true, hands: { front: [16, -33.5], back: [4, -32] },
-    back(c) {
-      c.save(); c.translate(-7.5, -27); c.rotate(-0.6); c.fillStyle = dk; c.beginPath(); c.roundRect(-2.6, -12, 5.2, 18, 2); c.fill();
-      [S.s, S.m, S.l].forEach((z, i) => idbRefill(c, -1.3 + i * 1.3, -11, 7, { col: z.col, angle: -0.1 + i * 0.1 })); c.restore();
-      const sc = fnPath((p) => { p.moveTo(-4, -38); p.quadraticCurveTo(-14, -36, -22, -30); p.lineTo(-20, -27.5); p.quadraticCurveTo(-13, -32, -4, -35); p.closePath(); }); c.fillStyle = B.cerise; c.fill(sc);
-    },
-    legs(c) { c.fillStyle = pr; c.fillRect(-9.2, -8.5, 4.2, 2); c.fillRect(2.8, -8.5, 4.2, 2); },
-    chest(c) {
-      c.strokeStyle = B.ink2; c.lineWidth = 2.2; c.beginPath(); c.moveTo(-6, -35); c.lineTo(6, -21); c.stroke();
-      [S.s, S.m, S.l, S.m].forEach((z, i) => { c.fillStyle = z.col; c.beginPath(); c.roundRect(-4.6 + i * 3, -33.6 + i * 3.5, 2, 2.8, 0.6); c.fill(); });
-      c.fillStyle = B.ink; c.fillRect(-7.4, -20.8, 14.8, 2.2);
-    },
-    front(c) { idbHolder(c, 21.5, -33.5, 22, { angle: Math.PI / 2, loaded: S.m.col }); },
-    shoulders(c) {
-      const m = fnPath((p) => { p.moveTo(-8.5, -38.5); p.quadraticCurveTo(-11.5, -33, -9.5, -29); for (let i = 0; i < 4; i++) p.quadraticCurveTo(-7.4 + i * 4.6, -26.4, -5 + i * 4.6, -29.2); p.quadraticCurveTo(11, -33, 8.4, -38.5); p.quadraticCurveTo(0, -41, -8.5, -38.5); p.closePath(); });
-      c.fillStyle = B.orchid; c.save(); c.translate(0, 1.1); c.fill(m); c.restore(); c.fillStyle = pr; c.fill(m); c.save(); c.clip(m); c.fillStyle = dk; c.fillRect(-12, -40, 6, 14); c.restore();
-    },
-    helm(c) {
-      plate(c, fnPath((p) => { p.moveTo(-7.5, -40); p.quadraticCurveTo(-10.5, -45, -15.5, -47.5); p.quadraticCurveTo(-12, -50, -9, -50.6); p.quadraticCurveTo(-6.5, -59.6, 1.5, -61); p.quadraticCurveTo(9, -57, 9.6, -48); p.quadraticCurveTo(10, -42, 7, -39.6); p.quadraticCurveTo(0, -38.4, -7.5, -40); p.closePath(); }), { sx: 4, sy: -49, sr: 10.5, gloss: [4.2, -55, 2.2, 1] });
-      c.strokeStyle = 'rgba(120,140,185,0.75)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(1, -60); c.quadraticCurveTo(-3, -52, -9, -49.8); c.stroke();
-      c.fillStyle = B.ink; c.fill(RANGER_SLIT);
-    },
-    glow(c) { visorGlow(c, RANGER_SLIT, 5, -49, 16); halo(c, 25, -33.5, 7, '#FFFFFF', 0.35); },
-  };
-  const bulwark: OrderSet = {
-    id: 'bulwark', name: 'Bulwark', line: 'The shield of the Order, master of the rinse. Heavy and steady: guards, charges and cracks tartar.', earned: 'From the Glutton\'s hoard, Sugar Wastes, before the Calculus Deep.',
-    stats: { health: 5, speed: 2, reach: 3, guard: 5 }, boot: KE.cloth, knees: true, gauntlet: true, hands: { front: [9, -22], back: [-9, -24] },
-    back(c) {
-      brush(c, -14, -16, 40, { angle: -0.95, handle: pr });
-      const p = fnPath((p) => { p.moveTo(-10, -37); p.quadraticCurveTo(-15, -22, -13, -8); p.lineTo(9, -8); p.quadraticCurveTo(11, -22, 9, -37); p.closePath(); }); c.fillStyle = dk; c.fill(p);
-    },
-    chest(c) {
-      const ch = fnPath((p) => { p.moveTo(-10.5, -37); p.quadraticCurveTo(-13, -27, -9.5, -17.5); p.lineTo(9.5, -17.5); p.quadraticCurveTo(13, -27, 10.5, -37); p.quadraticCurveTo(0, -40, -10.5, -37); p.closePath(); });
-      plate(c, ch, { sx: 4, sy: -31, sr: 13, gloss: [5, -33.5, 2.6, 1.2] });
-      c.save(); c.clip(ch); c.fillStyle = pr; c.fillRect(-14, -27.5, 28, 6); c.fillStyle = '#FFFFFF'; c.fillRect(-14, -23.2, 28, 1.4); c.restore();
-    },
-    front(c) {
-      plate(c, fnPath((p) => p.arc(10, -20, 9.5, 0, TAU)), { sx: 12, sy: -22, sr: 9 });
-      const f = fnPath((p) => p.arc(10, -20, 7.6, 0, TAU)); c.fillStyle = pr; c.fill(f); c.save(); c.clip(f); c.fillStyle = dk; c.beginPath(); c.arc(6, -16, 9, 0, TAU); c.fill(); c.restore(); crownCap(c, 10, -16.5, 9, { cusps: 3 });
-    },
-    shoulders(c) {
-      for (const [sx, k] of [[-11, -1], [11, 1]] as V2[]) {
-        const p = fnPath((p) => { p.moveTo(sx - 5.5, -33); p.quadraticCurveTo(sx - 6.5, -40, sx - 3, -40); p.quadraticCurveTo(sx - 1.5, -42.6, sx, -40.2); p.quadraticCurveTo(sx + 1.6, -42.6, sx + 3, -40); p.quadraticCurveTo(sx + 6.5, -40, sx + 5.5, -33); p.quadraticCurveTo(sx, -31, sx - 5.5, -33); p.closePath(); });
-        plate(c, p, k < 0 ? { base: KE.shade, shade: KE.deep, sx: sx + 2, sy: -38, sr: 5 } : { sx: sx + 1.5, sy: -38, sr: 5.5, gloss: [sx + 1.5, -38.6, 1.6, 0.8] });
-      }
-    },
-    helm(c) {
-      plate(c, fnPath((p) => { p.moveTo(-10.5, -39); p.quadraticCurveTo(-12.5, -46, -10.5, -51); p.quadraticCurveTo(-8.5, -55.4, -5.4, -52.8); p.quadraticCurveTo(-3, -55.6, -0.4, -53); p.quadraticCurveTo(2.4, -55.6, 5, -52.8); p.quadraticCurveTo(8.6, -55.2, 10.6, -50.6); p.quadraticCurveTo(12.6, -45, 10.8, -39); p.quadraticCurveTo(0, -36.6, -10.5, -39); p.closePath(); }), { sx: 5, sy: -47, sr: 12.5, gloss: [6, -51, 2.6, 1.1] });
-      c.fillStyle = B.ink; c.beginPath(); c.roundRect(-1.8, -49.4, 12, 8.2, 2.2); c.fill(); c.fillStyle = mix(B.ink, '#FFFFFF', 0.25); c.fill(BULWARK_BARS);
-    },
-    glow(c) { visorGlow(c, BULWARK_BARS, 4, -45.5, 17); },
-  };
-  return [initiate, vanguard, ranger, bulwark];
-}
-const VANGUARD_VISOR = poly([-0.5, -48.6, 8.8, -48.6, 8.8, -46.6, 4.6, -46.6, 4.6, -41.8, 2.6, -41.8, 2.6, -46.6, -0.5, -46.6]);
-const RANGER_SLIT = poly([0.5, -48.4, 9.4, -51.6, 9.6, -49.4, 0.5, -46.6]);
-const BULWARK_BARS = (() => { const p = new Path2D(); for (let i = 0; i < 5; i++) p.roundRect(-0.6 + i * 2.2, -48.5, 1.2, 6.4, 0.6); return p; })();
-
+// The rig and the Orders live in src/design/hero.ts, shared with the game.
 function ordersSection() {
-  const sets = orderSets();
+  const ART = orderArts(), sets = ORDER_IDS.map((id) => ART[id]);
   const stage = (ctx: Ctx, w: number, h: number, gy: number) => {
     const g = ctx.createRadialGradient(w * 0.45, h * 0.45, 10, w * 0.45, h * 0.45, w); g.addColorStop(0, '#22365F'); g.addColorStop(1, '#070F2A'); ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = '#132B57'; ctx.fillRect(0, gy, w, h - gy); ctx.fillStyle = 'rgba(201,214,238,0.35)'; ctx.fillRect(0, gy, w, 1.5);
   };
-  const figure = (set: OrderSet) => (ctx: Ctx, w: number, h: number) => {
+  const figure = (set: OrderArt) => (ctx: Ctx, w: number, h: number) => {
     const s = Math.min(3.4, w / 44), x = w * 0.42, gy = h * 0.9; stage(ctx, w, h, gy);
-    ctx.save(); ctx.translate(x, gy); ctx.scale(s, s); rig(ctx, set, 'scene'); ctx.globalCompositeOperation = 'lighter'; rig(ctx, set, 'glow'); ctx.restore();
-    const tx = w - 24; ctx.strokeStyle = 'rgba(204,216,237,0.3)'; ctx.lineWidth = 1; ctx.strokeRect(tx - 16, gy - 32, 32, 32); ctx.save(); ctx.translate(tx, gy); rig(ctx, set, 'scene'); ctx.restore();
+    ctx.save(); ctx.translate(x, gy); ctx.scale(s, s); drawRig(ctx, set, staticPose(set), 'scene'); ctx.globalCompositeOperation = 'lighter'; drawRig(ctx, set, staticPose(set), 'glow'); ctx.restore();
+    const tx = w - 24; ctx.strokeStyle = 'rgba(204,216,237,0.3)'; ctx.lineWidth = 1; ctx.strokeRect(tx - 16, gy - 32, 32, 32); ctx.save(); ctx.translate(tx, gy); drawRig(ctx, set, staticPose(set), 'scene'); ctx.restore();
   };
   // the swap: one rig, the set changes at a fountain with a rinse of bubbles and a clean-tooth glint
   const swap = (ctx: Ctx, w: number, h: number) => {
@@ -803,13 +641,13 @@ function ordersSection() {
       ctx.setTransform(PR, 0, 0, PR, 0, 0); stage(ctx, w, h, gy);
       ctx.save(); ctx.globalCompositeOperation = 'lighter'; halo(ctx, x, gy, 90 * (1 + flash), B.sky, 0.12 + flash * 0.35); ctx.restore();
       const bob = Math.sin(performance.now() / 1000 * 2.4) * 0.6;
-      ctx.save(); ctx.translate(x, gy); ctx.scale(s, s); rig(ctx, sets[i], 'scene', bob); ctx.globalCompositeOperation = 'lighter'; rig(ctx, sets[i], 'glow', bob); ctx.restore();
+      ctx.save(); ctx.translate(x, gy); ctx.scale(s, s); drawRig(ctx, sets[i], staticPose(sets[i], bob), 'scene'); ctx.globalCompositeOperation = 'lighter'; drawRig(ctx, sets[i], staticPose(sets[i], bob), 'glow'); ctx.restore();
       fx.draw(ctx, false); ctx.globalCompositeOperation = 'lighter'; fx.draw(ctx, true); ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = 'rgba(232,238,249,0.9)'; ctx.font = `15px ${T.font.display}`; ctx.textAlign = 'left'; ctx.fillText(sets[i].name.toUpperCase(), 22, 34);
       ctx.fillStyle = 'rgba(232,238,249,0.5)'; ctx.font = `11px ${T.font.display}`; ctx.fillText('SAME RIG  ·  SWAP AT A FOUNTAIN', 22, 54);
     };
   };
-  const bars = (st: OrderSet['stats']) => (['health', 'speed', 'reach', 'guard'] as const).map((k) => `<div class="ostat"><span>${k}</span><i>${[1, 2, 3, 4, 5].map((n) => `<b class="${n <= st[k] ? 'on' : ''}"></b>`).join('')}</i></div>`).join('');
+  const bars = (st: OrderArt['stats']) => (['health', 'speed', 'reach', 'guard'] as const).map((k) => `<div class="ostat"><span>${k}</span><i>${[1, 2, 3, 4, 5].map((n) => `<b class="${n <= st[k] ? 'on' : ''}"></b>`).join('')}</i></div>`).join('');
   const slots: [string, string][] = [['Helm', 'The silhouette. Each Order has its own helm and visor glow.'], ['Shoulders', 'Plates or mantle. They set how broad the knight reads.'], ['Chest', 'Breastplate, tabard or bandolier, in the brand primary.'], ['Back', 'Cape, quiver or a slung brush. Moves after the body.'], ['Weapon / front', 'Brush longsword, the interdental bow, or the crown shield.'], ['Boots', 'Colour and knee plates; light boots for the Ranger.']];
   const moves: [string, string, string, string, string][] = [
     ['Brush slash', 'Base', '+2 cleaning power, longer reach', 'Base', 'Slower, +3 cleaning power'],

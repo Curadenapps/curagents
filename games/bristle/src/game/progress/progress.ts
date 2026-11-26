@@ -7,6 +7,7 @@ import type { GameCore } from '../game';
 import type { Entity, Faction, ProgressApi } from '../types';
 import { PERKS, BRANCHES, FACTIONS } from './perks';
 import { brandText as BT } from '../../design/tokens';
+import { applyOrder } from '../orders';
 
 const GUESS: [RegExp, Faction][] = [[/leech|flare|swell|gum|inflam/, 'gum'], [/imp|sugar/, 'sugar'], [/tartar|spit|brute|calculus|matriarch/, 'tartar']];
 export const nextXp = (level: number) => 12 + level * 14;
@@ -46,7 +47,7 @@ export class Progress implements ProgressApi {
   buy(id: string) {
     if (!this.canBuy(id)) { this.g.audio.sfx('ui-back'); return; }
     const g = this.g; this.p.points--; this.p.perks.push(id); g.audio.sfx('buy');
-    if (id === 'c4') { g.save.maxHp++; g.player.maxHp = g.save.maxHp; g.player.heal(99); }
+    if (id === 'c4') { g.save.maxHp++; g.player.maxHp = g.save.maxHp; applyOrder(g as any); g.player.heal(99); }
     g.persist(); this.render();
   }
 

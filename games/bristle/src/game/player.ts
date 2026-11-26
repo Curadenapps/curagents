@@ -5,6 +5,8 @@ import { TILE } from '../engine/render';
 import { approach, clamp, damp, sign, TAU, lerp } from '../engine/math';
 import type { Game, PlayerApi, Hit, HitKind } from './types';
 import { brand as BR, particle as PT } from '../design/tokens';
+import { ART, ORDER_STATS, currentOrder, type OrderId } from './orders';
+import { drawRig, RIG, RIG_SCALE, type RigPose } from '../design/hero';
 
 export const C = { blue: BR.blue, blueDk: BR.blueDark, blue80: BR.blue80, blue60: BR.blue60, sky: '#8BB8E8', white: '#FFFFFF', enamel: '#F3F6FC', enamelShade: '#C7D3EA', ink: '#0A1F44', ink2: '#132B57', cerise: BR.cerise, yellow: '#FCE300', orange: '#FF8200', orchid: '#F277C6', lime: '#C4D600' };
 
@@ -26,6 +28,8 @@ export class Player extends Actor implements PlayerApi {
   // timers
   coyote = 0; atkCd = 0; dashT = 0; dashCd = 0; airDash = true; hurtT = 0; recoilT = 0; wallLock = 0; landT = 0; focusT = 0; spellT = 0; stepT = 0;
   slash: Slash | null = null; throwT = 0;
+  /** The Order worn (armour set), refreshed every update from the save. */
+  ord: OrderId = 'initiate';
   /** Seconds the blade button has been held after a slash (charges the Deep Clean). */
   charge = 0; charged = false;
   /** Without the Floss Grip relic you still get one wall jump per jump; the relic makes it unlimited and adds the slide. */
@@ -53,6 +57,7 @@ export class Player extends Actor implements PlayerApi {
 
   hurt(g: Game, dmg: number, fromX: number, kind: HitKind = 'contact') {
     if (this.invuln > 0 || this.deadT >= 0 || this.hazardT >= 0) return;
+    if (kind === 'projectile' && this.dashing && ORDER_STATS[this.ord].guard) { g.audio.sfx('clink'); g.fx.burst(this.x + this.facing * 12, this.y - 6, { ...PT.cleanGlint, n: 2 }); return; }
     this.hp -= dmg; this.invuln = (g as any).diff?.invuln ?? 1.3; this.charge = 0; this.hurtT = 0.24; this.slash = null; this.focusT = 0; this.dashT = 0; this.dashing = false;
     const dir = sign(this.x - fromX) || -this.facing; this.vx = dir * 340; this.vy = -430;
     g.hitstop(0.14); g.shake(11, 0.32); g.flash([1, 1, 1], 0.4); g.slowmo(0.35, 0.28); g.audio.sfx('hurt');
@@ -63,7 +68,7 @@ export class Player extends Actor implements PlayerApi {
   }
 
   update(g: Game, dt: number) {
-    this.g = g; const inp = g.input, busy = g.busy() || g.ui.isOpen() || this.workT > 0; const perk = (id: string) => g.progress.has(id);
+    this.g = g; this.ord = currentOrder(g); const inp = g.input, busy = g.busy() || g.ui.isOpen() || this.workT > 0; const perk = (id: string) => g.progress.has(id);
     this.inflamed = Math.max(0, this.inflamed - dt); this.comboT -= dt; if (this.comboT <= 0) this.combo = 0;
     if (this.inflamed > 0 && Math.random() < dt * 10) g.fx.burst(this.x + (Math.random() - 0.5) * 18, this.y - 10 + (Math.random() - 0.5) * 30, { n: 1, color: ['#E31C79', '#F277C6'], speed: [10, 40], angle: -Math.PI / 2, spread: 1, size: [1, 2.2], life: [0.4, 0.8], gravity: -60, emissive: true });
     this.invuln = Math.max(0, this.invuln - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt; this.workT -= dt; this.throwT -= dt;
@@ -84,7 +89,7 @@ export class Player extends Actor implements PlayerApi {
     const want = (k: Parameters<typeof inp.pressed>[0], buf = 0) => !busy && this.hurtT <= 0 && inp.pressed(k, buf);
 
     // ---- grounded bookkeeping
-    if (this.grounded) { this.coyote = COYOTE; this.airDash = true; this.airDashes = perk('i3') ? 2 : 1; this.wallJumps = 1; this.lastWall = 0; } else { this.coyote -= dt; if ((this.wallL && this.lastWall === 1) || (this.wallR && this.lastWall === -1)) this.wallJumps = 1; }
+    if (this.grounded) { this.coyote = COYOTE; this.airDash = true; this.airDashes = (perk('i3') ? 2 : 1) + ORDER_STATS[this.ord].airDashes; this.wallJumps = 1; this.lastWall = 0; } else { this.coyote -= dt; if ((this.wallL && this.lastWall === 1) || (this.wallR && this.lastWall === -1)) this.wallJumps = 1; }
 
     // ---- dash (Prime)
     if (this.dashT > 0) {
@@ -95,7 +100,7 @@ export class Player extends Actor implements PlayerApi {
       }
       if (Math.random() < 0.9) this.ghosts.push({ x: this.x, y: this.y, f: this.facing, t: 0.22 });
       g.fx.burst(this.x - this.facing * 8, this.y + (Math.random() - 0.5) * 30, { n: 1, color: C.sky, shape: 'streak', speed: [40, 80], angle: this.facing > 0 ? Math.PI : 0, spread: 0.3, emissive: true, size: [1, 2], life: [0.15, 0.3] });
-      if (this.dashT <= 0) { this.dashing = false; this.vx = this.facing * RUN * 0.9; }
+      if (this.dashT <= 0) { this.dashing = false; this.vx = this.facing * RUN * ORDER_STATS[this.ord].run * 0.9; }
     } else {
       if (want('dash', 0.08) && g.save.abilities.dash && this.dashCd <= 0 && (this.grounded || this.airDash || this.wallSlide)) {
         inp.consume('dash'); if (this.wallSlide) this.facing = -this.wallSlide as 1 | -1; else if (ax) this.facing = sign(ax) as 1 | -1;
@@ -108,7 +113,7 @@ export class Player extends Actor implements PlayerApi {
     if (this.dashT <= 0) {
       // ---- horizontal
       if (this.recoilT <= 0 && this.wallLock <= 0) {
-        const target = ax * RUN * (this.focusT > 0 ? 0 : this.charge > 0.2 ? 0.55 : this.crouching ? 0.42 : 1);
+        const target = ax * RUN * ORDER_STATS[this.ord].run * (this.focusT > 0 ? 0 : this.charge > 0.2 ? 0.55 : this.crouching ? 0.42 : 1);
         this.vx = approach(this.vx, target, (this.grounded ? ACC_G : ACC_A) * dt);
         if (ax && !this.slash) this.facing = sign(ax) as 1 | -1;
       }
@@ -134,13 +139,13 @@ export class Player extends Actor implements PlayerApi {
       inp.consume('attack');
       const dir: SlashDir = ay < -0.5 ? 'up' : ay > 0.5 && !this.grounded ? 'down' : 'side';
       this.slashFlip = dir === 'side' && this.lastSlash === 'side' && this.slash === null && this.atkCd > -0.25 ? -this.slashFlip : 1;
-      this.slash = { dir, t: 0, hit: new Set(), cells: new Set(), flip: this.slashFlip, landed: false }; this.lastSlash = dir; this.atkCd = ATK_CD * (perk('b2') ? 0.85 : 1); this.focusT = 0;
+      this.slash = { dir, t: 0, hit: new Set(), cells: new Set(), flip: this.slashFlip, landed: false }; this.lastSlash = dir; this.atkCd = ATK_CD * ORDER_STATS[this.ord].atkCd * (perk('b2') ? 0.85 : 1); this.focusT = 0;
       g.audio.sfx('slash', { pitch: 0.92 + Math.random() * 0.16 });
     }
     // hold the blade button to charge a Deep Clean; release to unleash it
     if (!busy && inp.held('attack') && this.dashT <= 0 && this.hurtT <= 0) {
       this.charge += dt;
-      if (!this.charged && this.charge >= CHARGE_T) { this.charged = true; g.audio.sfx('charge'); g.fx.burst(this.x, this.y - 10, { n: 14, color: ['#ffffff', C.sky], shape: 'streak', speed: [60, 160], emissive: true, size: [1, 1.6], life: [0.2, 0.4] }); }
+      if (!this.charged && this.charge >= ORDER_STATS[this.ord].chargeT) { this.charged = true; g.audio.sfx('charge'); g.fx.burst(this.x, this.y - 10, { n: 14, color: ['#ffffff', C.sky], shape: 'streak', speed: [60, 160], emissive: true, size: [1, 1.6], life: [0.2, 0.4] }); }
     } else {
       if (this.charged && !busy) this.deepClean(g);
       this.charge = 0; this.charged = false;
@@ -222,7 +227,7 @@ export class Player extends Actor implements PlayerApi {
       if (e.dead || !e.hurtable || e.team === 'player' || s.hit.has(e.id)) continue;
       if (Math.abs(e.x - b.x) < e.hw + b.hw && Math.abs(e.y - b.y) < e.hh + b.hh) {
         s.hit.add(e.id);
-        const hit: Hit = { damage: 5 + 2 * (Number(g.save.flags.blade) || 0) + (g.progress.has('b3') ? 2 : 0), dirX: dirX || sign(e.x - this.x) || this.facing, dirY, kind: s.dir === 'down' ? 'pogo' : 'slash', source: this, heavy: s.heavy };
+        const hit: Hit = { damage: 5 + ORDER_STATS[this.ord].slash + 2 * (Number(g.save.flags.blade) || 0) + (g.progress.has('b3') ? 2 : 0), dirX: dirX || sign(e.x - this.x) || this.facing, dirY, kind: s.dir === 'down' ? 'pogo' : 'slash', source: this, heavy: s.heavy };
         if (s.heavy) hit.damage = Math.round(hit.damage * 2.5 + 3);
         if (e.onHit?.(g, hit)) {
           s.landed = true; this.gainFluor(g.progress.has('c3') ? 15 : 11); g.hitstop(s.heavy ? 0.11 : 0.05); g.shake(s.heavy ? 8 : 3.5, s.heavy ? 0.2 : 0.1);
@@ -315,69 +320,43 @@ export class Player extends Actor implements PlayerApi {
   /** Shoulder and hand in body space (origin at the feet, +y down), and the brush's angle. */
   grip() {
     const f = this.facing, a = this.bladeA * f + (f < 0 ? Math.PI : 0);
-    const sx = f * 3.2, sy = -22.5 + this.bob * 0.5 - this.breath * 0.3;
+    const sx = f * RIG.front[0] * RIG_SCALE, sy = RIG.front[1] * RIG_SCALE - this.bob - this.breath * 0.5;
     // the arm reaches toward the brush; slashes extend it, idle keeps it close
-    const reach = this.slash ? 10 : this.focusT > 0 ? 8 : 7;
+    const reach = this.slash ? 12 : this.focusT > 0 ? 10 : 9;
     return { sx, sy, hx: sx + Math.cos(a) * reach, hy: sy + Math.sin(a) * reach, a };
   }
 
   draw(ctx: CanvasRenderingContext2D, g: Game) {
     if (this.invuln > 0 && this.deadT < 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0) return;
-    const f = this.facing, x = this.x, y = this.y + this.hh; // feet
+    const f = this.facing, x = this.x, y = this.y + this.hh, art = ART[this.ord];
     ctx.save();
-    // cloak behind
-    const c = this.cloak; ctx.beginPath();
-    const off = (i: number) => 2.5 + i * 1.7;
-    ctx.moveTo(c[0].x + f * 4, c[0].y);
-    for (let i = 1; i < c.length; i++) ctx.lineTo(c[i].x + f * off(i) * 0.6, c[i].y);
-    for (let i = c.length - 1; i >= 0; i--) ctx.lineTo(c[i].x - f * off(i), c[i].y + (i === c.length - 1 ? 2 : 0));
-    ctx.closePath(); ctx.fillStyle = C.blueDk; ctx.fill();
-    ctx.lineWidth = 1.5; ctx.strokeStyle = C.blue; ctx.stroke();
-    // body transform (squash at the feet)
-    const crawl = this.crawlK(); ctx.translate(x - f * 19 * crawl, y); ctx.rotate(this.lean + f * 1.18 * crawl); ctx.scale(this.sx, this.sy);
-    const lift = -this.bob;
-    // legs, swinging from the hip
-    ctx.fillStyle = '#121a36';
-    for (const [k, ang] of [[-1, this.legB], [1, this.legA]] as const) {
-      ctx.save(); ctx.translate(k * 3.4, -10.5 + lift * 0.4); ctx.rotate(ang * f);
-      ctx.beginPath(); ctx.roundRect(-2.6, 0, 5.2, 10.8, 2.4); ctx.fill();
-      ctx.fillStyle = '#0b1128'; ctx.beginPath(); ctx.roundRect(-3, 8, 6.4 * 1, 3, 1.5); ctx.fill(); ctx.fillStyle = '#121a36';
-      ctx.restore();
+    // cape, or the Ranger's scarf: the verlet chain hanging from the shoulders, styled by the Order
+    const cape = art.cape;
+    if (cape) {
+      const c = this.cloak, w = cape.width, off = (i: number) => (2.5 + i * 1.7) * w; ctx.beginPath();
+      ctx.moveTo(c[0].x + f * 4 * Math.min(1, w), c[0].y);
+      for (let i = 1; i < c.length; i++) ctx.lineTo(c[i].x + f * off(i) * 0.6, c[i].y);
+      for (let i = c.length - 1; i >= 0; i--) ctx.lineTo(c[i].x - f * off(i), c[i].y + (i === c.length - 1 ? 2 : 0));
+      ctx.closePath(); ctx.fillStyle = cape.color; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = cape.edge; ctx.stroke();
     }
-    ctx.translate(0, lift);
-    const gr = this.grip();
-    // back arm (half hidden): swings opposite the legs
-    ctx.strokeStyle = C.blueDk; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    // body: crawl tilt and squash, then the rig (mirrored for facing, at rig scale)
+    const crawl = this.crawlK(); ctx.translate(x - f * 19 * crawl, y); ctx.rotate(this.lean + f * 1.18 * crawl); ctx.scale(this.sx, this.sy);
+    const K = RIG_SCALE, pose = this.rigPose(), gr = this.grip(), col = brushColour(g);
+    ctx.scale(f * K, K);
+    // the brush stays the game's own blade, drawn in body space between the chest and the front arm
+    drawRig(ctx, art, pose, 'scene', { blade: (c) => { c.save(); c.translate(0, pose.lift); c.scale(f / K, 1 / K); this.drawBlade(c, gr.hx, gr.hy, gr.a, col); c.restore(); } });
+    ctx.restore();
+  }
+  /** The rig pose from the animation state (rig space: facing right, at RIG_SCALE). */
+  rigPose(): RigPose {
+    const f = this.facing, K = RIG_SCALE, gr = this.grip(), lift = (this.bob + this.breath * 0.5) / K;
     const ba = 1.9 + Math.sin(this.runPhase) * 0.6 * (this.grounded ? 1 : 0) + (this.throwT > 0 ? -2.6 : 0);
-    ctx.beginPath(); ctx.moveTo(-f * 3, -22.5 + this.bob * 0.5); ctx.lineTo(-f * 3 + Math.cos(ba) * 7 * -f, -22.5 + this.bob * 0.5 + Math.sin(ba) * 7); ctx.stroke();
-    // tunic (breathes a little)
-    const br = this.breath * 0.4;
-    ctx.fillStyle = '#18244a'; ctx.beginPath(); ctx.moveTo(-8, -10); ctx.quadraticCurveTo(-9.2 - br, -24, 0, -26 - br); ctx.quadraticCurveTo(9.2 + br, -24, 8, -10); ctx.closePath(); ctx.fill();
-    // cloak front panel
-    ctx.fillStyle = C.blue; ctx.beginPath(); ctx.moveTo(-f * 9, -25); ctx.quadraticCurveTo(-f * 11, -14, -f * 7, -9); ctx.lineTo(f * 2, -12); ctx.quadraticCurveTo(f * 4, -20, f * 3, -26); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = C.white; ctx.globalAlpha = 0.9; ctx.fillRect(-f * 7 - 1, -10.5, f * 9, 1.6); ctx.globalAlpha = 1;
-    // the brush, then the arm and hand that hold it
-    this.drawBlade(ctx, gr.hx, gr.hy, gr.a, brushColour(g));
-    ctx.strokeStyle = C.blue; ctx.lineWidth = 4.4; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(gr.sx, gr.sy); ctx.lineTo(gr.hx, gr.hy); ctx.stroke();
-    ctx.fillStyle = C.enamel; ctx.beginPath(); ctx.arc(gr.hx, gr.hy, 2.9, 0, TAU); ctx.fill();
-    ctx.strokeStyle = '#8fa3c9'; ctx.lineWidth = 0.8; ctx.stroke();
-    // helm: a molar crown (four cusps, fissures) seated on a gum-pink collar, visor slit across the front
-    ctx.save(); ctx.translate(f * 0.5, -32 - this.breath * 0.5); ctx.rotate(this.headTilt);
-    ctx.fillStyle = '#F277C6'; ctx.beginPath(); ctx.ellipse(0, 9.6, 9.5, 2.8, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#E31C79'; ctx.globalAlpha = 0.55; ctx.beginPath(); ctx.ellipse(0, 10.6, 8.5, 1.6, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
-    const helm = () => { ctx.beginPath(); ctx.moveTo(-10, 6); ctx.quadraticCurveTo(-12, -4, -9.6, -9); ctx.quadraticCurveTo(-8, -14, -5.2, -11.2); ctx.quadraticCurveTo(-3.4, -14.2, -1.2, -11.4); ctx.quadraticCurveTo(1, -13.8, 3.2, -11.2); ctx.quadraticCurveTo(5.8, -14.4, 8.2, -10.6); ctx.quadraticCurveTo(12, -5, 10, 6); ctx.quadraticCurveTo(8.5, 9.6, 0, 9.8); ctx.quadraticCurveTo(-8.5, 9.6, -10, 6); ctx.closePath(); };
-    helm(); ctx.fillStyle = C.enamel; ctx.fill();
-    ctx.save(); helm(); ctx.clip();
-    ctx.fillStyle = C.enamelShade; ctx.beginPath(); ctx.ellipse(-f * 9, 7, 13, 12, 0, 0, TAU); ctx.rect(-20, -20, 40, 40); ctx.fill('evenodd');
-    ctx.strokeStyle = 'rgba(120,140,185,0.75)'; ctx.lineWidth = 0.8; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(-4.2, -10.4); ctx.quadraticCurveTo(-3.4, -7.6, -1.6, -6.8); ctx.moveTo(2.2, -10.4); ctx.quadraticCurveTo(1.4, -7.6, -0.6, -6.8); ctx.moveTo(-1.1, -6.8); ctx.lineTo(-1.1, -4.6); ctx.stroke();
-    ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.9; ctx.beginPath(); ctx.ellipse(f * 4.5, -7.5, 2.6, 1.3, -0.3 * f, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
-    ctx.fillStyle = C.ink; ctx.beginPath(); ctx.roundRect(f > 0 ? -3 : -11, -0.5, 14, 4.2, 2); ctx.fill();
-    ctx.restore();
-    helm(); ctx.lineWidth = 1.1; ctx.strokeStyle = '#8fa3c9'; ctx.stroke();
-    ctx.restore();
-    ctx.restore();
+    return {
+      legA: this.legA, legB: this.legB, lift, headTilt: this.headTilt * f,
+      backHand: [RIG.back[0] - Math.cos(ba) * 12, RIG.back[1] + Math.sin(ba) * 12],
+      frontHand: [(gr.hx * f) / K, gr.hy / K + lift],
+      game: true, aiming: false, sway: clamp((-this.vx * f) / 500, -1, 1), open: this.blink > 0 ? 0.25 : 1,
+    };
   }
   /** A CURAPROX CS 5460-style brush held at (hx, hy): slim faceted handle, clear neck, compact head, dense filaments. */
   drawBlade(ctx: CanvasRenderingContext2D, hx: number, hy: number, a: number, col = BRUSH.cerise) {
@@ -398,15 +377,16 @@ export class Player extends Actor implements PlayerApi {
     if (this.inflamed > 0) g.r.halo(ctx, this.x, this.y - 6, 40, '#E31C79', 0.25 + 0.12 * Math.sin(g.time * 9));
     // visor glow
     const vp = this.bodyToWorld(f * 4.5, -(32 + this.bob + this.breath * 0.5) + 1.6), vx = vp.x, vy = vp.y, open = this.blink > 0 ? 0.25 : 1;
-    g.r.halo(ctx, vx, vy, 16, C.sky, 0.55 * open);
-    ctx.fillStyle = '#d8ecff'; ctx.beginPath(); ctx.roundRect(vx - 5.5, vy - 1.1 * open, 11, 2.2 * open, 1.1); ctx.fill();
+    void vx; void vy; void open;
+    { const p0 = this.bodyToWorld(0, 0), crawl = this.crawlK(); ctx.save(); ctx.translate(p0.x, p0.y); ctx.rotate(this.lean + f * 1.18 * crawl); ctx.scale(this.sx * f * RIG_SCALE, this.sy * RIG_SCALE);
+      drawRig(ctx, ART[this.ord], this.rigPose(), 'glow', { halo: (c, hx, hy, r, color, a) => g.r.halo(c, hx, hy, r, color, a) }); ctx.restore(); }
     // bristle tuft on the blade tip
     const gp = this.grip(), a = gp.a, lx = gp.hx + Math.cos(a) * 29 + Math.sin(a) * 5, ly = gp.hy - this.bob + Math.sin(a) * 29 - Math.cos(a) * 5, tp = this.bodyToWorld(lx, ly), bx = tp.x, by = tp.y;
     g.r.halo(ctx, bx, by, 14, C.sky, 0.4);
     // slash arc
     const s = this.slash; if (s) this.drawSlash(ctx, g, s);
     if (this.focusT > 0) { const k = this.focusT / FOCUS_T; g.r.halo(ctx, this.x, this.y, 30 + k * 40, C.sky, 0.25 + k * 0.4); }
-    if (this.charge > 0.15) { const k = Math.min(1, this.charge / CHARGE_T); g.r.halo(ctx, bx, by, 10 + k * 26, this.charged ? '#ffffff' : C.sky, 0.3 + k * 0.6 + (this.charged ? Math.sin(g.time * 30) * 0.15 : 0)); }
+    if (this.charge > 0.15) { const k = Math.min(1, this.charge / ORDER_STATS[this.ord].chargeT); g.r.halo(ctx, bx, by, 10 + k * 26, this.charged ? '#ffffff' : C.sky, 0.3 + k * 0.6 + (this.charged ? Math.sin(g.time * 30) * 0.15 : 0)); }
   }
   drawSlash(ctx: CanvasRenderingContext2D, g: Game, s: Slash) {
     const t = clamp(s.t / 0.16, 0, 1), fade = 1 - clamp((s.t - 0.06) / 0.16, 0, 1); if (fade <= 0) return;

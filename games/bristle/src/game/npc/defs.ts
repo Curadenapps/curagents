@@ -3,6 +3,7 @@
 import type { GameCore } from '../game';
 import { PERSONAS, type VoiceState } from '../../../server/personas.mjs';
 import { brand as BR, brandText as BT } from '../../design/tokens';
+import { applyOrder } from '../orders';
 
 type Cond = (g: GameCore) => boolean;
 interface Line { text: string | ((g: GameCore) => string); when?: Cond }
@@ -232,7 +233,7 @@ export interface Ware {
   buy(g: GameCore): void;
 }
 
-const setMaxHp = (g: GameCore, n: number) => { g.save.maxHp = n; if (g.player) { g.player.maxHp = n; g.player.heal(99); } g.save.hp = n; };
+const setMaxHp = (g: GameCore, n: number) => { g.save.maxHp = n; if (g.player) { g.player.maxHp = n; applyOrder(g as any); g.player.heal(99); } g.save.hp = n; };
 const ownedColours = (g: GameCore) => String(g.flag('brush-colours-owned') ?? 'blue').split(',').filter(Boolean);
 export const colourIndex = { v: 0 }; // the swatch shown in the shop row
 

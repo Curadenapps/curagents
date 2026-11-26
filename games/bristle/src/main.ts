@@ -30,7 +30,8 @@ window.addEventListener('keydown', () => g.audio.unlock());
 // Dev helpers: ?room=<id>&door=<marker>&all (all abilities) &god (no damage)
 const qs = new URLSearchParams(location.search);
 if (qs.get('room')) { g.save.room = qs.get('room')!; g.save.door = qs.get('door') ?? '@'; }
-if (qs.has('all')) Object.keys(g.save.abilities).forEach((k) => ((g.save.abilities as any)[k] = true));
+if (qs.has('all')) { Object.keys(g.save.abilities).forEach((k) => ((g.save.abilities as any)[k] = true)); for (const o of ['vanguard', 'ranger', 'bulwark']) g.save.flags['order-' + o] = true; }
+if (qs.get('order')) g.save.flags.order = qs.get('order')!;
 if (qs.has('room') || qs.has('play')) { g.startGame(false); }
 if (qs.has('god')) { const orig = g.hurtPlayer.bind(g); g.hurtPlayer = () => {}; (window as any).BRISTLE.ungod = () => (g.hurtPlayer = orig); }
 

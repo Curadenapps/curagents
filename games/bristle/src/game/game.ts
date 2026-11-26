@@ -11,6 +11,7 @@ import { Shine } from './entity';
 import { Biomes, Legend, Objects, Rooms, type Biome } from './registry';
 import type { AudioApi, Entity, Game, HitKind, SaveData, UiApi, ProgressApi } from './types';
 import type { Light } from '../engine/render';
+import { applyOrder } from './orders';
 
 const SAVE_KEY = 'bristle-save-v1';
 /** Difficulty tuning. Gentle forgives, Veteran punishes. */
@@ -85,7 +86,7 @@ export class GameCore implements Game {
   // ---------- flow ----------
   startGame(fresh: boolean) {
     if (fresh) { this.wipe(); }
-    this.player = new Player(0, 0); this.player.hp = this.save.hp || this.save.maxHp; this.player.maxHp = this.save.maxHp; this.player.fluor = this.save.fluor;
+    this.player = new Player(0, 0); this.player.hp = this.save.hp || this.save.maxHp; this.player.maxHp = this.save.maxHp; this.player.fluor = this.save.fluor; applyOrder(this as any);
     this.state = 'play';
     this.enter(this.save.room, this.save.door, true);
     this.trans = { t: 0, dur: 0.6, fn: null, phase: 'in' };
