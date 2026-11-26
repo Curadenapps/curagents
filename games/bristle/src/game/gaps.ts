@@ -9,6 +9,7 @@ import { Actor } from './entity';
 import { TILE } from '../engine/render';
 import type { Game } from './types';
 import { particle as PT } from '../design/tokens';
+import { idbHolder } from '../design/kit';
 
 export type GapSize = 's' | 'm' | 'l';
 export const GAP_CHARS = '|IH';
@@ -25,7 +26,12 @@ export function hasPrime(g: Game, s: GapSize) {
   return !!g.save.flags['prime-l'];
 }
 
-const WORK = 1.05; // seconds of gentle in-and-out before the clog lets go
+// Cleaning a gap works like a key: take the holder out, push the refill in once, pull it out once, and the
+// clog lets go and the walls crumble. Phases as fractions of WORK: draw 0-0.2, in 0.2-0.5, hold, out 0.6-0.85.
+const WORK = 0.9;
+const ease = (t: number) => t * t * (3 - 2 * t);
+/** How far the refill is pushed into the gap, 0..1, at fraction t of the clean. */
+export const keyDepth = (t: number) => t < 0.2 ? 0 : t < 0.5 ? ease((t - 0.2) / 0.3) : t < 0.6 ? 1 : t < 0.85 ? 1 - ease((t - 0.6) / 0.25) : 0;
 const wantsInteract = (g: Game) => !g.busy() && !g.ui.isOpen() && (g.input.pressed('interact', 0.05) || g.input.pressed('up', 0.05)) && g.player.grounded;
 
 export class Gap extends Actor {
@@ -56,13 +62,15 @@ export class Gap extends Actor {
     g.audio.sfx('scrub', { pitch: 1.1 });
   }
   private scrubbing(g: Game, dt: number) {
-    const p = g.player; this.work += dt; (p as any).workT = 0.12; p.vx = 0;
-    const face = this.side < 0 ? this.x0 : this.x1;
-    if (Math.floor(this.work * 6) !== Math.floor((this.work - dt) * 6)) g.audio.sfx('scrub', { pitch: 0.9 + Math.random() * 0.3, vol: 0.6 });
-    if (Math.random() < dt * 30) {
-      const [cx, cy] = this.cells[Math.floor(Math.random() * this.cells.length)];
-      g.fx.burst(face, (cy + Math.random()) * TILE, { n: 2, color: ['#d8c48a', '#bfa863', '#FCE300'], speed: [40, 160], angle: this.side < 0 ? Math.PI : 0, spread: 1.2, size: [1.5, 3.5], gravity: 700, life: [0.3, 0.7] });
-      void cx;
+    const p = g.player, before = this.work / WORK; this.work += dt; (p as any).workT = 0.12; p.vx = 0;
+    const t = this.work / WORK, face = this.side < 0 ? this.x0 : this.x1;
+    const cross = (k: number) => before < k && t >= k;
+    if (cross(0.2)) g.audio.sfx('clink', { pitch: 1.3, vol: 0.5 });                       // holder out
+    if (cross(0.45)) { g.audio.sfx('scrub', { pitch: 1.0 }); g.shake(2, 0.08); }         // in: the click of the key
+    if (cross(0.8)) g.audio.sfx('scrub', { pitch: 1.25, vol: 0.7 });                      // out
+    if (t > 0.3 && t < 0.85 && Math.random() < dt * 26) {
+      const [, cy] = this.cells[Math.floor(Math.random() * this.cells.length)];
+      g.fx.burst(face, (cy + Math.random()) * TILE, { ...PT.idbHit, n: 2, angle: this.side < 0 ? Math.PI : 0 });
     }
     if (this.work >= WORK) this.clear(g);
   }
@@ -70,7 +78,8 @@ export class Gap extends Actor {
     const r = g.room;
     for (const [x, y] of this.cells) { r.grid[y][x] = '.'; g.save.flags[`gap:${r.def.id}:${x},${y}`] = true; }
     r.version++; r.rebuild(); this.dead = true;
-    g.audio.sfx('break'); g.hitstop(0.08); g.shake(5, 0.25);
+    g.audio.sfx('break'); g.hitstop(0.08); g.shake(7, 0.3);
+    for (const [x, y] of this.cells) g.fx.burst((x + 0.5) * TILE, (y + 0.5) * TILE, { ...PT.tartarChip, n: 8 });
     for (const [x, y] of this.cells) g.fx.burst((x + 0.5) * TILE, (y + 0.5) * TILE, { n: 10, color: ['#d8c48a', '#bfa863', '#ffffff'], shape: 'crumb', spin: 8, speed: [80, 300], size: [1.5, 3.6], gravity: 900, life: [0.4, 0.9] });
     g.fx.burst(this.x, this.y, { n: 24, color: ['#ffffff', this.size.col], shape: 'bubble', speed: [30, 160], angle: -Math.PI / 2, spread: 2, size: [1, 3], gravity: -60, emissive: true, life: [0.6, 1.2] }); g.fx.burst(this.x, this.y, PT.cleanGlint);
     g.progress?.gain(8); (g as any).float?.(this.x, this.y0 - 8, '+8 XP', '#8BB8E8');
@@ -79,14 +88,12 @@ export class Gap extends Actor {
   }
   draw(ctx: CanvasRenderingContext2D, g: Game) {
     if (this.work < 0) return;
-    // the interdental brush in the knight's hand, working in and out of the gap
-    const p = g.player, f = -this.side, s = this.size;
-    const hx = p.x + f * 10, hy = p.y - 2, face = this.side < 0 ? this.x0 : this.x1;
-    const reach = Math.abs(face - hx), d = reach + 4 + 9 * (0.5 + 0.5 * Math.sin(this.work * 24));
-    ctx.save(); ctx.translate(hx, hy); ctx.scale(f, 1);
-    ctx.fillStyle = s.col; ctx.beginPath(); ctx.roundRect(-8, -2.5, 12, 5, 2.5); ctx.fill();
-    ctx.strokeStyle = '#c9d4ea'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(d - 5, 0); ctx.stroke();
-    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.roundRect(d - 6, -2 - s.channel / 6, 9, 4 + s.channel / 3, 2); ctx.fill();
+    // the knight's interdental holder, loaded with this size, pushed into the gap once and pulled out once
+    const p = g.player, f = -this.side, s = this.size, t = this.work / WORK;
+    const face = this.side < 0 ? this.x0 : this.x1, hx = face - f * 25, hy = p.y - 4; // refill tip rests just outside the face
+    const show = Math.min(1, t / 0.2), d = keyDepth(t) * 20; void p;
+    ctx.save(); ctx.globalAlpha = show; ctx.translate(hx + f * d, hy); ctx.scale(f, 1);
+    idbHolder(ctx, 0, 0, 20, { angle: Math.PI / 2, loaded: s.col });
     ctx.restore();
   }
   drawEmissive(ctx: CanvasRenderingContext2D, g: Game) {

@@ -249,6 +249,7 @@ export abstract class Creature extends Enemy {
   finishDeath(g: Game) {
     this.dead = true;
     g.save.killed[this.type] = (g.save.killed[this.type] || 0) + 1;
+    g.progress?.onKill(this as any);
     const c = this.bloodColor();
     g.fx.burst(this.x, this.y, { ...PT.plaqueBurst, color: c }); g.fx.burst(this.x, this.y, PT.rinseAway); g.fx.burst(this.x, this.y - 6, PT.cleanGlint);
     g.fx.burst(this.x, this.y, { n: 1, speed: [0, 0], color: '#ffffff', shape: 'ring', size: [6, 6], grow: 260, emissive: true, life: [0.25, 0.25] });

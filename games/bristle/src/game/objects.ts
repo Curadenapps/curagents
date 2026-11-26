@@ -6,6 +6,7 @@ import type { Game } from './types';
 import type { Room } from './room';
 import { ART, owned, ownedOrders, nextOrder, setOrder, unlockOrder } from './orders';
 import { particle as PT } from '../design/tokens';
+import { rewardOnce, XP } from './xp';
 
 const near = (g: Game, x: number, y: number, rx: number, ry: number) => Math.abs(g.player.x - x) < rx && Math.abs(g.player.y - y) < ry;
 const wantsInteract = (g: Game) => !g.busy() && !g.ui.isOpen() && (g.input.pressed('interact', 0.05) || g.input.pressed('up', 0.05)) && g.player.grounded;
@@ -28,7 +29,7 @@ export class Fountain extends Actor {
       g.input.consume('interact'); g.input.consume('up');
       const p = g.player; p.heal(99); g.save.room = g.room.id; g.save.door = 'S'; g.save.hp = p.maxHp; g.persist();
       this.resting = 1.4; g.audio.sfx('rest');
-      this.rested = true;
+      this.rested = true; rewardOnce(g, `rest:${g.room.def.id}`, XP.rest, this.x, this.y - 60, 'Fountain');
       const first = !owned(g, 'vanguard'); if (first) unlockOrder(g, 'vanguard', true);
       if (g.save.progress.points > 0) setTimeout(() => g.progress.open(), 650);
       else if (!first) g.ui.toast(ownedOrders(g).length > 1 ? 'Rested. Rest again to change your Order.' : 'Rested. The fountain will bring you back here.');
@@ -61,7 +62,8 @@ export class Relic extends Actor {
     this.t += dt;
     if (g.save.abilities[this.ability]) { this.dead = true; return; }
     if (near(g, this.x, this.y, 26, 40)) {
-      g.save.abilities[this.ability] = true; g.setFlag(this.flagId, true); if (this.ability === 'dash') { g.setFlag('prime-m', true); unlockOrder(g, 'ranger'); } g.persist(); this.dead = true;
+      g.save.abilities[this.ability] = true; g.setFlag(this.flagId, true); if (this.ability === 'dash') { g.setFlag('prime-m', true); unlockOrder(g, 'ranger'); }
+      rewardOnce(g, `relic:${this.ability}`, XP.relic, this.x, this.y - 40, 'Relic'); g.persist(); this.dead = true;
       g.audio.sfx('relic'); g.hitstop(0.2); g.flash([1, 1, 1], 0.6); g.shake(8, 0.4);
       g.fx.burst(this.x, this.y, { n: 60, color: ['#ffffff', '#8BB8E8', '#FCE300'], speed: [80, 520], emissive: true, size: [1, 3], life: [0.4, 1.2], shape: 'streak' });
       g.ui.areaTitle(this.title, this.text);
@@ -86,7 +88,7 @@ export class LoreStone extends Actor {
   constructor(x: number, y: number, text: string) { super(x, y, 16, 24); this.text = text; this.z = 4; }
   update(g: Game, dt: number) {
     this.t += dt; const n = near(g, this.x, this.y, 46, 50); this.prompt = clamp(this.prompt + (n ? dt : -dt) * 4, 0, 1);
-    if (n && wantsInteract(g)) { g.input.consume('interact'); g.input.consume('up'); g.ui.toast(this.text, 6500); g.audio.sfx('read'); }
+    if (n && wantsInteract(g)) { g.input.consume('interact'); g.input.consume('up'); g.ui.toast(this.text, 6500); g.audio.sfx('read'); rewardOnce(g, `lore:${g.room.def.id}:${Math.round(this.x)}`, XP.lore, this.x, this.y - 44, 'Oath stone'); }
   }
   draw(ctx: CanvasRenderingContext2D) {
     const x = this.x, y = this.y + this.hh;

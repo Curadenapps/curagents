@@ -3,6 +3,7 @@ import { Actor } from '../entity';
 import { clamp, damp } from '../../engine/math';
 import type { Game } from '../types';
 import { ART, type Pose } from './art';
+import { rewardOnce, XP } from '../xp';
 
 export class Npc extends Actor {
   npc: string; t = Math.random() * 10; prompt = 0; blinkT = 2 + Math.random() * 3; blink = 0; look = 0; talking = false; talk = 0;
@@ -25,7 +26,7 @@ export class Npc extends Actor {
     this.talk = this.talking ? 0.5 + 0.5 * Math.sin(this.t * 18) : damp(this.talk, 0, 10, dt);
     if (near && !this.talking && !g.busy() && !g.ui.isOpen() && p.grounded && (g.input.pressed('interact', 0.05) || g.input.pressed('up', 0.05))) {
       g.input.consume('interact'); g.input.consume('up');
-      this.talking = true;
+      this.talking = true; rewardOnce(g, `talk:${this.npc}`, XP.talk, this.x, this.y - 70, 'New friend');
       g.ui.talk(this.npc).finally(() => { this.talking = false; });
     }
   }

@@ -12,6 +12,7 @@ import { Biomes, Legend, Objects, Rooms, type Biome } from './registry';
 import type { AudioApi, Entity, Game, HitKind, SaveData, UiApi, ProgressApi } from './types';
 import type { Light } from '../engine/render';
 import { applyOrder } from './orders';
+import { rewardOnce, XP } from './xp';
 
 const SAVE_KEY = 'bristle-save-v1';
 /** Difficulty tuning. Gentle forgives, Veteran punishes. */
@@ -122,6 +123,7 @@ export class GameCore implements Game {
     // camera snaps
     this.updateCamera(1, true);
     const first = !this.save.visited[def.id]; this.save.visited[def.id] = true;
+    if (first && this.player) rewardOnce(this as any, `room:${def.id}`, def.title ? XP.area : XP.room, this.player.x, this.player.y - 56, def.title ? 'New area' : 'New room');
     if (!quiet && first && def.title) this.ui.areaTitle(def.title, def.subtitle);
     if (quiet && def.title && first) this.ui.areaTitle(def.title, def.subtitle);
     this.audio.music(def.music ?? this.biome.music ?? null);

@@ -56,7 +56,8 @@ class Grid {
     }
     return this.g[ty][tx];
   }
-  solid(tx, ty, pass) { const c = this.at(tx, ty); return c === '#' || c === 'P' || (c === 'I' && !this.hasM) || c === 'H'; } // '|' (size S) is always cleanable
+  // Clogged gaps ('|' S, 'I' M, 'H' L) are solid until cleaned; see cleanGaps() for when the player can clean one.
+  solid(tx, ty, pass) { const c = this.at(tx, ty); return c === '#' || c === 'P' || c === '|' || c === 'I' || c === 'H'; }
   solidAt(x, y, pass) { return this.solid(Math.floor(x / T), Math.floor(y / T), pass); }
   oneWay(tx, ty) { return this.at(tx, ty) === '='; }
   hazardAt(x, y) { return this.at(Math.floor(x / T), Math.floor(y / T)) === '^'; }
@@ -206,6 +207,25 @@ function arrival(G, door) {
 }
 const cloneS = (s) => ({ ...s });
 
+/** Clean every clogged gap the player can start cleaning from a reached standing spot, exactly as gaps.ts allows:
+ *  grounded, body within 14 px of the gap sideways and overlapping it vertically, and carrying that size
+ *  (S always, M with the Prime Dash relic, L never in the slice). Returns the number of cells opened. */
+function cleanGaps(G, seen, ab) {
+  const can = { '|': true, I: !!ab.dash, H: false }; let opened = 0; const done = new Set();
+  for (let y = 0; y < G.h; y++) for (let x = 0; x < G.w; x++) {
+    const ch = G.g[y][x]; if (!(ch in can) || done.has(y * G.w + x)) continue;
+    const cells = [], st = [[x, y]]; done.add(y * G.w + x);
+    while (st.length) { const [cx, cy] = st.pop(); cells.push([cx, cy]); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = cx + dx, ny = cy + dy, k = ny * G.w + nx; if (nx < 0 || ny < 0 || nx >= G.w || ny >= G.h || done.has(k) || G.g[ny][nx] !== ch) continue; done.add(k); st.push([nx, ny]); } }
+    if (!can[ch]) continue;
+    const x0 = Math.min(...cells.map((c) => c[0])) * T, x1 = (Math.max(...cells.map((c) => c[0])) + 1) * T, y0 = Math.min(...cells.map((c) => c[1])) * T, y1 = (Math.max(...cells.map((c) => c[1])) + 1) * T;
+    let ok = false;
+    // a grounded player in the tile beside the gap can walk up to it (the gap itself stops them)
+    for (const { kind, s } of seen.values()) { const cx = Math.floor(s.x / T); if (kind === 'g' && cx >= x0 / T - 1 && cx <= x1 / T && s.y + HH > y0 + 2 && s.y - HH < y1 - 2) { ok = true; break; } }
+    if (ok) for (const [cx, cy] of cells) { G.g[cy][cx] = '.'; opened++; }
+  }
+  return opened;
+}
+
 /** BFS inside one room from an entry. Returns { exits:Set, relics:Set(ability), touched objects, nodes } */
 function searchRoom(def, entry, ab) {
   let G = new Grid(def); G.hasM = !!ab.dash;
@@ -245,6 +265,7 @@ function searchRoom(def, entry, ab) {
         const tx = cx + dx, ty = fy + dy; if (G.at(tx, ty) === 'P') { G.g[ty][tx] = '.'; scrubbed++; }
       }
     }
+    scrubbed += cleanGaps(G, seen, ab);
     if (!scrubbed) break;
     G.hasPogo = !NO_POGO && G.g.some((r) => r.includes('P') || r.includes('^'));
     const old = [...seen.keys()]; for (const k of old) queue.push(k); // re-run from known spots on the opened grid

@@ -23,6 +23,8 @@ interface Slash { dir: SlashDir; t: number; hit: Set<number>; cells: Set<number>
 export class Player extends Actor implements PlayerApi {
   facing: 1 | -1 = 1;
   hp = 5; maxHp = 5; fluor = 0;
+  /** Seconds of post-hit blinking. Separate from invuln, which menus and dialogue also hold up (you stay visible). */
+  hurtBlink = 0;
   invuln = 0; dashing = false; inflamed = 0; combo = 0; comboT = 0; airDashes = 1; dashHits = new Set<number>();
   override team = 'player' as const; override z = 20;
   // timers
@@ -64,6 +66,7 @@ export class Player extends Actor implements PlayerApi {
     g.fx.burst(this.x, this.y, PT.hurtShards);
     g.fx.burst(this.x, this.y, { n: 1, color: '#ffffff', shape: 'ring', size: [8, 8], grow: 420, emissive: true, life: [0.3, 0.3] });
     if (kind === 'hazard') { this.hazardT = 0; this.invuln = 1.6; }
+    this.hurtBlink = this.invuln;
     if (this.hp <= 0) { this.hp = 0; this.deadT = 0; g.slowmo(0.25, 0.8); g.audio.sfx('death'); }
   }
 
@@ -71,7 +74,7 @@ export class Player extends Actor implements PlayerApi {
     this.g = g; this.ord = currentOrder(g); const inp = g.input, busy = g.busy() || g.ui.isOpen() || this.workT > 0; const perk = (id: string) => g.progress.has(id);
     this.inflamed = Math.max(0, this.inflamed - dt); this.comboT -= dt; if (this.comboT <= 0) this.combo = 0;
     if (this.inflamed > 0 && Math.random() < dt * 10) g.fx.burst(this.x + (Math.random() - 0.5) * 18, this.y - 10 + (Math.random() - 0.5) * 30, { n: 1, color: ['#E31C79', '#F277C6'], speed: [10, 40], angle: -Math.PI / 2, spread: 1, size: [1, 2.2], life: [0.4, 0.8], gravity: -60, emissive: true });
-    this.invuln = Math.max(0, this.invuln - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt; this.workT -= dt; this.throwT -= dt;
+    this.invuln = Math.max(0, this.invuln - dt); this.hurtBlink = Math.max(0, this.hurtBlink - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt; this.workT -= dt; this.throwT -= dt;
     for (const gh of this.ghosts) gh.t -= dt; this.ghosts = this.ghosts.filter((gh) => gh.t > 0);
 
     if (this.deadT >= 0) { this.deadT += dt; this.vx *= Math.exp(-4 * dt); this.physics(g, dt); this.animate(g, dt, 0); return; }
@@ -285,7 +288,7 @@ export class Player extends Actor implements PlayerApi {
     this.bob = damp(this.bob, running ? Math.abs(Math.sin(this.runPhase)) * 2.4 : 0, 18, dt);
     this.breath = Math.sin(this.animT * 2.3) * (running ? 0 : 0.7);
     let lean = clamp(this.vx / RUN, -1, 1) * 0.12 * (this.grounded ? 1 : 0.5);
-    if (this.slash && this.slash.t < 0.1) lean += this.facing * (this.slash.dir === 'side' ? 0.16 : 0.05);
+    if (this.slash && this.slash.t < 0.1) lean += this.facing * (this.slash.dir === 'side' ? 0.26 : 0.08);
     if (this.hurtT > 0) lean -= this.facing * 0.28;
     if (this.focusT > 0) lean *= 0.2;
     this.lean = damp(this.lean, lean, 12, dt);
@@ -293,7 +296,8 @@ export class Player extends Actor implements PlayerApi {
     // legs: swing from the hip when running, tuck when rising, dangle when falling
     const sw = Math.sin(this.runPhase), rising = !this.grounded && this.vy < 0;
     const crawling = this.crouching, crawlSw = Math.sin(this.runPhase * 1.6);
-    const la = crawling ? -0.9 + crawlSw * 0.35 : running ? sw * 0.7 : !this.grounded ? (rising ? 0.45 : -0.25) : 0, lb = crawling ? -1.2 - crawlSw * 0.35 : running ? -sw * 0.7 : !this.grounded ? (rising ? -0.15 : 0.3) : 0;
+    const sl = this.slash, lunge = sl && this.grounded && sl.dir === 'side' && sl.t < 0.22;
+    const la = crawling ? -0.9 + crawlSw * 0.35 : lunge ? -0.5 : sl && sl.dir === 'down' ? 0.6 : running ? sw * 0.85 : !this.grounded ? (rising ? 0.45 : -0.25) : 0, lb = crawling ? -1.2 - crawlSw * 0.35 : lunge ? 0.55 : sl && sl.dir === 'down' ? -0.4 : running ? -sw * 0.85 : !this.grounded ? (rising ? -0.15 : 0.3) : 0;
     this.legA = damp(this.legA, la, 20, dt); this.legB = damp(this.legB, lb, 20, dt);
     // visor blink
     this.blinkT -= dt; if (this.blinkT <= 0) { this.blink = 0.13; this.blinkT = 2.5 + Math.random() * 3; } this.blink = Math.max(0, this.blink - dt);
@@ -301,7 +305,11 @@ export class Player extends Actor implements PlayerApi {
     const s = this.slash;
     const rest = this.crouching ? -1.0 + Math.sin(this.runPhase * 1.6) * 0.2 : this.focusT > 0 ? -1.45 : running ? 2.55 + Math.sin(this.runPhase * 2) * 0.12 : !this.grounded ? (rising ? 2.85 : 1.95) : 1.8 + this.breath * 0.04;
     const target = s ? (s.dir === 'up' ? -1.9 : s.dir === 'down' ? 1.6 : (s.flip > 0 ? 0.9 : -0.8)) : this.throwT > 0 ? -1.2 : this.charge > 0.15 ? 2.9 : rest;
-    this.bladeA = damp(this.bladeA, target, s ? 40 : 12, dt);
+    if (s) {
+      const arc = s.dir === 'up' ? [0.9, -1.95] : s.dir === 'down' ? [-1.3, 1.65] : s.flip > 0 ? [-2.0, 0.95] : [1.7, -0.85];
+      const k = 1 - Math.pow(1 - clamp(s.t / 0.13, 0, 1), 3); // ease-out cubic
+      this.bladeA = arc[0] + (arc[1] - arc[0]) * k;
+    } else this.bladeA = damp(this.bladeA, target, 12, dt);
     // cloak: verlet chain hanging from the shoulders
     const ax0 = this.x - this.facing * 2, ay0 = this.y - 7 + this.bob * 0.5, wind = -this.vx * 0.012;
     const c = this.cloak; c[0].x = ax0; c[0].y = ay0;
@@ -322,12 +330,12 @@ export class Player extends Actor implements PlayerApi {
     const f = this.facing, a = this.bladeA * f + (f < 0 ? Math.PI : 0);
     const sx = f * RIG.front[0] * RIG_SCALE, sy = RIG.front[1] * RIG_SCALE - this.bob - this.breath * 0.5;
     // the arm reaches toward the brush; slashes extend it, idle keeps it close
-    const reach = this.slash ? 12 : this.focusT > 0 ? 10 : 9;
+    const reach = this.slash ? 9 + 6 * Math.sin(Math.PI * clamp(this.slash.t / 0.18, 0, 1)) : this.focusT > 0 ? 10 : 9;
     return { sx, sy, hx: sx + Math.cos(a) * reach, hy: sy + Math.sin(a) * reach, a };
   }
 
   draw(ctx: CanvasRenderingContext2D, g: Game) {
-    if (this.invuln > 0 && this.deadT < 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0) return;
+    if (this.hurtBlink > 0 && this.deadT < 0 && Math.floor(this.hurtBlink * 18) % 2 === 0 && this.hurtT <= 0) return;
     const f = this.facing, x = this.x, y = this.y + this.hh, art = ART[this.ord];
     ctx.save();
     // cape, or the Ranger's scarf: the verlet chain hanging from the shoulders, styled by the Order
@@ -350,7 +358,7 @@ export class Player extends Actor implements PlayerApi {
   /** The rig pose from the animation state (rig space: facing right, at RIG_SCALE). */
   rigPose(): RigPose {
     const f = this.facing, K = RIG_SCALE, gr = this.grip(), lift = (this.bob + this.breath * 0.5) / K;
-    const ba = 1.9 + Math.sin(this.runPhase) * 0.6 * (this.grounded ? 1 : 0) + (this.throwT > 0 ? -2.6 : 0);
+    const ba = this.slash && this.slash.t < 0.25 ? 2.7 : 1.9 + Math.sin(this.runPhase) * 0.75 * (this.grounded ? 1 : 0) + (this.throwT > 0 ? -2.6 : 0);
     return {
       legA: this.legA, legB: this.legB, lift, headTilt: this.headTilt * f,
       backHand: [RIG.back[0] - Math.cos(ba) * 12, RIG.back[1] + Math.sin(ba) * 12],
@@ -373,7 +381,7 @@ export class Player extends Actor implements PlayerApi {
     const f = this.facing;
     for (const gh of this.ghosts) { const a = gh.t / 0.22; ctx.globalAlpha = a * 0.35; ctx.fillStyle = C.sky; ctx.beginPath(); ctx.ellipse(gh.x, gh.y - 4, 11, 22, 0, 0, TAU); ctx.fill(); }
     ctx.globalAlpha = 1;
-    if (this.invuln > 0 && Math.floor(this.invuln * 18) % 2 === 0 && this.hurtT <= 0 && this.deadT < 0) return;
+    if (this.hurtBlink > 0 && Math.floor(this.hurtBlink * 18) % 2 === 0 && this.hurtT <= 0 && this.deadT < 0) return;
     if (this.inflamed > 0) g.r.halo(ctx, this.x, this.y - 6, 40, '#E31C79', 0.25 + 0.12 * Math.sin(g.time * 9));
     // visor glow
     const vp = this.bodyToWorld(f * 4.5, -(32 + this.bob + this.breath * 0.5) + 1.6), vx = vp.x, vy = vp.y, open = this.blink > 0 ? 0.25 : 1;

@@ -1,7 +1,7 @@
 // BRISTLE hero rig: one knight body and the Orders (armour sets) that dress it.
 // Used by the game (src/game/player.ts draws the live knight) and the style guide (static poses), so the
 // two cannot drift. Rig space: feet at (0,0), +y down, facing right, about 61 units tall; the game draws
-// it at RIG_SCALE so the knight stays about 49 units tall on a 42-unit hit box.
+// it at RIG_SCALE: about 58 units tall on a 42-unit hit box, so the helm reads as big as the original hero's.
 //
 // The rig owns the skeleton and the draw order; an Order only fills slots:
 //   back, legs (cuffs), offhand, chest, weapon, front, shoulders, helm, glow, plus a cape style for the
@@ -14,7 +14,7 @@ type Ctx = CanvasRenderingContext2D;
 export type V2 = [number, number];
 export type OrderId = 'initiate' | 'vanguard' | 'ranger' | 'bulwark';
 export const ORDER_IDS: OrderId[] = ['initiate', 'vanguard', 'ranger', 'bulwark'];
-export const RIG_SCALE = 0.8;
+export const RIG_SCALE = 0.95;
 /** Rig shoulders (front, back) and hip height. */
 export const RIG = { front: [6, -34] as V2, back: [-5.5, -34] as V2, hip: -20, leg: 17, neck: [0.5, -39] as V2 };
 
