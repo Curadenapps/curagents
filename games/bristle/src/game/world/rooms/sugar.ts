@@ -83,7 +83,7 @@ export const rooms: RoomDef[] = [
     id: "sugar-grip",
     biome: "sugar",
     dark: 0.12,
-    doors: { '1': { to: "sugar-spires", door: "2" }, '2': { to: "calculus-1", door: "1" } },
+    doors: { '1': { to: "sugar-spires", door: "2" }, '2': { to: "sugar-rest", door: "1" } },
     objects: [
       { type: "relic", x: 11, y: 41, ability: "grip", title: "Floss Grip", text: "Hold toward a wall to cling, then jump to spring off it. Climb between close walls." },
       { type: "lore", x: 37, y: 7, text: "A thread is a small thing to trust. The climbers of the Order trusted it twice a day." },

@@ -119,6 +119,8 @@ export interface ProgressApi {
   has(perk: string): boolean;
   masteryLevel(f: Faction): number;
   open(): void;
+  /** Open the Oath picker at the next calm moment. */
+  queueOpen(): void;
 }
 
 export interface PlayerApi extends Entity {

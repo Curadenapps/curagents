@@ -237,9 +237,11 @@ export const colourIndex = { v: 0 }; // the swatch shown in the shop row
 
 export const WARES: Ware[] = [
   { id: 'shard-1', name: 'Enamel Shard', icon: 'shard', blurb: 'One more shard of enamel for your crown. Raises your health by one, and mends you on the spot.', pip: 'Hand-polished! By me! With my face!',
-    price: () => 150, owned: (g) => !!g.flag('shop-shard-1'), buy: (g) => { g.setFlag('shop-shard-1', true); setMaxHp(g, g.save.maxHp + 1); } },
+    price: () => 90, owned: (g) => !!g.flag('shop-shard-1'), buy: (g) => { g.setFlag('shop-shard-1', true); setMaxHp(g, g.save.maxHp + 1); } },
   { id: 'shard-2', name: 'Enamel Shard', icon: 'shard', blurb: 'A second shard, thicker than the first. Raises your health by one.', pip: 'The last one I have. Probably. Pip is always finding things.',
     price: () => 300, owned: (g) => !!g.flag('shop-shard-2'), locked: (g) => (g.flag('shop-shard-1') ? null : 'After the first shard'), buy: (g) => { g.setFlag('shop-shard-2', true); setMaxHp(g, g.save.maxHp + 1); } },
+  { id: 'oath', name: 'Oath Token', icon: 'scroll', blurb: 'A token of the Order. Gives you one skill point to spend on the Oath right away.', pip: 'Found it in a gap. It hummed. I took that as a yes.',
+    price: () => 70, owned: (g) => !!g.flag('shop-oath'), buy: (g) => { g.setFlag('shop-oath', true); g.save.progress.points++; setTimeout(() => (g as any).progress?.queueOpen?.(), 400); } },
   { id: 'edge-1', name: 'Bristle Edge', icon: 'edge', blurb: 'Re-tufted filaments for your brush-blade. Every swing hits harder.', pip: 'Sharp! Well. Firm. Firmly persuasive.',
     price: () => 200, owned: (g) => (Number(g.flag('blade')) || 0) >= 1, buy: (g) => g.setFlag('blade', 1) },
   { id: 'edge-2', name: 'Bristle Edge II', icon: 'edge', blurb: 'A master tuft, every filament set by hand. Your blade hits harder still.', pip: 'My finest work. I cried a little. Thread is very absorbent.',

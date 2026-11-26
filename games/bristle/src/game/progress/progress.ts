@@ -8,7 +8,7 @@ import type { Entity, Faction, ProgressApi } from '../types';
 import { PERKS, BRANCHES, FACTIONS } from './perks';
 
 const GUESS: [RegExp, Faction][] = [[/leech|flare|swell|gum|inflam/, 'gum'], [/imp|sugar/, 'sugar'], [/tartar|spit|brute|calculus|matriarch/, 'tartar']];
-export const nextXp = (level: number) => 30 + level * 30;
+export const nextXp = (level: number) => 12 + level * 14;
 export const masteryOf = (xp: number) => Math.min(5, Math.floor(Math.sqrt(xp / 20)));
 export const masteryXp = (lvl: number) => lvl * lvl * 20;
 
@@ -33,11 +33,14 @@ export class Progress implements ProgressApi {
     p.xp += xp;
     while (p.xp >= nextXp(p.level)) {
       p.xp -= nextXp(p.level); p.level++; p.points++;
-      g.ui.toast(`Oath level ${p.level}. A skill point waits at the next fountain.`, 4200);
+      g.ui.toast(`Oath level ${p.level}. Choose a skill.`, 3000); this.queueOpen();
       g.audio.sfx('levelup'); g.flash([0.8, 0.9, 1], 0.25);
       const pl = g.player; if (pl) g.fx.burst(pl.x, pl.y, { n: 36, color: ['#ffffff', '#8BB8E8', '#FCE300'], shape: 'streak', speed: [120, 420], angle: -Math.PI / 2, spread: 2.2, emissive: true, size: [1, 2], life: [0.4, 0.9] });
     }
   }
+  /** Open the Oath picker as soon as the moment is calm (not mid-transition or mid-dialogue). */
+  pending = -1;
+  queueOpen() { if (this.pending < 0) this.pending = 0.7; }
   canBuy(id: string) { const k = PERKS.find((x) => x.id === id)!; return !this.has(id) && this.p.points > 0 && (!k.needs || this.has(k.needs)); }
   buy(id: string) {
     if (!this.canBuy(id)) { this.g.audio.sfx('ui-back'); return; }
@@ -56,6 +59,8 @@ export class Progress implements ProgressApi {
   close() { if (!this.el) return; this.el.remove(); this.el = null; this.g.modal = Math.max(0, this.g.modal - 1); this.g.audio.sfx('ui-close'); this.g.input.clear(); }
   /** Runs before the UI layer each frame so the Oath screen owns input while it is open. */
   update(dt: number) {
+    const g = this.g;
+    if (!this.el && this.pending >= 0 && g.state === 'play') { this.pending -= dt; if (this.pending <= 0 && !g.busy() && !g.ui.isOpen() && g.player && g.player.deadT < 0) { this.pending = -1; if (this.p.points > 0) this.open(); } }
     if (!this.el) return; this.t += dt; const i = this.g.input;
     const col = (n: number) => Math.floor(n / 4), row = (n: number) => n % 4;
     let s = this.sel;
@@ -80,7 +85,7 @@ export class Progress implements ProgressApi {
         }).join('')}</section>`).join('')}</div>
         <div class="oath-mastery"><h2>Mastery</h2>${FACTIONS.map((f) => { const xp = p.mastery[f.id] || 0, lv = masteryOf(xp), lo = masteryXp(lv), hi = masteryXp(lv + 1);
           return `<div class="m"><div class="m-head"><b>${f.name}</b><span>Level ${lv}${lv ? ` · +${lv * 10}% damage` : ''}</span></div><div class="oath-bar">${bar(lv >= 5 ? 1 : xp - lo, lv >= 5 ? 1 : hi - lo, f.colour)}</div><p>${f.blurb}</p></div>`; }).join('')}</div>
-        <footer><span>Arrows to choose · Enter to take · Esc to close</span><button type="button" data-close>Close</button></footer>
+        <footer><span>Arrows to choose · Enter to take · Esc to keep points for later</span><button type="button" data-close>Close</button></footer>
       </div>`;
   }
 }

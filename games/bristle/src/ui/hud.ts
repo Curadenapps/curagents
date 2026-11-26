@@ -51,7 +51,7 @@ export class Hud {
     const sx = ox + vr * 2 + 14, sy = oy + 50; c.fillStyle = '#FCE300'; c.beginPath(); c.moveTo(sx, sy - 7); c.lineTo(sx + 5, sy); c.lineTo(sx, sy + 7); c.lineTo(sx - 5, sy); c.fill();
     c.fillStyle = '#E8EEF9'; c.fillText(String(this.shown.shine), sx + 14, sy + 1);
     // Oath level and XP
-    const pg = g.save.progress, need = 30 + pg.level * 30, bx = ox + vr * 2 + 70, by = sy;
+    const pg = g.save.progress, need = 12 + pg.level * 14, bx = ox + vr * 2 + 70, by = sy;
     c.font = '400 13px ' + FONT; c.fillStyle = 'rgba(232,238,249,0.75)'; c.fillText('LV ' + pg.level, bx, by + 1);
     c.fillStyle = 'rgba(139,184,232,0.18)'; c.beginPath(); c.roundRect(bx + 40, by - 2, 90, 4, 2); c.fill();
     c.fillStyle = '#8BB8E8'; c.beginPath(); c.roundRect(bx + 40, by - 2, 90 * Math.min(1, pg.xp / need), 4, 2); c.fill();

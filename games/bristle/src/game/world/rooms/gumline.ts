@@ -8,7 +8,7 @@ export const rooms: RoomDef[] = [
     biome: "gumline",
     title: "Gumline Hollows",
     subtitle: "Where the Towers Take Root",
-    doors: { '1': { to: "crown-descent", door: "2" }, '2': { to: "gumline-maw", door: "1" } },
+    doors: { '1': { to: "crown-descent", door: "2" }, '2': { to: "gumline-pip", door: "1" } },
     objects: [
       { type: "lore", x: 44, y: 14, text: "The gums remember every visitor. They are soft about it." },
     ],
@@ -46,7 +46,7 @@ export const rooms: RoomDef[] = [
   {
     id: "gumline-pip",
     biome: "gumline",
-    doors: { '1': { to: "gumline-maw", door: "2" }, '2': { to: "gumline-grotto", door: "1" } },
+    doors: { '1': { to: "gumline-1", door: "2" }, '2': { to: "gumline-grotto", door: "1" } },
     objects: [
       { type: "npc", id: "pip", x: 31, y: 17 },
     ],

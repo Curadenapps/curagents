@@ -8,7 +8,7 @@ export const rooms: RoomDef[] = [
     biome: "calculus",
     title: "Calculus Deep",
     subtitle: "Where the Film Grows Old",
-    doors: { '1': { to: "sugar-grip", door: "2" }, '2': { to: "calculus-warden", door: "1" } },
+    doors: { '1': { to: "sugar-maw", door: "2" }, '2': { to: "calculus-warden", door: "1" } },
     objects: [
       { type: "lore", x: 4, y: 8, text: "What the Film is not shown the door, it builds a house. What it builds a house, it builds a throne." },
     ],

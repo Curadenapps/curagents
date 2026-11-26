@@ -7,4 +7,4 @@ import { rooms as sugar } from './sugar';
 import { rooms as calculus } from './calculus';
 import { rooms as maw } from './maw';
 
-export const ROOMS: RoomDef[] = [...crown, ...gumline, ...maw, ...narrows, ...sugar, ...calculus];
+export const ROOMS: RoomDef[] = [...crown, ...gumline, ...narrows, ...sugar, ...maw, ...calculus];
