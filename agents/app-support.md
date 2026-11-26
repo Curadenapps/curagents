@@ -170,8 +170,10 @@ same request on the same morning). The two Routines never run on the same day:
 - Sean's Routine has no "Fabian's last run looks old" rule any more: at the first run
   of each day his last run is always from the evening before, so that rule made both
   Routines answer. If Fabian's Routine is really down, Sean sets Fabian's registry
-  row to `Paused` and runs his own by hand ("app support"); a run started by hand on
-  Mon–Thu with Fabian's row not Paused logs `no-op` ("Fabian's day") and stops.
+  row to `Paused` and runs his own by hand ("app support"). Any run of Sean's on
+  Mon–Thu, scheduled or by hand, with Fabian's row there and not Paused logs `no-op`
+  ("Fabian's day") and stops. This also covers the 07:20 double reply of 26 Nov
+  (#114) while Sean's Routine is still scheduled Mon–Fri.
 - **Never answer on top of someone.** Before posting anything on a form task, every
   run reads its latest comments. If anyone from the team or either support assistant
   has commented since the submitter's last message, it posts nothing and moves on.
@@ -234,7 +236,10 @@ Requests & Feedback", and that have either:
 - a story newer than App Support's last action (a reply from the submitter, or the
   owner confirming a change).
 
-Tasks pushed to the board by webex-sweep or created by people are out of scope.
+Tasks pushed to the board by webex-sweep or created by people are out of scope. One
+exception: tasks whose notes end with "This task was created by the practice approval
+run (bob-admin)" are in scope, read like a form submission ("Duplicate sign-ups"
+below).
 
 **Read the form fields from the notes** (each label on its own line, the value on the
 next): `Name`, `Email address`, `Title`, `App Country`, `Application(s)`, `Operating
@@ -358,9 +363,44 @@ text and not as a `mailto:` link. It doesn't notify anyone and it publishes the
 address on the task. The @mention tag
 (`<a data-asana-gid="{gid}"/>`) is the only way to address the submitter.
 
+**Guests whose Asana name is their email: no @mention** (Sean, 26 Nov 2026). An
+@mention shows the follower's Asana display name, and a guest invited by email often
+has the email address as that name (seen 26 Nov 2026: the mention printed the
+submitter's address in the comment). So before any @mention, read the follower's
+`name`: if it contains `@`, don't use the tag. Write "Hi {first name}," from the
+form's `Name` field instead. They still get the email, because every comment emails
+the task's followers; the @mention adds nothing for someone already following.
+
 **Every comment on a form task emails its followers.** So App Support writes only
 requester-facing replies as comments. Notes for the owner go in subtasks or in the run
 summary, never as task comments.
+
+### Duplicate sign-ups (from the practice approval run)
+
+The practice approval run on Fabian's PC (`skills/bob-admin/SKILL.md`, "Practice
+approvals run") creates a task on this board when the same person registered BOB more
+than once, often with two email addresses. Its notes use the form's layout; `Name`
+and `Email address` are the newest registration's, and "Describe your request" lists
+the practices, their emails and what matched. Handle it as a class (a) request with
+these differences:
+
+- **Route: Asana**, always: the reply asks them something, and their answer decides
+  a change in BOB Admin. The invite run adds them once the owner ticks Review.
+- **The reply** (voice and sign-off as usual, in the language of their country):
+  they registered BOB {twice / n times}, with two different email addresses
+  (never write the addresses in the comment); ask which email address they want to
+  sign in with and, when the practice names differ, whether it's one practice or
+  two. If one came over from the old BOB app (the notes say so), say their account
+  from the old app was moved over, so they can keep using it. Say nothing is lost
+  either way, and that you'll tidy it up once they reply.
+- **Their answer → a change subtask** "Fabian: change in BOB Admin" with the exact
+  change: reject the pending duplicate with reason "duplicate of {id}", or, for two
+  approved practices, move the coaches (`bob-admin practices members move`) and set
+  the other practice inactive. Never delete a practice. Then confirm and close as
+  usual (step 4).
+- One practice really is two (a group with two sites): no change; tell them it's
+  fine and close the task. The duplicate key in the notes keeps the run from raising
+  the same group again.
 
 ## 2. Classify
 
@@ -519,7 +559,8 @@ Asana account: `<body>Hi {first name}, {rest of the voice file's greeting}…</b
 with the sign-off above. A held draft the owner approved for someone already following
 (step 1.2), and the pointer line after the owner adds them (step 1.1), use
 `<a data-asana-gid="{follower_gid}"/>` in place of the first name, with that gid and
-nothing else in the tag.
+nothing else in the tag, unless the follower's Asana name contains `@`: then "Hi
+{first name}," with no tag (step 1, "Guests whose Asana name is their email").
 After a question, move the task from **Inbox** or **Refinement (WIP)** to **Awaiting
 Feedback**; leave any other section alone. (The board's sections: Inbox, Refinement
 (WIP), Awaiting Feedback, Development, Review for Deployment, Ready for Deployment,

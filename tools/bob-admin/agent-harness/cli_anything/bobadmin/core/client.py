@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import stat
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -33,6 +34,9 @@ WRITE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 # Auth calls are writes in HTTP terms but change nothing on the platform.
 NON_MUTATING_POSTS = {"/auth/login", "/auth/refresh", "/auth/logout"}
 PROD_WRITE_ENV_FLAG = "BOB_ADMIN_PROD_WRITES"
+# Narrow unlock: lets `practices auto-approve` (and nothing else) approve on prod.
+AUTO_APPROVE_ENV_FLAG = "BOB_ADMIN_AUTO_APPROVE"
+AUTO_APPROVE_PATH = re.compile(r"/practices/[^/]+/decisions/approve")
 TIMEOUT = 30
 
 
@@ -137,10 +141,16 @@ class Client:
         self.cli_name = cli_name
         self.session = Session.load(env, session_name)
         self.http = http or requests.Session()
+        # Set only by `practices auto-approve`; with BOB_ADMIN_AUTO_APPROVE=1 it may
+        # send approvals to prod without unlocking every other prod write.
+        self.write_scope: str | None = None
 
     # ---- safety -------------------------------------------------------
-    def check_write_allowed(self) -> None:
+    def check_write_allowed(self, req: "Request | None" = None) -> None:
         if self.env == "prod" and os.environ.get(PROD_WRITE_ENV_FLAG) != "1":
+            if (self.write_scope == "auto-approve" and os.environ.get(AUTO_APPROVE_ENV_FLAG) == "1"
+                    and req is not None and req.method.upper() == "POST" and AUTO_APPROVE_PATH.fullmatch(req.path)):
+                return
             raise BobAdminError(
                 "Writes to production are locked. Set "
                 f"{PROD_WRITE_ENV_FLAG}=1 in your own shell to allow them for that shell only."
@@ -192,7 +202,7 @@ class Client:
     def call(self, req: Request, raw: bool = False, auth: bool = True) -> Any:
         """Send a request. Returns parsed JSON, or the Response when raw=True."""
         if req.is_write:
-            self.check_write_allowed()
+            self.check_write_allowed(req)
         if auth and not self.session.access_token:
             raise BobAdminError(f"Not signed in to {self.env}. Run: {self.cli_name} --env {self.env} auth login")
         r = self._send(req, auth=auth)
