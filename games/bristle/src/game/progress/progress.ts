@@ -16,7 +16,7 @@ import { drawRig, staticPose } from '../../design/hero';
 import { EARNED_ORDERS } from '../../design/hero';
 
 const GUESS: [RegExp, Faction][] = [[/leech|flare|swell|gum|inflam/, 'gum'], [/imp|sugar/, 'sugar'], [/tartar|spit|brute|calculus|matriarch/, 'tartar']];
-export const nextXp = (level: number) => 20 + level * 22;
+export const nextXp = (level: number) => (level <= 1 ? 24 : 20 + level * 22);
 /** Seconds the card pick ignores input after it opens, so a button mashed in a fight cannot take or close it. */
 const LOCK = 0.7;
 export const masteryOf = (xp: number) => Math.min(5, Math.floor(Math.sqrt(xp / 20)));
@@ -49,7 +49,7 @@ export class Progress implements ProgressApi {
     p.xp += xp;
     while (p.xp >= nextXp(p.level)) {
       p.xp -= nextXp(p.level); p.level++; p.points++;
-      g.ui.toast(`Oath level ${p.level}. Your cards wait for a calm moment.`, 3000); this.queueOpen();
+      g.ui.toast(`Oath level ${p.level}. A new combo card waits for a calm moment.`, 3000); this.queueOpen();
       g.audio.sfx('levelup'); g.flash([0.8, 0.9, 1], 0.25);
       const pl = g.player; if (pl) g.fx.burst(pl.x, pl.y, { n: 36, color: ['#ffffff', '#8BB8E8', '#FCE300'], shape: 'streak', speed: [120, 420], angle: -Math.PI / 2, spread: 2.2, emissive: true, size: [1, 2], life: [0.4, 0.9] });
     }
@@ -62,6 +62,8 @@ export class Progress implements ProgressApi {
     return !g.entities.some((e: any) => e.team === 'enemy' && !e.dead && Math.abs(e.x - p.x) < 340 && Math.abs(e.y - p.y) < 240);
   }
   queueOpen() { if (this.pending < 0) this.pending = 0.45; }
+  /** Points left unspent (an old save's refund, or cards put off with Esc) open the pick once per session. */
+  private offered = false;
   canBuy(id: string) { const k = PERKS.find((x) => x.id === id)!; return !this.has(id) && this.p.points > 0 && (!k.needs || this.has(k.needs)); }
   buy(id: string) {
     if (!this.canBuy(id)) { this.g.audio.sfx('ui-back'); return; }
@@ -110,6 +112,7 @@ export class Progress implements ProgressApi {
   update(dt: number) {
     const g = this.g;
     if (!this.el && this.ordersPending && g.state === 'play' && !g.busy() && !g.ui.isOpen() && this.calm()) { this.ordersPending = false; this.openOrders(); }
+    if (!this.offered && !this.el && g.state === 'play' && this.p.points > 0 && this.pending < 0) { this.offered = true; this.queueOpen(); }
     if (!this.el && this.pending >= 0 && g.state === 'play') { this.pending -= dt; if (this.pending <= 0 && !g.busy() && !g.ui.isOpen() && g.player && g.player.deadT < 0) { if (this.calm()) { this.pending = -1; if (this.p.points > 0) this.open(); } else this.pending = 0.3; } }
     if (!this.el) return; this.t += dt; const i = this.g.input, n = this.hand.length;
     let s = this.sel;

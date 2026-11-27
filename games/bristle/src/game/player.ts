@@ -314,7 +314,7 @@ export class Player extends Actor implements PlayerApi {
   }
 
   /** A combo name over the knight's head. */
-  callout(g: Game, name: string) { (g as any).float?.(this.x, this.y - 58, name.toUpperCase(), '#FCE300'); }
+  callout(g: Game, name: string) { (g as any).float?.(this.x, this.y - 62, name.toUpperCase(), '#FCE300', true); }
   /** Circle Stroke: hold the second stroke of a chain for a full spin. */
   circleStroke(g: Game) {
     this.slash = { dir: 'side', t: 0, hit: new Set(), cells: new Set(), flip: 1, landed: false, kind: 'spin' };
