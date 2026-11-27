@@ -34,6 +34,8 @@ export class Player extends Actor implements PlayerApi {
   slash: Slash | null = null; throwT = 0;
   /** Seconds the shot has been held (load, then draw); -1 when not aiming. */
   shotT = -1;
+  /** Aim angle of the shot in world space (radians; 0 = right, negative = up). */
+  aimA = 0;
   /** The Order worn (armour set), refreshed every update from the save. */
   ord: OrderId = 'initiate';
   /** Seconds the blade button has been held after a slash (charges the Deep Clean). */
@@ -160,7 +162,7 @@ export class Player extends Actor implements PlayerApi {
     if (this.slash) { this.slash.t += dt; if (this.slash.t < 0.11) this.slashHits(g); if (this.slash.t > (this.slash.heavy ? 0.3 : 0.22)) this.slash = null; }
 
     // ---- spell: Up + spell = Rinse wave (after the rinse relic); spell alone = the interdental shot (src/game/shot.ts)
-    const rinseWant = ay < -0.5 && g.save.abilities.rinse;
+    const rinseWant = ay < -0.5 && g.save.abilities.rinse && !inp.spellFromMouse; // right-click always shoots
     if (want('spell', 0.08) && this.dashT <= 0 && rinseWant) {
       const cost = SPELL_COST - (perk('c1') ? 5 : 0);
       inp.consume('spell');
@@ -174,6 +176,7 @@ export class Player extends Actor implements PlayerApi {
       if (usable(g).length && ammo(g, sz) > 0) { this.shotT = 0; this.slash = null; g.audio.sfx('clink', { pitch: 1.2, vol: 0.45 }); }
       else { g.audio.sfx('empty'); g.ui.toast(`No size ${sz.toUpperCase()} refills left. Pick fired ones back up, or rest at a fountain.`, 3200); }
     }
+    if (this.shotT >= 0) this.aim(g, ay);
     if (this.shotT >= 0) {
       if (busy || this.hurtT > 0 || this.dashT > 0 || this.deadT >= 0) this.shotT = -1;
       else if (inp.held('spell')) {
@@ -182,11 +185,11 @@ export class Player extends Actor implements PlayerApi {
         const full = LOAD + DRAW[this.ord]; if (before < full && this.shotT >= full) { g.audio.sfx('charge', { pitch: 1.3, vol: 0.5 }); g.fx.burst(this.x + this.facing * 26, this.y - 8, { ...PT.cleanGlint, n: 1 }); }
       } else {
         if (this.shotT >= LOAD) {
-          const sz = selectedSize(g), k = clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1), sp = 520 + 460 * k;
-          g.spawn(new RefillShot(this.x + this.facing * 24, this.y - 8, this.facing * sp, k < 0.6 ? -140 * (1 - k) : 0, sz, POWER[sz] + Math.round(6 * k), k >= (this.ord === 'ranger' ? 0.5 : 1), k < 0.6, this.ord));
-          setAmmo(g, sz, ammo(g, sz) - 1); this.throwT = 0.18; this.vx -= this.facing * 80 * k; this.sx = 1.1; this.sy = 0.94;
+          const sz = selectedSize(g), k = clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1), sh = this.shot(k);
+          g.spawn(new RefillShot(sh.x, sh.y, sh.vx, sh.vy, sz, POWER[sz] + Math.round(6 * k), k >= (this.ord === 'ranger' ? 0.5 : 1), sh.drop, this.ord));
+          setAmmo(g, sz, ammo(g, sz) - 1); this.throwT = 0.18; this.vx -= Math.cos(this.aimA) * 80 * k; this.sx = 1.1; this.sy = 0.94;
           g.audio.sfx('throw', { pitch: 1.3 }); g.shake(1 + 2 * k, 0.08);
-          if (!g.save.flags['shot-tip']) { g.save.flags['shot-tip'] = true; g.ui.toast('Hold right-click (or L) to draw further, let go to shoot. Mouse wheel or R changes the size. Walk over fired refills to take them back; fountains fill them.', 6000); }
+          if (!g.save.flags['shot-tip']) { g.save.flags['shot-tip'] = true; g.ui.toast('Hold right-click (or L) to draw, aim with the mouse (or Up / Down), let go to shoot. Mouse wheel or R changes the size. Walk over fired refills to take them back; fountains fill them.', 6400); }
         }
         this.shotT = -1;
       }
@@ -374,9 +377,28 @@ export class Player extends Actor implements PlayerApi {
     const K = RIG_SCALE, pose = this.rigPose(), gr = this.grip(), col = brushColour(g);
     ctx.scale(f * K, K);
     // the brush stays the game's own blade, drawn in body space between the chest and the front arm
-    drawRig(ctx, art, pose, 'scene', { blade: (c) => { c.save(); c.translate(0, pose.lift); c.scale(f / K, 1 / K); this.drawWeapon(c, gr.hx, gr.hy, gr.a, col); c.restore(); } });
-    if (this.shotT >= 0 && this.ord !== 'ranger') { ctx.scale(f / K, 1 / K); drawHeld(ctx, f * 17, -31 - this.bob, f, selectedSize(g), this.shotT >= LOAD, clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1)); }
+    drawRig(ctx, art, pose, 'scene', { blade: (c) => { if (this.shotT >= 0) return; c.save(); c.translate(0, pose.lift); c.scale(f / K, 1 / K); this.drawWeapon(c, gr.hx, gr.hy, gr.a, col); c.restore(); } });
+    if (this.shotT >= 0 && this.ord !== 'ranger') { const rel = pose.aim ?? 0; ctx.translate(0, -pose.lift); drawHeld(ctx, pose.frontHand[0] + Math.cos(rel) * 7, pose.frontHand[1] + Math.sin(rel) * 7, 1, selectedSize(g), this.shotT >= LOAD, clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1), rel); }
     ctx.restore();
+  }
+  /** Aim while drawing: at the mouse when it is in use, else Up / Down (Down only in the air), else the right stick.
+   *  The knight turns to face the aim. Angle in world space, from the front shoulder. */
+  aim(g: Game, ay: number) {
+    const inp = g.input as any, from = this.shoulderWorld();
+    let a: number;
+    if (inp.mouseAim && (g as any).mouseWorld) { const m = (g as any).mouseWorld(); a = m ? Math.atan2(m.y - from.y, m.x - from.x) : this.aimA; }
+    else if (Math.hypot(inp.aimX ?? 0, inp.aimY ?? 0) > 0.4) a = Math.atan2(inp.aimY, inp.aimX);
+    else { const up = ay < -0.5, down = ay > 0.5 && !this.grounded, rel = up ? -0.95 : down ? 0.8 : 0; a = this.facing > 0 ? rel : Math.PI - rel; }
+    const side = Math.cos(a) >= 0 ? 1 : -1; if (side !== this.facing && Math.abs(Math.cos(a)) > 0.05) this.facing = side as 1 | -1;
+    this.aimA = a;
+  }
+  /** Aim relative to the knight's facing (0 = straight ahead, negative = up), as the rig draws it. */
+  aimRel() { return Math.atan2(Math.sin(this.aimA), Math.abs(Math.cos(this.aimA))); }
+  shoulderWorld() { return this.bodyToWorld(this.facing * RIG.front[0] * RIG_SCALE, RIG.front[1] * RIG_SCALE - this.bob); }
+  /** Where and how fast a shot at draw k leaves: along the aim from the shoulder; weak draws lob and drop. */
+  shot(k: number) {
+    const from = this.shoulderWorld(), c = Math.cos(this.aimA), s = Math.sin(this.aimA), sp = 520 + 460 * k, drop = k < 0.6;
+    return { x: from.x + c * 20, y: from.y + s * 20, vx: c * sp, vy: s * sp - (drop ? 140 * (1 - k) : 0), drop };
   }
   /** The rig pose from the animation state (rig space: facing right, at RIG_SCALE). */
   rigPose(): RigPose {
@@ -385,8 +407,8 @@ export class Player extends Actor implements PlayerApi {
     return {
       legA: this.legA, legB: this.legB, lift, headTilt: this.headTilt * f,
       backHand: [RIG.back[0] - Math.cos(ba) * 12, RIG.back[1] + Math.sin(ba) * 12],
-      frontHand: [(gr.hx * f) / K, gr.hy / K + lift],
-      game: true, aiming: this.shotT >= 0, sway: clamp((-this.vx * f) / 500, -1, 1), open: this.blink > 0 ? 0.25 : 1,
+      frontHand: this.shotT >= 0 ? [RIG.front[0] + Math.cos(this.aimRel()) * 11, RIG.front[1] + Math.sin(this.aimRel()) * 11] : [(gr.hx * f) / K, gr.hy / K + lift],
+      game: true, aiming: this.shotT >= 0, aim: this.aimRel(), sway: clamp((-this.vx * f) / 500, -1, 1), open: this.blink > 0 ? 0.25 : 1,
     };
   }
   /** The weapon in hand, by Order: the CS 5460 as a greatsword (Vanguard), a single tuft (Duelist), the Hydrosonic
@@ -414,6 +436,14 @@ export class Player extends Actor implements PlayerApi {
     ctx.globalAlpha = 1;
     if (this.hurtBlink > 0 && Math.floor(this.hurtBlink * 18) % 2 === 0 && this.hurtT <= 0 && this.deadT < 0) return;
     if (this.inflamed > 0) g.r.halo(ctx, this.x, this.y - 6, 40, '#E31C79', 0.25 + 0.12 * Math.sin(g.time * 9));
+    // aim preview while drawing: the shot's path (gravity as RefillShot), brighter with the draw, and a ring at the cursor
+    if (this.shotT >= LOAD && this.deadT < 0) {
+      const k = clamp((this.shotT - LOAD) / DRAW[this.ord], 0, 1), sh = this.shot(k); let x = sh.x, y = sh.y, vx = sh.vx, vy = sh.vy;
+      ctx.fillStyle = '#D8ECFF';
+      for (let i = 1; i <= 36; i++) { const dt2 = 1 / 60; if (sh.drop) vy += 1400 * dt2; x += vx * dt2; y += vy * dt2; if (g.room.solidAt(x, y)) break; if (i % 3 === 0) { ctx.globalAlpha = (0.2 + 0.5 * k) * (1 - i / 40); ctx.beginPath(); ctx.arc(x, y, 1.6 + k, 0, TAU); ctx.fill(); } }
+      ctx.globalAlpha = 1;
+    }
+    if (this.shotT >= 0 && (g.input as any).mouseAim && (g as any).mouseWorld) { const m = (g as any).mouseWorld(); if (m) { ctx.strokeStyle = 'rgba(216,236,255,0.75)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(m.x, m.y, 7, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.arc(m.x, m.y, 1.4, 0, TAU); ctx.stroke(); } }
     // visor glow
     const vp = this.bodyToWorld(f * 4.5, -(32 + this.bob + this.breath * 0.5) + 1.6), vx = vp.x, vy = vp.y, open = this.blink > 0 ? 0.25 : 1;
     void vx; void vy; void open;

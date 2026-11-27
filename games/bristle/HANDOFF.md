@@ -40,8 +40,8 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
   change. Each set changes health, speed, slash speed and power, Deep Clean charge, air dashes, refills carried and draw
   speed, and the weapon in hand; the Lancer's dash blocks shots. Slash hit boxes are the same for every set.
 - **Controls**: move A/D, jump Space/Z, slash J/X (hold for Deep Clean, up/down for up-slash and pogo), dash Shift/K/C (from the start;
-  the Prime Dash relic now only gives the size M brush), **interdental shot** right-click or L/V (hold to draw, release
-  to fire), **Up + shot = Rinse wave**, **size: mouse wheel, middle-click, R or Tab** (S/M/L),
+  the Prime Dash relic now only gives the size M brush), **interdental shot** right-click or L/V (hold to draw, aim with
+  the mouse, Up / Down or the right stick, release to fire), **Up + shot = Rinse wave**, **size: mouse wheel, middle-click, R or Tab** (S/M/L),
   focus heal F/Q, interact E/Up, pause Esc. The toothpaste throw is gone (the `PasteGlob` class is unused).
 - **The shot** (`src/game/shot.ts`): refills per size, picked back up where they land, dropped by about a third of
   cleared creatures, refilled at fountains; the right
@@ -56,30 +56,13 @@ npx tsc --noEmit && node tests/smoke.cjs && node tests/reach.mjs   # all three m
 - Dental particles (bristle flicks, plaque crumbs, rinse bubbles, clean-tooth sparkles); slashes sweep a full arc with
   a lunge; the knight stays visible while talking.
 
-## Next up: aim the interdental shot with the mouse (planned 26 Nov, not built)
+## Aiming the shot (built 27 Nov)
 
-Sean asked for it; build it next on the laptop. Today the shot flies straight along the facing (with a small lob at
-low draw). Shot power was raised the same day: S 8 / M 11 / L 15, plus up to +6 at full draw.
-
-1. **Mouse position** (`src/engine/input.ts`): track `mousemove` over the game canvas as CSS pixels, plus a
-   `mouseAim` flag that turns on when the mouse moves and off when a stick or the keyboard aims.
-2. **Screen to world** (`src/game/game.ts`): `screenToWorld(mx, my)` from the camera:
-   `x = cam.left() + mx / cssWidth * cam.viewW`, `y = cam.top() + my / cssHeight * cam.viewH` (`src/engine/render.ts` Camera).
-3. **Aim angle** (`src/game/player.ts`, shot block): while `shotT >= 0`, aim from the shoulder (`grip()` sx, sy through
-   `bodyToWorld`) to the mouse's world point; turn `facing` toward it. Without the mouse: 8 directions from the
-   arrows / WASD (Up, Up+forward, forward, Down+forward in the air), or the right stick (gamepad axes 2 and 3).
-   Up + shot stays the Rinse wave only when the mouse is not aiming (keyboard players), so aiming up with the mouse
-   still shoots.
-4. **Fire along the aim**: `vx, vy = cos(a), sin(a) * speed`; keep gravity for draws under 0.6 so weak shots arc.
-   `RefillShot` already takes vx, vy, and gap cells are checked per cell, so shooting up into a gap works.
-5. **Show the aim**: `drawHeld` (`src/game/shot.ts`) takes the angle and rotates the holder; the front arm points
-   along it (`rigPose` frontHand = front shoulder + direction x reach; the Ranger's own art uses the same).
-   While drawing, a dotted trajectory preview on the emissive layer (simulate the shot's gravity for about 0.5 s),
-   brighter at full draw, plus a small crosshair at the mouse on the HUD.
-6. **Feel**: slow the knight to 0.45 run speed while drawing (already), allow a draw in the air, cap upward aim when
-   standing under a low ceiling. Test aiming at enemies above and below, a vertical gap, and with a gamepad.
-
-Rough size: two to three hours. No new tests needed; check by play.
+While drawing, the shot aims at the mouse (`g.mouseWorld()` in `src/game/game.ts`, `Player.aim()` in `src/game/player.ts`); the
+knight turns to face the aim, the holder and front arm rotate with it, the brush is put away, and a dotted path plus a
+ring at the cursor preview the shot. Without the mouse: Up / Down (Down only in the air) or the right stick. Right-click
+always shoots; Up + L (keyboard) is still the Rinse wave. Shot power S 8 / M 11 / L 15, plus up to +6 at full draw.
+Checked by stepping the game: up-forward, behind and down-forward shots fly along the aim. Not yet seen by eye in play.
 
 ## Known gaps (only when Sean asks)
 

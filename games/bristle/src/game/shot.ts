@@ -93,8 +93,8 @@ export class RefillPickup extends Actor {
 }
 
 /** The holder in the knight's hand while loading and drawing (body space, facing f). k = draw 0..1. */
-export function drawHeld(ctx: CanvasRenderingContext2D, x: number, y: number, f: number, size: GapSize, loaded: boolean, k: number) {
-  ctx.save(); ctx.translate(x - f * k * 3, y); ctx.scale(f, 1);
+export function drawHeld(ctx: CanvasRenderingContext2D, x: number, y: number, f: number, size: GapSize, loaded: boolean, k: number, rel = 0) {
+  ctx.save(); ctx.translate(x - f * Math.cos(rel) * k * 3, y - Math.sin(rel) * k * 3); ctx.scale(f, 1); ctx.rotate(rel);
   idbHolder(ctx, 0, 0, 20, { angle: Math.PI / 2, loaded: loaded ? COL[size] : null });
   ctx.restore();
 }

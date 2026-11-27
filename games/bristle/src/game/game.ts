@@ -172,6 +172,11 @@ export class GameCore implements Game {
     let threat = 0; for (const e of this.entities) if (e.team === 'enemy' && e.hurtable && Math.abs(e.x - p.x) < 520 && Math.abs(e.y - p.y) < 320) threat++;
     this.audio.intensity(Math.min(1, threat / 3));
   }
+  /** The mouse pointer in world units (null before the canvas is laid out). */
+  mouseWorld() {
+    const rect = this.r.view.getBoundingClientRect(); if (!rect.width || !rect.height) return null;
+    return this.cam.toWorld((this.input.mouseX - rect.left) * this.cam.w / rect.width, (this.input.mouseY - rect.top) * this.cam.h / rect.height);
+  }
   updateCamera(dt: number, snap: boolean) {
     const p = this.player, cam = this.cam, room = this.room;
     if (p.grounded && Math.abs(p.vx) < 5 && this.input.axisY > 0.5) this.lookDown += dt; else if (p.grounded && Math.abs(p.vx) < 5 && this.input.axisY < -0.5) this.lookDown -= dt; else this.lookDown = 0;

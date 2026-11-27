@@ -73,6 +73,7 @@ export interface RigPose {
   backHand: V2; frontHand: V2;         // rig space, before lift
   game: boolean;                       // true: the live knight (brush in hand, physics cloak drawn by the game)
   aiming?: boolean;                    // Ranger: holder raised
+  aim?: number;                        // aim angle in rig space (0 = straight ahead, negative = up)
   sway?: number;                       // plume and scarf sway, about -1..1
   open?: number;                       // visor open 0..1 (blink)
 }
@@ -232,7 +233,7 @@ export function orderArts(): Record<OrderId, OrderArt> {
       c.fillStyle = B.ink; c.fillRect(-7.4, -20.8, 14.8, 2.2);
       if (p.game && !p.aiming) idbHolder(c, -5.5, -17, 11, { angle: 0.25 }); // holstered at the hip
     },
-    front(c, p) { if (!p.game || p.aiming) idbHolder(c, p.frontHand[0] + 5.5, p.frontHand[1] + 0.5, 22, { angle: Math.PI / 2, loaded: S.m.col }); },
+    front(c, p) { const a = p.aim ?? 0; if (!p.game || p.aiming) idbHolder(c, p.frontHand[0] + Math.cos(a) * 5.5, p.frontHand[1] + Math.sin(a) * 5.5 + 0.5, 22, { angle: Math.PI / 2 + a, loaded: S.m.col }); },
     shoulders(c) {
       const m = fnPath((q) => { q.moveTo(-8.5, -38.5); q.quadraticCurveTo(-11.5, -33, -9.5, -29); for (let i = 0; i < 4; i++) q.quadraticCurveTo(-7.4 + i * 4.6, -26.4, -5 + i * 4.6, -29.2); q.quadraticCurveTo(11, -33, 8.4, -38.5); q.quadraticCurveTo(0, -41, -8.5, -38.5); q.closePath(); });
       c.fillStyle = B.orchid; c.save(); c.translate(0, 1.1); c.fill(m); c.restore(); c.fillStyle = pr; c.fill(m); c.save(); c.clip(m); c.fillStyle = dk; c.fillRect(-12, -40, 6, 14); c.restore();
@@ -242,7 +243,7 @@ export function orderArts(): Record<OrderId, OrderArt> {
       c.strokeStyle = 'rgba(120,140,185,0.75)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(1, -60); c.quadraticCurveTo(-3, -52, -9, -49.8); c.stroke();
       c.fillStyle = B.ink; c.fill(RANGER_SLIT);
     },
-    glow(c, p, halo) { visorGlow(c, RANGER_SLIT, 5, -49, 16, halo, p.open ?? 1); if (!p.game || p.aiming) halo(c, p.frontHand[0] + 9, p.frontHand[1], 7, '#FFFFFF', 0.35); },
+    glow(c, p, halo) { visorGlow(c, RANGER_SLIT, 5, -49, 16, halo, p.open ?? 1); if (!p.game || p.aiming) { const a = p.aim ?? 0; halo(c, p.frontHand[0] + Math.cos(a) * 9, p.frontHand[1] + Math.sin(a) * 9, 7, '#FFFFFF', 0.35); } },
   };
   const duelist: OrderArt = {
     id: 'duelist', name: 'Duelist', line: 'The needle of the Order, master of the single tuft: one in each hand, fast precise jabs for the tight spots.', earned: 'When the Glutton is rinsed away: one of four Orders to choose.',
