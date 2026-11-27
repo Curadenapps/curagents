@@ -42,6 +42,7 @@ let last = performance.now(), acc = 0;
 function frame(now: number) {
   requestAnimationFrame(frame);
   const real = Math.min(0.1, (now - last) / 1000); last = now; g.time += real;
+  g.input.layout = g.save.settings.layout === 'qwer' ? 'qwer' : 'zxc';
   g.input.poll(g.time);
   progress.update(real);
   ui.update(real);

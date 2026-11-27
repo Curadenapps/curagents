@@ -3,7 +3,7 @@ import type { GameCore } from '../game/game';
 import { clamp } from '../engine/math';
 import * as Enemies from '../game/enemies/index';
 import { RELICS, BALLAD, BRUSH_COLOURS, kills } from '../game/npc/defs';
-import { h, List, Nav, button, wordmark, sfx, saveSettings, backTap, confirmTap, type Screen, type Item } from './kit';
+import { h, List, Nav, button, wordmark, sfx, saveSettings, backTap, confirmTap, keyName, KEY_NAMES, type Screen, type Item } from './kit';
 import { brandText as BT } from '../design/tokens';
 import { applyOrder } from '../game/orders';
 
@@ -46,7 +46,7 @@ export class SettingsPanel implements Screen {
         h('span', { class: 'row-ctl' }, h('button', { class: 'step', 'data-step': '-', type: 'button', 'aria-label': 'Less', onclick: () => step(-0.1) }, '‹'), track, h('button', { class: 'step', 'data-step': '+', type: 'button', 'aria-label': 'More', onclick: () => step(0.1) }, '›'), val));
       paint(); body.append(el); items.push({ el, left: () => step(-0.1), right: () => step(0.1) });
     };
-    const choice = (label: string, opts: { v: number | boolean; t: string }[], get: () => number | boolean, set: (v: any) => void, note?: () => string) => {
+    const choice = (label: string, opts: { v: number | boolean | string; t: string }[], get: () => number | boolean | string, set: (v: any) => void, note?: () => string) => {
       const val = h('span', { class: 'row-value choice' }), noteEl = h('span', { class: 'row-note' });
       const idx = () => Math.max(0, opts.findIndex((o) => o.v === get()));
       const paint = () => { val.textContent = opts[idx()].t; noteEl.textContent = note ? note() : ''; };
@@ -60,6 +60,9 @@ export class SettingsPanel implements Screen {
     slider('Master volume', () => s.master, (v) => (s.master = v));
     slider('Music', () => s.music, (v) => (s.music = v));
     slider('Effects', () => s.sfx, (v) => (s.sfx = v));
+    body.append(h('div', { class: 'group-label', text: 'Controls' }));
+    choice('Layout', [{ v: 'zxc', t: 'ZXC' }, { v: 'qwer', t: 'QWER' }], () => (s.layout === 'qwer' ? 'qwer' : 'zxc'), (v) => (s.layout = v as 'zxc' | 'qwer'),
+      () => (s.layout === 'qwer' ? 'A/D move, Space jump, Q slash, Shift dash, E shot, R rinse, F focus, G interact.' : 'Arrows move, Z jump, X slash, C dash, V shot, A focus, S interact.'));
     body.append(h('div', { class: 'group-label', text: 'Display' }));
     choice('Difficulty', [{ v: 0, t: 'Gentle' }, { v: 1, t: 'Knight' }, { v: 2, t: 'Veteran' }], () => s.difficulty ?? 1, (v) => { s.difficulty = v; applyOrder(g as any); g.player?.heal(0); }, () => ['Two extra health, fewer hits to clear creatures, longer recovery, faster healing.', 'The intended challenge.', 'Tougher creatures and heavier blows. Applies from the next room.'][s.difficulty ?? 1]);
     slider('Brightness', () => ((s.brightness ?? 0.85) - 0.55) / 0.55, (v) => (s.brightness = 0.55 + v * 0.55), (v) => Math.round((0.55 + v * 0.55) * 100) + '%');
@@ -79,21 +82,34 @@ export function controlsPanel(g: GameCore, host: PanelHost) {
   const lock = (have: boolean, where: string) => (inGame && !have ? h('span', { class: 'lock', text: where }) : null);
   const keys = (...k: string[]) => h('span', { class: 'keys' }, ...k.map((x) => h('kbd', { text: x })));
   const row = (label: string, kb: HTMLElement, pad: HTMLElement, extra?: HTMLElement | null) => h('div', { class: 'ctl-row' }, h('span', { class: 'ctl-label' }, label, extra ?? null), kb, pad);
+  const note = (t: string) => h('span', { class: 'ctl-or', text: t });
+  const qwer = g.save.settings.layout === 'qwer', K = (x: Parameters<typeof keyName>[1]) => KEY_NAMES[qwer ? 'qwer' : 'zxc'][x], P = (x: Parameters<typeof keyName>[1]) => KEY_NAMES.pad[x];
+  const A = K('attack'), Ap = P('attack'), has = (id: string) => !inGame || g.progress?.has(id);
+  const combo = (id: string | null, label: string, kb: string[], pad: string[], what: string) => row(label, keys(...kb), keys(...pad), id && !has(id) ? h('span', { class: 'lock', text: 'Unlock with a level-up card' }) : note(what));
   const body = h('div', { class: 'controls' },
-    h('div', { class: 'ctl-row ctl-head' }, h('span', {}), h('span', { text: 'Keyboard' }), h('span', { text: 'Gamepad' })),
-    row('Move', keys('A', 'D'), keys('Stick'), h('span', { class: 'ctl-or', text: 'or arrows' })),
-    row('Jump', keys('Space', 'Z'), keys('A')),
-    row('Crouch', keys('Hold S'), keys('Hold down'), h('span', { class: 'ctl-or', text: 'duck under low gaps' })),
-    row('Deep Clean', keys('Hold J'), keys('Hold X'), h('span', { class: 'ctl-or', text: 'charge, then release' })),
-    row('Brush-blade', keys('J', 'X'), keys('X'), h('span', { class: 'ctl-or', text: 'or left click' })),
-    row('Up-slash, pogo', keys('W', 'S'), keys('Stick'), h('span', { class: 'ctl-or', text: 'hold up or down while striking' })),
-    row('Throw paste', keys('L', 'V'), keys('Y'), h('span', { class: 'ctl-or', text: 'spends fluor' })),
-    row('Rinse wave', keys('W', '+ L'), keys('Up', '+ Y'), lock(a.rinse, 'Find the Rinse relic')),
-    row('Dash', keys('K', 'Shift'), keys('B', 'RB'), lock(a.dash, 'Find the Prime Dash')),
-    row('Wall jump', keys('Space', 'at a wall'), keys('A', 'at a wall'), h('span', { class: 'ctl-or', text: 'once per jump; the Floss Grip makes it unlimited' })),
-    row('Focus (heal)', keys('Hold F', 'Q'), keys('Hold LB')),
-    row('Talk, rest, read', keys('E', 'W'), keys('Up')),
+    h('div', { class: 'ctl-row ctl-head' }, h('span', { text: qwer ? 'Layout: QWER (change in Settings)' : 'Layout: ZXC (change in Settings)' }), h('span', { text: 'Keyboard' }), h('span', { text: 'Gamepad' })),
+    row('Move', keys(K('move')), keys('Stick'), note('arrows always work')),
+    row('Jump', keys(K('jump')), keys(P('jump'))),
+    row('Crawl', keys('Hold ' + K('down')), keys('Hold down'), note('under low gaps')),
+    row('Slash', keys(A), keys(Ap), note('or left click')),
+    row('Up-slash, pogo', keys(K('up') + ' + ' + A, K('down') + ' + ' + A), keys('Stick'), note('pogo in the air off spikes and plaque')),
+    row('Deep Clean', keys('Hold ' + A), keys('Hold ' + Ap), note('charge, then release; cracks guards')),
+    row('Dash', keys(K('dash')), keys(P('dash'))),
+    row('Interdental shot', keys('Hold ' + K('spell')), keys('Hold ' + P('spell')), note('aim with ' + K('up') + ' / ' + K('down') + ' or the mouse')),
+    row('Brush size', keys(K('size')), keys(P('size')), note('or the mouse wheel')),
+    row('Rinse wave', keys(K('rinse')), keys(P('rinse')), lock(a.rinse, 'Find the Rinse relic')),
+    row('Focus (heal)', keys('Hold ' + K('focus')), keys('Hold ' + P('focus'))),
+    row('Talk, rest, clean a gap', keys(K('interact'), K('up')), keys('Up')),
     row('Pause', keys('Esc'), keys('Start')),
+    h('div', { class: 'ctl-row ctl-head' }, h('span', { text: 'Combos' }), h('span', {}), h('span', {})),
+    combo(null, 'Three-stroke', [A, A, A], [Ap, Ap, Ap], 'the third is a finisher'),
+    combo('k-circle', 'Circle Stroke', [A, 'hold ' + A], [Ap, 'hold ' + Ap], 'a spin that clears all around'),
+    combo('k-rise', 'Rising Sweep', [A, A, K('up') + '+' + A], [Ap, Ap, 'Up+' + Ap], 'lifts creatures; good against imps'),
+    combo('k-flurry', 'Air Flurry', [A, A, A + ' in the air'], [Ap, Ap, Ap], 'each stroke holds you aloft'),
+    combo('k-slam', 'Gumline Slam', ['hold ' + K('down') + '+' + A + ' in the air'], ['hold Down+' + Ap], 'plunge and shockwave'),
+    combo('k-dash', 'Dash Strike', [A, K('dash')], [Ap, P('dash')], 'the dash cleans what it passes'),
+    combo('k-thrust', 'Interdental Thrust', [A, A, K('spell')], [Ap, Ap, P('spell')], 'piercing thrust, no refill'),
+    combo('k-burst', 'Rinse Burst', [K('focus') + ' after a finisher'], [P('focus')], 'push back and refill fluor'),
   );
   return new ReadPanel(g, host, 'controls-scr', 'How to play', 'Controls', body);
 }

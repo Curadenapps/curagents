@@ -57,7 +57,7 @@ export interface SaveData {
   killed: Record<string, number>;       // bestiary counts by enemy type
   visited: Record<string, boolean>;
   /** difficulty: 0 Gentle, 1 Knight, 2 Veteran. brightness: exposure 0.6-1.1. */
-  settings: { master: number; music: number; sfx: number; shake: number; quality: number; difficulty: number; brightness: number };
+  settings: { master: number; music: number; sfx: number; shake: number; quality: number; layout: 'zxc' | 'qwer'; difficulty: number; brightness: number };
   playTime: number;
   progress: { xp: number; level: number; points: number; mastery: Record<Faction, number>; perks: string[] };
 }

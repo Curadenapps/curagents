@@ -27,7 +27,7 @@ export function freshSave(): SaveData {
   return {
     v: 1, room: START_ROOM, door: '@', maxHp: 5, hp: 5, fluor: 0, shine: 0,
     abilities: { dash: false, grip: false, rinse: false, pulse: false }, flags: {}, killed: {}, visited: {},
-    settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, difficulty: 1, brightness: 0.85 }, playTime: 0,
+    settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, layout: 'zxc', difficulty: 1, brightness: 0.85 }, playTime: 0,
     progress: { xp: 0, level: 1, points: 0, mastery: { plaque: 0, sugar: 0, tartar: 0, gum: 0 }, perks: [] },
   };
 }
@@ -71,8 +71,8 @@ export class GameCore implements Game {
   flash(c: [number, number, number], a: number) { this.flashC = c; this.flashA = Math.max(this.flashA, a); }
   hurtPlayer(d: number, fromX: number, kind: HitKind = 'contact') { this.player.hurt(this, d + (kind === 'hazard' ? 0 : d >= 2 ? this.diff.extraDamage : 0), fromX, kind); }
   /** Floating text (XP, notes). Drawn on the emissive layer. */
-  floaters: { x: number; y: number; text: string; t: number; color: string }[] = [];
-  float(x: number, y: number, text: string, color = '#CCD8ED') { this.floaters.push({ x, y, text, t: 0, color }); }
+  floaters: { x: number; y: number; text: string; t: number; color: string; big?: boolean }[] = [];
+  float(x: number, y: number, text: string, color = '#CCD8ED', big = false) { if (big) this.floaters = this.floaters.filter((f) => !f.big); this.floaters.push({ x, y, text, t: 0, color, big }); }
   dropShine(x: number, y: number, amount: number) { let left = amount; while (left > 0) { const v = left >= 10 ? 5 : 1; left -= v; this.spawn(new Shine(x, y, v)); } }
   flag(n: string) { return this.save.flags[n]; }
   setFlag(n: string, v: boolean | number | string) { this.save.flags[n] = v; }
@@ -223,7 +223,14 @@ export class GameCore implements Game {
     // floating text
     em.textAlign = 'center'; em.font = '400 13px "Futura LT Pro", Futura, sans-serif';
     this.floaters = this.floaters.filter((f) => (f.t += this.dt) < 1.2);
-    for (const f of this.floaters) { em.globalAlpha = Math.min(1, (1.2 - f.t) * 2.5); em.fillStyle = f.color; em.fillText(f.text, f.x, f.y - f.t * 26); }
+    for (const f of this.floaters) {
+      em.globalAlpha = Math.min(1, (1.2 - f.t) * 2.5); em.fillStyle = f.color;
+      if (f.big) { // combo names: a big pop over the knight, with a dark backing so they read on any background
+        const s = 1 + 0.35 * Math.max(0, 1 - f.t * 8), y = f.y - 8 - f.t * 14;
+        em.save(); em.translate(f.x, y); em.scale(s, s); em.font = '700 22px "Futura LT Pro", Futura, sans-serif';
+        em.lineWidth = 5; em.strokeStyle = 'rgba(6,14,36,0.85)'; em.strokeText(f.text, 0, 0); em.fillText(f.text, 0, 0); em.restore();
+      } else { em.font = '400 13px "Futura LT Pro", Futura, sans-serif'; em.fillText(f.text, f.x, f.y - f.t * 26); }
+    }
     em.globalAlpha = 1;
     // lights
     b.lights?.(this);

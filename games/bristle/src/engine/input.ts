@@ -1,12 +1,18 @@
 // Keyboard, mouse and gamepad, mapped to named actions. Presses are buffered so a jump pressed a few
 // frames early still counts (see Input.pressed(action, buffer)).
-export type Action = 'left' | 'right' | 'up' | 'down' | 'jump' | 'attack' | 'dash' | 'spell' | 'focus' | 'interact' | 'pause' | 'confirm' | 'back' | 'size';
+export type Action = 'left' | 'right' | 'up' | 'down' | 'jump' | 'attack' | 'dash' | 'spell' | 'focus' | 'interact' | 'pause' | 'confirm' | 'back' | 'size' | 'rinse';
 
-const KEYS: Record<string, Action[]> = {
-  ArrowLeft: ['left'], KeyA: ['left'], ArrowRight: ['right'], KeyD: ['right'], ArrowUp: ['up'], KeyW: ['up'], ArrowDown: ['down'], KeyS: ['down'],
-  Space: ['jump', 'confirm'], KeyZ: ['jump'], KeyJ: ['attack'], KeyX: ['attack'], KeyK: ['dash'], KeyC: ['dash'], ShiftLeft: ['dash'], ShiftRight: ['dash'],
-  KeyL: ['spell'], KeyV: ['spell'], KeyF: ['focus'], KeyQ: ['focus'], KeyE: ['interact'], Enter: ['confirm', 'interact'], KeyR: ['size'], Tab: ['size'],
-  Escape: ['pause', 'back'], KeyP: ['pause'], Backspace: ['back'],
+// Two keyboard layouts (Settings > Layout). Arrow keys move in both; Enter, Esc and Tab work in both.
+export type Layout = 'zxc' | 'qwer';
+const COMMON: Record<string, Action[]> = {
+  ArrowLeft: ['left'], ArrowRight: ['right'], ArrowUp: ['up'], ArrowDown: ['down'],
+  Space: ['jump', 'confirm'], Enter: ['confirm', 'interact'], Escape: ['pause', 'back'], KeyP: ['pause'], Backspace: ['back'], Tab: ['size'],
+};
+const LAYOUTS: Record<Layout, Record<string, Action[]>> = {
+  // platformer: arrows move, Z jump, X slash, C dash, V shot, A focus, S interact, D size
+  zxc: { ...COMMON, KeyZ: ['jump'], KeyX: ['attack'], KeyC: ['dash'], KeyV: ['spell'], KeyA: ['focus'], KeyS: ['interact'], KeyD: ['size'], ShiftLeft: ['dash'], ShiftRight: ['dash'] },
+  // League of Legends style: A/D move, W/S up/down, Space jump, Shift dash, Q slash, E shot, R rinse, F focus, G interact, T size
+  qwer: { ...COMMON, KeyA: ['left'], KeyD: ['right'], KeyW: ['up'], KeyS: ['down'], ShiftLeft: ['dash'], ShiftRight: ['dash'], KeyQ: ['attack'], KeyE: ['spell'], KeyR: ['rinse'], KeyF: ['focus'], KeyG: ['interact'], KeyT: ['size'] },
 };
 // Standard gamepad layout: 0 A, 1 B, 2 X, 3 Y, 4 LB, 5 RB, 6 LT, 7 RT, 9 Start, 12-15 d-pad
 const PAD: Record<number, Action[]> = { 0: ['jump', 'confirm'], 1: ['dash', 'back'], 2: ['attack'], 3: ['spell'], 4: ['focus'], 5: ['dash'], 6: ['focus'], 7: ['dash'], 9: ['pause'], 8: ['interact'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'], 10: ['size'], 11: ['size'] };
@@ -21,6 +27,9 @@ export class Input {
   axisX = 0; axisY = 0;
   usingPad = false;
   lastKey = '';
+  /** Keyboard layout; main.ts keeps it in step with the setting. */
+  layout: Layout = 'zxc';
+  private keys(code: string) { return LAYOUTS[this.layout]?.[code] ?? LAYOUTS.zxc[code]; }
   /** Mouse position (page CSS px). mouseAim turns on when the mouse moves and off when a pad is used. */
   mouseX = 0; mouseY = 0; mouseAim = false;
   /** True when the last spell press came from the right mouse button (it always shoots, never Rinses). */
@@ -30,13 +39,13 @@ export class Input {
 
   constructor(target: Window = window) {
     target.addEventListener('keydown', (e) => {
-      const acts = KEYS[e.code]; this.lastKey = e.code; this.usingPad = false; if (acts?.includes('spell')) this.spellFromMouse = false;
+      const acts = this.keys(e.code); this.lastKey = e.code; this.usingPad = false; if (acts?.includes('spell')) this.spellFromMouse = false;
       if (!acts) return;
       if (e.code === 'Space' || e.code.startsWith('Arrow') || e.code === 'Tab') e.preventDefault();
       if (e.repeat) return;
       for (const a of acts) { this.down.add(a); this.pending.add(a); }
     });
-    target.addEventListener('keyup', (e) => { const acts = KEYS[e.code]; if (acts) for (const a of acts) this.down.delete(a); });
+    target.addEventListener('keyup', (e) => { const acts = this.keys(e.code); if (acts) for (const a of acts) this.down.delete(a); });
     target.addEventListener('blur', () => { this.down.clear(); });
     target.addEventListener('mousedown', (e) => {
       if ((e.target as HTMLElement)?.closest?.('#ui button, #ui input, #ui a')) return;

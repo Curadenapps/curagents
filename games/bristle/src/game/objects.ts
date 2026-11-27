@@ -79,6 +79,12 @@ export class Relic extends Actor {
     g.r.halo(ctx, x, y, 70, '#8BB8E8', 0.6); g.r.halo(ctx, x, y, 22, '#ffffff', 0.9);
     ctx.save(); ctx.translate(x, y); ctx.rotate(this.t * 0.8); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
     for (let i = 0; i < 4; i++) { ctx.rotate(TAU / 4); ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(13, 0); ctx.stroke(); } ctx.restore();
+    // a beacon and the relic's name, so it reads from across the room
+    const pulse = 0.5 + 0.5 * Math.sin(this.t * 3);
+    g.r.halo(ctx, x, y, 130 + pulse * 30, '#8BB8E8', 0.35 + pulse * 0.15);
+    ctx.globalAlpha = 0.18 + pulse * 0.12; const beam = ctx.createLinearGradient(0, y - 220, 0, y); beam.addColorStop(0, 'rgba(139,184,232,0)'); beam.addColorStop(1, 'rgba(232,241,255,1)');
+    ctx.fillStyle = beam; ctx.fillRect(x - 5, y - 220, 10, 220); ctx.globalAlpha = 1;
+    if (this.title) { ctx.fillStyle = '#E8F1FF'; ctx.font = '400 14px "Futura LT Pro", Futura, sans-serif'; ctx.textAlign = 'center'; ctx.globalAlpha = 0.75 + pulse * 0.25; ctx.fillText(this.title.toUpperCase(), x, y - 34); ctx.globalAlpha = 1; }
   }
   lights(g: Game) { g.light({ x: this.x, y: this.y, r: 260, color: '#8BB8E8', i: 1 }); }
 }

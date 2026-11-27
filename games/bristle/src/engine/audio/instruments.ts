@@ -49,6 +49,7 @@ export class Instruments {
 
   /** Glassy music box: FM tine (ratio 4) with a short inharmonic shimmer partial. */
   box(m: number, t: number, vel: number, pan = 0, decay = 1.2) {
+    if (!Number.isFinite(m) || !Number.isFinite(t) || !Number.isFinite(vel)) return; // a note picked from an empty chord: skip it
     const c = this.c, f = mtof(m), car = c.createOscillator(), mod = c.createOscillator(), mg = c.createGain(), sh = c.createOscillator(), sg = c.createGain(), g = c.createGain();
     car.frequency.value = f; mod.frequency.value = f * 4; sh.frequency.value = f * 5.43;
     mg.gain.setValueAtTime(f * 1.1, t); mg.gain.setTargetAtTime(0, t, 0.08);

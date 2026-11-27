@@ -1,5 +1,6 @@
 // Bristle, the last knight of the Order of the 5,460. Movement, blade, Prime dash, Floss grip,
 // rinse spell, focus heal, and the procedural drawing (enamel helm, Curaprox-blue cloak, brush-blade).
+import { keyName } from '../ui/kit';
 import { Actor, Projectile } from './entity';
 import { TILE } from '../engine/render';
 import { approach, clamp, damp, sign, TAU, lerp } from '../engine/math';
@@ -20,7 +21,9 @@ const COYOTE = 0.09, JUMP_BUF = 0.13, ATK_CD = 0.36, DASH_T = 0.19, DASH_V = 820
 const FOCUS_COST = 33, SPELL_COST = 33, PASTE_COST = 25, FOCUS_T = 0.92, CHARGE_T = 0.6;
 
 type SlashDir = 'side' | 'up' | 'down';
-interface Slash { dir: SlashDir; t: number; hit: Set<number>; cells: Set<number>; flip: number; landed: boolean; heavy?: boolean }
+interface Slash { dir: SlashDir; t: number; hit: Set<number>; cells: Set<number>; flip: number; landed: boolean; heavy?: boolean; fin?: boolean; kind?: 'spin' | 'rise' }
+/** Seconds after a slash starts in which the next press continues the chain. */
+const CHAIN_WIN = 0.62;
 
 /** Crawl pose: torso tip (radians), hip height above the floor and how far the hip sits behind centre (px). */
 const CRAWL_A = 1.0, CRAWL_HIP = 9, CRAWL_BACK = 12;
@@ -44,7 +47,9 @@ export class Player extends Actor implements PlayerApi {
   /** Seconds the blade button has been held after a slash (charges the Deep Clean). */
   charge = 0; charged = false;
   /** Without the Floss Grip relic you still get one wall jump per jump; the relic makes it unlimited and adds the slide. */
-  wallJumps = 1; lastWall = 0; workT = 0;
+  wallJumps = 1; lastWall = 0;
+  /** Combos: strokes in the current chain, time since the last stroke and since the last finisher. */
+  chain = 0; chainT = 9; finT = 9; spinLock = false; slamming = false; dashStrike = false; workT = 0;
   /** Crouching: hold Down on the ground to duck under low gaps (hitbox 26 tall instead of 42). */
   crouching = false; crouchK = 1; lastSlash: SlashDir = 'side'; slashFlip = 1;
   wallSlide = 0; // -1 left wall, 1 right wall
@@ -62,14 +67,14 @@ export class Player extends Actor implements PlayerApi {
   bounce(strength = 1) { this.vy = -720 * strength; this.airDash = true; this.jumpHeld = false; }
   heal(n: number) { this.hp = Math.min(this.maxHp, this.hp + n); }
   gainFluor(n: number) { const d = (this.g as any)?.diff?.fluor ?? 1; this.fluor = clamp(this.fluor + (n > 0 ? n * d * (this.inflamed > 0 ? 0.5 : 1) : n), 0, 99); }
-  inflame(seconds: number) { if (!this.g) return; const g = this.g, m = g.progress.masteryLevel('gum'); const k = (g.progress.has('c2') ? 0.5 : 1) * (m >= 4 ? 0 : m >= 2 ? 0.6 : 1); if (k <= 0) return; this.inflamed = Math.max(this.inflamed, seconds * k); }
+  inflame(seconds: number) { if (!this.g) return; const g = this.g, m = g.progress.masteryLevel('gum'); const k = (g.progress.has('k-calm') ? 0.5 : 1) * (m >= 4 ? 0 : m >= 2 ? 0.6 : 1); if (k <= 0) return; this.inflamed = Math.max(this.inflamed, seconds * k); }
   private g: Game | null = null;
   resetCloak() { for (let i = 0; i < this.cloak.length; i++) { const c = this.cloak[i]; c.x = c.px = this.x; c.y = c.py = this.y - 6 + i * 4; } }
 
   hurt(g: Game, dmg: number, fromX: number, kind: HitKind = 'contact') {
     if (this.invuln > 0 || this.deadT >= 0 || this.hazardT >= 0) return;
     if (kind === 'projectile' && this.dashing && ORDER_STATS[this.ord].guard) { g.audio.sfx('clink'); g.fx.burst(this.x + this.facing * 12, this.y - 6, { ...PT.cleanGlint, n: 2 }); return; }
-    this.hp -= dmg; this.invuln = (g as any).diff?.invuln ?? 1.3; this.charge = 0; this.hurtT = 0.24; this.slash = null; this.focusT = 0; this.dashT = 0; this.dashing = false;
+    this.chain = 0; this.slamming = false; this.hp -= dmg; this.invuln = (g as any).diff?.invuln ?? 1.3; this.charge = 0; this.hurtT = 0.24; this.slash = null; this.focusT = 0; this.dashT = 0; this.dashing = false;
     const dir = sign(this.x - fromX) || -this.facing; this.vx = dir * 340; this.vy = -430;
     g.hitstop(0.14); g.shake(11, 0.32); g.flash([1, 1, 1], 0.4); g.slowmo(0.35, 0.28); g.audio.sfx('hurt');
     g.fx.burst(this.x, this.y, PT.hurtShards);
@@ -81,7 +86,8 @@ export class Player extends Actor implements PlayerApi {
 
   update(g: Game, dt: number) {
     this.g = g; this.ord = currentOrder(g); const inp = g.input, busy = g.busy() || g.ui.isOpen() || this.workT > 0; const perk = (id: string) => g.progress.has(id);
-    this.inflamed = Math.max(0, this.inflamed - dt); this.comboT -= dt; if (this.comboT <= 0) this.combo = 0;
+    this.inflamed = Math.max(0, this.inflamed - dt); this.comboT -= dt; if (this.comboT <= 0) this.combo = 0; this.chainT += dt; this.finT += dt;
+    if (this.slamming && this.grounded) this.slamLand(g);
     if (this.inflamed > 0 && Math.random() < dt * 10) g.fx.burst(this.x + (Math.random() - 0.5) * 18, this.y - 10 + (Math.random() - 0.5) * 30, { n: 1, color: ['#E31C79', '#F277C6'], speed: [10, 40], angle: -Math.PI / 2, spread: 1, size: [1, 2.2], life: [0.4, 0.8], gravity: -60, emissive: true });
     this.invuln = Math.max(0, this.invuln - dt); this.hurtBlink = Math.max(0, this.hurtBlink - dt); this.atkCd -= dt; this.dashCd -= dt; this.hurtT -= dt; this.recoilT -= dt; this.wallLock -= dt; this.landT -= dt; this.spellT -= dt; this.workT -= dt; this.throwT -= dt;
     for (const gh of this.ghosts) gh.t -= dt; this.ghosts = this.ghosts.filter((gh) => gh.t > 0);
@@ -101,14 +107,14 @@ export class Player extends Actor implements PlayerApi {
     const want = (k: Parameters<typeof inp.pressed>[0], buf = 0) => !busy && this.hurtT <= 0 && inp.pressed(k, buf);
 
     // ---- grounded bookkeeping
-    if (this.grounded) { this.coyote = COYOTE; this.airDash = true; this.airDashes = (perk('i3') ? 2 : 1) + ORDER_STATS[this.ord].airDashes; this.wallJumps = 1; this.lastWall = 0; } else { this.coyote -= dt; if ((this.wallL && this.lastWall === 1) || (this.wallR && this.lastWall === -1)) this.wallJumps = 1; }
+    if (this.grounded) { this.coyote = COYOTE; this.airDash = true; this.airDashes = (perk('k-prime') ? 2 : 1) + ORDER_STATS[this.ord].airDashes; this.wallJumps = 1; this.lastWall = 0; } else { this.coyote -= dt; if ((this.wallL && this.lastWall === 1) || (this.wallR && this.lastWall === -1)) this.wallJumps = 1; }
 
     // ---- dash (Prime)
     if (this.dashT > 0) {
       this.dashT -= dt; this.vy = 0;
-      if (perk('i2')) for (const e of g.entities) {
+      if (this.dashStrike) for (const e of g.entities) {
         if (e.dead || !e.hurtable || e.team !== 'enemy' || this.dashHits.has(e.id)) continue;
-        if (Math.abs(e.x - this.x) < e.hw + this.hw && Math.abs(e.y - this.y) < e.hh + this.hh) { this.dashHits.add(e.id); if (e.onHit?.(g, { damage: 6, dirX: this.facing, dirY: 0, kind: 'slash', source: this })) { g.hitstop(0.03); if (perk('i4')) { this.gainFluor(8); this.invuln = Math.max(this.invuln, 0.3); } } }
+        if (Math.abs(e.x - this.x) < e.hw + this.hw && Math.abs(e.y - this.y) < e.hh + this.hh) { this.dashHits.add(e.id); if (e.onHit?.(g, { damage: 8 + ORDER_STATS[this.ord].slash, dirX: this.facing, dirY: 0, kind: 'slash', source: this })) { g.hitstop(0.04); this.gainFluor(6); if (this.dashHits.size === 1) this.callout(g, 'Dash Strike'); this.combo++; this.comboT = 1.2; } }
       }
       if (Math.random() < 0.9) this.ghosts.push({ x: this.x, y: this.y, f: this.facing, t: 0.22 });
       g.fx.burst(this.x - this.facing * 8, this.y + (Math.random() - 0.5) * 30, { n: 1, color: C.sky, shape: 'streak', speed: [40, 80], angle: this.facing > 0 ? Math.PI : 0, spread: 0.3, emissive: true, size: [1, 2], life: [0.15, 0.3] });
@@ -116,7 +122,7 @@ export class Player extends Actor implements PlayerApi {
     } else {
       if (want('dash', 0.08) && this.dashCd <= 0 && (this.grounded || this.airDash || this.wallSlide)) {
         inp.consume('dash'); if (this.wallSlide) this.facing = -this.wallSlide as 1 | -1; else if (ax) this.facing = sign(ax) as 1 | -1;
-        this.dashT = DASH_T; this.dashing = true; this.invuln = Math.max(this.invuln, 0.12); this.charge = 0; this.dashCd = DASH_CD * (perk('i1') ? 0.65 : 1); this.vx = this.facing * DASH_V; this.vy = 0; this.slash = null; this.focusT = 0; this.dashHits.clear();
+        this.dashT = DASH_T; this.dashing = true; this.invuln = Math.max(this.invuln, 0.12); this.charge = 0; this.dashCd = DASH_CD * (perk('k-glide') ? 0.65 : 1); this.vx = this.facing * DASH_V; this.vy = 0; this.dashStrike = perk('k-dash') && this.chainT < 0.45; this.slash = null; this.focusT = 0; this.dashHits.clear(); this.slamming = false;
         if (!this.grounded) { this.airDashes--; if (this.airDashes <= 0) this.airDash = false; } this.sx = 1.35; this.sy = 0.7;
         g.audio.sfx('dash'); g.fx.burst(this.x, this.y + 12, { ...PT.dashPuff, angle: this.facing > 0 ? Math.PI : 0 });
       }
@@ -146,29 +152,41 @@ export class Player extends Actor implements PlayerApi {
       if (this.wallSlide && this.vy > 0) { this.vy = Math.min(this.vy, 170); if (Math.random() < 0.3) g.fx.burst(this.x + this.wallSlide * 10, this.y + 10, { n: 1, color: '#9fb4d9', speed: [10, 40], size: [1, 2], life: [0.2, 0.4], gravity: 300 }); }
     }
 
-    // ---- attack
-    if (want('attack', 0.1) && this.atkCd <= 0 && this.dashT <= 0) {
+    // ---- attack: strokes chain when pressed within CHAIN_WIN of the last; the third is a finisher.
+    // Combos (unlocked by level-up cards) branch off the chain: see perks.ts.
+    if (want('attack', 0.2) && this.atkCd <= 0 && this.dashT <= 0 && !this.slamming) {
       inp.consume('attack');
       const dir: SlashDir = ay < -0.5 ? 'up' : ay > 0.5 && !this.grounded ? 'down' : 'side';
+      this.chain = this.chainT < CHAIN_WIN && dir !== 'down' ? this.chain + 1 : 1; this.chainT = 0;
+      const fin = this.chain >= 3, rise = fin && dir === 'up' && perk('k-rise');
       this.slashFlip = dir === 'side' && this.lastSlash === 'side' && this.slash === null && this.atkCd > -0.25 ? -this.slashFlip : 1;
-      this.slash = { dir, t: 0, hit: new Set(), cells: new Set(), flip: this.slashFlip, landed: false }; this.lastSlash = dir; this.atkCd = ATK_CD * ORDER_STATS[this.ord].atkCd * (perk('b2') ? 0.85 : 1); this.focusT = 0;
-      g.audio.sfx('slash', { pitch: 0.92 + Math.random() * 0.16 });
+      this.slash = { dir, t: 0, hit: new Set(), cells: new Set(), flip: this.slashFlip, landed: false, fin, kind: rise ? 'rise' : undefined }; this.lastSlash = dir;
+      this.atkCd = ATK_CD * ORDER_STATS[this.ord].atkCd * (fin ? 1.35 : 1); this.focusT = 0;
+      if (!this.grounded && perk('k-flurry') && dir !== 'down') this.vy = Math.min(this.vy, 20);
+      if (rise) { this.vy = Math.min(this.vy, -420); this.callout(g, 'Rising Sweep'); }
+      else if (fin) { if (dir === 'side') { this.vx = this.facing * 260; this.recoilT = 0.08; } this.callout(g, !this.grounded && perk('k-flurry') ? 'Air Flurry' : 'Finisher'); }
+      if (fin) { this.chain = 0; this.finT = 0; }
+      g.audio.sfx('slash', { pitch: fin ? 0.78 : 0.92 + Math.random() * 0.16 });
     }
-    // hold the blade button to charge a Deep Clean; release to unleash it
-    if (!busy && inp.held('attack') && this.dashT <= 0 && this.hurtT <= 0) {
+    // hold slash: holding the second stroke becomes the Circle Stroke; in the air with Down, the Gumline Slam; else a Deep Clean
+    if (!busy && inp.held('attack') && this.dashT <= 0 && this.hurtT <= 0 && !this.spinLock && !this.slamming) {
       this.charge += dt;
-      if (!this.charged && this.charge >= ORDER_STATS[this.ord].chargeT) { this.charged = true; g.audio.sfx('charge'); g.fx.burst(this.x, this.y - 10, { n: 14, color: ['#ffffff', C.sky], shape: 'streak', speed: [60, 160], emissive: true, size: [1, 1.6], life: [0.2, 0.4] }); }
+      if (this.chain === 2 && this.chainT < CHAIN_WIN + 0.3 && this.charge >= 0.22 && perk('k-circle')) this.circleStroke(g);
+      else if (!this.grounded && ay > 0.5 && this.charge >= 0.14 && perk('k-slam')) this.slamStart(g);
+      else if (!this.charged && this.charge >= ORDER_STATS[this.ord].chargeT) { this.charged = true; g.audio.sfx('charge'); g.fx.burst(this.x, this.y - 10, { n: 14, color: ['#ffffff', C.sky], shape: 'streak', speed: [60, 160], emissive: true, size: [1, 1.6], life: [0.2, 0.4] }); }
     } else {
-      if (this.charged && !busy) this.deepClean(g);
-      this.charge = 0; this.charged = false;
+      if (this.charged && !busy && !this.spinLock) this.deepClean(g);
+      this.charge = 0; this.charged = false; if (!inp.held('attack')) this.spinLock = false;
     }
-    if (this.slash) { this.slash.t += dt; if (this.slash.t < 0.11) this.slashHits(g); if (this.slash.t > (this.slash.heavy ? 0.3 : 0.22)) this.slash = null; }
+    if (this.slash) { const sl = this.slash; sl.t += dt; if (sl.t < (sl.kind === 'spin' ? 0.32 : 0.11)) this.slashHits(g); if (sl.t > (sl.kind === 'spin' ? 0.38 : sl.heavy || sl.fin ? 0.3 : 0.22)) this.slash = null; }
 
     // ---- spell: Up + spell = Rinse wave (after the rinse relic); spell alone = the interdental shot (src/game/shot.ts)
     const rinseWant = ay < -0.5 && g.save.abilities.rinse && !inp.spellFromMouse; // right-click always shoots
-    if (want('spell', 0.08) && this.dashT <= 0 && rinseWant) {
-      const cost = SPELL_COST - (perk('c1') ? 5 : 0);
-      inp.consume('spell');
+    const rinseKey = want('rinse', 0.08) && g.save.abilities.rinse && this.dashT <= 0;
+    if (want('spell', 0.08) && this.dashT <= 0 && !busy && this.chain === 2 && this.chainT < CHAIN_WIN && perk('k-thrust') && !rinseWant) { inp.consume('spell'); this.thrust(g); }
+    else if (rinseKey || (want('spell', 0.08) && this.dashT <= 0 && rinseWant)) {
+      const cost = SPELL_COST;
+      inp.consume('spell'); inp.consume('rinse');
       if (this.fluor >= cost) {
         this.fluor -= cost; this.spellT = 0.3; this.slash = null; this.shotT = -1;
         g.spawn(new RinseWave(this.x + this.facing * 18, this.y - 2, this.facing)); this.vx = -this.facing * 220; this.recoilT = 0.12;
@@ -192,20 +210,22 @@ export class Player extends Actor implements PlayerApi {
           g.spawn(new RefillShot(sh.x, sh.y, sh.vx, sh.vy, sz, POWER[sz] + Math.round(6 * k), k >= (this.ord === 'ranger' ? 0.5 : 1), sh.drop, this.ord));
           setAmmo(g, sz, ammo(g, sz) - 1); this.throwT = 0.18; this.vx -= Math.cos(this.aimA) * 80 * k; this.sx = 1.1; this.sy = 0.94;
           g.audio.sfx('throw', { pitch: 1.3 }); g.shake(1 + 2 * k, 0.08);
-          if (!g.save.flags['shot-tip']) { g.save.flags['shot-tip'] = true; g.ui.toast('Hold right-click (or L) to draw, aim with the mouse (or Up / Down), let go to shoot. Mouse wheel or R changes the size. Walk over fired refills to take them back; fountains fill them.', 6400); }
+          if (!g.save.flags['shot-tip']) { g.save.flags['shot-tip'] = true; g.ui.toast(`Hold ${keyName(g as any, 'spell')} to draw, aim with ${keyName(g as any, 'up')} / ${keyName(g as any, 'down')} (or the mouse), let go to shoot. ${keyName(g as any, 'size')} changes the size. Walk over fired refills to take them back; fountains fill them.`, 6400); }
         }
         this.shotT = -1;
       }
     }
     if (!busy && inp.pressed('size', 0.05)) { inp.consume('size'); cycleSize(g); }
 
+    // ---- Rinse Burst: focus right after a finisher
+    if (!busy && this.finT < 0.6 && perk('k-burst') && inp.pressed('focus', 0.06)) { inp.consume('focus'); this.rinseBurst(g); }
     // ---- focus (heal)
     if (!busy && inp.held('focus') && this.grounded && this.fluor >= FOCUS_COST && this.hp < this.maxHp && this.hurtT <= 0 && !this.slash && this.dashT <= 0) {
       if (this.focusT === 0) g.audio.sfx('focus');
       this.focusT += dt; this.vx = approach(this.vx, 0, ACC_G * dt);
       const a = Math.random() * TAU, r = 60 + Math.random() * 30;
       g.fx.burst(this.x + Math.cos(a) * r, this.y + Math.sin(a) * r, { n: 1, color: [C.sky, C.white], vx: -Math.cos(a) * r * 2.2, vy: -Math.sin(a) * r * 2.2, speed: [0, 0], drag: 0, emissive: true, size: [1, 2], life: [0.4, 0.45], shape: 'streak' });
-      if (this.focusT >= FOCUS_T * (perk('c2') ? 0.78 : 1) * (this.inflamed > 0 ? 1.45 : 1) * ((g as any).diff?.focus ?? 1)) {
+      if (this.focusT >= FOCUS_T * (perk('k-calm') ? 0.78 : 1) * (this.inflamed > 0 ? 1.45 : 1) * ((g as any).diff?.focus ?? 1)) {
         this.focusT = 0.0001; this.fluor -= FOCUS_COST; this.heal(1); g.audio.sfx('heal'); g.flash([0.7, 0.85, 1], 0.18);
         g.fx.burst(this.x, this.y, PT.heal);
       }
@@ -246,24 +266,30 @@ export class Player extends Actor implements PlayerApi {
 
   wide = 1;
   slashBox(): { x: number; y: number; hw: number; hh: number } {
-    const s = this.slash!, k = this.wide * (s.heavy ? 1.5 : 1); if (s.dir === 'up') return { x: this.x, y: this.y - 44 * k, hw: 30 * k, hh: 36 * k };
+    const s = this.slash!, k = this.wide * (s.heavy ? 1.5 : s.fin ? (this.g?.progress.has('k-firm') ? 1.4 : 1.22) : 1);
+    if (s.kind === 'spin') return { x: this.x, y: this.y - 4, hw: 74 * this.wide, hh: 48 };
+    if (s.kind === 'rise') return { x: this.x + this.facing * 18, y: this.y - 46, hw: 46, hh: 60 };
+    if (s.dir === 'up') return { x: this.x, y: this.y - 44 * k, hw: 30 * k, hh: 36 * k };
     if (s.dir === 'down') return { x: this.x, y: this.y + 42 * k, hw: 28 * k, hh: 34 * k };
     return { x: this.x + this.facing * 42 * k, y: this.y - 2, hw: 40 * k, hh: 26 * k };
   }
   slashHits(g: Game) {
-    this.wide = g.progress.has('b1') ? 1.2 : 1;
+    this.wide = 1;
     const s = this.slash!, b = this.slashBox();
     const dirX = s.dir === 'side' ? this.facing : 0, dirY = s.dir === 'up' ? -1 : s.dir === 'down' ? 1 : 0;
     for (const e of g.entities) {
       if (e.dead || !e.hurtable || e.team === 'player' || s.hit.has(e.id)) continue;
       if (Math.abs(e.x - b.x) < e.hw + b.hw && Math.abs(e.y - b.y) < e.hh + b.hh) {
         s.hit.add(e.id);
-        const hit: Hit = { damage: 5 + ORDER_STATS[this.ord].slash + 2 * (Number(g.save.flags.blade) || 0) + (g.progress.has('b3') ? 2 : 0), dirX: dirX || sign(e.x - this.x) || this.facing, dirY, kind: s.dir === 'down' ? 'pogo' : 'slash', source: this, heavy: s.heavy };
+        const hit: Hit = { damage: 5 + ORDER_STATS[this.ord].slash + 2 * (Number(g.save.flags.blade) || 0) , dirX: s.kind === 'spin' ? sign(e.x - this.x) || this.facing : dirX || sign(e.x - this.x) || this.facing, dirY: s.kind === 'rise' ? -1 : dirY, kind: s.dir === 'down' ? 'pogo' : 'slash', source: this, heavy: s.heavy };
         if (s.heavy) hit.damage = Math.round(hit.damage * 2.5 + 3);
+        else if (s.fin || s.kind) hit.damage = Math.round(hit.damage * (s.kind === 'spin' ? 1.4 : 1.6) * (g.progress.has('k-firm') && s.fin ? 1.4 : 1));
+        if (s.fin || s.kind) hit.heavy = true;
         if (e.onHit?.(g, hit)) {
-          s.landed = true; this.gainFluor(g.progress.has('c3') ? 15 : 11); g.hitstop(s.heavy ? 0.11 : 0.05); g.shake(s.heavy ? 8 : 3.5, s.heavy ? 0.2 : 0.1);
+          s.landed = true; this.gainFluor(11); g.hitstop(s.heavy ? 0.11 : s.fin || s.kind ? 0.08 : 0.05); g.shake(s.heavy ? 8 : s.fin || s.kind ? 6 : 3.5, s.heavy || s.fin ? 0.2 : 0.1);
+          if (s.kind === 'rise' && (e as any).maxHp < 200 && !e.dead) { (e as any).vy = -720; }
           this.combo++; this.comboT = 1.2;
-          if (g.progress.has('b4') && this.combo % 3 === 0) this.filamentStorm(g, b.x, b.y);
+          if (this.combo >= 3 && this.combo % 3 === 0) (g as any).float?.(this.x, this.y - 74, this.combo + ' hits', '#E8F1FF');
           const ix = (e.x + this.x + this.facing * 30) / 2;
           g.fx.burst(ix, b.y, { n: 1, color: '#ffffff', shape: 'ring', size: [4, 4], grow: 300, emissive: true, life: [0.14, 0.14] });
           if (s.dir === 'side') { this.vx = -this.facing * 260; this.recoilT = 0.08; }
@@ -287,6 +313,46 @@ export class Player extends Actor implements PlayerApi {
     }
   }
 
+  /** A combo name over the knight's head. */
+  callout(g: Game, name: string) { (g as any).float?.(this.x, this.y - 62, name.toUpperCase(), '#FCE300', true); }
+  /** Circle Stroke: hold the second stroke of a chain for a full spin. */
+  circleStroke(g: Game) {
+    this.slash = { dir: 'side', t: 0, hit: new Set(), cells: new Set(), flip: 1, landed: false, kind: 'spin' };
+    this.atkCd = ATK_CD * 1.5; this.chain = 0; this.finT = 0; this.charge = 0; this.charged = false; this.spinLock = true;
+    if (!this.grounded) this.vy = Math.min(this.vy, 0);
+    g.audio.sfx('storm', { vol: 0.7 }); g.audio.sfx('slash', { pitch: 0.7 }); g.shake(4, 0.14); this.callout(g, 'Circle Stroke');
+    g.fx.burst(this.x, this.y - 4, { n: 1, color: '#ffffff', shape: 'ring', size: [12, 12], grow: 420, emissive: true, life: [0.26, 0.26] });
+    g.fx.burst(this.x, this.y - 4, { n: 26, color: ['#ffffff', C.sky], shape: 'streak', speed: [220, 460], emissive: true, size: [1, 2], life: [0.15, 0.3] });
+  }
+  /** Gumline Slam: in the air, hold Down + slash to plunge; landing sends a shockwave both ways. */
+  slamStart(g: Game) {
+    this.slamming = true; this.charge = 0; this.charged = false; this.spinLock = true; this.slash = null; this.vy = 1150; this.vx *= 0.3;
+    this.invuln = Math.max(this.invuln, 0.5); g.audio.sfx('dash', { pitch: 0.7 }); this.callout(g, 'Gumline Slam');
+  }
+  slamLand(g: Game) {
+    this.slamming = false; this.finT = 0; g.hitstop(0.08); g.shake(10, 0.3); g.audio.sfx('boss-slam', { vol: 0.6 }); this.sx = 1.4; this.sy = 0.65;
+    for (const s of [-1, 1]) g.fx.burst(this.x + s * 10, this.y + this.hh - 2, { n: 14, color: ['#ffffff', C.sky], speed: [200, 520], angle: s > 0 ? 0 : Math.PI, spread: 0.35, size: [1.5, 3], life: [0.2, 0.45], emissive: true });
+    for (const e of g.entities) if (!e.dead && e.hurtable && e.team === 'enemy' && Math.abs(e.x - this.x) < 130 + e.hw && Math.abs(e.y - this.y) < 70 + e.hh)
+      if (e.onHit?.(g, { damage: 12 + ORDER_STATS[this.ord].slash, dirX: sign(e.x - this.x) || 1, dirY: -0.5, kind: 'slash', source: this, heavy: true })) { this.combo++; this.comboT = 1.2; }
+  }
+  /** Interdental Thrust: after two strokes, the shot key makes a quick piercing thrust with the holder. */
+  thrust(g: Game) {
+    this.chain = 0; this.finT = 0; this.atkCd = ATK_CD; this.throwT = 0.18; this.vx = this.facing * 180; this.recoilT = 0.06;
+    const x = this.x + this.facing * 60, y = this.y - 4; let any = false;
+    for (const e of g.entities) if (!e.dead && e.hurtable && e.team === 'enemy' && Math.abs(e.x - x) < 52 + e.hw && Math.abs(e.y - y) < 16 + e.hh)
+      if (e.onHit?.(g, { damage: 10 + ORDER_STATS[this.ord].slash, dirX: this.facing, dirY: 0, kind: 'slash', source: this, heavy: true })) { any = true; this.combo++; this.comboT = 1.2; this.gainFluor(8); }
+    g.audio.sfx('throw', { pitch: 1.5 }); if (any) { g.hitstop(0.07); g.shake(4, 0.1); }
+    g.fx.burst(this.x + this.facing * 30, y, { n: 12, color: ['#ffffff', C.sky], shape: 'streak', speed: [400, 760], angle: this.facing > 0 ? 0 : Math.PI, spread: 0.12, emissive: true, size: [1, 2], life: [0.08, 0.18] });
+    this.callout(g, 'Interdental Thrust');
+  }
+  /** Rinse Burst: focus right after a finisher; pushes creatures back and refills fluor. */
+  rinseBurst(g: Game) {
+    this.finT = 9; this.gainFluor(14); g.audio.sfx('splash'); g.shake(3, 0.12); this.callout(g, 'Rinse Burst');
+    g.fx.burst(this.x, this.y, { n: 1, color: '#CCE6FF', shape: 'ring', size: [10, 10], grow: 380, emissive: true, life: [0.3, 0.3] });
+    g.fx.burst(this.x, this.y, { n: 24, color: ['#ffffff', '#8BB8E8'], shape: 'bubble', speed: [120, 340], size: [1.5, 4], life: [0.3, 0.7], emissive: true });
+    for (const e of g.entities) if (!e.dead && e.hurtable && e.team === 'enemy' && Math.hypot(e.x - this.x, e.y - this.y) < 110 + e.hw)
+      e.onHit?.(g, { damage: 5, dirX: sign(e.x - this.x) || 1, dirY: -0.3, kind: 'spell', source: this, heavy: true });
+  }
   /** The charged strike: a wide, heavy sweep that breaks guards and shields. */
   deepClean(g: Game) {
     const ay = g.input.axisY, dir: SlashDir = ay < -0.5 ? 'up' : ay > 0.5 && !this.grounded ? 'down' : 'side';
@@ -467,15 +533,17 @@ export class Player extends Actor implements PlayerApi {
     if (this.charge > 0.15) { const k = Math.min(1, this.charge / ORDER_STATS[this.ord].chargeT); g.r.halo(ctx, bx, by, 10 + k * 26, this.charged ? '#ffffff' : C.sky, 0.3 + k * 0.6 + (this.charged ? Math.sin(g.time * 30) * 0.15 : 0)); }
   }
   drawSlash(ctx: CanvasRenderingContext2D, g: Game, s: Slash) {
-    const t = clamp(s.t / 0.16, 0, 1), fade = 1 - clamp((s.t - 0.06) / 0.16, 0, 1); if (fade <= 0) return;
+    const spin = s.kind === 'spin', dur = spin ? 0.3 : 0.16, t = clamp(s.t / dur, 0, 1), fade = 1 - clamp((s.t - dur * 0.4) / dur, 0, 1); if (fade <= 0) return;
     const f = this.facing; let cx = this.x, cy = this.y - 2, base = 0;
-    if (s.dir === 'side') { cx += f * 10; base = f > 0 ? 0 : Math.PI; } else if (s.dir === 'up') { cy -= 8; base = -Math.PI / 2; } else { cy += 8; base = Math.PI / 2; }
-    const span = 2.3, a0 = base - (span / 2) * s.flip * (s.dir === 'side' ? f : 1), dir = s.flip * (s.dir === 'side' ? f : 1);
+    if (s.kind === 'rise') { cx += f * 14; cy -= 18; base = -Math.PI / 2; } else if (s.dir === 'side') { cx += f * 10; base = f > 0 ? 0 : Math.PI; } else if (s.dir === 'up') { cy -= 8; base = -Math.PI / 2; } else { cy += 8; base = Math.PI / 2; }
+    if (spin) cx = this.x;
+    const big = s.heavy || s.fin || !!s.kind;
+    const span = spin ? Math.PI * 2.2 : s.kind === 'rise' ? 2.9 : 2.3, a0 = base - (span / 2) * s.flip * (s.dir === 'side' ? f : 1), dir = s.flip * (s.dir === 'side' ? f : 1);
     const head = a0 + dir * span * (0.25 + 0.75 * t), tail = a0 + dir * span * Math.max(0, t - 0.55);
     ctx.lineCap = 'round';
     for (let i = 0; i < 9; i++) {
-      const r = (26 + i * 4.2 + (s.dir === 'side' ? 6 : 2)) * (s.heavy ? 1.45 : 1), w = (i === 6 ? 3.2 : 1.1 + (i % 3) * 0.5) * (s.heavy ? 1.4 : 1);
-      ctx.globalAlpha = fade * (0.25 + 0.75 * (1 - Math.abs(i - 6) / 7)); ctx.strokeStyle = i > 4 ? '#ffffff' : C.sky; ctx.lineWidth = w;
+      const r = (26 + i * 4.2 + (s.dir === 'side' ? 6 : 2)) * (s.heavy ? 1.45 : spin ? 1.6 : big ? 1.25 : 1), w = (i === 6 ? 3.2 : 1.1 + (i % 3) * 0.5) * (big ? 1.4 : 1);
+      ctx.globalAlpha = fade * (0.25 + 0.75 * (1 - Math.abs(i - 6) / 7)); ctx.strokeStyle = i > 4 ? '#ffffff' : s.fin || s.kind ? '#FCE300' : C.sky; ctx.lineWidth = w;
       ctx.beginPath(); if (dir > 0) ctx.arc(cx, cy, r, tail, head); else ctx.arc(cx, cy, r, head, tail); ctx.stroke();
     }
     ctx.globalAlpha = fade * 0.55; g.r.halo(ctx, cx + Math.cos(head) * 46, cy + Math.sin(head) * 46, 26, '#ffffff', fade * 0.6);
