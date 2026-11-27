@@ -1,0 +1,17 @@
+{
+  "name": "bristle",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BRISTLE: Knight of the Crown. An original 2D action-platformer in the CURAPROX world.",
+  "type": "module",
+  "scripts": {
+    "dev": "node serve.mjs",
+    "build": "node build.mjs",
+    "play": "node build.mjs && node serve.mjs --no-watch",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}
