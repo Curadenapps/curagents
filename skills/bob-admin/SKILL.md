@@ -55,7 +55,7 @@ sign-in and can't use it; they put ready-to-run commands in their drafts instead
 |---|---|
 | Who am I / what can I do | `auth status`, `auth whoami`, `auth capabilities` |
 | Pending registrations | `reports home`, `practices pending` |
-| Approve / reject | `practices approve ID --idb-office/--no-idb-office --idb-kit/--no-idb-kit --training-date YYYY-MM-DD`, `practices reject ID --reason ...` |
+| Approve / reject | `practices approve ID --idb-office/--no-idb-office --idb-kit/--no-idb-kit --training-date YYYY-MM-DD`, `practices reject ID --reason ...` (approve needs `--idb-office --idb-kit`: the API refuses an unticked checklist) |
 | Would it auto-approve? | `practices check [ID...]` (read-only: verdict and failed checks per pending registration) |
 | Approve the sensible ones | `practices auto-approve` (`--dry-run` first; `--max 10`, `--country`, `--manual-country`) |
 | People who signed up twice | `practices duplicates [--days 30] [--include-possible]` (read-only) |
@@ -165,7 +165,9 @@ prod. Each run:
    that practice ID. Name: "Approve or reject: practice {id} ({country})". Notes:
    the `details` lines, where to look (https://admin.bobscore.app → Practices →
    Pending), and the two commands, filled in:
-   `bob-admin --env prod practices approve {id} --no-idb-office --no-idb-kit --training-date {today+14}`
+   `bob-admin --env prod practices approve {id} --idb-office --idb-kit --training-date {today+14}`
+   (the API only approves with both checklist items ticked: `--no-idb-…` gets a 422
+   "checklist: incomplete")
    and `bob-admin --env prod practices reject {id} --reason "…"`. No names or emails
    in the subtask: Fabian sees them in BOB Admin. When a later run finds the
    practice no longer pending, it comments "Done: decided in BOB Admin" and ticks
