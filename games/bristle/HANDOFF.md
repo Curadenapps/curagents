@@ -8,7 +8,7 @@ Read this first when you pick BRISTLE up in a new session. Sean asked: do not bu
 - Branch: `claude/dazzling-meitner-9fo696` (pushed, so the PC and the laptop can both work on it).
   Claude app (artifact, private): https://claude.ai/artifact/GTBfaF4p87mhx4Dc3BNfz5, in the Claude account this PC
   session uses (published 26 Nov). Build with `node build.mjs --fragment` and publish `dist/fragment.html` to that URL;
-  it declares the `sample` capability for Claude-voiced NPCs. The older artifact
+  NPCs speak only written lines (the Claude-voiced replies were removed 27 Nov), so it needs no capabilities. The older artifact
   https://claude.ai/artifact/7RrzdiT1yUeCX34PiECaJD lives in Sean's other Claude account and is out of date.
   Design system (artifact, private): https://claude.ai/artifact/MXMb9wjtNjNVXW4P4H471E. Build with
   `node styleguide.mjs --fragment` and publish `dist/styleguide-fragment.html` to that URL. Its brand picker remembers

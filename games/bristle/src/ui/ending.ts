@@ -29,7 +29,7 @@ export class EndingScreen implements Screen {
         h('dt', { text: 'World' }), h('dd', { text: 'Ivoria, inside the Great Smile' }),
         h('dt', { text: 'Characters' }), h('dd', { text: 'Bristle, Derek, Pip and the Warden' }),
         h('dt', { text: 'Art' }), h('dd', { text: 'Every shape drawn in code' }),
-        h('dt', { text: 'Voices' }), h('dd', { text: 'Written lines, with optional replies by Claude' })),
+        h('dt', { text: 'Voices' }), h('dd', { text: 'Written lines' })),
       wordmark('wordmark end-mark'),
       h('p', { class: 'end-thanks', text: 'Thank you for playing' }));
     this.el = h('div', { class: 'scr end-scr', role: 'dialog', 'aria-label': 'Ending' }, this.veil, h('div', { class: 'end-lines' }, ...this.lineEls), this.credits,

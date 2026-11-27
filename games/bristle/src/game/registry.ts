@@ -54,9 +54,7 @@ export const Biomes: Record<string, Biome> = {};
 
 export interface NpcDef {
   id: string; name: string; title?: string;
-  /** Who they are and how they talk; fed to the AI voice. */
-  persona: string;
-  /** Written lines used when the AI voice is off or unavailable. Chosen by the npc module. */
+  /** Every written line they can say. Chosen by the npc module. */
   lines: string[];
 }
 export const Npcs: Record<string, NpcDef> = {};

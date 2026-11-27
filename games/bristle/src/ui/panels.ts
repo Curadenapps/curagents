@@ -3,7 +3,6 @@ import type { GameCore } from '../game/game';
 import { clamp } from '../engine/math';
 import * as Enemies from '../game/enemies/index';
 import { RELICS, BALLAD, BRUSH_COLOURS, kills } from '../game/npc/defs';
-import { voice } from '../game/npc/voice';
 import { h, List, Nav, button, wordmark, sfx, saveSettings, backTap, confirmTap, type Screen, type Item } from './kit';
 import { brandText as BT } from '../design/tokens';
 
@@ -65,10 +64,6 @@ export class SettingsPanel implements Screen {
     slider('Brightness', () => ((s.brightness ?? 0.85) - 0.55) / 0.55, (v) => (s.brightness = 0.55 + v * 0.55), (v) => Math.round((0.55 + v * 0.55) * 100) + '%');
     choice('Screen shake', [{ v: 0, t: 'Off' }, { v: 0.5, t: 'Gentle' }, { v: 1, t: 'Full' }], () => (s.shake >= 0.75 ? 1 : s.shake >= 0.25 ? 0.5 : 0), (v) => (s.shake = v));
     choice('Quality', [{ v: 0.5, t: 'Performance' }, { v: 0.75, t: 'Balanced' }, { v: 1, t: 'Sharp' }], () => (s.quality >= 0.9 ? 1 : s.quality >= 0.65 ? 0.75 : 0.5), (v) => (s.quality = v));
-    body.append(h('div', { class: 'group-label', text: 'Voices' }));
-    const paintAi = choice('AI voices', [{ v: false, t: 'Off' }, { v: true, t: 'On' }], () => !!s.aiVoices, (v) => (s.aiVoices = v),
-      () => (voice.transport ? 'Characters answer your questions with Claude.' : 'Not available here. Characters use their written lines.'));
-    voice.ready.then(paintAi);
     const back = button('Back'); body.append(back); items.push({ el: back, confirm: () => this.close() });
     this.list = new List(g, items);
     this.el = frame('settings-scr', 'Options', 'Settings', body, hints(['↑↓', 'Select'], ['←→', 'Adjust'], ['Esc', 'Back']));
@@ -110,7 +105,7 @@ export function creditsPanel(g: GameCore, host: PanelHost) {
     h('dl', { class: 'credits-list' },
       h('dt', { text: 'World' }), h('dd', { text: 'Ivoria, the kingdom inside the Great Smile' }),
       h('dt', { text: 'Art' }), h('dd', { text: 'Every shape drawn in code. No image files.' }),
-      h('dt', { text: 'Voices' }), h('dd', { text: 'Written lines, with optional replies by Claude' }),
+      h('dt', { text: 'Voices' }), h('dd', { text: 'Written lines' }),
       h('dt', { text: 'Type' }), h('dd', { text: 'Futura LT Pro' }),
     ),
     wordmark('wordmark credits-mark'),

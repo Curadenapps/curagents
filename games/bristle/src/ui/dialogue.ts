@@ -1,17 +1,14 @@
-// The dialogue box: a procedurally drawn portrait, a name plate, typewriter text with blips, choices, and the
-// Ask flow (preset or typed questions answered in character by Claude when a voice is available).
+// The dialogue box: a procedurally drawn portrait, a name plate, typewriter text with blips and choices.
+// Characters speak only their written lines (no AI replies).
 import type { GameCore } from '../game/game';
 import { Npcs } from '../game/registry';
 import { ART, gradientGlow } from '../game/npc/art';
-import { ASK_PRESETS, converse, fallbackLine, voiceState, type Choice, type TalkHost } from '../game/npc/defs';
-import { voice, type Turn } from '../game/npc/voice';
+import { converse, type Choice, type TalkHost } from '../game/npc/defs';
 import { h, List, button, sfx, backTap, taps, type Screen } from './kit';
 import { TAU, hash2 } from '../engine/math';
 
 const PITCH: Record<string, number> = { derek: 1.0, pip: 1.5, warden: 0.68 };
 const CPS = 52;
-const MAX_ASKS = 6;
-const history: Record<string, Turn[]> = {};
 
 export interface DialogueHost { pop(s: Screen): void; push(s: Screen): void; openShop(): Promise<void>; visit: number; greeted: Record<string, number> }
 
@@ -76,40 +73,6 @@ export class Dialogue implements Screen, TalkHost {
     this.choicesEl.classList.add('is-on');
     this.list = new List(this.g, items);
     return new Promise((r) => (this.chooseResolve = r));
-  }
-  canAsk() { return voice.available(this.g.save.settings.aiVoices) && this.asks < MAX_ASKS; }
-  async greeting(): Promise<string | null> {
-    if (!voice.available(this.g.save.settings.aiVoices) || this.host.greeted[this.npc] === this.host.visit) return null;
-    this.host.greeted[this.npc] = this.host.visit;
-    this.setThinking(true);
-    const r = await voice.reply(this.npc, [], voiceState(this.g, this.npc), 'greet', 4000);
-    this.setThinking(false);
-    return this.closed ? null : r;
-  }
-  async ask(): Promise<boolean> {
-    const presets = ASK_PRESETS[this.npc] ?? [];
-    const opts: Choice[] = presets.map((q, i) => ({ id: 'q' + i, label: q }));
-    opts.push({ id: 'type', label: 'In your own words…' }, { id: 'back', label: 'Never mind' });
-    const c = await this.choose(opts);
-    if (c === null) return false;
-    if (c === 'back') return true;
-    const q = c === 'type' ? await this.typeQuestion() : presets[Number(c.slice(1))];
-    if (this.closed) return false;
-    if (!q || !q.trim()) return true;
-    this.asks++;
-    const turns = (history[this.npc] ??= []);
-    turns.push({ role: 'knight', text: q.trim().slice(0, 120) });
-    this.quoteEl.textContent = '“' + q.trim().slice(0, 120) + '”'; this.quoteEl.classList.add('is-on');
-    this.setThinking(true);
-    const reply = await voice.reply(this.npc, turns, voiceState(this.g, this.npc), 'ask');
-    this.setThinking(false);
-    if (this.closed) return false;
-    if (!reply) { turns.pop(); const ok = (await this.say('...')) && (await this.say(fallbackLine(this.npc))); this.quoteEl.classList.remove('is-on'); return ok; }
-    turns.push({ role: 'npc', text: reply }); if (turns.length > 12) turns.splice(0, turns.length - 12);
-    const ok = await this.say(reply);
-    this.quoteEl.classList.remove('is-on');
-    if (ok && this.asks >= MAX_ASKS) return this.say(this.npc === 'pip' ? 'Phew! Pip is all talked out. Come back later, friend!' : this.npc === 'warden' ? 'Enough words for now, knight. Words are heavy down here.' : 'Let us save some words for later, knight.');
-    return ok;
   }
   async shop(): Promise<boolean> {
     this.el.classList.add('is-behind'); this.mode = 'idle';
