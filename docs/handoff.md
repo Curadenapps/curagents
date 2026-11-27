@@ -1,25 +1,23 @@
-# Handoff: state of curagents (5 Nov 2026, latest section 25 Nov)
+# Handoff: state of curagents (started 5 Nov 2026, latest section 26 Nov)
 
 Read this after `CLAUDE.md`, `RUNTIME.md` and `dream.md` when you pick up maintenance
 in a new session. Update it (or delete the lines that are done) by PR whenever you
 finish one of the items, so the next session starts from the truth.
 
-## Where things stand
+## Where things stand (27 Nov)
 
-- **`main`** has everything up to #54: built-in browser for Webex (#48), keep-alive
-  every 2 hours with run-log rows (#50), voice-first WBS dates (#49), market-rollout
-  agent (#51), scheduled agents posting to Webex on their own (#52), launch KPIs
-  (#54).
-- **All schedules still run on the Personal account.** The Curaden migration has
-  done Phase 1 only (extract, #44). Prompts 2 and 3 in
-  `docs/migration-mega-prompts.md` haven't been run.
-- **Live scheduled tasks (Personal):** Truth Catcher scan (cloud, weekdays 07:58 +
-  13:58), Bob roadmap jira sync (cloud, Thu 07:30), Agent run log check (cloud,
-  weekdays 10:15), and on the PC Boom Boom Derek (08:45), the old hourly Webex
-  keep-alive, Roadmap watch (Mon 08:00) and Roadmap dashboard refresh (Mon, should
-  be off).
-- **Not running anywhere yet:** Webex Sweep, Team update draft, Feedback QA report
-  (Fri), the new Roadmap watch summary post. They start with mega prompts 2 and 3.
+- **Who runs what:** the Notion Agent registry. `RUNTIME.md` "Where each agent runs"
+  and the README's "What runs when" are the background.
+- **Curaden** runs the connector-only cloud Routines (Truth Catcher, Boom Boom Derek,
+  Roadmap watch, Roadmap pack, Roadmap ← Jira sync, Team update draft, Feedback QA
+  report, App Support cover on Fridays, Agent run log check).
+- **Personal** runs the one PC task, the Webex courier (outbox + Webex Sweep), and the
+  on-request browser runs.
+- **Fabian** runs App Support (Mon–Thu), the invites task, the bob-support sweep,
+  practice approvals and the orchestrator daily. Sean's PC runs a second copy of
+  practice approvals.
+- The dated sections below are the history, newest first; "Needs Sean" and "Agent refinements to do" at the end predate the Curaden
+  switch, so check each item against the registry before acting on it.
 
 ## 26 Nov: orchestrator runs daily, automatic practice approval, duplicate sign-ups
 
