@@ -268,7 +268,8 @@ def check_practice(p: dict[str, Any], all_practices: list[dict[str, Any]],
 def approval_note(result: dict[str, Any], tool: str = "bob-admin practices auto-approve") -> str:
     passed = ", ".join(c["check"] for c in result["checks"] if c["ok"])
     return (f"Approved automatically by {tool} on {date.today().isoformat()}. Checks passed: {passed}. "
-            "IDB office, IDB kit and training date are placeholders: confirm them in onboarding.")[:1000]
+            "IDB office and IDB kit are ticked because the API needs a complete checklist, and the "
+            "training date is a placeholder: confirm them in onboarding.")[:1000]
 
 
 def training_date(days: int, today: date | None = None) -> str:

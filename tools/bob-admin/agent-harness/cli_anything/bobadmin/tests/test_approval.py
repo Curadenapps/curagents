@@ -210,7 +210,7 @@ def test_auto_approve_with_yes(http, monkeypatch):
     post = [c for c in http.calls if c["method"] == "POST"]
     assert len(post) == 1 and post[0]["url"] == TEST_API + "/practices/2/decisions/approve"
     body = post[0]["body"]
-    assert body["isIdbOffice"] is False and body["hasIdbKit"] is False
+    assert body["isIdbOffice"] is True and body["hasIdbKit"] is True
     assert "Approved automatically" in body["note"]
 
 
