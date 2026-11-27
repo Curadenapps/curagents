@@ -1006,7 +1006,9 @@ async function boot() {
   LIT = new Lit();
   const nav = `<nav class="side"><div class="mark">BRISTLE<small>Design system v0.1</small></div><ol>${SECTIONS.map(([id, n], i) => `<li><a href="#${id}"><span>${String(i + 1).padStart(2, '0')}</span>${n}</a></li>`).join('')}</ol><label class="brandpick">Brand pack<select id="brandpick">${Object.values(packs).map((p) => `<option value="${p.id}"${p.id === P.id ? ' selected' : ''}>${p.name}</option>`).join('')}</select></label><div class="foot">Living style guide, drawn by the game's own code.<br>Build: node styleguide.mjs</div></nav>`;
   const main = `<main>${cover()}${principles()}${colour()}${typeSection()}${components()}${materials()}${kitSection()}${heroSection()}${heroOptions()}${ordersSection()}${idbSection()}${lightSection()}${particleSection()}${motionSection()}${doDont()}<footer><span>BRISTLE: Knight of the Crown &middot; ${P.legal}</span><span>tokens.ts &middot; kit.ts &middot; ART-BIBLE.md &middot; BACKLOG.md</span></footer></main>`;
-  document.body.innerHTML = `<div class="layout">${nav}${main}</div>`;
+  // add the page into its own container: replacing the body would also remove the <style> where hosts such as
+  // artifacts put it inside <body> (that left the published design system unstyled)
+  const host = document.createElement('div'); host.className = 'layout'; host.innerHTML = `${nav}${main}`; document.body.appendChild(host);
   document.getElementById('brandpick')?.addEventListener('change', (ev) => { // remembered in this browser, so it also works where ?brand= cannot be passed
     const v = (ev.target as HTMLSelectElement).value; try { localStorage.setItem('bristle-brand', v); } catch { /* storage blocked */ }
     const u = new URL(location.href); if (u.searchParams.has('brand')) { u.searchParams.delete('brand'); location.href = u.toString(); } else location.reload();
