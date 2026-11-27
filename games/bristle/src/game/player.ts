@@ -22,6 +22,9 @@ const FOCUS_COST = 33, SPELL_COST = 33, PASTE_COST = 25, FOCUS_T = 0.92, CHARGE_
 type SlashDir = 'side' | 'up' | 'down';
 interface Slash { dir: SlashDir; t: number; hit: Set<number>; cells: Set<number>; flip: number; landed: boolean; heavy?: boolean }
 
+/** Crawl pose: torso tip (radians), hip height above the floor and how far the hip sits behind centre (px). */
+const CRAWL_A = 1.0, CRAWL_HIP = 9, CRAWL_BACK = 12;
+
 export class Player extends Actor implements PlayerApi {
   facing: 1 | -1 = 1;
   hp = 5; maxHp = 5; fluor = 0;
@@ -322,13 +325,13 @@ export class Player extends Actor implements PlayerApi {
     const sw = Math.sin(this.runPhase), rising = !this.grounded && this.vy < 0;
     const crawling = this.crouching, crawlSw = Math.sin(this.runPhase * 1.6);
     const sl = this.slash, lunge = sl && this.grounded && sl.dir === 'side' && sl.t < 0.22;
-    const la = crawling ? -0.9 + crawlSw * 0.35 : lunge ? -0.5 : sl && sl.dir === 'down' ? 0.6 : running ? sw * 0.85 : !this.grounded ? (rising ? 0.45 : -0.25) : 0, lb = crawling ? -1.2 - crawlSw * 0.35 : lunge ? 0.55 : sl && sl.dir === 'down' ? -0.4 : running ? -sw * 0.85 : !this.grounded ? (rising ? -0.15 : 0.3) : 0;
+    const la = crawling ? -0.12 + crawlSw * 0.16 : lunge ? -0.5 : sl && sl.dir === 'down' ? 0.6 : running ? sw * 0.85 : !this.grounded ? (rising ? 0.45 : -0.25) : 0, lb = crawling ? 0.1 - crawlSw * 0.16 : lunge ? 0.55 : sl && sl.dir === 'down' ? -0.4 : running ? -sw * 0.85 : !this.grounded ? (rising ? -0.15 : 0.3) : 0;
     this.legA = damp(this.legA, la, 20, dt); this.legB = damp(this.legB, lb, 20, dt);
     // visor blink
     this.blinkT -= dt; if (this.blinkT <= 0) { this.blink = 0.13; this.blinkT = 2.5 + Math.random() * 3; } this.blink = Math.max(0, this.blink - dt);
     // the brush: held in the hand; resting pose depends on what the knight is doing
     const s = this.slash;
-    const rest = this.crouching ? -1.0 + Math.sin(this.runPhase * 1.6) * 0.2 : this.focusT > 0 ? -1.45 : running ? 2.55 + Math.sin(this.runPhase * 2) * 0.12 : !this.grounded ? (rising ? 2.85 : 1.95) : 1.8 + this.breath * 0.04;
+    const rest = this.crouching ? -CRAWL_A - 0.12 + Math.sin(this.runPhase * 1.6) * 0.08 : this.focusT > 0 ? -1.45 : running ? 2.55 + Math.sin(this.runPhase * 2) * 0.12 : !this.grounded ? (rising ? 2.85 : 1.95) : 1.8 + this.breath * 0.04;
     const target = s ? (s.dir === 'up' ? -1.9 : s.dir === 'down' ? 1.6 : (s.flip > 0 ? 0.9 : -0.8)) : this.throwT > 0 ? -1.2 : this.charge > 0.15 ? 2.9 : rest;
     if (s) {
       const arc = s.dir === 'up' ? [0.9, -1.95] : s.dir === 'down' ? [-1.3, 1.65] : s.flip > 0 ? [-2.0, 0.95] : [1.7, -0.85];
@@ -345,10 +348,16 @@ export class Player extends Actor implements PlayerApi {
 
   /** 0 standing .. 1 fully down on hands and knees. */
   crawlK() { return clamp((1 - this.crouchK) / 0.38, 0, 1); }
+  /** Body transform. Standing: pivot at the feet. Crawling: pivot at the hip, held up at knee height, torso tipped
+   *  forward by CRAWL_A so the knight is on hands and knees (legs kneel behind, head stays up). */
+  bodyXf() {
+    const f = this.facing, c = this.crawlK(), hipY = RIG.hip * RIG_SCALE;
+    return { px: this.x - f * CRAWL_BACK * c, py: this.y + this.hh - CRAWL_HIP * c, a: this.lean + f * CRAWL_A * c, oy: -hipY * c };
+  }
   /** Body-space point (origin at the feet) to world space, through crawl tilt and squash. */
   bodyToWorld(lx: number, ly: number) {
-    const f = this.facing, c = this.crawlK(), a = this.lean + f * 1.18 * c, X = lx * this.sx, Y = ly * this.sy;
-    return { x: this.x - f * 19 * c + X * Math.cos(a) - Y * Math.sin(a), y: this.y + this.hh + X * Math.sin(a) + Y * Math.cos(a) };
+    const t = this.bodyXf(), X = lx * this.sx, Y = ly * this.sy + t.oy;
+    return { x: t.px + X * Math.cos(t.a) - Y * Math.sin(t.a), y: t.py + X * Math.sin(t.a) + Y * Math.cos(t.a) };
   }
   /** Shoulder and hand in body space (origin at the feet, +y down), and the brush's angle. */
   grip() {
@@ -373,7 +382,7 @@ export class Player extends Actor implements PlayerApi {
       ctx.closePath(); ctx.fillStyle = cape.color; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = cape.edge; ctx.stroke();
     }
     // body: crawl tilt and squash, then the rig (mirrored for facing, at rig scale)
-    const crawl = this.crawlK(); ctx.translate(x - f * 19 * crawl, y); ctx.rotate(this.lean + f * 1.18 * crawl); ctx.scale(this.sx, this.sy);
+    const t = this.bodyXf(); ctx.translate(t.px, t.py); ctx.rotate(t.a); ctx.translate(0, t.oy); ctx.scale(this.sx, this.sy);
     const K = RIG_SCALE, pose = this.rigPose(), gr = this.grip(), col = brushColour(g);
     ctx.scale(f * K, K);
     // the brush stays the game's own blade, drawn in body space between the chest and the front arm
@@ -405,8 +414,8 @@ export class Player extends Actor implements PlayerApi {
     const f = this.facing, K = RIG_SCALE, gr = this.grip(), lift = (this.bob + this.breath * 0.5) / K;
     const ba = this.slash && this.slash.t < 0.25 ? 2.7 : 1.9 + Math.sin(this.runPhase) * 0.75 * (this.grounded ? 1 : 0) + (this.throwT > 0 ? -2.6 : 0);
     return {
-      legA: this.legA, legB: this.legB, lift, headTilt: this.headTilt * f,
-      backHand: [RIG.back[0] - Math.cos(ba) * 12, RIG.back[1] + Math.sin(ba) * 12],
+      legA: this.legA, legB: this.legB, lift, headTilt: this.headTilt * f - CRAWL_A * 0.75 * this.crawlK(),
+      backHand: this.crawlK() > 0.5 ? [RIG.back[0] + Math.sin(CRAWL_A) * 15 + Math.sin(this.runPhase * 1.6) * 2, RIG.back[1] + Math.cos(CRAWL_A) * 15] : [RIG.back[0] - Math.cos(ba) * 12, RIG.back[1] + Math.sin(ba) * 12],
       frontHand: this.shotT >= 0 ? [RIG.front[0] + Math.cos(this.aimRel()) * 11, RIG.front[1] + Math.sin(this.aimRel()) * 11] : [(gr.hx * f) / K, gr.hy / K + lift],
       game: true, aiming: this.shotT >= 0, aim: this.aimRel(), sway: clamp((-this.vx * f) / 500, -1, 1), open: this.blink > 0 ? 0.25 : 1,
     };
@@ -447,7 +456,7 @@ export class Player extends Actor implements PlayerApi {
     // visor glow
     const vp = this.bodyToWorld(f * 4.5, -(32 + this.bob + this.breath * 0.5) + 1.6), vx = vp.x, vy = vp.y, open = this.blink > 0 ? 0.25 : 1;
     void vx; void vy; void open;
-    { const p0 = this.bodyToWorld(0, 0), crawl = this.crawlK(); ctx.save(); ctx.translate(p0.x, p0.y); ctx.rotate(this.lean + f * 1.18 * crawl); ctx.scale(this.sx * f * RIG_SCALE, this.sy * RIG_SCALE);
+    { const t = this.bodyXf(); ctx.save(); ctx.translate(t.px, t.py); ctx.rotate(t.a); ctx.translate(0, t.oy); ctx.scale(this.sx * f * RIG_SCALE, this.sy * RIG_SCALE);
       drawRig(ctx, ART[this.ord], this.rigPose(), 'glow', { halo: (c, hx, hy, r, color, a) => g.r.halo(c, hx, hy, r, color, a) }); ctx.restore(); }
     // bristle tuft on the blade tip
     const gp = this.grip(), a = gp.a, lx = gp.hx + Math.cos(a) * 29 + Math.sin(a) * 5, ly = gp.hy - this.bob + Math.sin(a) * 29 - Math.cos(a) * 5, tp = this.bodyToWorld(lx, ly), bx = tp.x, by = tp.y;
