@@ -92,7 +92,8 @@ personal projects stay on Personal; curagents and its automations move.
 | Orchestrator daily | On request only | **New** (26 Nov): the orchestrator runs on its own every weekday: board moves by fixed rules, the Asana task "Orchestrator: board moves to decide", registrations waiting on a person (`agents/orchestrator.md` §8). Works from any instance: the first run of the day works, the others stop | Fabian's Routine "Orchestrator daily (Fabian)" while Sean is away; a Curaden copy is optional |
 | Practice approvals | — | **New** (26 Nov): automatic practice approval (BA-324) and duplicate sign-up tasks with the bob-admin CLI, on Fabian's own BOB Admin sign-in (`skills/bob-admin/SKILL.md` "Practice approvals run") | Fabian's PC task "Practice approvals (Fabian)" and, since 27 Nov, Sean's PC task "Practice approvals (Sean)" (Account `Curaden`), both weekdays 08:50, 12:50, 16:50 |
 | App Support | — | **New** (10 Nov): answers form submissions on its own, hourly in work hours; bugs and gaps to Jira. Since 18 Nov Fabian owns every request: his Routine on his own account (Mon–Thu) plus his PC task "App Support invites (Fabian)" that adds approved requesters; Sean's Routine only covers (Fridays, or when Fabian's is down) | Routine "App Support (Curaden)" `trig_01NzNgUy17FxJiHFc8otT4oS`, created 10 Nov |
-| Roadmap dashboard refresh | Personal PC, 09:15 | **On request** (Sean, 23 Oct): switch its schedule off and run it on click | — |
+| Roadmap dashboard refresh | Personal PC, 09:15 | **Replaced** (25 Nov) by the roadmap pack below; the PC task stays off | — |
+| Roadmap pack | Personal PC by hand (W48, 25 Nov) | **New on Curaden** (Sean, 25 Nov): the weekly picture and PDF for App Team, scope since 3 Nov; the post waits in the outbox as Held for Sean | Routine "Roadmap pack (Curaden)", Mon 08:40 |
 | Boom Boom queued | Personal PC, 14:00 | **Retire**: the courier posts the outbox | — |
 | Webex keep-alive | Personal PC, hourly 07–20 | **Retire** (11 Nov): the courier checks the sign-in at every run | — (switch off the Personal task) |
 | Asana ↔ Notion sync | Paused | **Retire**: Webex Sweep makes the Asana triage tasks itself; running both would duplicate tasks | — |
@@ -112,6 +113,7 @@ personal projects stay on Personal; curagents and its automations move.
 | `truth-catcher` | Cloud | Claude Routine "Truth Catcher scan" (`trig_01BxmV4KaG4CPbZMU4GmMHa7`), weekdays 07:58 + 13:58 Zurich | Asana, Notion, GitHub connectors |
 | Roadmap ← Jira sync | Cloud | Claude Routine "Bob roadmap jira sync" (`trig_01EREg8Ra4divTV2Jomidy9g`), Thu 07:30 Paris | The only automation that writes roadmap rows from Jira |
 | `roadmap-watch` | Cloud + courier | Claude Routine "Roadmap watch (Curaden)" (Mon 07:40 Zurich); "roadmap watch" any time | Writes the report page and puts the App Team summary in the outbox |
+| `roadmap-pack` | Cloud + courier | Claude Routine "Roadmap pack (Curaden)" (Mon 08:40 Zurich); "roadmap pack" any time | Builds the picture and PDF (`tools/roadmap-pack`, headless Chromium), writes the pack page under Roadmap Reports, swaps them on Goals & Objectives, and puts the App Team post in the outbox as Held. The courier posts it once Sean ticks Approved |
 | Webex courier | **PC (Personal)** | Desktop app scheduled task "Webex courier (Personal)", weekdays 08:02, 09:02, 12:02, 17:02 Zurich | The only scheduled PC task: sign-in check, outbox, Webex Sweep ("PC runs" below) |
 | `webex-sweep` | **PC (courier)** | Inside the Personal task "Webex courier (Personal)" (weekdays 08:02, 09:02, 12:02, 17:02); "check webex" any time | Reads the watched spaces and new meetings (summary, action items, transcript); Inbox log rows (the check-up log), triage tasks in BOB App › Webex inbox, Asana comments, a "New in Jira" note in the common chat |
 | `bob-admin` CLI (BOB Admin) | **PC** | "bob admin …", "pending registrations", "create super user …" (`skills/bob-admin`) | Runs on the signed-in user's own session in `%USERPROFILE%\.bob-admin` (Sean or Fabian, each their own login). Not for cloud Routines: they have no sign-in. Writes only after a yes per action; prod writes locked by default |
@@ -281,8 +283,8 @@ Cloud Routine prompts take the same `Account:` first line.
 |----------------|---------------|----------|
 | Webex courier (Personal) | Weekdays 08:02, 09:02, 12:02, 17:02 (cron `2 8,9,12,17 * * 1-5`) | Webex courier |
 
-That is the only PC task. Boom Boom Derek, Roadmap watch, Feedback QA report and the
-team update run as cloud Routines on Curaden (`docs/curaden-routines.md`).
+That is the only PC task. Boom Boom Derek, Roadmap watch, the roadmap pack, Feedback QA
+report and the team update run as cloud Routines on Curaden (`docs/curaden-routines.md`).
 
 ## PC runs
 

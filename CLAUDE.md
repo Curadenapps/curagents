@@ -57,6 +57,7 @@ rules in `agents/orchestrator.md` §3a. Load the relevant file for context:
 - [`agents/release.md`](agents/release.md) — Release coordinator (BOB + RevolveNote); manual trigger only
 - [`agents/meeting-notes.md`](agents/meeting-notes.md) — Webex meeting (AI summary, action items, transcript, recording frames) → Notion recap page
 - [`agents/roadmap-watch.md`](agents/roadmap-watch.md) — Weekly roadmap drift report (Notion roadmaps vs Asana/Jira); read-only, plus a Monday summary to Webex App Team
+- [`agents/roadmap-pack.md`](agents/roadmap-pack.md) — Weekly roadmap pack: after Roadmap Watch on Monday, one picture and a PDF of the BOB roadmap (scope since 3 Nov 2026) on a Notion pack page and Goals & Objectives, plus an App Team post held in the outbox for Sean
 - [`agents/feedback-qa.md`](agents/feedback-qa.md) — Feedback QA: reads the Notion inbox, posts the PDF report to the Webex QA space on its own every Friday when there's enough; Confluence for full UATs
 - [`agents/announcements.md`](agents/announcements.md) — Team update: week / two weeks / month across every tool → Notion draft → Webex after approval
 - [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) — Boom Boom Derek: Truth Catcher for the Phinamic team (Derek La and Khanh); autonomous, funny-but-clear pings in the Webex common chat (QA space) or "Curaden / Phinamic", details on its Notion page

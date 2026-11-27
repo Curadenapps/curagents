@@ -116,6 +116,21 @@ Schedule: Mondays 07:40.
 > Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
 > describes (Agent `roadmap-watch`, Where Cloud, Account Curaden).
 
+### Roadmap pack (Curaden)
+
+Schedule: Mondays 08:40 (an hour after Roadmap watch).
+
+> Account: Curaden. Fetch `Curadenapps/curagents` and read every file from
+> `origin/main` (never merge or push). Check the switch as `RUNTIME.md` describes:
+> find the Agent registry row whose Started by names "Roadmap pack (Curaden)"; if its Account
+> isn't Curaden, log `no-op` and stop.
+> Then build and publish this week's pack exactly as `agents/roadmap-pack.md` describes
+> (`python3 tools/roadmap-pack/roadmap_pack.py`): the pack page under Roadmap Reports,
+> the picture and PDF on Goals & Objectives, and one Webex outbox row as **Held**.
+> Never Queued, never post to Webex yourself. Live: don't ask first.
+> Last step, always, also on failure: one row in the Agent run log as `RUNTIME.md`
+> describes (Agent `other`, Run `roadmap-pack …`, Where Cloud, Account Curaden).
+
 ### Feedback QA report (Curaden)
 
 Schedule: Fridays 10:10.
