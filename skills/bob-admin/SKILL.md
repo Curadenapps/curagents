@@ -125,21 +125,30 @@ is read again; if someone decided it in the meantime, it's left alone.
 Output never holds names, emails or phone numbers: IDs, countries, checks and match
 reasons only, so it can go in run logs and task notes as it is.
 
-## Practice approvals run (Fabian's PC)
+## Practice approvals run (Fabian's PC and Sean's PC)
 
-A desktop-app scheduled task, **"Practice approvals (Fabian)"**, on Fabian's PC (he
-owns support and BA-324 since 25 Nov; Sean is away until January). Setup:
-`docs/app-support-quickstart.md`, "Setup details" section 4. It also runs on
-"practice approvals" in any session on a PC signed in to BOB Admin prod. Each run:
+A desktop-app scheduled task on two PCs, each on its owner's own BOB Admin sign-in:
+**"Practice approvals (Fabian)"** on Fabian's PC (he owns support and BA-324 since
+25 Nov; setup: `docs/app-support-quickstart.md`, "Setup details" section 4) and
+**"Practice approvals (Sean)"** on Sean's PC (Sean, 27 Nov 2026: both are away soon,
+so approvals must not hang on one PC; same schedule, prompt starts `Account:
+Curaden`). Both may fire in the same slot: `practices auto-approve` reads each
+practice again before approving and leaves decided ones alone, and steps 5 and 6
+skip anything that already has a subtask or task, so a double run changes nothing.
+It also runs on "practice approvals" in any session on a PC signed in to BOB Admin
+prod. Each run:
 
-1. **Switch.** Read the Agent registry row whose Started by names "Practice
-   approvals (Fabian)" (Notion REST API with `NOTION_API_KEY`, as the quickstart's
-   "Notion through the API" says). Account not `Fabian` → log `no-op` and stop. No
-   row yet → log `no-op` "no registry row" and stop.
+1. **Switch.** Read the Agent registry row whose Started by names this task
+   ("Practice approvals (Fabian)" or "Practice approvals (Sean)"). Fabian's PC reads
+   it with the Notion REST API and `NOTION_API_KEY` (the quickstart's "Notion through
+   the API"); Sean's PC uses the Notion connector in view mode (`RUNTIME.md`
+   "Reading Notion"). Account not the one the prompt names → log `no-op` and stop.
+   No row yet → log `no-op` "no registry row" and stop.
 2. **Latest CLI.** `git fetch origin main`, `git pull --ff-only` when on a clean
    `main` (otherwise read files from `origin/main`), then
    `powershell -ExecutionPolicy Bypass -File tools\bob-admin\install.ps1` (quiet;
-   updates `%USERPROFILE%\.bob-admin`). Use `%USERPROFILE%\.bob-admin\bin\bob-admin.cmd`
+   updates `%USERPROFILE%\.bob-admin`). When the checkout isn't on a clean `main`,
+   add `-FromGitHub` so the CLI comes from `main`, not a feature branch. Use `%USERPROFILE%\.bob-admin\bin\bob-admin.cmd`
    if `bob-admin` isn't on PATH.
 3. **Sign-in.** `bob-admin --env prod --json auth status`. Not signed in or expired:
    `PushNotification` once ("BOB Admin prod is signed out. Run `bob-admin --env prod
@@ -202,7 +211,7 @@ owns support and BA-324 since 25 Nov; Sean is away until January). Setup:
    `possible` and `internal` groups get no task: list their keys in the run-log row.
 7. **Run log**, always, also on failure: one row as `RUNTIME.md` describes (Agent
    `practice-approvals`, or `other` if the select has no such option; Where `PC`;
-   Account `Fabian`). Outcome `ok` (something approved or raised), `no-op` (nothing
+   Account as the prompt names it: `Fabian` or `Curaden`). Outcome `ok` (something approved or raised), `no-op` (nothing
    pending, no new duplicates), `partial` or `failed`. Summary: "{n} approved
    ({ids}), {m} to Fabian ({ids}), {k} duplicate tasks ({keys})". IDs only.
 
