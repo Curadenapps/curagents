@@ -5,9 +5,12 @@ description: >
   action items and full transcript (and, when needed, screen-shared frames from the
   recording) in Webex web (built-in browser, Claude in Chrome as fallback) on Sean's sign-in, then writes
   Summary (what was decided), Topics Covered and Next Steps (owner by judgment, not
-  pattern rules). Fireflies and pasted transcripts are fallbacks. Manual trigger only.
+  pattern rules). Any Webex call, video chat or recording Webex has no recap for
+  (space calls, 1:1s, unrecorded meetings, downloaded recordings) comes from Yogurt,
+  the local recorder on Sean's PC, through its MCP server. Fireflies and pasted
+  transcripts are fallbacks. Manual trigger only.
 model: claude-sonnet-5-5
-tools: Read, NotionAPI, ClaudeBrowser, ClaudeInChrome, FirefliesAPI
+tools: Read, NotionAPI, ClaudeBrowser, ClaudeInChrome, YogurtMCP, FirefliesAPI
 trigger:
   - type: manual
     phrases:
@@ -20,20 +23,25 @@ trigger:
       - "meeting transcript"
       - "recap the last meeting"
       - "fetch from fireflies"
+      - "from yogurt"
+      - "recap the call"
+      - "notes from the call"
 memory:
   read:
     - dream.md
     - skills/webex-web/SKILL.md
+    - docs/yogurt.md
     - "notion: Decision Log & Meeting Recaps 3f27e8aabbb481baa16ce7cb9e7514dd (existing recaps)"
   write:
     - "notion: one recap page per meeting (Meeting Notes DB if NOTION_MEETING_NOTES_DB_ID is set, else a child page of Decision Log & Meeting Recaps)"
-idempotency_key: "meeting-notes:{webex meeting container id | fireflies id}"
+    - "notion: one Held Webex outbox row per recap (one-tap send; Sean ticks Approved, the courier posts)"
+idempotency_key: "meeting-notes:{webex meeting container id | yogurt:{meeting id} | fireflies id}"
 dry_run: false
 output:
   schema:
     notion_page_url: string
     title: string
-    source: "webex|fireflies|manual"
+    source: "webex|yogurt|fireflies|manual"
     topics_covered: "string[]"
     next_steps: "array of {action, owner, due}"
     status: "ok|error|skipped"
@@ -58,8 +66,13 @@ format, owner judgment and posting. Do not re-implement those steps here.
 | Condition | Action |
 |-----------|--------|
 | A browser reachable (built-in, or Claude in Chrome), Sean signed in to Webex | **Webex mode** (default): the meeting he names, or the latest recorded one without a recap |
-| Webex has no AI summary or transcript for that meeting, `FIREFLIES_API_KEY` is set | Fireflies mode |
-| No browser (cloud session), or nothing recorded | Paste mode: ask for the transcript or the Webex recap text |
+| Sean says "from Yogurt", or it was a call / video chat in a space, a 1:1, or a meeting Webex has no AI summary or transcript for, and the `yogurt` MCP server answers | **Yogurt mode** |
+| Neither has it, `FIREFLIES_API_KEY` is set | Fireflies mode |
+| No browser and no Yogurt (cloud session), or nothing recorded | Paste mode: ask for the transcript or the Webex recap text |
+
+Webex comes first when it has a recap: its AI summary is better than Yogurt's local
+model. When both have the same meeting, use Webex for the summary and Yogurt's
+`myNotes` (Sean's own typed notes) as an extra source.
 
 ## Webex mode
 
@@ -85,6 +98,34 @@ format, owner judgment and posting. Do not re-implement those steps here.
 6. **Write the page** with Procedure 4's format. Set `Source: Webex — {container id}`
    and link the Webex meeting page.
 
+## Yogurt mode
+
+Yogurt records Sean's mic and the call audio of any Webex meeting, call or video chat
+on his PC (no bot joins), transcribes and summarises it locally, and serves it through
+the `yogurt` MCP server. Setup and limits: [`docs/yogurt.md`](../docs/yogurt.md).
+Field mapping and the You / Them speaker rule: `skills/curaden-communications/references/meeting-notes.md` §3b.
+
+1. **Pick the meeting.** `list_meetings` (optionally `query`, `person`, or `before` to
+   page back). Match the title, date or person Sean gave; with none given, take the
+   newest meeting with no recap page yet. A meeting with `recording: true` is still
+   running: say so and stop.
+2. **Idempotency.** If a recap page carries `Source: Yogurt — {id}`, return its URL and stop.
+   If the same meeting already has a Webex recap (same date and time, same people),
+   stop too, and say Webex already has it.
+3. **Read it.** `get_meeting` (summary, `myNotes`, attendees, calendar event), then
+   `get_transcript`. Build Summary and Topics from the summary, checked against the
+   transcript; Next Steps from the transcript and `myNotes` (Yogurt lists no action items).
+4. **Recordings.** A Webex recording Sean downloaded and uploaded into Yogurt
+   (`scripts/webex-recording-to-yogurt.ps1` makes the MP4 an M4A) shows up as a normal
+   meeting with `imported: true`. Same steps.
+5. **Write the page** with Procedure 4's format. Set `Source: Yogurt — {id}`; no link
+   (the meeting lives only on Sean's PC).
+6. Use `ask` only when Sean asks a question across meetings ("what did Derek promise
+   about the voice flow?"); quote its sources (meeting and moment) in the answer.
+
+Read-only: never call Yogurt's change tools (rename, move, trash, import) unless Sean
+asks for that exact change. Never copy audio paths from `get_audio` anywhere.
+
 ## Where the page goes
 
 - `NOTION_MEETING_NOTES_DB_ID` set → a row in that database (Procedure 4).
@@ -93,14 +134,47 @@ format, owner judgment and posting. Do not re-implement those steps here.
   plus a row in that page's Date / Meeting / Key decision table. Actions that
   need tracking go to Asana only when Sean asks (through `asana-maintenance`).
 
+## Share with the team (one-tap send)
+
+Every recap, from any source, gets a ready-to-send Webex message that waits for
+Sean's one tap. Nothing goes to Webex on its own (agreed 26 Nov).
+
+1. **Pick the space** from who was in the meeting (attendees, the people the
+   transcript names, the title):
+
+   | Meeting | Space (`skills/webex-web/SKILL.md` "Spaces") | Message |
+   |---------|-------|---------|
+   | Curaden people only | `App Team` | Full recap |
+   | With Phinamic (Derek, Khanh) | The common chat `644fd150…` | **Partner-safe** cut: only what Phinamic may read (decisions and actions that involve them); nothing from an internal heading, no prices, contracts, other partners or people issues |
+   | Other externals (markets, distributors, agencies, legal), 1:1s, or can't tell | No row | Say so, and ask Sean which space if he wants it shared |
+
+   Sean naming a space ("send it to App Team") overrides the table.
+2. **Write the message** in the meeting's language, under ~1,500 characters:
+   first line `📝 Recap: {meeting} — {D Mon}` (this is the Marker), then 2–3 lines of
+   what was decided, then **Next steps** as `- {action} — {owner}, {due}`. For App
+   Team add the Notion page link; for the partner space leave the link out (Phinamic
+   can't open it). No transcript quotes, no clinical or efficacy claims (`dream.md` §2).
+3. **One row in the Webex outbox** (`collection://f73b099a-ad3e-45ed-bb7e-31da773ab08d`):
+   Status **`Held`**, Agent `meeting-notes`, Space, Marker = the first line, Mentions
+   only the owners named in Next steps who are in that space, Source = the recap page,
+   **Expires** 7 days after the meeting, the message in the row's body. Never `Queued`.
+   Idempotency: one row per recap page; if one exists, update its body instead.
+4. **Tell Sean** in one line: "Recap ready to send to {space}: tick Approved on the
+   outbox row (or say "post it")". The Webex courier posts approved rows on its next
+   run (weekdays 08:02, 09:02, 12:02, 17:02); "post it" on the PC posts now
+   (`RUNTIME.md` "Manual PC runs"). Sean can edit the row's body before ticking.
+   An unapproved row lapses at **Expires**; the recap stays in Notion.
+
 ---
 
 ## Hard Rules
 
 - Never fabricate content: only what the Webex summary, transcript, recording,
-  Fireflies or the pasted text contains.
+  Yogurt, Fireflies or the pasted text contains.
+- Yogurt transcripts and audio stay on Sean's PC. Only the recap goes to Notion; never
+  paste a full Yogurt transcript into Notion, Asana, Jira or Webex.
 - Read-only in Webex: never download, share, edit or delete a recording, summary or
-  transcript. If a sign-in or recording password appears, stop and tell Sean.
+  transcript. The only way a recap reaches Webex is the Held outbox row Sean approves. If a sign-in or recording password appears, stop and tell Sean.
 - Assign owners by reading context and using judgment. Never use regex-style patterns.
 - Output the Notion page in the **same language as the meeting** (German stays German) unless the user asks for a translation.
 - If `DRY_RUN=true`, print the formatted Notion page to the console; do not write to Notion.

@@ -1,5 +1,13 @@
 # BOB support playbook (for a support agent)
 
+> **How App Support uses this file** (added 12 Nov 2026): this is the source for every
+> **email** reply (the mailboxes in `agents/app-support.md`, "Mailboxes") and for the
+> recurring request types in section 2, on the form tasks as well. Facts in section 1
+> win over anything older in Notion. The voice rules in section 5 apply to email;
+> Asana replies keep `docs/app-support-voice-sean.md` (short, with the automated
+> sign-off). Section 8 grows from Sean's and Janine's edits to drafts ("Learning from
+> sent mail" in the spec). Edit it by PR; the next run uses it.
+
 **Built from:** the emails Sean answered between 4 and 12 Nov 2026, and the corrections he made to the drafts. The corrections are the most useful part, because they show where a default draft goes wrong.
 
 **Who this is for:** a Claude instance (curagents or a support agent) that drafts replies as Sean Dunne, Global Product Lead at Curaden, for the BOB App and the other apps.
@@ -36,7 +44,7 @@
 5. Each coach gets "Your temporary BOB App password" from support@bobscore.com and has to change it at first login.
 
 Points to repeat when they come up:
-- **The Main BOB User gets no app login** unless they also add themselves as a coach in step 3 of the form.
+- **The main contact (step 2) gets access to BOB** as coach or Practice Admin, so they don't add themselves again. **Step 3 is only for adding colleagues** who will use BOB too (Sean, 26 Nov 2026; the older "add yourself as a coach in step 3" advice was wrong).
 - **Country not in the list:** choose "Other countries" and submit anyway, and the team gets in touch.
 - **No email after 24 hours:** check spam first, then check the address entered. Password emails bounce silently on a mistyped address, which is a known issue (Derek is checking it).
 - **Demos and practice:** use anonymous sessions ("Skip & start anonymous session"), so nobody needs a fake patient.
@@ -82,7 +90,7 @@ Japan's clinics are a point of treatment and a point of sale, and they want to k
 - In-clinic purchases **can't be tracked automatically**, because they happen offline, by word of mouth at the chair.
 - **Proposal:** the clinician, or someone in the Admin Console, marks after the BOB that the patient "took on the recommendation", meaning they bought it.
 - Ask about their workflow: who recommends, who sells, when in the visit, and who would mark it.
-- Offer a call, and ideally a visit to see it in a clinic. Japan's needs are very different from other markets.
+- Ask them to write down their workflow in the reply; don't offer a call or meeting (no calls anywhere, Sean 25 Nov 2026). Japan's needs are very different from other markets.
 
 ### F. Someone asks for a presentation or KPI deck
 - **The board presentation (with the KPI slides) is internal and is never shared.**
@@ -116,7 +124,7 @@ Sean rejected the long version.
 >
 > You can register here: https://curaprox-apps.com/contact-form
 >
-> The form has four short steps. Please add yourself as a coach in step 3 as well, since that's what gives you a login for the app. If your country isn't in the list, choose "Other countries" and submit it anyway.
+> The form has four short steps. Step 2 is you, the main contact: you get access to BOB with that email. Step 3 is only for adding colleagues who will use BOB too. If your country isn't in the list, choose "Other countries" and submit it anyway.
 >
 > After you submit, you'll get a confirmation email saying the registration is under review. This first email has no login details in it. Once approved, a second email follows with your credentials, which can take up to 24 hours (please check your spam folder first if nothing arrives).
 >
@@ -167,7 +175,9 @@ Curaden App Hub → Templates). It asks who should get BOB and who the one BOB A
 person is, and links the BOB Academy page "Partner onboarding: BOB setup and training"
 (`4107e8aabbb481c9a15fe680c321efd2`). First sent to Curaden Czech on 6 Nov.
 
-**Sign-off (emails):**
+**Greeting and sign-off (Sean, 13 Nov):** emails start "Hey there!" and have no sign-off, because the Outlook signature adds it. The "Dear Dr. [name]" / "Hi [name]" openings in T1–T4 above are older; use "Hey there!".
+
+**Signature (added by Outlook, don't type it):**
 > Kind regards,
 > Sean Dunne
 > Global Digital Products Manager Apps
@@ -217,7 +227,7 @@ person is, and links the BOB Academy page "Partner onboarding: BOB setup and tra
 | The password email bounces on a wrong address, and nobody is notified | Ask them to check the address they registered with, then Sean resends | Derek (Phinamic) is checking it |
 | Practices wait days for approval (the local partner doesn't respond) | "We're on it." Automatic approval is being built | Derek and Khanh |
 | The acknowledgement email is mistaken for the login | The login comes in a second email after approval | |
-| The Main BOB User has no login | They need to be added as a coach | |
+| The main contact thinks they need to be added as a coach | No: step 2 (main contact) already gets access; step 3 is for colleagues | Fixed in the docs 26 Nov 2026 |
 | The FAQ says to search "BOB Score" | Send the direct store links instead | FAQ and Webflow need fixing |
 | Two different support emails in the docs | Settled 12 Nov: info@bobscore.com (BOB) and curaden.apps@curaden.ch (Curaprox app). Docs that still say support@ or info@curaprox.app need fixing | Sean (website, FAQ) |
 | The Approve button needs a training date first (an old checklist item) | This is internal. Don't mention it to practices | Proposed to move it after approval |
@@ -232,3 +242,18 @@ person is, and links the BOB Academy page "Partner onboarding: BOB setup and tra
 - Phinamic status (daily, local only): `.boom-boom-derek/YYYY-MM-DD.md`
 - Voice: `docs/app-support-voice-sean.md`, plus the `my-writing-style` and `curaden-comms` skills
 - Learned answers: `docs/app-support-faq.md`
+- Copy-and-paste replies for people (same wording): Notion Knowledge Wiki → Support `3287e8aabbb480b79f16f460a1c35a00`
+
+---
+
+## 8. Learned from sent mail
+
+The weekday maintenance session adds entries here by PR from the run log's
+`mail_learning` candidates: what Sean or Janine changed in a draft before sending it.
+One line each, generic, no names or addresses. When an entry contradicts a section
+above, the section is updated instead and the entry dropped.
+
+| Date | Request type | What the draft did | What was sent instead | Rule |
+|------|--------------|--------------------|-----------------------|------|
+| 4–12 Nov 2026 | Sections 2 and 5 above | | | Seeded from Sean's corrections that week |
+

@@ -57,8 +57,11 @@ BOB App hub. Phrases: "growth plan {market}", "content calendar", "draft post {t
 ### `market-rollout` → [`skills/market-rollout/SKILL.md`](skills/market-rollout/SKILL.md)
 
 Rollout support for the 2027 markets: UAE (Apr 2027) and Switzerland, the main market (May, waiting on Higi); then Slovenia and South Africa (Aug, on hold), USA and Japan (Sep); Germany self-service, Italy and Brazil parked. Calendar and stages live on the Notion Market rollout system page; to-dos on the Asana board BOB Market Rollouts. Used by the
-`market-rollout` agent; Notion home is the Market Rollout Academy (training modules +
-onboarding tracker).
+`market-rollout` agent; Notion home is the BOB Academy, where partners and staff learn
+BOB (training modules with their How-to guides, the onboarding tracker, the FAQs, and the
+"Partner onboarding: BOB setup and training" page, one flow for every partner and internal
+team). The reusable onboarding email is "Template — Partner onboarding email" under
+Curaden App Hub → Templates.
 
 | Trigger phrase | What it does |
 |----------------|-------------|

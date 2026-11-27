@@ -105,8 +105,10 @@ email address you used and I'll check it for you.
 
 Note: on CA20-3403 (Jan 2026) Phinamic found "no actual request was made": the form
 hadn't really been submitted. So the first question is always whether they finished
-the form, and with which address. A Main BOB User gets no app login unless they also
-added themselves as a coach (playbook §1).
+the form, and with which address. The main contact (step 2 of the form) gets access
+to BOB as coach or Practice Admin; step 3 is only for adding colleagues (playbook §1,
+corrected 26 Nov 2026). Never tell someone they have an account, or that a password
+is coming, without checking in BOB Admin first.
 
 ### Where do I register for the Curaprox app?
 - App: Curaprox app

@@ -2,8 +2,8 @@
 
 App Support answers the people who send requests through the Asana form "App
 Requests & Feedback". Since 18 Nov 2026 **you own every request, BOB included**, and
-it runs on your Claude account. Sean's Routine only covers on Fridays and when yours
-is off.
+it runs on your Claude account. Sean's Routine only runs on Fridays, so the two never
+answer the same request.
 
 What it does for you:
 
@@ -54,14 +54,18 @@ paste it into the chat; step 5 opens a secure form for it.
    > and anything I still need to do.
 
 6. **Tell Sean it's on.** The Notion **Agent registry** row "App Support (Fabian)"
-   is already there with Account `Fabian`. Set it to `Paused` any time to stop yours:
-   Sean's Routine then covers.
+   is already there with Account `Fabian`. Set it to `Paused` any time to stop yours,
+   and tell Sean: his Routine only runs on Fridays, so he covers other days by hand.
 
 ## What you do every day (all in Asana)
 
 Your task **"App Support: needs you (Fabian)"** (in My Tasks, not on the board, so
-requesters never see it) gets a **"Review: {title}"** subtask for every reply. Its
-first line says the route:
+requesters never see it) gets a subtask **only when a reply isn't standard** (since
+26 Nov 2026). Standard answers (register, download, old app → new app, no login email,
+first login and the rest of the Support replies page) are posted straight away and
+the invite run adds the person on its own: nothing for you to do. Each subtask you do
+get is named as the instruction, e.g. "Check in BOB Admin whether … has an account,
+then tick to send the reply". Its first line says the route:
 
 - **Route: Asana** (they need to answer back, or it's a change or a bug): open the
   form task and read the reply. Wrong? Edit or delete the comment. Right? **Tick the
@@ -194,7 +198,7 @@ connector on his account can only open the Curaden workspace. His runs use Sean'
 internal integration **"App Support (Fabian)"** instead: read and insert only, shared
 with the Agent control room (registry and run log), the product FAQs, the Support
 replies page (📋 Support, `3287e8aabbb480b79f16f460a1c35a00`), BOB Kit and its
-how-tos, the Product Roadmap, the Market Rollout Academy and the Education Hub
+how-tos, the Product Roadmap, the BOB Academy and the Education Hub
 markets pages. Nothing else in the workspace is visible to it.
 
 **The key.** Sean sends it to Fabian privately. It lives only in:

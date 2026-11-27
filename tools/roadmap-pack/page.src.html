@@ -1,0 +1,1391 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BOB Roadmap Dashboard</title>
+<meta name="description" content="Live status of the BOB and Curaprox app roadmap, read from the Notion Product Roadmap each time the page opens.">
+<style>
+/* Licensed brand faces, inlined by _build/build.py from bob-glow-up/_build/fonts/ */
+{{FONTS}}
+
+/* Layout: one 1240px column on the iTOP light-grey ground; a Corporate Blue header band; white cards.
+   Curaprox Apps Design System v1.0. Deliberately one light look (the brand's default theme), so every
+   colour is set explicitly and the page reads the same on a light or dark host.
+   Status ramp, light to strong: Not started (light grey) < In progress (Sky) < In review (Blue 60) < Done (Blue).
+   Tangerine warns, Cerise flags critical. No green, no lime. */
+:root{
+  --bg:#F4F6FC;          /* iTOP light grey: page ground */
+  --surface:#FFFFFF;
+  --ink:#04090B;
+  --muted:#706F6F;       /* Curaprox grey */
+  --line:#CCD8ED;        /* Blue tint 20: hairlines */
+  --blue:#003DA5;        /* Corporate Blue */
+  --blue-80:#3364B7;
+  --blue-60:#668BC9;
+  --blue-40:#99B1DB;
+  --sky:#8BB8E8;         /* informs */
+  --lgrey:#EDEDED;
+  --tangerine:#FF8200;   /* warns */
+  --cerise:#E31C79;      /* flags */
+  --cerise-tint:#F7DFE7;
+  --st-done:var(--blue); --st-review:var(--blue-60); --st-progress:var(--sky); --st-todo:var(--lgrey);
+  --f-lead:"Futura LT Pro", Futura, "Century Gothic", "Trebuchet MS", Arial, sans-serif;
+  --f-body:"Info Display Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --sh1:0 1px 2px rgba(4,9,11,.06),0 1px 1px rgba(4,9,11,.04);
+  --sh2:0 6px 16px rgba(4,9,11,.12),0 2px 4px rgba(4,9,11,.06);
+  color-scheme:light;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;background:var(--bg);}
+body{color:var(--ink);font:400 16px/1.4 var(--f-lead);letter-spacing:.02em;-webkit-font-smoothing:antialiased;font-synthesis:none;}
+a{color:var(--blue);text-decoration:none;}
+a:hover{text-decoration:underline;text-underline-offset:3px;}
+button,input,select{font:inherit;color:inherit;letter-spacing:inherit;}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px;border-radius:6px;}
+svg.ic{width:18px;height:18px;flex:none;display:block;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:24px;}
+.num{font-variant-numeric:tabular-nums lining-nums;}
+
+/* ---------- header band ---------- */
+.top{background:var(--blue);color:#fff;}
+.top .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:18px 28px;padding-block:22px 26px;}
+.brand{display:flex;flex-direction:column;gap:10px;min-width:0;flex:1 1 360px;}
+.wm{width:132px;height:19px;color:#fff;display:block;}
+.brand h1{margin:0;font:400 34px/1.05 var(--f-lead);letter-spacing:.08em;text-transform:uppercase;text-wrap:balance;}
+.brand p{margin:0;font-size:15px;letter-spacing:.05em;color:rgba(255,255,255,.88);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.live{display:inline-flex;align-items:center;gap:7px;}
+.live i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);}
+.live.on i{background:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.25);}
+.tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.upd{font-size:14px;color:rgba(255,255,255,.88);letter-spacing:.04em;}
+.pill{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 18px;border-radius:999px;border:1.5px solid rgba(255,255,255,.7);background:transparent;color:#fff;cursor:pointer;font-size:15px;letter-spacing:.04em;white-space:nowrap;transition:background 160ms var(--ease),color 160ms var(--ease),scale 80ms var(--ease);}
+.pill:hover{background:#fff;color:var(--blue);text-decoration:none;}
+.pill:active{scale:.98;}
+.pill.solid{background:#fff;color:var(--blue);border-color:#fff;}
+.pill.solid:hover{background:var(--blue-20,#CCD8ED);}
+.pill[disabled]{opacity:.5;cursor:default;}
+.pill[hidden]{display:none;}
+.spin svg{animation:spin .9s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ---------- banner (page-level connection state) ---------- */
+.banner{margin-top:20px;display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--blue);border-radius:12px;padding:16px 20px;box-shadow:var(--sh1);}
+.banner[hidden]{display:none;}
+.banner.warn{border-left-color:var(--tangerine);}
+.banner.crit{border-left-color:var(--cerise);}
+.banner .ic{width:22px;height:22px;color:var(--blue);margin-top:2px;}
+.banner.warn .ic{color:var(--tangerine);} .banner.crit .ic{color:var(--cerise);}
+.banner b{display:block;font-weight:400;font-size:18px;letter-spacing:.03em;color:var(--ink);}
+.banner p{margin:4px 0 0;font:400 15px/1.45 var(--f-body);color:var(--muted);max-width:70ch;}
+.banner .act{margin-top:12px;}
+.btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 18px;border-radius:999px;border:0;background:var(--blue);color:#fff;cursor:pointer;font-size:15px;letter-spacing:.04em;}
+.btn:hover{background:var(--blue-80);}
+.btn.ghost{background:transparent;color:var(--blue);border:1.5px solid var(--blue);}
+.btn.ghost:hover{background:var(--blue);color:#fff;}
+
+/* ---------- sections and cards ---------- */
+main{padding-block:8px 56px;}
+.sec{margin-top:36px;}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 14px;}
+.sec-h h2{margin:0;font:400 20px/1.2 var(--f-lead);letter-spacing:.14em;text-transform:uppercase;color:var(--blue);}
+.sec-h p{margin:0;font-size:14px;color:var(--muted);letter-spacing:.03em;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh1);padding:20px 22px;min-width:0;}
+.empty{color:var(--muted);font-size:15px;padding:6px 0;}
+.empty.load{display:flex;align-items:center;gap:10px;}
+.empty.load i{width:10px;height:10px;border-radius:50%;background:var(--line);animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{50%{background:var(--blue-40);}}
+.k{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+
+/* status pill + dot */
+.st{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px 0 8px;border-radius:999px;font-size:13px;letter-spacing:.03em;white-space:nowrap;background:var(--bg);color:var(--ink);border:1px solid var(--line);}
+.st i,.dot{width:10px;height:10px;border-radius:50%;flex:none;display:inline-block;}
+.s-done{background:var(--st-done);} .s-review{background:var(--st-review);} .s-progress{background:var(--st-progress);}
+.s-todo{background:var(--st-todo);box-shadow:inset 0 0 0 1px #B9B9B9;} .s-cut{background:transparent;box-shadow:inset 0 0 0 1.5px var(--muted);}
+
+/* ---------- KPI row ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:24px;}
+.hero{grid-column:span 2;background:var(--blue);color:#fff;border-radius:20px;padding:22px 24px;display:flex;flex-direction:column;gap:8px;min-width:0;}
+.hero .k{color:rgba(255,255,255,.88);}
+.hero h3{margin:2px 0 0;font:400 26px/1.15 var(--f-lead);letter-spacing:.03em;text-wrap:balance;}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:15px;color:rgba(255,255,255,.92);}
+.hero .days{font:400 46px/1 var(--f-lead);letter-spacing:.01em;}
+.hero .days small{font-size:17px;margin-left:6px;letter-spacing:.04em;}
+.hero a{color:#fff;text-decoration:underline;text-underline-offset:3px;}
+.hero .st{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff;}
+.tile{display:flex;flex-direction:column;gap:6px;}
+.tile .v{font:400 40px/1 var(--f-lead);color:var(--blue);letter-spacing:.01em;}
+.tile .v small{font-size:18px;color:var(--muted);margin-left:4px;}
+.tile .d{font-size:14px;color:var(--muted);letter-spacing:.02em;line-height:1.35;}
+.tile.alert .v{color:var(--cerise);}
+.mini{height:8px;border-radius:999px;background:var(--lgrey);overflow:hidden;display:flex;gap:2px;margin-top:4px;}
+.mini span{display:block;height:100%;}
+
+/* ---------- timeline ---------- */
+.tl{position:relative;min-height:120px;}
+.tl svg{display:block;width:100%;height:auto;overflow:visible;}
+.tl .axis text{font:400 13px var(--f-lead);fill:var(--muted);letter-spacing:.04em;}
+.tl .tick{stroke:var(--line);stroke-width:1;}
+.tl .base{stroke:var(--ink);stroke-width:1.5;}
+.tl .lead{stroke:var(--line);stroke-width:1.5;}
+.tl .today line{stroke:var(--cerise);stroke-width:2;stroke-dasharray:4 5;}
+.tl .today text{font:400 13px var(--f-lead);fill:var(--cerise);letter-spacing:.1em;text-transform:uppercase;}
+.tl .lab text{font:400 15px var(--f-lead);fill:var(--ink);letter-spacing:.02em;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round;}
+.tl .lab text.m{font-size:13px;fill:var(--muted);}
+.tl .lab{cursor:pointer;}
+.tl .lab:hover text:first-of-type,.tl .lab:focus-visible text:first-of-type{fill:var(--blue);text-decoration:underline;}
+.tl .lab:focus-visible{outline:none;}
+.tl .nod text{font:400 13px var(--f-lead);fill:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+.tl-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;font-size:14px;color:var(--muted);}
+.tl-legend span{display:inline-flex;align-items:center;gap:7px;}
+.tl-list{list-style:none;margin:0;padding:0;display:grid;gap:2px;}
+.tl-list li a{display:grid;grid-template-columns:70px 1fr;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);color:var(--ink);}
+.tl-list li a:hover{text-decoration:none;background:var(--bg);}
+.tl-list .dt{font-size:14px;color:var(--blue);letter-spacing:.04em;}
+.tl-list .nm{display:flex;flex-direction:column;gap:5px;min-width:0;}
+.tl-list .now{border-bottom:2px dashed var(--cerise);color:var(--cerise);font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:6px 4px;}
+
+/* ---------- coming up ---------- */
+.up{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;}
+.mc{display:flex;flex-direction:column;gap:10px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;box-shadow:var(--sh1);padding:18px 20px;cursor:pointer;color:var(--ink);min-width:0;transition:box-shadow 160ms var(--ease),translate 160ms var(--ease),border-color 160ms var(--ease);}
+.mc:hover{box-shadow:var(--sh2);translate:0 -2px;border-color:var(--blue-40);}
+.mc:active{scale:.99;}
+.mc .mtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.mc .dd{font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);}
+.mc .cd{font:400 30px/1 var(--f-lead);color:var(--blue);white-space:nowrap;}
+.mc .cd small{font-size:14px;margin-left:4px;color:var(--muted);letter-spacing:.04em;}
+.mc b{font-weight:400;font-size:17px;line-height:1.25;letter-spacing:.02em;text-wrap:balance;}
+.mc .rd{font-size:13px;color:var(--muted);letter-spacing:.02em;}
+.mc .bar{height:8px;}
+.mc .wt{font:400 13px/1.45 var(--f-body);color:var(--muted);}
+.mc .wt em{font-style:normal;color:var(--ink);}
+.mc.feat{grid-column:span 2;background:var(--blue);border-color:var(--blue);color:#fff;border-radius:20px;padding:22px 24px;}
+.mc.feat:hover{border-color:var(--blue);}
+.mc.feat .dd,.mc.feat .cd,.mc.feat .cd small,.mc.feat .rd,.mc.feat .wt,.mc.feat .wt em{color:#fff;}
+.mc.feat .rd,.mc.feat .wt{opacity:.9;}
+.mc.feat b{font-size:26px;}
+.mc.feat .cd{font-size:52px;}
+.mc.feat .bar{height:12px;background:rgba(255,255,255,.22);}
+.mc.feat .bar .s-done{background:#fff;} .mc.feat .bar .s-review{background:var(--blue-40);} .mc.feat .bar .s-progress{background:var(--sky);}
+.mc.feat .st{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff;}
+.mc .open{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:14px;}
+.mc .open li{display:flex;gap:8px;align-items:center;min-width:0;}
+.mc .open li span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tl-h{margin:0 0 6px;}
+
+.key{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px 0 8px;border-radius:999px;background:var(--cerise);color:#fff;font-size:12px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+.key svg{width:12px;height:14px;flex:none;}
+.pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.jnode .key{color:#fff;margin-top:2px;height:20px;font-size:10.5px;padding:0 8px 0 6px;}
+
+/* ---------- releases ---------- */
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted);}
+.legend span{display:inline-flex;align-items:center;gap:7px;}
+.rel{display:grid;grid-template-columns:minmax(180px,240px) minmax(0,1fr) 96px;gap:8px 20px;align-items:center;padding:14px 10px;border-radius:10px;border:0;background:none;width:100%;text-align:left;cursor:pointer;transition:background 160ms var(--ease);}
+.rel:hover{background:var(--bg);}
+.rel[aria-pressed="true"]{background:#EAF0F9;box-shadow:inset 0 0 0 1.5px var(--blue-40);}
+.rel + .rel{border-top:1px solid var(--line);border-radius:0;}
+.rel .nm{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.rel .nm b{font-weight:400;font-size:17px;letter-spacing:.03em;color:var(--ink);}
+.rel .nm span{font-size:13px;color:var(--muted);letter-spacing:.03em;}
+.bar{display:flex;gap:2px;height:14px;border-radius:999px;overflow:hidden;background:var(--lgrey);}
+.bar span{display:block;height:100%;min-width:4px;}
+.bar span:first-child{border-radius:999px 0 0 999px;} .bar span:last-child{border-radius:0 999px 999px 0;} .bar span:only-child{border-radius:999px;}
+.rel .cnt{font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:.02em;}
+.rel .pc{text-align:right;font-size:24px;color:var(--blue);}
+.rel .pc small{display:block;font-size:12px;color:var(--muted);letter-spacing:.06em;}
+.backlog{margin-top:10px;padding:12px 10px 2px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 18px;}
+.backlog button{border:0;background:none;padding:0;color:var(--blue);cursor:pointer;}
+.backlog button:hover{text-decoration:underline;text-underline-offset:3px;}
+
+/* ---------- attention + this week ---------- */
+.two{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:16px;align-items:start;}
+.att{list-style:none;margin:0;padding:0;}
+.att li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line);}
+.att li:last-child{border-bottom:0;}
+.sev{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;grid-row:span 2;align-self:start;}
+.sev .ic{width:14px;height:14px;}
+.sev.crit{background:var(--cerise);color:#fff;}
+.sev.warn{background:#FFF0E0;color:#8A4500;box-shadow:inset 0 0 0 1.5px var(--tangerine);}
+.att a.t{font-size:16px;color:var(--ink);letter-spacing:.02em;}
+.att a.t:hover{color:var(--blue);}
+.att .why{margin:0;font:400 14px/1.45 var(--f-body);color:var(--muted);}
+.att .tags{display:inline-flex;gap:8px;flex-wrap:wrap;margin-left:6px;font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;vertical-align:2px;}
+.more{margin-top:12px;}
+.wk h3{margin:4px 0 12px;font:400 22px/1.2 var(--f-lead);letter-spacing:.03em;color:var(--blue);}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;list-style:none;}
+.chips li{font-size:13px;padding:5px 11px;border-radius:999px;background:var(--bg);border:1px solid var(--line);letter-spacing:.03em;}
+.wk p{margin:0 0 14px;font:400 15px/1.55 var(--f-body);color:var(--ink);}
+.wk ul.risk{margin:0 0 14px;padding:0;list-style:none;display:grid;gap:10px;}
+.wk ul.risk li{font:400 14px/1.5 var(--f-body);color:var(--ink);padding-left:14px;border-left:3px solid var(--tangerine);}
+
+/* ---------- V2 scope map ---------- */
+.scope{display:grid;grid-template-columns:170px repeat(3,minmax(0,1fr));border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:var(--sh1);}
+.scope > div{padding:14px 14px;border-top:1px solid var(--line);min-width:0;}
+.scope > .hd{border-top:0;background:var(--blue);color:#fff;font-size:14px;letter-spacing:.1em;text-transform:uppercase;}
+.scope > .hd small{display:block;text-transform:none;letter-spacing:.03em;font-size:13px;color:rgba(255,255,255,.85);margin-top:3px;}
+.scope > .ar{font-size:16px;letter-spacing:.03em;color:var(--blue);background:#FAFBFE;}
+.scope > .ar small{display:block;font-size:13px;color:var(--muted);margin-top:3px;}
+.scope > div + div:not(.ar){border-left:1px solid var(--line);}
+.chip{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;margin:0 0 6px;border-radius:8px;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.3;letter-spacing:.02em;border:1px solid transparent;transition:border-color 160ms var(--ease),background 160ms var(--ease);}
+.chip:hover{text-decoration:none;border-color:var(--blue-40);background:#fff;}
+.chip .dot{margin-top:4px;}
+.chip.cut{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--muted);}
+.chip .ms{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-right:4px;}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);cursor:pointer;}
+.toggle input{width:18px;height:18px;accent-color:var(--blue);}
+
+/* ---------- shipped bars ---------- */
+.hb{display:grid;grid-template-columns:minmax(120px,220px) minmax(0,1fr) 40px;gap:8px 14px;align-items:center;}
+.hb .l{font-size:15px;letter-spacing:.02em;text-align:right;color:var(--ink);}
+.hb .tr{height:16px;display:flex;align-items:center;cursor:default;}
+.hb .tr span{display:block;height:12px;background:var(--blue);border-radius:0 4px 4px 0;min-width:4px;transition:background 160ms var(--ease);}
+.hb .tr:hover span{background:var(--blue-80);}
+.hb .n{font-size:15px;color:var(--ink);}
+
+/* ---------- table ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;}
+.search{position:relative;flex:1 1 240px;min-width:0;}
+.search .ic{position:absolute;left:14px;top:50%;translate:0 -50%;color:var(--muted);}
+.search input{width:100%;height:42px;border-radius:999px;border:1px solid var(--ink);padding:0 16px 0 42px;background:#fff;font-size:15px;}
+.filters select{height:42px;border-radius:999px;border:1px solid var(--ink);padding:0 34px 0 16px;background:#fff;font-size:15px;max-width:100%;}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--sh1);}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:14px;}
+th{text-align:left;font-weight:400;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--line);background:#FAFBFE;position:sticky;top:0;}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;letter-spacing:.02em;}
+tr:last-child td{border-bottom:0;}
+tbody tr:hover td{background:#F8FAFE;}
+td a{color:var(--ink);} td a:hover{color:var(--blue);}
+td.lvl{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+td.dt{white-space:nowrap;}
+.count{font-size:14px;color:var(--muted);margin:10px 2px 0;}
+
+/* ---------- journey (story diagram) ---------- */
+.jy{position:relative;}
+.jy > svg{display:block;width:100%;height:auto;overflow:visible;}
+.jy .path-done{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;}
+.jy .path-next{fill:none;stroke:var(--blue-40);stroke-width:3;stroke-linecap:round;stroke-dasharray:2 9;}
+.jy .mtn{fill:#EEF3FB;}
+.jy .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.4s var(--ease) .15s forwards;}
+@keyframes draw{to{stroke-dashoffset:0;}}
+.jy .today line{stroke:var(--cerise);stroke-width:2;stroke-dasharray:4 5;}
+.jy .today text{font:400 12px var(--f-lead);fill:var(--cerise);letter-spacing:.12em;text-transform:uppercase;}
+.jy .climber{fill:#FCE300;stroke:var(--ink);stroke-width:3;}
+.jnode{position:absolute;translate:-50% 0;width:var(--w);display:flex;flex-direction:column;align-items:center;gap:3px;text-align:center;border:0;background:none;padding:6px 4px;border-radius:12px;cursor:pointer;color:var(--ink);transition:background 160ms var(--ease);}
+.jnode:hover{background:#F2F6FC;}
+.jnode b{font-weight:400;font-size:15px;letter-spacing:.03em;line-height:1.2;}
+.jnode span{font-size:12.5px;color:var(--muted);letter-spacing:.02em;line-height:1.3;}
+.jnode.static{cursor:default;} .jnode.static:hover{background:none;}
+.jlist{list-style:none;margin:0;padding:0 0 0 6px;position:relative;}
+.jlist::before{content:"";position:absolute;left:37px;top:30px;bottom:30px;border-left:3px dotted var(--blue-40);}
+.jlist li{position:relative;}
+.jlist button{display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:8px 0;cursor:pointer;color:var(--ink);}
+.jlist b{display:block;font-weight:400;font-size:16px;}
+.jlist span{display:block;font-size:13px;color:var(--muted);}
+.jlist .ringwrap{background:#fff;border-radius:50%;}
+.jlist .now{display:flex;align-items:center;gap:10px;color:var(--cerise);font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:2px 0 2px 26px;}
+.jlist .now i{width:22px;height:22px;border-radius:50%;background:#FCE300;box-shadow:0 0 0 3px var(--ink);flex:none;}
+.ring{display:block;overflow:visible;}
+.ring .segs{transform-origin:50% 50%;animation:ringIn 700ms var(--ease) both;}
+@keyframes ringIn{from{opacity:0;transform:rotate(-70deg);}}
+.ring text{font:400 15px var(--f-lead);fill:var(--blue);letter-spacing:.02em;}
+
+/* ---------- the BOB loop ---------- */
+.v2grid{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:16px;align-items:start;}
+.loop > svg{display:block;width:100%;height:auto;overflow:visible;}
+.loop .rg{fill:none;stroke:var(--line);stroke-width:2;}
+.loop .rd{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.6s var(--ease) .2s forwards;}
+.loop .chev{fill:var(--blue);}
+.loop .st-n{cursor:pointer;}
+.loop .st-n circle.bg{fill:#fff;stroke:var(--blue);stroke-width:2;transition:fill 160ms var(--ease);}
+.loop .st-n:hover circle.bg,.loop .st-n:focus-visible circle.bg{fill:#EAF0F9;}
+.loop .st-n:focus-visible{outline:none;}
+.loop .st-n:focus-visible circle.bg{stroke-width:4;}
+.loop .st-n text.c{font:400 22px var(--f-lead);fill:var(--blue);}
+.loop .lbl{font:400 17px var(--f-lead);fill:var(--ink);letter-spacing:.03em;}
+.loop .sub{font:400 12.5px var(--f-lead);fill:var(--muted);letter-spacing:.03em;}
+.loop .adm circle.bg{fill:var(--blue);stroke:none;}
+.loop .adm:hover circle.bg,.loop .adm:focus-visible circle.bg{fill:var(--blue-80);}
+.loop .adm text.c,.loop .adm text.lbl,.loop .adm text.sub{fill:#fff;}
+.loop .way{fill:none;stroke:var(--blue);stroke-width:2;stroke-dasharray:3 6;}
+.loop .pop{animation:pop 500ms var(--ease) both;transform-box:fill-box;transform-origin:center;}
+@keyframes pop{from{opacity:0;transform:scale(.6);}}
+.v2side h3{margin:0 0 6px;font:400 24px/1.2 var(--f-lead);letter-spacing:.03em;color:var(--blue);text-wrap:balance;}
+.v2side p{margin:0 0 16px;font:400 15px/1.55 var(--f-body);}
+.phase{display:grid;grid-template-columns:110px minmax(0,1fr) 34px;gap:10px;align-items:center;margin:0 0 10px;font-size:14px;}
+.phase .pb{height:10px;border-radius:999px;background:var(--lgrey);overflow:hidden;}
+.phase .pb span{display:block;height:100%;background:var(--blue);border-radius:999px;}
+.gatebox{margin:18px 0 0;padding:14px 16px;border-radius:12px;background:var(--cerise-tint);display:flex;gap:12px;align-items:flex-start;}
+.gatebox svg{flex:none;width:26px;height:30px;}
+.gatebox b{display:block;font-weight:400;font-size:16px;}
+.gatebox span{font-size:13.5px;color:var(--ink);}
+.also{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+details.grid{margin-top:16px;}
+details.grid summary{cursor:pointer;color:var(--blue);font-size:15px;letter-spacing:.03em;padding:6px 0;}
+details.grid[open] summary{margin-bottom:10px;}
+
+/* ---------- drawer (detail overlay) ---------- */
+.scrim{position:fixed;inset:0;background:rgba(4,9,11,.34);z-index:40;opacity:0;transition:opacity 260ms var(--ease);}
+.scrim.on{opacity:1;}
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:41;width:min(540px,100vw);background:#fff;box-shadow:-16px 0 48px rgba(4,9,11,.2);overflow:auto;overscroll-behavior:contain;
+  padding:calc(20px + env(safe-area-inset-top,0px)) 28px calc(36px + env(safe-area-inset-bottom,0px));transform:translateX(104%);transition:transform 260ms var(--ease);}
+.drawer.on{transform:none;}
+.drawer[hidden],.scrim[hidden]{display:none;}
+.dw-top{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.ib{width:42px;height:42px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--blue);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;}
+.ib:hover{background:var(--blue);border-color:var(--blue);color:#fff;}
+.drawer h2{margin:6px 0 10px;font:400 30px/1.12 var(--f-lead);letter-spacing:.02em;color:var(--blue);text-wrap:balance;}
+.dw-meta{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:14px;color:var(--muted);margin-bottom:18px;}
+.dw-sum{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;align-items:center;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:6px;}
+.dw-sum ul{list-style:none;margin:0;padding:0;display:grid;gap:7px;font-size:14px;}
+.dw-sum li{display:flex;align-items:center;gap:8px;} .dw-sum li b{font-weight:400;margin-left:auto;}
+.dw-h{margin:22px 0 10px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+.dw-list{list-style:none;margin:0;padding:0;}
+.dw-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:14.5px;}
+.dw-list li small{grid-column:1 / -1;color:var(--muted);font-size:12.5px;letter-spacing:.03em;margin-top:-2px;}
+.dw-list a{color:var(--ink);} .dw-list a:hover{color:var(--blue);}
+.dw-note{margin:0;font:400 14px/1.5 var(--f-body);color:var(--muted);}
+.dep svg{display:block;width:100%;height:auto;overflow:visible;}
+.dep text{font:400 12.5px var(--f-lead);fill:var(--ink);letter-spacing:.02em;}
+.dep text.m{fill:var(--muted);font-size:11.5px;}
+.dep .ctr text{fill:#fff;}
+.dep .ed{fill:none;stroke:var(--blue-40);stroke-width:1.5;}
+.dep .cap{font-size:11px;fill:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+.dep a:hover text:first-of-type{fill:var(--blue);text-decoration:underline;}
+.dw-act{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;}
+.epb{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) 54px;gap:10px;align-items:center;font-size:13.5px;margin-bottom:8px;}
+.epb .bar{height:10px;}
+.epb .n{text-align:right;color:var(--muted);}
+.opener{border:0;background:none;padding:0;color:inherit;font:inherit;letter-spacing:inherit;text-align:inherit;cursor:pointer;}
+.opener:hover{color:var(--blue);text-decoration:underline;text-underline-offset:3px;}
+.hero .opener{color:#fff;text-decoration:underline;text-underline-offset:4px;}
+.hero .opener:hover{color:#fff;opacity:.9;}
+
+/* ---------- weekly pack: scope, changes, warnings ---------- */
+.warns{margin-top:20px;border:1.5px solid var(--tangerine);background:#FFF6EC;border-radius:12px;padding:14px 18px;font-size:15px;}
+.warns b{font-weight:400;color:#8A4500;letter-spacing:.08em;text-transform:uppercase;font-size:13px;display:block;margin-bottom:4px;}
+.warns li{margin-left:18px;}
+.scgrid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:16px;align-items:start;}
+.sct{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:18px;}
+.sct>div{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.sct .v{font:400 34px/1 var(--f-lead);color:var(--blue);}
+.sct .v small{font-size:16px;color:var(--muted);margin-left:6px;}
+.sct .v.up{color:var(--cerise);}
+.sct .d{font-size:14px;color:var(--muted);line-height:1.35;}
+.scc svg{display:block;width:100%;height:auto;max-height:250px;}
+.sct .s{font-size:15px;color:var(--ink);}
+.scc .ax{font:400 12px var(--f-lead);fill:var(--muted);letter-spacing:.04em;}
+.scc .vl{font:400 13px var(--f-lead);fill:var(--ink);}
+.scc .bl{stroke:var(--cerise);stroke-width:1.5;stroke-dasharray:4 4;}
+.sclg{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px;}
+.sclg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;}
+.chl h4{font:400 13px var(--f-lead);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px;}
+.chl h4:first-child{margin-top:0;}
+.chl ul{list-style:none;margin:0;padding:0;}
+.chl li{padding:6px 0;border-top:1px solid var(--line);font-size:15px;line-height:1.35;display:flex;gap:10px;justify-content:space-between;}
+.chl li span:last-child{color:var(--muted);white-space:nowrap;font-size:13px;}
+.chl li a{color:inherit;text-decoration:none;} .chl li a:hover{color:var(--blue);text-decoration:underline;}
+.chl p{color:var(--muted);font-size:15px;margin:0;}
+.chg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;}
+@media (max-width:760px){.scgrid,.chg{grid-template-columns:1fr;}.sct{grid-template-columns:1fr 1fr;}}
+/* ?card: the one picture for the Webex post (header, numbers, coming up, scope, journey) */
+.rm-card .sec:not(#secUp):not(#secScope):not(#secJy),.rm-card #warns,.rm-card #banner,.rm-card footer,.rm-card .tools .pill,.rm-card .tools button,.rm-card #tlCard,.rm-card #scLists,.rm-card .sec-h p{display:none!important;}
+.rm-card .scgrid{grid-template-columns:1fr;}
+.rm-card body,.rm-card{background:#fff;}
+
+/* ---------- PDF report: print layout (A4 landscape), also used by the PDF build (?report) ---------- */
+@page{size:A4 landscape;margin:10mm 10mm 14mm;
+  @bottom-left{content:"BOB roadmap report · Curaden internal";font:400 9pt "Futura LT Pro",Futura,Arial,sans-serif;color:#706F6F;}
+  @bottom-right{content:"Page " counter(page) " of " counter(pages);font:400 9pt "Futura LT Pro",Futura,Arial,sans-serif;color:#706F6F;}}
+.rpt-only{display:none;}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  *,*::before,*::after{animation:none!important;transition:none!important;}
+  html,body{background:#fff;}
+  .wrap{max-width:none;padding-inline:0;}
+  .top .wrap{padding:16px 22px;border-radius:12px;}
+  .top{background:none;} .top .wrap{background:var(--blue);}
+  #refresh,#pdf,#openLive,#openDb,.filters,.toggle,details.grid,#banner,.more,.scrim,.drawer,#tip,footer,.count{display:none!important;}
+  .card,.mc,.hero,.scope,.tbl-wrap{box-shadow:none;}
+  .mc:hover{translate:none;}
+  .sec{margin-top:22px;}
+  .kpis,.up,.card,.mc,.rel,.att li,.hb,.wk,.loop,.v2side,tr{break-inside:avoid;}
+  .sec-h{break-after:avoid;}
+  .rpt-break{break-before:page;}
+  .sct,.scc,.chl li,.warns{break-inside:avoid;}
+  .scgrid{grid-template-columns:minmax(0,7fr) minmax(0,5fr)!important;} .chg{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+  .rpt-only{display:block;}
+  .tbl-wrap{overflow:visible;border:0;}
+  table{min-width:0;font-size:12px;} th{position:static;} thead{display:table-header-group;}
+  a{color:inherit;}
+}
+
+footer{border-top:1px solid var(--line);margin-top:48px;padding-block:20px 32px;font-size:13px;color:var(--muted);letter-spacing:.03em;}
+footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;}
+
+/* tooltip */
+#tip{position:fixed;z-index:50;max-width:320px;pointer-events:none;background:var(--ink);color:#fff;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.4;letter-spacing:.02em;box-shadow:var(--sh2);opacity:0;transition:opacity 120ms var(--ease);}
+#tip.on{opacity:1;}
+#tip b{display:block;font-weight:400;font-size:14px;margin-bottom:3px;}
+
+/* section entrance: from a visible resting state */
+.fade{animation:fadeUp 420ms var(--ease) both;}
+@keyframes fadeUp{from{opacity:.0001;translate:0 8px;}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;}}
+
+/* ---------- responsive ---------- */
+@media (max-width:1080px){
+  .up{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .hero{grid-column:span 4;}
+  .two{grid-template-columns:minmax(0,1fr);}
+}
+@media (max-width:760px){
+  .wrap{padding-inline:16px;}
+  .brand h1{font-size:26px;}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .hero{grid-column:span 2;}
+  .up{grid-template-columns:minmax(0,1fr);}
+  .mc.feat{grid-column:auto;}
+  .mc.feat .cd{font-size:42px;}
+  .tile .v{font-size:32px;}
+  .rel{grid-template-columns:minmax(0,1fr) 64px;padding:14px 4px;}
+  .rel .bars{grid-column:1 / -1;grid-row:2;}
+  .scope{grid-template-columns:minmax(0,1fr);}
+  .scope > div + div:not(.ar){border-left:0;}
+  .scope > .hd{display:none;}
+  .scope > .cell:empty{display:none;}
+  .scope > .cell::before{content:attr(data-col);display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .hb{grid-template-columns:minmax(0,1fr) 34px;}
+  .hb .l{grid-column:1 / -1;text-align:left;margin-bottom:-4px;}
+  .card{padding:16px;}
+  .drawer{padding-inline:18px;}
+  .drawer h2{font-size:24px;}
+  .dw-sum{grid-template-columns:96px minmax(0,1fr);}
+  .epb{grid-template-columns:minmax(0,1fr) 54px;}
+  .epb .lb{grid-column:1 / -1;}
+}
+@media (max-width:1080px){.v2grid{grid-template-columns:minmax(0,1fr);}}
+/* PDF report: a fixed desktop grid at 78 % (the PDF is rendered 1342 px wide, which prints as A4 landscape) */
+@media print{
+  html{zoom:.78;}
+  .kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+  .up{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+  .mc.feat{grid-column:auto!important;}
+  .two{grid-template-columns:minmax(0,7fr) minmax(0,5fr)!important;}
+  .v2grid{grid-template-columns:minmax(0,560px) minmax(0,1fr)!important;}
+  .rel{grid-template-columns:minmax(180px,240px) minmax(0,1fr) 96px!important;}
+  .rel .bars{grid-column:auto!important;grid-row:auto!important;}
+  .hb{grid-template-columns:minmax(120px,220px) minmax(0,1fr) 40px!important;}
+  .hb .l{grid-column:auto!important;text-align:right!important;}
+  .scope{grid-template-columns:170px repeat(3,minmax(0,1fr))!important;}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <!-- CURAPROX wordmark: path copied verbatim from Marketing/assets/logo/assets/curaprox-wordmark-blue.svg -->
+  <symbol id="cpx" viewBox="0 0 1039 150"><path transform="translate(-280.3 -215.6)" fill="currentColor" d="{{WM_PATH}}"/></symbol>
+  <!-- icons: Lucide geometry, 24 grid, 1.5 stroke -->
+  <symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></g></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></g></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></g></symbol>
+  <symbol id="i-octagon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.86 2h8.28L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86z"/><path d="M12 8v4"/><path d="M12 16h.01"/></g></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></g></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></g></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-tent" viewBox="0 0 24 24"><path d="M3.5 21 14 3M20.5 21 10 3M15.5 21 12 15l-3.5 6M2 21h20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-7-7 7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="wm" viewBox="0 0 1039 150" role="img" aria-label="CURAPROX"><use href="#cpx"/></svg>
+      <h1>BOB roadmap</h1>
+      <p><span class="live" id="live"><i></i><span id="liveT">Waiting for Notion</span></span><span aria-hidden="true">·</span><span>Product Roadmap, BOB and the Curaprox app</span></p>
+    </div>
+    <div class="tools">
+      <span class="upd num" id="upd" aria-live="polite"></span>
+      <a class="pill solid" id="openLive" href="https://claude.ai/artifact/Fr19TszpTM7Td5bNALcokp" target="_blank" rel="noopener" hidden>Open the live dashboard<svg class="ic" aria-hidden="true"><use href="#i-ext"/></svg></a>
+      <a class="pill" id="pdf" href="?report&amp;print" target="_blank" rel="noopener" hidden>Download PDF</a>
+      <button type="button" class="pill solid" id="refresh" disabled><svg class="ic" aria-hidden="true"><use href="#i-refresh"/></svg>Refresh</button>
+      <a class="pill" id="openDb" href="https://app.notion.com/p/751b6071283e43e8b1a91054319e0db6" target="_blank" rel="noopener">Open in Notion<svg class="ic" aria-hidden="true"><use href="#i-ext"/></svg></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner" class="banner" role="status">
+    <svg class="ic" aria-hidden="true"><use href="#i-info"/></svg>
+    <div><b>Connecting to Notion</b><p>This dashboard reads the Notion Product Roadmap live, with your own Notion access. It fills in as soon as Notion answers.</p></div>
+  </div>
+
+  <div class="warns" id="warns" role="alert" hidden></div>
+
+  <section class="kpis" id="kpis" aria-label="Summary">
+    <div class="card tile"><span class="k">Features shipped</span><span class="empty load"><i></i>Waiting</span></div>
+    <div class="card tile"><span class="k">Launch window</span><span class="empty load"><i></i>Waiting</span></div>
+    <div class="card tile"><span class="k">Phase 1 scope</span><span class="empty load"><i></i>Waiting</span></div>
+    <div class="card tile"><span class="k">Needs attention</span><span class="empty load"><i></i>Waiting</span></div>
+  </section>
+
+  <section class="sec" id="secUp" aria-labelledby="h-tl">
+    <div class="sec-h"><h2 id="h-tl">Coming up</h2><p>The next milestones, soonest first, and how ready each one is. Click one for details.</p></div>
+    <div class="up" id="up"><div class="card"><p class="empty load"><i></i>The next milestones appear here as cards, with a countdown and how much of their release is done.</p></div></div>
+    <div class="card" id="tlCard" style="margin-top:16px"><div class="tl-h"><span class="k" id="tlTitle">Every milestone</span></div><div class="tl" id="tl"><p class="empty load"><i></i>The milestone timeline appears here.</p></div>
+      <div class="tl-legend" id="tlLegend"></div></div>
+  </section>
+
+  <section class="sec rpt-break" id="secScope" aria-labelledby="h-sc" hidden>
+    <div class="sec-h"><h2 id="h-sc">Scope since 3 Nov</h2><p>Against the roadmap after the voice-first reshape on 3 Nov 2026</p></div>
+    <div class="scgrid">
+      <div class="card"><div class="sct" id="scTiles"></div><div class="scc" id="scChart"></div></div>
+      <div class="card chl" id="scLists"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="secChg" aria-labelledby="h-chg" hidden>
+    <div class="sec-h"><h2 id="h-chg">Changed since last week</h2><p id="chgSub">In the Notion Product Roadmap</p></div>
+    <div class="card chl"><div class="chg" id="chg"></div></div>
+  </section>
+
+  <section class="sec" id="secJy" aria-labelledby="h-jy">
+    <div class="sec-h"><h2 id="h-jy">The journey</h2><p>From legacy BOB to the Curaprox app, live from Notion. Click a step for details.</p></div>
+    <div class="card"><div class="jy" id="jy"><p class="empty load"><i></i>The route from legacy BOB through launch, Phase 1, the gate and Phase 2 appears here, with progress on every step.</p></div></div>
+  </section>
+
+  <section class="sec rpt-break" aria-labelledby="h-rel">
+    <div class="sec-h"><h2 id="h-rel">Progress by release</h2><div class="legend" id="stLegend"></div></div>
+    <div class="card" id="rels"><p class="empty load"><i></i>One row per release, with what is done, in review, in progress and not started.</p></div>
+  </section>
+
+  <section class="sec two">
+    <div aria-labelledby="h-att">
+      <div class="sec-h"><h2 id="h-att">Needs attention</h2><p id="attSub">Worked out from dates, status and dependencies</p></div>
+      <div class="card" id="att"><p class="empty load"><i></i>Overdue milestones, items past their date and links that block a milestone appear here.</p></div>
+    </div>
+    <div aria-labelledby="h-wk">
+      <div class="sec-h"><h2 id="h-wk">This week</h2><p>From the latest Roadmap Watch report</p></div>
+      <div class="card wk" id="wk"><p class="empty load"><i></i>The summary of the latest weekly Roadmap Watch report appears here.</p></div>
+    </div>
+  </section>
+
+  <section class="sec rpt-break" aria-labelledby="h-scope">
+    <div class="sec-h"><h2 id="h-scope">What Phase 1 and 2 bring</h2>
+      <label class="toggle"><input type="checkbox" id="showCut">Show cut and parked in the grid</label></div>
+    <div class="v2grid">
+      <div class="card loop" id="loop"><p class="empty load"><i></i>The BOB loop appears here, with the planned work at each step.</p></div>
+      <div class="card v2side" id="v2side"><p class="empty load"><i></i>Phases and the gate appear here.</p></div>
+    </div>
+    <details class="grid"><summary>See it as a grid, by area and release</summary>
+      <div id="scope"><div class="card"><p class="empty load"><i></i>Planned features by area and phase appear here.</p></div></div>
+    </details>
+  </section>
+
+  <section class="sec" aria-labelledby="h-ship">
+    <div class="sec-h"><h2 id="h-ship">Shipped so far</h2><p id="shipSub">Done features by area</p></div>
+    <div class="card" id="ship"><p class="empty load"><i></i>Done features, grouped by epic.</p></div>
+  </section>
+
+  <section class="sec rpt-break" aria-labelledby="h-all">
+    <div class="sec-h"><h2 id="h-all">All items</h2><p>Click a name to open it in Notion</p></div>
+    <p class="rpt-only" style="margin:-6px 0 12px;font-size:13px;color:var(--muted)">In this report: every open feature and milestone (not done, not cut). The full list, with tasks, is in the Notion Product Roadmap.</p>
+    <div class="filters">
+      <label class="search"><span class="sr">Search</span><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg><input type="search" id="q" placeholder="Search names, epics, Jira keys"></label>
+      <label><span class="sr">Product</span><select id="fProd"><option value="">All products</option><option>BOB</option><option>Curaprox App</option><option>Shared</option></select></label>
+      <label><span class="sr">Release</span><select id="fRel"><option value="">All releases</option></select></label>
+      <label><span class="sr">Status</span><select id="fSt"><option value="">Any status</option><option value="open">Open (not done)</option><option>Done</option><option>In Review</option><option>In Progress</option><option>Not Started</option><option>Needs refinement</option><option>Cut</option></select></label>
+      <label><span class="sr">Level</span><select id="fLvl"><option value="fm">Features and milestones</option><option value="">All levels</option><option>Milestone</option><option>Feature</option><option>Task</option></select></label>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Level</th><th>Product</th><th>Release</th><th>Status</th><th>Date</th><th>Epic</th><th>Jira</th></tr></thead><tbody id="tb"><tr><td colspan="8" class="empty">Items from the Product Roadmap appear here.</td></tr></tbody></table></div>
+    <p class="count" id="count"></p>
+  </section>
+</main>
+
+<footer><div class="wrap"><span>Source: Notion Product Roadmap (Curaden App Hub) and Roadmap Reports, read live with your Notion access. Read-only: this page never changes Notion.</span><span>Curaden internal</span></div></footer>
+<div id="tip" role="tooltip"></div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dwT" hidden>
+  <div class="dw-top"><p class="k" id="dwK"></p><button type="button" class="ib" id="dwX" aria-label="Close details"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <h2 id="dwT"></h2>
+  <div id="dwB"></div>
+</aside>
+
+{{SNAPSHOT}}
+<script>
+(function(){
+'use strict';
+var D=document;
+function $(s){return D.querySelector(s);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function icon(id,cls){return '<svg class="ic'+(cls?' '+cls:'')+'" aria-hidden="true"><use href="#i-'+id+'"/></svg>';}
+
+/* ================= config ================= */
+var SERVER='Notion';
+var DS='collection://2ce24f93-f696-4d3b-98be-462df08c2c29';
+var SQL='SELECT "Name","Level","Status","Release","Product","Epic","Track","Priority",'
+  +'"date:Date:start" AS ds,"date:Date:end" AS de,"date:Last reviewed:start" AS lr,"Depends on" AS dep,"Jira Key" AS jira,url '
+  +'FROM "'+DS+'" LIMIT 1000';
+/* Rows come from the saved view "Agents: all rows (don't filter)" in pages of 100. View mode has no Notion
+   plan quota; SQL mode does (it ran out on 13 Oct 2026), so the page never uses SQL. */
+var VIEW='https://app.notion.com/p/751b6071283e43e8b1a91054319e0db6?v=3f47e8aabbb4818ca54e000c04b1a71b';
+function pageIn(cur){var d={mode:'view',view_url:VIEW,page_size:100};if(cur)d.start_cursor=cur;return {data:d};}
+var SEARCH_IN={query:'Roadmap Watch',page_size:10};
+var CACHE={staleTime:300000,gcTime:86400000};
+var REPORTS_URL='https://app.notion.com/p/3ec7e8aabbb481c09e57c7926468235c';
+var P1='Phase 1 Nov-26–Oct-27',P2='Phase 2 Oct-27–Aug-28',LATER='Later 2028';
+/* The roadmap was reshaped around the WBS on 3 Nov 2026: Phase 1 / Phase 2 / Later 2028 replace V2 P1 and Rollout.
+   The old names stay listed so any row still on them is counted (empty releases are skipped). */
+var RELEASES=['Soft Launch Oct-26','Web Nov-26','Hard Launch Dec-26',P1,P2,LATER,'V2 P1 Apr-27','Rollout Apr–Aug-27'];
+var PHASES=[[[P1,'V2 P1 Apr-27'],'Phase 1','Nov 2026 – Oct 2027'],[[P2,'Rollout Apr–Aug-27'],'Phase 2','Oct 2027 – Aug 2028'],[[LATER,'Future'],'Later','2028, or not yet planned']];
+var LAUNCH=RELEASES.slice(0,3);
+var BACKLOG=['Unscheduled','Future','Parked'];
+var SHIPPED='Shipped (pre-Oct-26)';
+var SG={'Done':'done','In Review':'review','In Progress':'progress','Not Started':'todo','Needs refinement':'todo','Cut':'cut'};
+var SGL={done:'Done',review:'In review',progress:'In progress',todo:'Not started',cut:'Cut'};
+var ORDER=['done','review','progress','todo'];
+
+/* ================= state ================= */
+var S={rows:null,byUrl:{},stamp:0,report:null,reportErr:null,relFilter:'',busy:false};
+var today=new Date();today.setHours(0,0,0,0);
+var DAY=864e5;
+
+/* ================= helpers ================= */
+function pd(s){if(!s)return null;s=String(s);var d=new Date(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10));return isNaN(d)?null:d;}
+function days(a,b){return Math.round((a-b)/DAY);}
+function fmt(d,noYear){if(!d)return '';return d.toLocaleDateString('en-GB',noYear?{day:'numeric',month:'short'}:{day:'numeric',month:'short',year:'numeric'});}
+function fmtRange(a,b){if(!a)return 'No date';if(!b||+a===+b)return fmt(a);if(a.getFullYear()===b.getFullYear())return a.toLocaleDateString('en-GB',{month:'short'})+'–'+b.toLocaleDateString('en-GB',{month:'short',year:'numeric'});return fmt(a)+' – '+fmt(b);}
+function short(n){return String(n||'').replace(/^Milestone:\s*/,'').replace(/^Curaprox app web:\s*/,'').replace(/^BOB Admin:\s*/,'');}
+function trunc(s,n){s=String(s);return s.length>n?s.slice(0,n-1).trim()+'…':s;}
+function isOpen(r){return r.sg!=='done'&&r.sg!=='cut';}
+function isKey(r){return r.level==='Milestone'&&r.priority==='P1';}
+var PENNANT='<svg viewBox="0 0 12 14" aria-hidden="true"><line x1="1.5" y1="13" x2="1.5" y2="1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2.5 1.5h8.5l-2.4 2.6 2.4 2.6H2.5z" fill="currentColor"/></svg>';
+function keyPill(){return '<span class="key">'+PENNANT+'Key milestone</span>';}
+function due(r){return r.end||r.start;}
+function stDot(r){return '<i class="dot s-'+r.sg+'" aria-hidden="true"></i>';}
+function stPill(r){return '<span class="st"><i class="s-'+r.sg+'"></i>'+esc(r.status||'No status')+'</span>';}
+function plural(n,w,ws){return n+' '+(n===1?w:(ws||w+'s'));}
+function parseJSON(v){if(v==null)return null;if(typeof v==='object')return v;try{return JSON.parse(v);}catch(e){return null;}}
+function payloadOf(res){if(!res)return null;var p=res.payload;if(p==null&&res.content&&res.content[0]&&res.content[0].text)p=res.content[0].text;return typeof p==='string'?(parseJSON(p)||p):p;}
+
+function norm(r){
+  var st=r.Status||'';
+  var row={name:r.Name||'(untitled)',level:r.Level||'',status:st,sg:SG[st]||'todo',release:r.Release||'',product:r.Product||'BOB',
+    epic:r.Epic||'',track:r.Track||'',priority:r.Priority||'',start:pd(r.ds||r['date:Date:start']),end:pd(r.de||r['date:Date:end']),reviewed:pd(r.lr||r['date:Last reviewed:start']),
+    deps:parseJSON(r.dep||r['Depends on'])||[],jira:r.jira||r['Jira Key']||'',url:r.url||''};
+  row.short=short(row.name);
+  return row;
+}
+
+/* ================= tooltip ================= */
+var tip=$('#tip');
+function showTip(html,x,y){tip.innerHTML=html;tip.classList.add('on');var w=tip.offsetWidth,h=tip.offsetHeight;var L=Math.min(innerWidth-w-8,Math.max(8,x+14)),T=y+16+h>innerHeight?y-h-12:y+16;tip.style.left=L+'px';tip.style.top=Math.max(8,T)+'px';}
+function hideTip(){tip.classList.remove('on');}
+D.addEventListener('pointerover',function(e){var t=e.target.closest&&e.target.closest('[data-tip]');if(t)showTip(t.getAttribute('data-tip'),e.clientX,e.clientY);});
+D.addEventListener('pointermove',function(e){if(!tip.classList.contains('on'))return;var t=e.target.closest&&e.target.closest('[data-tip]');if(!t){hideTip();return;}showTip(t.getAttribute('data-tip'),e.clientX,e.clientY);});
+D.addEventListener('focusin',function(e){var t=e.target.closest&&e.target.closest('[data-tip]');if(t){var r=t.getBoundingClientRect();showTip(t.getAttribute('data-tip'),r.left,r.bottom);}else hideTip();});
+D.addEventListener('scroll',hideTip,true);
+function tipFor(r){return esc('<b>'+esc(r.name)+'</b>'+esc([r.level,r.product,r.release||'No release'].filter(Boolean).join(' · '))+'<br>'+esc(r.status||'No status')+(due(r)?' · '+esc(fmtRange(r.start,r.end)):''));}
+
+/* ================= banner ================= */
+function banner(kind,title,text,action){
+  var b=$('#banner');
+  if(!kind){b.hidden=true;return;}
+  b.hidden=false;b.className='banner'+(kind==='info'?'':' '+kind);
+  b.innerHTML=icon(kind==='crit'?'octagon':kind==='warn'?'alert':'info')+'<div><b>'+esc(title)+'</b><p>'+esc(text)+'</p>'+(action||'')+'</div>';
+}
+
+/* ================= KPIs ================= */
+function renderKpis(){
+  var R=S.rows,el=$('#kpis');
+  var ms=R.filter(function(r){return r.level==='Milestone'&&isOpen(r)&&r.start&&(r.end||r.start)>=today;}).sort(function(a,b){return a.start-b.start;});
+  var h='';
+  var shipF=R.filter(function(r){return r.level==='Feature'&&r.sg==='done'&&r.release===SHIPPED;}).length;
+  var laterF=R.filter(function(r){return r.level==='Feature'&&r.sg==='done'&&r.release!==SHIPPED;}).length;
+  var shipT=R.filter(function(r){return r.level==='Task'&&r.sg==='done';}).length;
+  h+='<div class="card tile fade"><span class="k">Features shipped</span><span class="v num">'+shipF+'</span><span class="d">Shipped before Oct 2026'+(laterF?', plus '+laterF+' done since':'')+'. '+plural(shipT,'task')+' done in all.</span></div>';
+  var lw=R.filter(function(r){return LAUNCH.indexOf(r.release)>=0&&r.sg!=='cut';}),lwd=lw.filter(function(r){return r.sg==='done';}).length;
+  h+='<div class="card tile fade"><span class="k">Launch window</span><span class="v num">'+lwd+'<small>/ '+lw.length+'</small></span><span class="d">Items done across the Oct, Nov and Dec 2026 releases.</span>'+miniBar(lw)+'</div>';
+  var v2=R.filter(function(r){return r.release===P1&&r.level==='Feature'&&r.sg!=='cut';}),v2s=v2.filter(function(r){return r.sg!=='todo';}).length,p1m=msBy(/Phase 1 complete/i);
+  h+='<div class="card tile fade"><span class="k">Phase 1 scope</span><span class="v num">'+v2.length+'<small>features</small></span><span class="d">'+(v2s?v2s+' started':'None started yet')+'. Phase 1 complete '+(p1m&&p1m.start?esc(fmt(p1m.start)):'in Oct 2027')+'.</span></div>';
+  var A=S.att||[],crit=A.filter(function(a){return a.sev==='crit';}).length;
+  h+='<div class="card tile fade'+(crit?' alert':'')+'"><span class="k">Needs attention</span><span class="v num">'+A.length+'</span><span class="d">'+(crit?plural(crit,'critical item')+', '+(A.length-crit)+' to check':(A.length?'Nothing critical; '+plural(A.length,'item')+' to check':'Nothing flagged right now'))+'. <a href="#h-att">See the list</a></span></div>';
+  el.innerHTML=h;
+}
+function counts(list){var c={done:0,review:0,progress:0,todo:0,cut:0};list.forEach(function(r){c[r.sg]++;});return c;}
+function miniBar(list){var c=counts(list),t=c.done+c.review+c.progress+c.todo;if(!t)return '';
+  return '<div class="mini" role="img" aria-label="'+c.done+' done, '+c.review+' in review, '+c.progress+' in progress, '+c.todo+' not started">'+ORDER.filter(function(k){return c[k];}).map(function(k){return '<span class="s-'+k+'" style="width:'+(c[k]/t*100)+'%"></span>';}).join('')+'</div>';}
+
+/* ================= coming up ================= */
+function renderUpcoming(){
+  var ms=S.rows.filter(function(r){return r.level==='Milestone'&&isOpen(r)&&r.start&&(r.end||r.start)>=today;}).sort(function(a,b){return a.start-b.start;});
+  if(!ms.length){$('#up').innerHTML='<div class="card"><p class="empty">No upcoming dated milestones in the Product Roadmap.</p></div>';return;}
+  var show=ms.slice(0,3),ki=-1;show.forEach(function(m,i){if(ki<0&&isKey(m))ki=i;});
+  if(ki>0)show.unshift(show.splice(ki,1)[0]);
+  $('#up').innerHTML=show.map(function(m,i){
+    var dl=days(m.start,today),feat=i===0;
+    var work=S.rows.filter(function(r){return r.release===m.release&&r.level!=='Milestone'&&r.sg!=='cut';}),c=counts(work),t=work.length;
+    var waits=m.deps.map(function(u){return S.byUrl[u];}).filter(function(x){return x&&isOpen(x);});
+    var openL=work.filter(isOpen).sort(function(a,b){var rk={progress:0,review:1,todo:2};return rk[a.sg]-rk[b.sg]||((due(a)||9e15)-(due(b)||9e15));});
+    var h='<button type="button" class="mc fade'+(feat?' feat':'')+'" data-open="item:'+esc(m.url)+'" style="animation-delay:'+(i*70)+'ms">'
+      +'<span class="mtop"><span class="dd">'+esc(m.end?fmtRange(m.start,m.end):fmt(m.start))+'</span><span class="cd num">'+(dl<=0?'Today':dl+'<small>'+(dl===1?'day':'days')+'</small>')+'</span></span>'
+      +'<b>'+esc(m.short)+'</b><span class="pills">'+(isKey(m)?keyPill():'')+stPill(m)+'</span>';
+    if(t)h+='<span class="bar" role="img" aria-label="'+c.done+' of '+t+' items done">'+ORDER.filter(function(k){return c[k];}).map(function(k){return '<span class="s-'+k+'" style="width:'+(c[k]/t*100)+'%"></span>';}).join('')+'</span>'
+      +'<span class="rd">'+c.done+' of '+plural(t,'item')+' done in '+esc(m.release)+'</span>';
+    else h+='<span class="rd">No items linked to '+esc(m.release||'its release')+' yet</span>';
+    if(waits.length)h+='<span class="wt">Waits on <em>'+waits.map(function(w){return esc(w.short);}).join(', ')+'</em></span>';
+    if(feat&&openL.length)h+='<span class="rd" style="margin-top:4px">Still open</span><ul class="open">'+openL.slice(0,4).map(function(r){return '<li><i class="dot s-'+r.sg+'"></i><span>'+esc(r.short)+'</span></li>';}).join('')+(openL.length>4?'<li><span>and '+(openL.length-4)+' more</span></li>':'')+'</ul>';
+    return h+'</button>';}).join('');
+}
+
+/* ================= timeline ================= */
+var measureCtx=D.createElement('canvas').getContext('2d');
+function tw(s,px){measureCtx.font='400 '+px+'px "Futura LT Pro", Futura, Arial, sans-serif';return measureCtx.measureText(s).width*1.04+String(s).length*px*.02;}
+function renderTimeline(){
+  var box=$('#tl'),W=box.clientWidth||900;
+  var ms=S.rows.filter(function(r){return r.level==='Milestone'&&r.sg!=='cut';});
+  var dated=ms.filter(function(r){return r.start;}).sort(function(a,b){return a.start-b.start;});
+  var undated=ms.filter(function(r){return !r.start;});
+  var tt=$('#tlTitle');if(tt){var lastD=dated.length?(dated[dated.length-1].end||dated[dated.length-1].start):null;tt.textContent='Every milestone'+(lastD?' to '+lastD.toLocaleDateString('en-GB',{month:'short',year:'numeric'}):'');}
+  $('#tlLegend').innerHTML=ORDER.map(function(k){return '<span><i class="dot s-'+k+'"></i>'+SGL[k]+'</span>';}).join('')+'<span><svg width="12" height="12" aria-hidden="true"><rect x="2" y="2" width="8" height="8" fill="#fff" stroke="#FF8200" stroke-width="2.5" transform="rotate(45 6 6)"/></svg>Past its date, not done</span><span><svg width="18" height="12" aria-hidden="true"><line x1="9" y1="0" x2="9" y2="12" stroke="#E31C79" stroke-width="2" stroke-dasharray="3 3"/></svg>Today</span>';
+  if(!dated.length&&!undated.length){box.innerHTML='<p class="empty">No milestones in the Product Roadmap yet.</p>';return;}
+  if(W<640){ /* phone: a dated list with a Today divider */
+    var h='<ul class="tl-list">',nowDone=false;
+    dated.forEach(function(r){if(!nowDone&&r.start>=today){h+='<li class="now">Today, '+esc(fmt(today))+'</li>';nowDone=true;}
+      h+='<li><a href="#" data-open="item:'+esc(r.url)+'"><span class="dt num">'+esc(fmt(r.start,true))+'</span><span class="nm"><span>'+esc(r.short)+'</span><span class="pills">'+(isKey(r)?keyPill():'')+stPill(r)+(r.end?' <span class="k">to '+esc(fmt(r.end,true))+'</span>':'')+'</span></span></a></li>';});
+    if(!nowDone)h+='<li class="now">Today, '+esc(fmt(today))+'</li>';
+    undated.forEach(function(r){h+='<li><a href="#" data-open="item:'+esc(r.url)+'"><span class="dt">No date</span><span class="nm"><span>'+esc(r.short)+'</span><span>'+stPill(r)+'</span></span></a></li>';});
+    box.innerHTML=h+'</ul>';return;
+  }
+  var t0=new Date(Math.min(today,dated.length?dated[0].start:today)-5*DAY);t0=new Date(t0.getFullYear(),t0.getMonth(),1);
+  var tEnd=Math.max(+today+60*DAY,dated.reduce(function(m,r){return Math.max(m,+(r.end||r.start));},0));
+  var t1=new Date(tEnd+21*DAY);t1=new Date(t1.getFullYear(),t1.getMonth()+1,1);
+  var ndW=undated.length?200:0,padL=6,padR=10,plotW=W-ndW-padL-padR-(ndW?24:0);
+  function x(d){return padL+(d-t0)/(t1-t0)*plotW;}
+  /* labels: greedy lanes so no two overlap */
+  var laneEnd=[],items=dated.map(function(r){
+    var xs=x(r.start),xe=r.end?x(r.end):xs,nm=trunc(r.short,38),meta=fmtRange(r.start,r.end)+' · '+(SGL[r.sg]||r.status);
+    var w=Math.max(tw(nm,15),tw(meta,13))+8,lx=Math.min(xs-8,padL+plotW-w);lx=Math.max(padL,lx);
+    var lane=0;while(laneEnd[lane]!=null&&lx<laneEnd[lane]+14)lane++;laneEnd[lane]=lx+w;
+    return {r:r,xs:xs,xe:xe,nm:nm,meta:meta,lx:lx,lane:lane};});
+  var lanes=Math.max(1,laneEnd.length),LH=46,top=30,trackY=top+lanes*LH+22,axisY=trackY+26,H=axisY+30;
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="Milestone timeline">';
+  /* month ticks */
+  s+='<g class="axis">';
+  var lastL=-1e9;
+  for(var m=new Date(t0);m<=t1;m=new Date(m.getFullYear(),m.getMonth()+1,1)){var mx=x(m);
+    s+='<line class="tick" x1="'+mx+'" y1="'+(top-6)+'" x2="'+mx+'" y2="'+axisY+'"/>';
+    var ml=m.toLocaleDateString('en-GB',{month:'short'})+(m.getMonth()===0||+m===+t0?' '+m.getFullYear():'');
+    if(m<t1&&mx+6>=lastL+8){s+='<text x="'+(mx+6)+'" y="'+(axisY+20)+'">'+esc(ml)+'</text>';lastL=mx+6+tw(ml,13);}}
+  s+='<line class="base" x1="'+padL+'" y1="'+axisY+'" x2="'+(padL+plotW)+'" y2="'+axisY+'"/></g>';
+  /* today */
+  var tx=x(today);s+='<g class="today"><line x1="'+tx+'" y1="'+(top-14)+'" x2="'+tx+'" y2="'+axisY+'"/><text x="'+(tx+6)+'" y="'+(top-4)+'">Today</text></g>';
+  /* items: leaders first so every label sits above them */
+  items.forEach(function(it){var ly=top+(lanes-1-it.lane)*LH;s+='<line class="lead" x1="'+it.xs+'" y1="'+(ly+30)+'" x2="'+it.xs+'" y2="'+(trackY-9)+'"/>';});
+  items.forEach(function(it){var r=it.r,ly=top+(lanes-1-it.lane)*LH,od=isOpen(r)&&due(r)<today,col='var(--st-'+r.sg+')';
+    if(r.end)s+='<rect x="'+it.xs+'" y="'+(trackY-5)+'" width="'+Math.max(6,it.xe-it.xs)+'" height="10" rx="5" fill="'+col+'"'+(r.sg==='todo'?' stroke="#B9B9B9"':'')+'/>';
+    else s+='<rect x="'+(it.xs-7)+'" y="'+(trackY-7)+'" width="14" height="14" fill="'+col+'" stroke="'+(od?'#FF8200':(r.sg==='todo'?'#8E8E8E':'#fff'))+'" stroke-width="'+(od?3:1.5)+'" transform="rotate(45 '+it.xs+' '+trackY+')"/>';
+    if(isKey(r))s+='<g transform="translate('+(it.xs-1)+' '+(trackY-30)+')"><line x1="0" y1="20" x2="0" y2="0" stroke="#04090B" stroke-width="2" stroke-linecap="round"/><path d="M1 1h13l-3.5 4 3.5 4H1z" fill="#E31C79"/></g>';
+    s+='<a class="lab" href="#" data-open="item:'+esc(r.url)+'" data-tip="'+tipFor(r)+'" aria-label="'+esc(r.short+', '+it.meta)+'"><rect x="'+(it.lx-4)+'" y="'+(ly-4)+'" width="'+(tw(it.nm,15)+16)+'" height="40" fill="transparent"/>'
+      +'<text x="'+it.lx+'" y="'+(ly+12)+'">'+esc(it.nm)+'</text><text class="m" x="'+it.lx+'" y="'+(ly+29)+'">'+esc(it.meta)+(od?' · past date':'')+(isKey(r)?' · key':'')+'</text></a>';});
+  /* no-date lane */
+  if(ndW){var nx0=padL+plotW+24;
+    s+='<g class="nod"><line x1="'+(nx0-12)+'" y1="'+(top-14)+'" x2="'+(nx0-12)+'" y2="'+axisY+'" stroke="#CCD8ED" stroke-width="1.5" stroke-dasharray="4 5"/><text x="'+nx0+'" y="'+(top+2)+'">No date</text></g>';
+    undated.forEach(function(r,i){var y=top+24+i*LH,nm=trunc(r.short,24);
+      s+='<a class="lab" href="#" data-open="item:'+esc(r.url)+'" data-tip="'+tipFor(r)+'"><rect x="'+(nx0+1)+'" y="'+(y+1)+'" width="11" height="11" fill="#fff" stroke="#706F6F" stroke-width="1.5" transform="rotate(45 '+(nx0+6.5)+' '+(y+6.5)+')"/>'
+        +'<text x="'+(nx0+20)+'" y="'+(y+12)+'">'+esc(nm)+'</text><text class="m" x="'+(nx0+20)+'" y="'+(y+29)+'">'+esc(SGL[r.sg]||r.status)+'</text></a>';});}
+  box.innerHTML=s+'</svg>';
+}
+
+/* ================= releases ================= */
+function relTarget(rel){
+  var ms=S.rows.filter(function(r){return r.release===rel&&r.level==='Milestone'&&r.start;});
+  if(!ms.length)return null;
+  var a=ms.reduce(function(m,r){return r.start<m?r.start:m;},ms[0].start),b=ms.reduce(function(m,r){var e=r.end||r.start;return e>m?e:m;},ms[0].end||ms[0].start);
+  var range=ms.some(function(r){return r.end;});
+  return {a:range?a:b,b:range?b:null,last:b};
+}
+function renderReleases(){
+  $('#stLegend').innerHTML=ORDER.map(function(k){return '<span><i class="dot s-'+k+'"></i>'+SGL[k]+'</span>';}).join('');
+  var h='';
+  RELEASES.forEach(function(rel){
+    var list=S.rows.filter(function(r){return r.release===rel;}),c=counts(list),live=c.done+c.review+c.progress+c.todo;
+    if(!list.length)return;
+    var f=list.filter(function(r){return r.level==='Feature'&&r.sg!=='cut';}).length,t=list.filter(function(r){return r.level==='Task'&&r.sg!=='cut';}).length,m=list.filter(function(r){return r.level==='Milestone'&&r.sg!=='cut';}).length;
+    var tg=relTarget(rel),when=tg?fmtRange(tg.a,tg.b):'No milestone date',dl=tg?days(tg.last,today):null;
+    var sub=when+(dl!=null?(dl>=0?' · '+plural(dl,'day')+' to go':' · '+(-dl)+' days ago'):'');
+    var pct=live?Math.round(c.done/live*100):0;
+    var segs=ORDER.filter(function(k){return c[k];}).map(function(k){return '<span class="s-'+k+'" style="width:'+(c[k]/live*100)+'%" data-tip="'+esc('<b>'+esc(rel)+'</b>'+c[k]+' '+SGL[k].toLowerCase())+'"></span>';}).join('');
+    h+='<button type="button" class="rel" data-open="rel:'+esc(rel)+'" data-relrow="'+esc(rel)+'" aria-pressed="'+(S.relFilter===rel)+'">'
+      +'<span class="nm"><b>'+esc(rel)+'</b><span>'+esc(sub)+'</span></span>'
+      +'<span class="bars"><span class="bar" role="img" aria-label="'+c.done+' done, '+c.review+' in review, '+c.progress+' in progress, '+c.todo+' not started">'+segs+'</span>'
+      +'<span class="cnt">'+[m&&plural(m,'milestone'),f&&plural(f,'feature'),t&&plural(t,'task')].filter(Boolean).join(' · ')+(c.cut?' · '+c.cut+' cut':'')+'</span></span>'
+      +'<span class="pc num">'+pct+'%<small>done</small></span></button>';
+  });
+  var bl=BACKLOG.map(function(rel){var n=S.rows.filter(function(r){return r.release===rel&&r.sg!=='cut';}).length;return n?'<button type="button" data-rel="'+esc(rel)+'">'+esc(rel)+': '+n+'</button>':'';}).filter(Boolean).join('');
+  var nr=S.rows.filter(function(r){return !r.release&&r.sg!=='cut';}).length;
+  h+='<div class="backlog"><span>Not in a release window:</span>'+bl+(nr?'<span>No release: '+nr+'</span>':'')+'</div>';
+  $('#rels').innerHTML=h;
+}
+
+/* ================= needs attention ================= */
+function computeAttention(){
+  var R=S.rows,map={},out=[];
+  function add(r,sev,why){var k=r.url||r.name;if(!map[k]){map[k]={row:r,sev:sev,why:[]};out.push(map[k]);}if(sev==='crit')map[k].sev='crit';map[k].why.push(why);}
+  R.forEach(function(r){
+    if(!isOpen(r))return;
+    var st=r.start,en=r.end||r.start;
+    if(r.level==='Milestone'){
+      if(en&&en<today)add(r,'crit','Date passed on '+fmt(en)+' ('+plural(days(today,en),'day')+' ago), still '+r.status+'.');
+      else if(st){var dl=days(st,today);
+        if(dl<=14&&r.status==='Not Started')add(r,'warn','Due in '+plural(dl,'day')+' and still Not Started.');
+        if(dl<=30){var bl=r.deps.map(function(u){return S.byUrl[u];}).filter(function(x){return x&&isOpen(x);});
+          if(bl.length)add(r,isKey(r)&&dl<=14?'crit':'warn',(isKey(r)?'Key milestone, due in ':'Due in ')+plural(dl,'day')+'; still waiting on '+plural(bl.length,'item')+': '+bl.map(function(b){return b.short+' ('+b.status+')';}).join(', ')+'.');}}
+    }else if(en&&en<today&&r.release!==SHIPPED){
+      add(r,'warn','Its date ('+fmt(en)+') has passed and it is still '+r.status+'.');
+    }
+    if((r.level==='Feature'||r.level==='Milestone')&&LAUNCH.indexOf(r.release)>=0&&(!r.reviewed||days(today,r.reviewed)>21))
+      add(r,'warn',r.reviewed?'Not reviewed since '+fmt(r.reviewed)+'.':'Never marked as reviewed.');
+  });
+  out.sort(function(a,b){return (a.sev==='crit'?0:1)-(b.sev==='crit'?0:1)||((due(a.row)||9e15)-(due(b.row)||9e15));});
+  S.att=out;
+}
+var attAll=false;
+function renderAttention(){
+  var A=S.att,el=$('#att');
+  if(!A.length){el.innerHTML='<p class="empty">Nothing flagged. Every milestone is on track by its dates and dependencies.</p>';return;}
+  var show=attAll?A:A.slice(0,7);
+  el.innerHTML='<ul class="att">'+show.map(function(a){var r=a.row;
+    return '<li><span class="sev '+a.sev+'">'+icon(a.sev==='crit'?'octagon':'alert')+(a.sev==='crit'?'Critical':'Check')+'</span>'
+      +'<span><a class="t" href="#" data-open="item:'+esc(r.url)+'">'+esc(r.short)+'</a><span class="tags">'+esc(r.level)+' · '+esc(r.product)+'</span></span>'
+      +'<p class="why">'+esc(a.why.join(' '))+'</p></li>';}).join('')+'</ul>'
+    +(A.length>7?'<div class="more"><button type="button" class="btn ghost" id="attMore">'+(attAll?'Show fewer':'Show all '+A.length)+'</button></div>':'');
+  var mb=$('#attMore');if(mb)mb.onclick=function(){attAll=!attAll;renderAttention();};
+  $('#attSub').textContent=plural(A.length,'item')+', worked out from dates, status and dependencies';
+}
+
+/* ================= this week (Roadmap Watch) ================= */
+function clean(s){return String(s||'').replace(/\\\[/g,'[').replace(/\\\]/g,']').replace(/\\~/g,'~').replace(/\\([*_#>-])/g,'$1').replace(/\*\*/g,'').replace(/<[^>]+>/g,'').trim();}
+function parseReport(text){
+  var out={summary:[],story:'',risk:[]};
+  var m=text.match(/\*\*Summary:\*\*\s*([^\n]+)/);if(m)out.summary=clean(m[1]).split(/\s+·\s+/).filter(Boolean);
+  var after=text.split('</callout>')[1]||'';
+  out.story=clean((after.split('\n').filter(function(l){l=l.trim();return l&&l[0]!=='#'&&l[0]!=='<'&&l[0]!=='-'&&l[0]!=='|';})[0])||'');
+  var sec=text.split(/\n##\s+At-risk milestones\s*\n/)[1];
+  if(sec){sec=sec.split(/\n##\s/)[0];out.risk=sec.split('\n').filter(function(l){return /^\s*-\s/.test(l);}).map(function(l){return clean(l.replace(/^\s*-\s*/,''));});}
+  return out;
+}
+function renderWeek(){
+  var el=$('#wk');
+  if(S.reportErr){var c=errCopy(S.reportErr);el.innerHTML='<p class="empty"><b style="font-weight:400;color:var(--ink)">'+esc(c.t)+'.</b> '+esc(c.d)+'</p>';return;}
+  var R=S.report;if(!R)return;
+  if(R.none){el.innerHTML='<p class="empty">No Roadmap Watch report found yet. <a href="'+REPORTS_URL+'" target="_blank" rel="noopener">Open Roadmap Reports</a></p>';return;}
+  var p=R.parsed;
+  el.innerHTML='<span class="k">Roadmap Watch · '+esc(R.week)+'</span><h3>'+esc(R.title.replace(/^.*?Roadmap Watch\s*[—-]\s*/,'Week '))+'</h3>'
+    +(p.summary.length?'<ul class="chips">'+p.summary.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul>':'')
+    +(p.story?'<p>'+esc(p.story)+'</p>':'')
+    +(p.risk.length?'<span class="k">At-risk milestones</span><ul class="risk" style="margin-top:8px">'+p.risk.slice(0,3).map(function(s){return '<li>'+esc(trunc(s,260))+'</li>';}).join('')+'</ul>':'')
+    +'<a class="btn ghost" href="'+esc(R.url)+'" target="_blank" rel="noopener">Read the full report'+icon('arrow')+'</a>';
+}
+
+/* ================= V2 scope map ================= */
+var SCOPE_COLS=PHASES;
+var AREAS=[['app','Curaprox app','Where your patient uses the plan'],['assess','Assessment','BOB at the chair'],['plan','Treatment plan','Built and sent from BOB'],['admin','BOB Admin','Behind the loop'],['platform','BOB platform','Sign-up, commerce and the rest']];
+function areaOf(r){if(r.product==='Curaprox App')return 'app';if(r.track==='Assessment')return 'assess';if(r.track==='Interface'||r.epic==='Curated Treatment Plan')return 'plan';if(r.track==='Admin')return 'admin';return 'platform';}
+function renderScope(){
+  var showCut=$('#showCut').checked;
+  var rels=[].concat.apply([],SCOPE_COLS.map(function(c){return c[0];}));
+  var list=S.rows.filter(function(r){return (r.level==='Feature'||r.level==='Milestone')&&(rels.indexOf(r.release)>=0||(showCut&&r.release==='Parked'))&&(showCut||r.sg!=='cut');});
+  var h='<div class="scope fade"><div class="hd">Area</div>'+SCOPE_COLS.map(function(c){return '<div class="hd">'+esc(c[1])+'<small>'+esc(c[2])+'</small></div>';}).join('');
+  AREAS.forEach(function(a){
+    var inArea=list.filter(function(r){return areaOf(r)===a[0];});
+    h+='<div class="ar">'+esc(a[1])+'<small>'+esc(a[2])+'</small></div>';
+    SCOPE_COLS.forEach(function(c,i){
+      var cell=inArea.filter(function(r){return c[0].indexOf(r.release)>=0||(i===2&&r.release==='Parked');}).sort(function(x,y){return (x.level==='Milestone'?0:1)-(y.level==='Milestone'?0:1)||(x.priority||'P9').localeCompare(y.priority||'P9');});
+      h+='<div class="cell" data-col="'+esc(c[1])+'">'+cell.map(function(r){return '<a class="chip'+(r.sg==='cut'?' cut':'')+'" href="#" data-open="item:'+esc(r.url)+'" data-tip="'+tipFor(r)+'">'+stDot(r)+'<span>'+(r.level==='Milestone'?'<span class="ms">Milestone</span>':'')+esc(r.short)+(r.release==='Parked'?' <span class="k">(parked)</span>':'')+'</span></a>';}).join('')+'</div>';
+    });
+  });
+  $('#scope').innerHTML=h+'</div>';
+}
+
+/* ================= shipped ================= */
+function renderShipped(){
+  var done=S.rows.filter(function(r){return r.level==='Feature'&&r.sg==='done';}),g={};
+  done.forEach(function(r){var k=r.epic||'Other';(g[k]=g[k]||[]).push(r);});
+  var keys=Object.keys(g).sort(function(a,b){return g[b].length-g[a].length||a.localeCompare(b);}),max=keys.length?g[keys[0]].length:1;
+  if(!keys.length){$('#ship').innerHTML='<p class="empty">No done features yet.</p>';return;}
+  $('#shipSub').textContent=plural(done.length,'done feature')+' across '+plural(keys.length,'area');
+  $('#ship').innerHTML='<div class="hb fade">'+keys.map(function(k){var n=g[k].length,names=g[k].slice(0,8).map(function(r){return '· '+esc(r.short);}).join('<br>')+(n>8?'<br>and '+(n-8)+' more':'');
+    return '<span class="l">'+esc(k)+'</span><span class="tr" data-tip="'+esc('<b>'+esc(k)+': '+n+' done</b>'+names)+'" tabindex="0"><span style="width:'+(n/max*100)+'%"></span></span><span class="n num">'+n+'</span>';}).join('')+'</div>';
+}
+
+/* ================= table ================= */
+function fillRelFilter(){
+  var sel=$('#fRel'),have={};S.rows.forEach(function(r){if(r.release)have[r.release]=1;});
+  var opts=[SHIPPED].concat(RELEASES,BACKLOG).filter(function(r){return have[r];});
+  var cur=sel.value;sel.innerHTML='<option value="">All releases</option>'+opts.map(function(r){return '<option>'+esc(r)+'</option>';}).join('');sel.value=S.relFilter||cur;
+}
+function renderTable(){
+  var q=$('#q').value.trim().toLowerCase(),fp=$('#fProd').value,fr=$('#fRel').value,fs=$('#fSt').value,fl=$('#fLvl').value;
+  var list=S.rows.filter(function(r){
+    if(fp&&r.product!==fp)return false;
+    if(fr&&r.release!==fr)return false;
+    if(fs==='open'){if(!isOpen(r))return false;}else if(fs){if(r.status!==fs)return false;}else if(r.sg==='cut')return false;
+    if(fl==='fm'){if(r.level!=='Feature'&&r.level!=='Milestone')return false;}else if(fl&&r.level!==fl)return false;
+    if(q&&(r.name+' '+r.epic+' '+r.jira+' '+r.track).toLowerCase().indexOf(q)<0)return false;
+    return true;});
+  var ri=function(r){var i=[SHIPPED].concat(RELEASES,BACKLOG).indexOf(r.release);return i<0?99:i;};
+  list.sort(function(a,b){return ri(a)-ri(b)||((a.start||9e15)-(b.start||9e15))||a.short.localeCompare(b.short);});
+  var shown=list.slice(0,300);
+  $('#tb').innerHTML=shown.length?shown.map(function(r){return '<tr><td><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.short)+'</a></td><td class="lvl">'+esc(r.level)+'</td><td>'+esc(r.product)+'</td><td>'+esc(r.release||'None')+'</td><td>'+stPill(r)+'</td><td class="dt num">'+esc(r.start?fmtRange(r.start,r.end):'')+'</td><td>'+esc(r.epic)+'</td><td class="num">'+esc(r.jira)+'</td></tr>';}).join('')
+    :'<tr><td colspan="8" class="empty">Nothing matches these filters.</td></tr>';
+  $('#count').textContent='Showing '+shown.length+' of '+list.length+' matching items ('+S.rows.length+' rows in the Product Roadmap).';
+}
+['#q','#fProd','#fRel','#fSt','#fLvl'].forEach(function(s){$(s).addEventListener(s==='#q'?'input':'change',function(){if(s==='#fRel'){S.relFilter=$('#fRel').value;markRel();}if(S.rows)renderTable();});});
+$('#showCut').addEventListener('change',function(){if(S.rows)renderScope();});
+D.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-rel]');if(!b||!S.rows||b.classList.contains('cell'))return;
+  var rel=b.getAttribute('data-rel');S.relFilter=S.relFilter===rel?'':rel;$('#fRel').value=S.relFilter;if(S.relFilter)$('#fSt').value='';markRel();renderTable();
+  if(S.relFilter)$('#h-all').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});
+function markRel(){D.querySelectorAll('.rel').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-relrow')===S.relFilter?'true':'false');});}
+
+/* ================= rings ================= */
+function ringSVG(c,size,center,fill){
+  var t=c.done+c.review+c.progress+c.todo,cx=size/2,sw=Math.max(5,Math.round(size*.12)),r=cx-sw/2-1,C=2*Math.PI*r,off=0;
+  var s='<svg class="ring" width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" aria-hidden="true"><circle cx="'+cx+'" cy="'+cx+'" r="'+r+'" fill="'+(fill||'#fff')+'" stroke="#EDEDED" stroke-width="'+sw+'"/><g class="segs">';
+  if(t)['done','review','progress'].forEach(function(k){if(!c[k])return;var len=c[k]/t*C,g=(t>c[k]&&len>4)?2:0;
+    s+='<circle cx="'+cx+'" cy="'+cx+'" r="'+r+'" fill="none" stroke="var(--st-'+k+')" stroke-width="'+sw+'" stroke-dasharray="'+Math.max(0,len-g).toFixed(2)+' '+(C-len+g).toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cx+')"/>';off+=len;});
+  return s+'</g>'+(center||'')+'</svg>';
+}
+function pctText(c,size){var t=c.done+c.review+c.progress+c.todo;return '<text x="'+size/2+'" y="'+(size/2+size*.085)+'" text-anchor="middle" style="font-size:'+Math.round(size*.24)+'px">'+(t?Math.round(c.done/t*100)+'%':'–')+'</text>';}
+function iconIn(id,size,col){var w=Math.round(size*.42);return '<use href="#i-'+id+'" x="'+(size-w)/2+'" y="'+(size-w)/2+'" width="'+w+'" height="'+w+'" style="color:'+(col||'var(--blue)')+'"/>';}
+function ringLegend(c){var t=c.done+c.review+c.progress+c.todo;return '<ul>'+ORDER.map(function(k){return '<li><i class="dot s-'+k+'"></i>'+SGL[k]+'<b class="num">'+c[k]+'</b></li>';}).join('')+(c.cut?'<li><i class="dot s-cut"></i>Cut (not counted)<b class="num">'+c.cut+'</b></li>':'')+'</ul>';}
+
+/* ================= journey (story diagram) ================= */
+var FLAG='<svg viewBox="0 0 26 30" aria-hidden="true"><line x1="3" y1="29" x2="3" y2="2" stroke="#04090B" stroke-width="2.5" stroke-linecap="round"/><path d="M4 3h19l-5 5.5 5 5.5H4z" fill="#E31C79"/></svg>';
+function msBy(re){return S.rows.filter(function(r){return r.level==='Milestone'&&r.sg!=='cut'&&re.test(r.name);})[0];}
+function jNodes(){
+  var R=S.rows,N=[{kind:'static',name:'Legacy BOB',sub:'Where we started',icon:'tent',past:true,c:{done:0,review:0,progress:0,todo:0,cut:0}}];
+  function relNode(rel,name,sub){var list=R.filter(function(r){return r.release===rel;});if(!list.length)return;var c=counts(list),tg=relTarget(rel),live=c.done+c.review+c.progress+c.todo;
+    N.push({kind:'rel',rel:rel,name:name,sub:sub||(tg?fmtRange(tg.a,tg.b):'No date'),date:tg?tg.last:null,c:c,line:c.done+' of '+live+' done',key:list.some(isKey)});}
+  relNode(SHIPPED,'Shipped','Feb–Aug 2026');if(N.length>1){N[1].past=true;}
+  relNode('Soft Launch Oct-26','Soft launch');relNode('Web Nov-26','BOB on the web');relNode('Hard Launch Dec-26','Hard launch');relNode(P1,'Phase 1');relNode('V2 P1 Apr-27','V2 P1');
+  var g=msBy(/^Gate/i);if(g)N.push({kind:'item',row:g,name:'The gate',sub:'Do patients use the plan?',flag:true,date:g.start,c:counts([g]),line:g.status});
+  relNode(P2,'Phase 2');relNode(LATER,'Later 2028');
+  var cx=msBy(/Curaprox app roadmap/i);if(cx)N.push({kind:'item',row:cx,name:'Curaprox app roadmap',sub:'If the gate says go',icon:'arrow',date:cx.start,c:counts([cx]),line:cx.status});
+  return N;
+}
+function jOpen(n){return n.kind==='rel'?'rel:'+n.rel:n.kind==='item'?'item:'+n.row.url:'';}
+function jRingInner(n,size){
+  if(n.icon==='tent')return ringSVG({done:0,review:0,progress:0,todo:0},size,'<circle cx="'+size/2+'" cy="'+size/2+'" r="'+(size/2-4)+'" fill="#04090B"/>'+iconIn('tent',size,'#fff'),'#fff');
+  if(n.flag)return ringSVG(n.c,size,'<g transform="translate('+(size/2-9)+' '+(size/2-11)+') scale(.75)"><line x1="3" y1="29" x2="3" y2="2" stroke="#04090B" stroke-width="3" stroke-linecap="round"/><path d="M4 3h19l-5 5.5 5 5.5H4z" fill="#E31C79"/></g>');
+  if(n.kind==='item')return ringSVG(n.c,size,iconIn(n.icon||'arrow',size));
+  return ringSVG(n.c,size,pctText(n.c,size));
+}
+function todayIndex(N){ /* today sits after node i: the last node that is past */
+  var i=0;N.forEach(function(n,k){if(n.past||(n.date&&n.date<today))i=k;});
+  var j=i+1,f=.5;if(N[j]&&N[j].date&&N[i].date){f=(today-N[i].date)/(N[j].date-N[i].date);}
+  return {i:i,f:Math.min(.85,Math.max(.15,f))};
+}
+function renderJourney(){
+  var box=$('#jy'),W=box.clientWidth||1100,N=jNodes(),T=todayIndex(N);
+  if(W<700){
+    var h='<ul class="jlist">';
+    N.forEach(function(n,k){var op=jOpen(n);
+      h+='<li><button type="button"'+(op?' data-open="'+esc(op)+'"':' disabled')+'><span class="ringwrap">'+jRingInner(n,56)+'</span><span><b>'+esc(n.name)+'</b><span>'+esc(n.sub)+(n.line?' · '+esc(n.line):'')+'</span></span></button></li>';
+      if(k===T.i)h+='<li class="now"><i></i>Today, '+esc(fmt(today))+'</li>';});
+    box.innerHTML=h+'</ul>';return;
+  }
+  var pad=74,H=322,yB=200,climb=104,n=N.length,step=(W-2*pad)/Math.max(1,n-1),nodeW=Math.min(150,step-6);
+  var P=N.map(function(_,k){return [pad+k*step,yB-k*climb/Math.max(1,n-1)];});
+  var a=P[T.i],b=P[Math.min(n-1,T.i+1)],tp=[a[0]+(b[0]-a[0])*T.f,a[1]+(b[1]-a[1])*T.f];
+  var done=P.slice(0,T.i+1).concat([tp]),next=[tp].concat(P.slice(T.i+1));
+  function pts(L){return L.map(function(q){return q[0].toFixed(1)+','+q[1].toFixed(1);}).join(' ');}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="The journey from legacy BOB to the Curaprox app roadmap, with today between '+esc(N[T.i].name)+' and '+esc((N[T.i+1]||N[T.i]).name)+'">'
+    +'<polygon class="mtn" points="0,'+H+' '+(W*.18)+','+(H*.62)+' '+(W*.58)+','+(H*.12)+' '+(W*.7)+','+(H*.38)+' '+(W*.86)+','+(H*.2)+' '+W+','+(H*.42)+' '+W+','+H+'"/>'
+    +'<polyline class="path-done draw" pathLength="1" points="'+pts(done)+'"/>'
+    +'<polyline class="path-next" points="'+pts(next)+'"/>'
+    +'<g class="today"><line x1="'+tp[0]+'" y1="'+(tp[1]-58)+'" x2="'+tp[0]+'" y2="'+(tp[1]-14)+'"/><text x="'+tp[0]+'" y="'+(tp[1]-64)+'" text-anchor="middle">Today</text><circle class="climber" cx="'+tp[0]+'" cy="'+tp[1]+'" r="9"/></g></svg>';
+  N.forEach(function(nd,k){var op=jOpen(nd),q=P[k];
+    s+='<button type="button" class="jnode'+(op?'':' static')+' fade" style="--w:'+nodeW+'px;left:'+q[0]+'px;top:'+(q[1]-36)+'px;animation-delay:'+(k*70)+'ms"'+(op?' data-open="'+esc(op)+'"':' tabindex="-1" aria-disabled="true"')
+      +' aria-label="'+esc(nd.name+(nd.key?', key milestone':'')+', '+nd.sub+(nd.line?', '+nd.line:''))+'">'+jRingInner(nd,60)+'<b>'+esc(nd.name)+'</b><span>'+esc(nd.sub)+'</span>'+(nd.line?'<span>'+esc(nd.line)+'</span>':'')+(nd.key?'<span class="key">'+PENNANT+'Key</span>':'')+'</button>';});
+  box.innerHTML=s;box.style.height=H+'px';
+}
+
+/* ================= the BOB loop (V2) ================= */
+var STATIONS=[['assess','Assess','BOB, at the chair'],['plan','Plan','BOB'],['open','Open','Curaprox app, web'],['daily','Do it daily','Curaprox app'],['buy','Buy','Shopify'],['back','Come back','Reminders and history']];
+var STX={admin:['BOB Admin','Behind the loop'],wayin:['Way in','In-app sign-up'],other:['Also planned','Not tied to one step of the loop']};
+STATIONS.forEach(function(x){STX[x[0]]=[x[1],x[2]];});
+var V2REL=[].concat.apply([],PHASES.map(function(p){return p[0];}));
+function stationOf(r){var n=r.name.toLowerCase();
+  if(r.product==='Curaprox App'){if(/remind|re-bob|history|engagement|follow/.test(n))return 'back';if(/my treatment plan|dashboard|daily|routine/.test(n))return 'daily';if(/commerce|care kit|cart|shop/.test(n))return 'buy';return 'open';}
+  if(r.track==='Admin'||/^bob admin/.test(n))return 'admin';
+  if(/sign-up|sign up|signup/.test(n))return 'wayin';
+  if(/shopify|referral|commerce|cart/.test(n))return 'buy';
+  if(/remind|re-bob/.test(n))return 'back';
+  if(r.track==='Assessment'||/bpe|assessment|voice|pre-bob|post-bob|mpi|plaque/.test(n))return 'assess';
+  if(r.track==='Interface'||r.epic==='Curated Treatment Plan'||/treatment plan/.test(n))return 'plan';
+  return 'other';}
+function v2Items(){return S.rows.filter(function(r){return r.level==='Feature'&&r.sg!=='cut'&&V2REL.indexOf(r.release)>=0;});}
+function renderLoop(){
+  var items=v2Items(),by={};items.forEach(function(r){var k=stationOf(r);(by[k]=by[k]||[]).push(r);});
+  function cnt(k){return (by[k]||[]).length;}
+  function started(k){return (by[k]||[]).filter(function(r){return r.sg!=='todo';}).length;}
+  var W=640,H=530,cx=320,cy=280,R=150,nr=36,s='<svg viewBox="0 0 '+W+' '+H+'" role="group" aria-label="The BOB loop: planned work at each step">';
+  s+='<circle class="rg" cx="'+cx+'" cy="'+cy+'" r="'+R+'"/><path class="rd" pathLength="1" d="M'+cx+' '+(cy-R)+'A'+R+' '+R+' 0 1 1 '+cx+' '+(cy+R)+'A'+R+' '+R+' 0 1 1 '+cx+' '+(cy-R)+'"/>';
+  for(var k=0;k<6;k++){var a=(-90+60*k+30)*Math.PI/180;s+='<path class="chev" d="M-6 -8 L6 0 L-6 8 Z" transform="translate('+(cx+R*Math.cos(a)).toFixed(1)+' '+(cy+R*Math.sin(a)).toFixed(1)+') rotate('+(-90+60*k+30+90)+')"/>';}
+  /* way in */
+  var wx=96,wy=64;s+='<path class="way" d="M'+(wx+20)+' '+(wy+22)+' C '+(wx+60)+' '+(wy+86)+', '+(cx-90)+' '+(cy-R+4)+', '+(cx-nr-6)+' '+(cy-R+2)+'"/>';
+  s+=stNode('wayin',wx,wy,28,cnt('wayin'),started('wayin'),'start',0);
+  STATIONS.forEach(function(st,i){var a=(-90+60*i)*Math.PI/180,x=cx+R*Math.cos(a),y=cy+R*Math.sin(a),c=Math.cos(a);
+    s+=stNode(st[0],x,y,nr,cnt(st[0]),started(st[0]),Math.abs(c)<.3?'middle':(c>0?'start':'end'),i+1,Math.sin(a));});
+  s+=stNode('admin',cx,cy,74,cnt('admin'),started('admin'),'middle',7);
+  $('#loop').innerHTML=s+'</svg>';
+  /* side panel */
+  var ph=PHASES,mx=1;
+  var pc=ph.map(function(p){var n=items.filter(function(r){return p[0].indexOf(r.release)>=0;}).length;mx=Math.max(mx,n);return n;});
+  var g=msBy(/^Gate/i),oth=cnt('other');
+  $('#v2side').innerHTML='<span class="k">The BOB loop</span><h3>Every planned feature is judged by one question: does it make this loop work better?</h3>'
+    +'<p>The numbers on the loop count the Phase 1, Phase 2 and later features in Notion at each step: your patient is assessed, gets a plan, opens it, follows it daily, buys what it recommends and comes back. Click a step to see them.</p>'
+    +'<div class="k" style="margin-bottom:10px">Features by phase</div>'
+    +ph.map(function(p,i){return '<div class="phase"><span>'+esc(p[1])+'<br><span class="k" style="font-size:11px">'+esc(p[2])+'</span></span><span class="pb"><span style="width:'+(pc[i]/mx*100)+'%"></span></span><span class="num">'+pc[i]+'</span></div>';}).join('')
+    +(g?'<button type="button" class="gatebox opener" data-open="item:'+esc(g.url)+'">'+FLAG+'<span><b>The gate: '+esc(short(g.name).replace(/^Gate:\s*/i,''))+'</b><span>Go or no-go. '+(g.start?'Set for '+esc(fmt(g.start))+'. ':'No date set yet. ')+'Status: '+esc(g.status)+'. A go unlocks the wider Curaprox app roadmap.</span></span></button>':'')
+    +(oth?'<div class="also"><button type="button" class="btn ghost" data-open="st:other">'+plural(oth,'other planned feature')+icon('arrow')+'</button></div>':'');
+}
+function stNode(key,x,y,r,n,st,anchor,i,sinA){
+  var nm=STX[key][0],sub=plural(n,'feature')+(st?' · '+st+' started':''),adm=key==='admin';
+  var lx=x,ly=y,ta=anchor;
+  if(adm){ly=y;}else if(key==='wayin'){lx=x+r+12;ly=y-4;ta='start';}
+  else if(anchor==='middle'){ly=sinA<0?y-r-30:y+r+26;}else{lx=x+(anchor==='start'?r+14:-(r+14));ly=y-4;}
+  var g='<g class="st-n pop'+(adm?' adm':'')+'" style="animation-delay:'+(300+i*140)+'ms" tabindex="0" role="button" data-open="st:'+key+'" aria-label="'+esc(nm+', '+sub)+'">'
+    +'<circle class="bg" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'"/>';
+  if(adm)g+='<text class="lbl" x="'+x+'" y="'+(y-10)+'" text-anchor="middle">BOB Admin</text><text class="c" x="'+x+'" y="'+(y+20)+'" text-anchor="middle">'+n+'</text><text class="sub" x="'+x+'" y="'+(y+40)+'" text-anchor="middle">'+(n===1?'feature':'features')+'</text>';
+  else g+='<text class="c" x="'+x.toFixed(1)+'" y="'+(y+8).toFixed(1)+'" text-anchor="middle">'+n+'</text><text class="lbl" x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" text-anchor="'+ta+'">'+esc(nm)+'</text><text class="sub" x="'+lx.toFixed(1)+'" y="'+(ly+18).toFixed(1)+'" text-anchor="'+ta+'">'+esc(key==='wayin'?STX[key][1]:STX[key][1])+'</text>';
+  return g+'</g>';
+}
+
+/* ================= detail overlay (drawer) ================= */
+var dw=$('#drawer'),scrim=$('#scrim'),lastTrig=null,dwT=0;
+function li(r,extra){return '<li><a href="#" data-open="item:'+esc(r.url)+'">'+esc(r.short)+'</a>'+stPill(r)+'<small>'+esc([r.level,extra||r.epic,r.start?fmtRange(r.start,r.end):''].filter(Boolean).join(' · '))+'</small></li>';}
+function sumBlock(c,size){return '<div class="dw-sum">'+ringSVG(c,size||112,pctText(c,size||112))+ringLegend(c)+'</div>';}
+function depSVG(r){
+  var ups=r.deps.map(function(u){return S.byUrl[u];}).filter(Boolean),downs=S.rows.filter(function(x){return x.deps.indexOf(r.url)>=0;});
+  if(!ups.length&&!downs.length)return '<p class="dw-note">Nothing is linked: the “Depends on” field in Notion is empty for this item, and no other item depends on it.</p>';
+  var W=480,cw=134,nh=46,gap=10,rows=Math.max(ups.length,downs.length,1),H=26+rows*(nh+gap),cxm=(W-cw)/2,cy=26+(H-26)/2-nh/2;
+  function node(x,y,it,ctr){var col='var(--st-'+it.sg+')';
+    return '<a href="#" data-open="item:'+esc(it.url)+'" class="'+(ctr?'ctr':'')+'"><rect x="'+x+'" y="'+y+'" width="'+cw+'" height="'+nh+'" rx="10" fill="'+(ctr?'#003DA5':'#fff')+'" stroke="'+(ctr?'#003DA5':'#CCD8ED')+'"/>'
+      +(ctr?'':'<rect x="'+x+'" y="'+(y+8)+'" width="4" height="'+(nh-16)+'" rx="2" fill="'+col+'"'+(it.sg==='todo'?' stroke="#B9B9B9"':'')+'/>')
+      +'<text x="'+(x+12)+'" y="'+(y+19)+'">'+esc(trunc(it.short,19))+'</text><text class="m" x="'+(x+12)+'" y="'+(y+35)+'"'+(ctr?' style="fill:#fff;opacity:.85"':'')+'>'+esc(it.status||'No status')+'</text></a>';}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Dependencies"><text class="cap" x="0" y="12">Waits on</text><text class="cap" x="'+W+'" y="12" text-anchor="end">Needed by</text>';
+  ups.forEach(function(u,i){var y=26+i*(nh+gap);s+='<path class="ed" d="M'+cw+' '+(y+nh/2)+' C '+(cw+40)+' '+(y+nh/2)+', '+(cxm-40)+' '+(cy+nh/2)+', '+cxm+' '+(cy+nh/2)+'"/>';});
+  downs.forEach(function(d,i){var y=26+i*(nh+gap);s+='<path class="ed" d="M'+(cxm+cw)+' '+(cy+nh/2)+' C '+(cxm+cw+40)+' '+(cy+nh/2)+', '+(W-cw-40)+' '+(y+nh/2)+', '+(W-cw)+' '+(y+nh/2)+'"/>';});
+  ups.forEach(function(u,i){s+=node(0,26+i*(nh+gap),u);});
+  downs.forEach(function(d,i){s+=node(W-cw,26+i*(nh+gap),d);});
+  s+=node(cxm,cy,r,true);
+  return '<div class="dep">'+s+'</svg></div>';
+}
+function itemBody(r){
+  var h='<div class="dw-meta">'+(isKey(r)?keyPill():'')+stPill(r)+'<span>'+esc(r.product)+'</span><span>'+esc(r.release||'No release')+'</span>'+(r.start?'<span>'+esc(fmtRange(r.start,r.end))+'</span>':'<span>No date</span>')+(r.jira?'<span>'+esc(r.jira)+'</span>':'')+'</div>';
+  var d=due(r);if(d&&isOpen(r)){var dl=days(d,today);h+='<p class="dw-note">'+(dl<0?'Its date passed '+plural(-dl,'day')+' ago.':dl===0?'Due today.':'Due in '+plural(dl,'day')+'.')+(r.reviewed?' Last reviewed '+esc(fmt(r.reviewed))+'.':'')+'</p>';}
+  var a=(S.att||[]).filter(function(x){return x.row===r;})[0];
+  if(a)h+='<div class="dw-h">Needs attention</div><ul class="att"><li><span class="sev '+a.sev+'">'+icon(a.sev==='crit'?'octagon':'alert')+(a.sev==='crit'?'Critical':'Check')+'</span><span></span><p class="why">'+esc(a.why.join(' '))+'</p></li></ul>';
+  h+='<div class="dw-h">How it connects</div>'+depSVG(r);
+  var sib=S.rows.filter(function(x){return x!==r&&x.release===r.release&&r.release&&x.epic===r.epic&&r.epic&&x.sg!=='cut';}).slice(0,8);
+  if(sib.length)h+='<div class="dw-h">Also in '+esc(r.epic)+', '+esc(r.release)+'</div><ul class="dw-list">'+sib.map(function(x){return li(x,x.level);}).join('')+'</ul>';
+  h+='<div class="dw-act"><a class="btn" href="'+esc(r.url)+'" target="_blank" rel="noopener">Open in Notion'+icon('ext')+'</a></div>';
+  return h;
+}
+function relBody(rel){
+  var list=S.rows.filter(function(r){return r.release===rel;}),c=counts(list),tg=relTarget(rel);
+  var h='<div class="dw-meta"><span>'+(tg?esc(fmtRange(tg.a,tg.b)):'No milestone date')+'</span>'+(tg?'<span>'+(days(tg.last,today)>=0?plural(days(tg.last,today),'day')+' to go':plural(-days(tg.last,today),'day')+' ago')+'</span>':'')+'<span>'+plural(list.length,'row')+' in Notion</span></div>'+sumBlock(c);
+  var ms=list.filter(function(r){return r.level==='Milestone';});
+  if(ms.length)h+='<div class="dw-h">Milestones</div><ul class="dw-list">'+ms.map(function(r){return li(r,r.product);}).join('')+'</ul>';
+  var g={};list.filter(function(r){return r.sg!=='cut';}).forEach(function(r){var k=r.epic||'No epic';(g[k]=g[k]||[]).push(r);});
+  var ks=Object.keys(g).sort(function(a,b){return g[b].length-g[a].length;});
+  if(ks.length)h+='<div class="dw-h">By epic</div>'+ks.map(function(k){var cc=counts(g[k]),t=g[k].length;
+    return '<div class="epb"><span class="lb">'+esc(k)+'</span><span class="bar">'+ORDER.filter(function(o){return cc[o];}).map(function(o){return '<span class="s-'+o+'" style="width:'+(cc[o]/t*100)+'%"></span>';}).join('')+'</span><span class="n num">'+cc.done+' / '+t+'</span></div>';}).join('');
+  var rank={progress:0,review:1,todo:2};
+  var open=list.filter(function(r){return isOpen(r)&&r.level!=='Milestone';}).sort(function(a,b){return rank[a.sg]-rank[b.sg]||((due(a)||9e15)-(due(b)||9e15));});
+  if(open.length)h+='<div class="dw-h">Open items ('+open.length+')</div><ul class="dw-list">'+open.slice(0,15).map(function(r){return li(r);}).join('')+'</ul>'+(open.length>15?'<p class="dw-note" style="margin-top:8px">And '+(open.length-15)+' more in the table.</p>':'');
+  h+='<div class="dw-act"><button type="button" class="btn" data-filter-rel="'+esc(rel)+'">Show all in the table'+icon('arrow')+'</button></div>';
+  return h;
+}
+function stBody(key){
+  var list=v2Items().filter(function(r){return stationOf(r)===key;}),c=counts(list);
+  var h='<div class="dw-meta"><span>'+esc(STX[key][1])+'</span><span>'+plural(list.length,'planned feature')+'</span></div>'+sumBlock(c,96);
+  PHASES.forEach(function(p){
+    var L=list.filter(function(r){return p[0].indexOf(r.release)>=0;});if(!L.length)return;
+    h+='<div class="dw-h">'+esc(p[1]+' · '+p[2])+'</div><ul class="dw-list">'+L.map(function(r){return li(r,[r.priority,r.product].filter(Boolean).join(' · '));}).join('')+'</ul>';});
+  if(!list.length)h+='<p class="dw-note">No planned features in Notion map to this step yet.</p>';
+  h+='<p class="dw-note" style="margin-top:16px">Steps are matched from each row’s product, track and name in Notion, so a new row lands on the right step without extra setup.</p>';
+  return h;
+}
+function openDrawer(kind,key,trig){
+  if(!S.rows)return;var k='',t='',b='';
+  if(kind==='item'){var r=S.byUrl[key];if(!r)return;k=r.level+(r.epic?' · '+r.epic:'');t=r.short;b=itemBody(r);}
+  else if(kind==='rel'){k='Release';t=key;b=relBody(key);}
+  else if(kind==='st'){if(!STX[key])return;k=key==='admin'||key==='wayin'||key==='other'?'Planned':'The BOB loop · planned';t=STX[key][0];b=stBody(key);}
+  else return;
+  $('#dwK').textContent=k;$('#dwT').textContent=t;$('#dwB').innerHTML=b;
+  if(dw.hidden){lastTrig=trig||null;}
+  clearTimeout(dwT);hideTip();
+  dw.hidden=false;scrim.hidden=false;void dw.offsetWidth;dw.classList.add('on');scrim.classList.add('on');
+  dw.scrollTop=0;D.documentElement.style.overflow='hidden';$('#dwX').focus({preventScroll:true});
+}
+function closeDrawer(){
+  if(dw.hidden)return;dw.classList.remove('on');scrim.classList.remove('on');D.documentElement.style.overflow='';
+  dwT=setTimeout(function(){dw.hidden=true;scrim.hidden=true;},280);
+  if(lastTrig&&D.contains(lastTrig)&&lastTrig.focus)lastTrig.focus({preventScroll:true});lastTrig=null;
+}
+$('#dwX').addEventListener('click',closeDrawer);
+scrim.addEventListener('click',closeDrawer);
+D.addEventListener('click',function(e){
+  var t=e.target.closest&&e.target.closest('[data-open]');
+  if(t){e.preventDefault();var v=t.getAttribute('data-open'),i=v.indexOf(':');openDrawer(v.slice(0,i),v.slice(i+1),t);return;}
+  var f=e.target.closest&&e.target.closest('[data-filter-rel]');
+  if(f){S.relFilter=f.getAttribute('data-filter-rel');$('#fRel').value=S.relFilter;$('#fSt').value='';$('#fLvl').value='';$('#q').value='';markRel();renderTable();closeDrawer();
+    setTimeout(function(){$('#h-all').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});},60);}
+});
+D.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&!dw.hidden){e.preventDefault();closeDrawer();return;}
+  if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.getAttribute&&e.target.getAttribute('role')==='button'&&e.target.hasAttribute('data-open')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));return;}
+  if(e.key==='Tab'&&!dw.hidden){var f=[].slice.call(dw.querySelectorAll('a[href],button:not([disabled])'));if(!f.length)return;var first=f[0],last=f[f.length-1];
+    if(e.shiftKey&&D.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&D.activeElement===last){e.preventDefault();first.focus();}else if(!dw.contains(D.activeElement)){e.preventDefault();first.focus();}}
+});
+
+/* ================= report mode (?report): the layout the PDF is printed from ================= */
+var REPORT=/[?&#]report\b/.test(location.search+location.hash);
+if(/[?&#]card\b/.test(location.search+location.hash))D.documentElement.classList.add('rm-card');
+if(REPORT){D.documentElement.classList.add('rm-report');attAll=true;$('#fSt').value='open';$('#fLvl').value='fm';}
+addEventListener('beforeprint',function(){if(!S.rows)return;attAll=true;renderAttention();renderJourney();renderTimeline();});
+
+/* ================= weekly pack: scope since the baseline, changes since last week ================= */
+function nm(x){return '<a href="https://app.notion.com/p/'+esc(x[0])+'" target="_blank" rel="noopener">'+esc(short(String(x[1]).replace(/\\([\[\]])/g,'$1')))+'</a>';}
+function dShort(s){return s?fmt(pd(s),true):'no date';}
+function renderWarnings(ws){var el=$('#warns');if(!el)return;if(!ws||!ws.length){el.hidden=true;return;}
+  el.hidden=false;el.innerHTML='<b>Check before sharing</b><ul>'+ws.map(function(w){return '<li>'+esc(w)+'</li>';}).join('')+'</ul>';}
+function renderScopeSince(sc){
+  var sec=$('#secScope');if(!sec)return;if(!sc){sec.hidden=true;return;}sec.hidden=false;
+  var b=sc.baseline,n=sc.now,dn=n.total-b.total,tr=sc.trend||[];
+  var bu=null;tr.forEach(function(t){if(t.baseline)bu=t.untracked;});
+  var ut=sc.untracked,du=(ut!=null&&bu!=null)?ut-bu:null;
+  var noRel=sc.added.filter(function(x){return !x[3];}).length;
+  function sg(v){return (v>0?'+':v<0?'−':'±')+Math.abs(v);}
+  var endMoved=b.end&&n.end&&b.end!==n.end;
+  $('#scTiles').innerHTML=
+    '<div><span class="k">In the roadmap</span><span class="v num'+(dn>0?' up':'')+'">'+sg(dn)+'</span><span class="s num">'+b.total+' on 3 Nov → '+n.total+' now</span><span class="d">Live items (not cut). '+plural(sc.added.length,'row')+' added'+(noRel?', '+noRel+' with no release yet':'')+(sc.cut.length?', '+sc.cut.length+' cut':'')+'.</span></div>'
+    +'<div><span class="k">Not in the roadmap</span><span class="v num'+(du>0?' up':'')+'">'+(ut==null?'–':ut)+'</span><span class="s num">'+(du!=null?bu+' on 3 Nov → '+ut+' now':'items this week')+'</span><span class="d">Work in Jira or Asana with no roadmap row, from Roadmap Watch.</span></div>'
+    +'<div><span class="k">Furthest milestone</span><span class="v num'+(endMoved?' up':'')+'">'+(n.end?esc(pd(n.end).toLocaleDateString('en-GB',{month:'short',year:'numeric'})):'–')+'</span><span class="s">'+(endMoved?'Was '+esc(fmt(pd(b.end))):'Unchanged since 3 Nov')+'</span><span class="d">'+plural(n.milestones,'milestone')+' in the roadmap.</span></div>';
+  /* chart: roadmap items (blue) + not in the roadmap (cerise), one bar per read */
+  if(tr.length){
+    var W=640,H=210,L=8,Rr=8,T=24,B=40,mx=1;tr.forEach(function(t){mx=Math.max(mx,t.scope+(t.untracked||0));});
+    var bw=Math.min(70,(W-L-Rr)/tr.length*.55),step=(W-L-Rr)/tr.length,y=function(v){return T+(H-T-B)*(1-v/mx);};
+    var h='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Roadmap items and untracked work per week">';
+    tr.forEach(function(t,i){var x=L+step*i+(step-bw)/2,u=t.untracked||0;
+      h+='<rect x="'+x+'" y="'+y(t.scope)+'" width="'+bw+'" height="'+(y(0)-y(t.scope))+'" rx="3" fill="#003DA5"><title>'+t.scope+' in the roadmap</title></rect>';
+      if(u)h+='<rect x="'+x+'" y="'+y(t.scope+u)+'" width="'+bw+'" height="'+(y(t.scope)-y(t.scope+u))+'" rx="3" fill="#E31C79"><title>'+u+' not in the roadmap</title></rect>';
+      h+='<text class="vl num" x="'+(x+bw/2)+'" y="'+(y(t.scope+u)-7)+'" text-anchor="middle">'+t.scope+(u?' + '+u:'')+'</text>';
+      h+='<text class="ax" x="'+(x+bw/2)+'" y="'+(H-20)+'" text-anchor="middle">'+esc(fmt(pd(t.date),true))+'</text>';
+      if(t.baseline)h+='<text class="ax" x="'+(x+bw/2)+'" y="'+(H-4)+'" text-anchor="middle" style="fill:#E31C79">baseline</text>';
+    });
+    $('#scChart').innerHTML=h+'</svg><div class="sclg"><span><i style="background:#003DA5"></i>In the roadmap (live items)</span><span><i style="background:#E31C79"></i>Not in the roadmap</span></div>';
+  }
+  /* lists */
+  var h2='<h4>Added to the roadmap since 3 Nov</h4>'+(sc.added.length?'<ul>'+sc.added.slice(-8).reverse().map(function(x){return '<li>'+nm(x)+'<span>'+esc(x[3]||'No release yet')+'</span></li>';}).join('')+'</ul>'+(sc.added.length>8?'<p>and '+(sc.added.length-8)+' more, all in the table at the end</p>':''):'<p>Nothing added.</p>');
+  if(sc.moved.length)h2+='<h4>Moved release since 3 Nov</h4><ul>'+sc.moved.map(function(x){return '<li>'+nm(x)+'<span>'+esc(x[4])+' → '+esc(x[5])+'</span></li>';}).join('')+'</ul>';
+  if(sc.slipped.length)h2+='<h4>Dates moved later since 3 Nov</h4><ul>'+sc.slipped.map(function(x){return '<li>'+nm(x)+'<span>'+esc(dShort(x[4]))+' → '+esc(dShort(x[5]))+'</span></li>';}).join('')+'</ul>';
+  var ui=sc.untrackedItems||[];
+  h2+='<h4>Not in the roadmap yet</h4>'+(ui.length?'<ul>'+ui.map(function(t){return '<li><span>'+esc(t)+'</span><span></span></li>';}).join('')+'</ul>':'<p>'+(ut?ut+' items, listed in the Roadmap Watch report.':'Nothing reported.')+'</p>');
+  $('#scLists').innerHTML=h2;
+}
+function renderChanges(wk){
+  var sec=$('#secChg');if(!sec)return;if(!wk){sec.hidden=true;return;}sec.hidden=false;
+  $('#chgSub').textContent='In the Notion Product Roadmap since '+fmt(pd(wk.since));
+  function col(t,list,f,empty){return '<div><h4>'+esc(t)+' <span class="num">('+list.length+')</span></h4>'+(list.length?'<ul>'+list.slice(0,10).map(function(x){return '<li>'+nm(x)+'<span>'+f(x)+'</span></li>';}).join('')+'</ul>'+(list.length>10?'<p>and '+(list.length-10)+' more</p>':''):'<p>'+empty+'</p>')+'</div>';}
+  var moved=wk.moved.concat(wk.slipped.map(function(x){return [x[0],x[1],x[2],x[3],'date',x[4],x[5]];}));
+  $('#chg').innerHTML=
+    col('Done',wk.done,function(x){return esc(x[2]);},'No roadmap row was marked Done.'+(function(){var rp=S.report&&S.report.parsed,m=rp&&typeof rp.done==='number'?rp.done:null;((rp&&rp.summary)||[]).forEach(function(t){var q=/^(\d+)\s+done/.exec(t);if(q)m=+q[1];});return m?' Roadmap Watch counted '+m+' tasks done in Asana and Jira this week, so the roadmap rows are behind.':'';})())
+    +col('Slipped or moved',moved,function(x){return x[4]==='date'?esc(dShort(x[5]))+' → '+esc(dShort(x[6])):esc(x[4])+' → '+esc(x[5]);},'No dates or releases changed.')
+    +col('Added or cut',wk.added.concat(wk.cut.map(function(x){return x.concat(['cut']);})),function(x){return x[4]==='cut'?'Cut':esc(x[3]||'No release yet');},'Nothing added or cut.');
+}
+
+/* ================= render all ================= */
+function renderAll(){
+  if(!S.rows)return;
+  computeAttention();renderKpis();renderJourney();renderUpcoming();renderTimeline();renderLoop();renderReleases();renderAttention();renderScope();renderShipped();fillRelFilter();renderTable();
+}
+var rT=0;addEventListener('resize',function(){clearTimeout(rT);rT=setTimeout(function(){if(S.rows){renderJourney();renderTimeline();}},150);});
+
+/* ================= freshness ================= */
+function tickUpdated(){
+  if(!S.stamp){$('#upd').textContent='';return;}
+  if(S.snap){$('#upd').textContent='Snapshot of '+fmt(new Date(S.stamp))+', '+new Date(S.stamp).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+(S.report&&S.report.week?' · Roadmap Watch '+S.report.week:'');return;}
+  var m=Math.round((Date.now()-S.stamp)/6e4),t=new Date(S.stamp).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  var ago=m<1?'just now':m<60?plural(m,'minute')+' ago':m<1440?plural(Math.round(m/60),'hour')+' ago':plural(Math.round(m/1440),'day')+' ago';
+  $('#upd').textContent='Updated '+(m<1440?t:fmt(new Date(S.stamp),true)+' '+t)+', '+ago;
+}
+setInterval(tickUpdated,30000);
+function setLive(on,text){$('#live').classList.toggle('on',on);$('#liveT').textContent=text;}
+
+/* ================= errors (one message per code) ================= */
+var NOMCP={t:'Open this page in Claude to see live data',d:'This dashboard reads the Notion Product Roadmap with your own Notion access, so it only works inside Claude, signed in, with the Notion connector added in Settings → Connectors.'};
+function errCopy(e){switch(e&&e.code){
+  case 'needs_reauth':return {t:'Notion needs reconnecting',d:'Your Notion connection has expired. Reconnect Notion in claude.ai Settings → Connectors, then press Refresh.',k:'warn'};
+  case 'server_not_connected':return {t:'Notion isn’t connected',d:'Add the Notion connector in claude.ai Settings → Connectors, then reopen this page.',k:'warn'};
+  case 'selection_required':return {t:'Choose which Notion connection to use',d:'You have more than one Notion connector. Pick one when Claude asks, then press Refresh.',k:'warn'};
+  case 'not_in_manifest':return {t:'Notion is turned off for this page',d:'Turn Notion on in this page’s Permissions menu, then press Refresh.',k:'warn'};
+  case 'blocked_by_policy':return {t:'Blocked by your organisation',d:'Your organisation’s policy blocks this Notion tool for your account.',k:'crit'};
+  case 'approval_required':return {t:'Allow this page to read Notion',d:'The dashboard reads the Product Roadmap with your Notion access. It never changes anything in Notion.',k:'info',approve:true};
+  case 'tool_error':if(/usage.?limit/i.test(e.message||''))return {t:'Notion’s usage limit is reached',d:'Your Notion workspace has used up its allowance for this kind of query for now. Try Refresh later.',k:'warn'};
+    return {t:'Notion returned an error',d:(e.message||'The query failed.')+' Press Refresh to try again.',k:'warn'};
+  case 'server_unavailable':case 'rate_limited':return {t:'Notion didn’t answer',d:'Notion is slow or unreachable right now. The dashboard tries once more by itself; otherwise press Refresh in a minute.',k:'warn'};
+  case 'not_granted':case 'capability_disabled':case 'capability_removed':return {t:NOMCP.t,d:NOMCP.d,k:'info'};
+  default:return {t:'Couldn’t load from Notion',d:(e&&e.message)||'Something went wrong while reading Notion. Press Refresh to try again.',k:'warn'};
+}}
+var DENY={needs_reauth:1,server_not_connected:1,blocked_by_policy:1,approval_required:1,not_in_manifest:1,selection_required:1};
+
+/* ================= data: rows ================= */
+var mcp=null,retried={rows:false,search:false};
+var loading=false;
+function loadRows(force){
+  if(!mcp||loading)return;loading=true;setBusy(true);
+  var all=[],stamp=0,n=0,opts={cache:force?{staleTime:0,gcTime:CACHE.gcTime,refresh:true}:CACHE};
+  (function step(cur){
+    mcp.callTool(SERVER,'notion-query-data-sources',pageIn(cur),opts).then(function(res){
+      var p=payloadOf(res);
+      if(!p||!Array.isArray(p.results)){loading=false;rowsError({code:'tool_error',message:typeof p==='string'?p.slice(0,200):'Notion answered in an unexpected format.'});return;}
+      if(!stamp)stamp=(res.cache&&res.cache.storedAt)||Date.now();
+      all=all.concat(p.results);n++;
+      if(p.has_more&&p.next_cursor&&n<10)step(p.next_cursor);else{loading=false;takeRows(all,stamp);}
+    },function(e){loading=false;rowsError(e);});
+  })(null);
+}
+function takeRows(list,stamp){
+  S.rows=list.map(norm);S.byUrl={};S.rows.forEach(function(r){if(r.url)S.byUrl[r.url]=r;});
+  S.stamp=stamp||Date.now();retried.rows=false;
+  banner(null);setLive(true,'Live from Notion');tickUpdated();setBusy(false);
+  renderAll();
+}
+function rowsError(e){
+  setBusy(false);
+  var c=errCopy(e);
+  if(e&&e.retryable&&!retried.rows&&mcp){retried.rows=true;setTimeout(function(){loadRows(true);},(e.retryAfterMs||1200)+Math.random()*800);}
+  if(DENY[e&&e.code]){S.rows=null;setLive(false,'Not connected');
+    D.querySelectorAll('.empty.load').forEach(function(x){x.classList.remove('load');x.textContent='Not loaded: see the message at the top.';});
+  }
+  var act=c.approve?'<div class="act"><button type="button" class="btn" id="approve">Allow and load</button></div>':(e&&e.code==='needs_reauth'||e&&e.code==='tool_error'||e&&e.code==='server_unavailable')?'<div class="act"><button type="button" class="btn ghost" id="retry">Refresh</button></div>':'';
+  banner(c.k==='info'?'info':c.k,c.t,S.rows&&!DENY[e&&e.code]?c.d+' Showing the last data that loaded.':c.d,act);
+  var ap=$('#approve');if(ap)ap.onclick=function(){ap.disabled=true;loadRows(true);};
+  var rb=$('#retry');if(rb)rb.onclick=refresh;
+}
+
+/* ================= data: weekly report ================= */
+function takeSearch(res){
+  var p=payloadOf(res),list=(p&&p.results)||[];
+  var best=null;list.forEach(function(it){var m=/Roadmap Watch\s*[—–-]+\s*(\d{4})-W(\d{1,2})/.exec(it.title||'');if(m){var k=+m[1]*100+ +m[2];if(!best||k>best.k)best={k:k,it:it,week:m[1]+'-W'+m[2]};}});
+  if(!best){S.report={none:true};S.reportErr=null;renderWeek();return;}
+  mcp.callTool(SERVER,'notion-fetch',{id:best.it.id},{cache:CACHE}).then(function(r2){
+    var q=payloadOf(r2),text=(q&&q.text)||(typeof q==='string'?q:'');
+    S.report={week:best.week,title:(q&&q.title)||best.it.title,url:best.it.url||REPORTS_URL,parsed:parseReport(text)};S.reportErr=null;renderWeek();
+  },function(e){S.reportErr=e;renderWeek();});
+}
+function searchError(e){
+  if(e&&e.retryable&&!retried.search&&mcp){retried.search=true;setTimeout(function(){mcp.invalidate(SERVER,'notion-search').catch(function(){});},(e.retryAfterMs||1500)+Math.random()*800);return;}
+  if(DENY[e&&e.code]||!S.report){S.reportErr=e;renderWeek();}
+}
+
+/* ================= refresh ================= */
+function setBusy(b){S.busy=b;var r=$('#refresh');r.classList.toggle('spin',b);r.setAttribute('aria-busy',b?'true':'false');}
+function refresh(){if(WEB){loadWeb(true);return;}if(!mcp)return;retried.rows=retried.search=false;
+  mcp.invalidate(SERVER,'notion-search').catch(function(){});mcp.invalidate(SERVER,'notion-fetch').catch(function(){});
+  loadRows(true);setTimeout(function(){if(S.busy&&!loading)setBusy(false);},30000);}
+$('#refresh').addEventListener('click',refresh);
+
+/* ================= snapshot (Notion embed): data baked in at build time ================= */
+function takeData(sn,snap){
+  S.snap=snap;
+  if(sn.dict&&!sn.decoded){sn.rows=sn.rows.map(function(a){a=a.slice();for(var j=1;j<8;j++)a[j]=sn.dict[j-1][a[j]];return a;});sn.decoded=true;}
+  var F=['Name','Level','Status','Release','Product','Epic','Track','Priority','ds','de','lr','dep','jira','id'];
+  var rows=sn.rows.map(function(a){var o={};F.forEach(function(k,i){o[k]=a[i];});o.url='https://app.notion.com/p/'+o.id;o.dep=(o.dep||[]).map(function(id){return 'https://app.notion.com/p/'+id;});return o;});
+  takeRows(rows,Date.parse(sn.at));
+  if(snap)setLive(true,'Snapshot from Notion');
+  var rp=sn.report;
+  if(rp&&rp.error){S.report=null;S.reportErr={code:'tool_error',message:rp.error};}else{S.report=rp||{none:true};S.reportErr=null;}
+  renderWeek();
+  renderWarnings(sn.warnings);renderScopeSince(sn.scope);renderChanges(sn.week);
+}
+function startSnap(sn){
+  $('#refresh').hidden=true;$('#openLive').hidden=false;
+  takeData(sn,true);
+  var ft=D.querySelector('footer .wrap span');if(ft)ft.textContent='Snapshot of the Notion Product Roadmap and the latest Roadmap Watch report, rebuilt every Monday for the weekly roadmap pack. For today’s state, open the Product Roadmap in Notion.';
+  /* ?card: note where the content ends (data-card-h, CSS px) so the picture can be cut to size without an image library */
+  if(D.documentElement.classList.contains('rm-card'))setTimeout(function(){var b=0;
+    [].forEach.call(D.body.querySelectorAll('*'),function(e){var r=e.getBoundingClientRect();if(r.width&&r.height&&r.bottom>b)b=r.bottom;});
+    D.documentElement.setAttribute('data-card-h',String(Math.ceil(b+(window.scrollY||0))));},400);
+}
+
+/* ================= hosted (web) mode: the dashboard server reads Notion for everyone ================= */
+var WEB=window.__API||'';
+/*WEB-ONLY*/
+var KEY=(/[?&]k=([^&#]+)/.exec(location.search)||[])[1]||'';
+var PRINT=REPORT&&/[?&]print\b/.test(location.search),printed=false,webBusy=false;
+function apiUrl(fresh){var q=[];if(KEY)q.push('k='+KEY);if(fresh)q.push('fresh=1');return WEB+(q.length?'?'+q.join('&'):'');}
+function webErr(e){switch(e&&e.code){
+  case 'no_access':return {t:'This link needs its access key',d:'Open the dashboard from the Goals & Objectives page in Notion.'};
+  case 'not_configured':return {t:'The dashboard isn’t connected to Notion yet',d:'The server has no Notion key. Setup steps are in web/SETUP.md.'};
+  case 'bad_token':return {t:'Notion refused the dashboard’s key',d:'The Notion integration key is wrong or was removed. Setup steps are in web/SETUP.md.'};
+  case 'not_shared':return {t:'The roadmap isn’t shared with the dashboard',d:'In Notion, open the Product Roadmap, choose ··· → Connections, and add the dashboard’s integration.'};
+  case 'rate_limited':return {t:'Notion is busy',d:'Too many reads at once. Press Refresh in a minute.'};
+  case 'offline':return {t:'Couldn’t reach the dashboard server',d:'Check your connection, then press Refresh.'};
+  default:return {t:'Couldn’t load from Notion',d:(e&&e.message)||'Something went wrong. Press Refresh to try again.'};
+}}
+function webFail(e){
+  var c=webErr(e);
+  if(!S.rows){setLive(false,'Not connected');D.querySelectorAll('.empty.load').forEach(function(x){x.classList.remove('load');x.textContent='Not loaded: see the message at the top.';});}
+  banner('warn',c.t,S.rows?c.d+' Showing the last data that loaded.':c.d,'<div class="act"><button type="button" class="btn ghost" id="retry">Refresh</button></div>');
+  var rb=$('#retry');if(rb)rb.onclick=function(){loadWeb(true);};
+}
+function loadWeb(fresh){
+  if(webBusy)return;webBusy=true;setBusy(true);
+  fetch(apiUrl(fresh),{cache:'no-store'}).then(function(r){
+    return r.json().catch(function(){return {error:{code:'bad_answer',message:'The dashboard server answered '+r.status+'.'}};});
+  }).then(function(d){
+    webBusy=false;setBusy(false);
+    if(!d||!Array.isArray(d.rows)){webFail(d&&d.error);return;}
+    takeData(d,false);
+    if(d.error){var c=webErr(d.error);banner('warn',c.t,c.d+' Showing the last data that loaded.');}
+    if(PRINT&&!printed){printed=true;(D.fonts&&D.fonts.ready?D.fonts.ready:Promise.resolve()).then(function(){setTimeout(function(){window.print();},500);});}
+  },function(){webBusy=false;setBusy(false);webFail({code:'offline'});});
+}
+function startWeb(){
+  $('#refresh').disabled=false;
+  var pdf=$('#pdf');pdf.hidden=false;pdf.href='?report&print'+(KEY?'&k='+KEY:'');
+  var b=D.querySelector('#banner p');if(b)b.textContent='Reading the Notion Product Roadmap. It fills in as soon as Notion answers.';
+  var ft=D.querySelector('footer .wrap span');if(ft)ft.textContent='Source: Notion Product Roadmap and the latest Roadmap Watch report, read live through a read-only Notion connection. It updates itself every 5 minutes while open; Refresh reads Notion again now. This page never changes Notion.';
+  setLive(false,'Connecting to Notion');
+  loadWeb(false);
+  setInterval(function(){if(D.visibilityState==='visible')loadWeb(false);},300000);
+  D.addEventListener('visibilitychange',function(){if(D.visibilityState==='visible'&&S.stamp&&Date.now()-S.stamp>300000)loadWeb(false);});
+}
+/*/WEB-ONLY*/
+
+/* ================= start ================= */
+function start(){
+  if(window.__SNAP){startSnap(window.__SNAP);return;}
+  if(WEB){startWeb();return;}
+  if(!window.claude||typeof window.claude.use!=='function'){banner('info',NOMCP.t,NOMCP.d);setLive(false,'Not connected');return;}
+  window.claude.use('mcp').then(function(m){
+    mcp=m;
+    if(!mcp){banner('info',NOMCP.t,NOMCP.d);setLive(false,'Not connected');return;}
+    $('#refresh').disabled=false;setBusy(true);setLive(false,'Connecting to Notion');
+    loadRows(false);
+    mcp.watchTool(SERVER,'notion-search',SEARCH_IN,function(ev){if(ev.type==='data')takeSearch(ev.result);else searchError(ev.error);},{cache:CACHE});
+  },function(){banner('info',NOMCP.t,NOMCP.d);setLive(false,'Not connected');});
+}
+start();
+})();
+</script>
+</body>
+</html>

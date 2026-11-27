@@ -531,7 +531,8 @@ def practices_stats(ctx, practice_id):
 
 @practices.command("approve")
 @click.argument("practice_id")
-@click.option("--idb-office/--no-idb-office", required=True, help="Is it an IDB office?")
+@click.option("--idb-office/--no-idb-office", required=True,
+              help="Is it an IDB office? The API only approves with both checklist items ticked.")
 @click.option("--idb-kit/--no-idb-kit", required=True, help="Does it have the IDB kit?")
 @click.option("--training-date", required=True, help="App training date, YYYY-MM-DD.")
 @click.option("--subsidiary-id")
@@ -665,7 +666,9 @@ def practices_auto_approve(ctx, manual, countries, no_mx, max_approvals, trainin
         if len(approved) + len(planned) >= max_approvals:
             skipped.append(r["id"])
             continue
-        body = {"isIdbOffice": False, "hasIdbKit": False,
+        # The API refuses an approval unless both checklist items are ticked
+        # (422 "checklist: incomplete"); every approval on prod is true/true (Sean, 27 Nov 2026).
+        body = {"isIdbOffice": True, "hasIdbKit": True,
                 "appTrainingDate": approval.training_date(training_in_days), "note": approval.approval_note(r)}
         req = Request("POST", f"/practices/{r['id']}/decisions/approve", body=body)
         if dry:
