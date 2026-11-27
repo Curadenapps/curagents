@@ -21,6 +21,28 @@ steps are in `skills/webex-web/SKILL.md` Recipe 4. Nothing to set up, no API key
 | "Action items" | **Next Steps** table | Owner and due from the item; transcript confirms (§4) |
 | Transcript | Checks only | Owners, dates, decisions the summary missed; never pasted whole |
 
+## 3b. Field Mapping: Yogurt → Notion
+
+Yogurt (local recorder, `docs/yogurt.md`) covers what Webex has no recap for: calls in
+a space, 1:1 calls, video chats, unrecorded meetings, and downloaded recordings
+uploaded into it. Read through the `yogurt` MCP server (PC only).
+
+| Yogurt (MCP) | Notion target | Notes |
+|--------------|---------------|-------|
+| `get_meeting` title + start | Page `Name`, `Date` | Prefer the calendar event title (`calendar_event.title`) when Yogurt's is generic ("Webex call") |
+| `start` → `end` | `Duration` property | |
+| `attendees` (calendar) + named transcript speakers | `Attendees` property | Webex speakers come as You / Them (below) |
+| Meeting id (UUID) | `Fireflies ID` property | Idempotency key `yogurt:{id}`; `Source = Yogurt` |
+| `get_meeting` summary (Markdown) | **Summary**, **Topics Covered** | Yogurt's local model is smaller than Webex AI: check every decision against the transcript |
+| `myNotes` | Topics / Next Steps | Sean's own typed notes outrank the model's summary |
+| `get_transcript` (format `text`) | Checks + action items | Yogurt writes no action-item list: take them from the transcript and myNotes |
+
+**Speakers on Webex.** Yogurt names speakers only for Zoom, Teams and Meet. On Webex
+the lines are `You` (Sean's mic) and `Them` (everyone else on the call audio). For a
+two-person call, `Them` is the other attendee. With more people, name a speaker only
+when the words make it certain ("Derek here", someone addressed by name and answering);
+otherwise write "the team" / "Phinamic" and leave the owner as `TBC` for Sean.
+
 ## 1. Fireflies fallback: Webex → Fireflies Setup (one-time)
 
 Fireflies joins your Webex meetings as a bot and transcribes them automatically.

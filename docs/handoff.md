@@ -423,6 +423,11 @@ the courier on Personal). Sean runs prompt 2, then prompt 3.
    30 Oct; the live version has unsourced market facts. Pick the version.
 8. Truth Catcher (5 Nov) suggests updating the Referral Program roadmap row's release
    to match the UAE referral MVP (Mar 2027).
+9. **Yogurt**: installed on the PC 25 Nov (v0.3.76, signed by Frigade Inc.) and
+   registered as the `yogurt` MCP server in `~/.claude.json`, so every Claude Code
+   session on the PC (both accounts) has it. Left for Sean: finish Yogurt's first-run
+   setup (models) and turn on **Settings > AI apps**; until then the server answers
+   "connecting AI apps turned off". Steps in `docs/yogurt.md`.
 
 ## Agent refinements to do (maintenance session)
 
