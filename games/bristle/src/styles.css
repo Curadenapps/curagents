@@ -306,6 +306,7 @@ html, body { height: 100%; margin: 0; background: #000; overflow: hidden; }
   transition: transform 180ms var(--ease), border-color 180ms, box-shadow 180ms; font: inherit; }
 .dcard canvas { width: 100%; height: auto; display: block; }
 .dcard b { padding: 0 16px; font-family: var(--display); font-weight: 400; font-size: 19px; letter-spacing: 0.06em; color: #fff; }
+.dcard b .dcombo { margin-left: 8px; padding: 2px 7px; border-radius: 999px; background: #FCE300; color: #0A1F44; font-style: normal; font-size: 11px; letter-spacing: 0.12em; vertical-align: 3px; text-transform: uppercase; }
 .dcard .dtext { padding: 0 16px; font-size: 14px; line-height: 1.45; color: var(--mist); min-height: 40px; }
 .dchip { margin: 4px 16px 0; align-self: flex-start; font-family: var(--display); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; background: rgba(139,184,232,0.14); color: var(--sky); }
 .dcard.b-brush .dchip { background: color-mix(in srgb, var(--blue) 45%, transparent); color: #fff; }

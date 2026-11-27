@@ -3,25 +3,26 @@
 // busiest moments, and names keyboard or gamepad buttons to match what the player is using.
 import { TILE } from '../engine/render';
 import type { GameCore } from './game';
+import { keyName } from '../ui/kit';
 
 type TipId = 'pogo' | 'airdash' | 'gap' | 'walljump' | 'crouch' | 'paste' | 'focus' | 'deepclean' | 'stuck';
 
 export class Tips {
   g: GameCore; cool = 6; roomT = 0; hazards = 0; roomId = ''; wallT = 0; slitT = 0; crouchT = 0;
   constructor(g: GameCore) { this.g = g; }
-  private k(key: string, pad: string) { return this.g.input.usingPad ? pad : key; }
+  private k(a: Parameters<typeof keyName>[1]) { return keyName(this.g as any, a); }
   private seen(id: TipId) { return !!this.g.save.flags['tip-' + id]; }
   show(id: TipId) {
     const g = this.g; if (this.seen(id) || this.cool > 0 || g.ui.isOpen() || g.busy()) return false;
     const text: Record<TipId, string> = {
-      pogo: `In the air, hold ${this.k('Down', 'down')} and slash (${this.k('J', 'X')}) to bounce off spikes and plaque.`,
-      airdash: `Jump, then dash in mid-air (${this.k('Shift', 'B')}) to cross wide gaps. Your dash comes back when you land or touch a wall.`,
-      gap: `A clogged gap between two teeth. Walk up and press ${this.k('Up or E', 'up')} to clean it with an interdental brush of the size shown.`,
-      walljump: `Touching a wall in the air? Jump again (${this.k('Space', 'A')}) to spring off it.`,
-      crouch: `Hold ${this.k('Down', 'down')} to crawl under low gaps.`,
-      paste: `Shoot an interdental refill: hold right-click or ${this.k('L', 'Y')} to draw, let go to fire. Mouse wheel or R changes the size.`,
-      focus: `Low on enamel? Hold ${this.k('F', 'LB')} to focus and mend a shard with fluor.`,
-      deepclean: `Guarded creature. Hold slash (${this.k('J', 'X')}) to charge a Deep Clean, then let go: it cracks guards.`,
+      pogo: `In the air, hold ${this.k('down')} and slash (${this.k('attack')}) to bounce off spikes and plaque.`,
+      airdash: `Jump, then dash in mid-air (${this.k('dash')}) to cross wide gaps. Your dash comes back when you land or touch a wall.`,
+      gap: `A clogged gap between two teeth. Walk up and press ${this.k('interact')} to clean it with an interdental brush of the size shown.`,
+      walljump: `Touching a wall in the air? Jump again (${this.k('jump')}) to spring off it.`,
+      crouch: `Hold ${this.k('down')} to crawl under low gaps.`,
+      paste: `Shoot an interdental refill: hold ${this.k('spell')} to draw, aim with ${this.k('up')} / ${this.k('down')}, let go to fire. ${this.k('size')} changes the size.`,
+      focus: `Low on enamel? Hold ${this.k('focus')} to focus and mend a shard with fluor.`,
+      deepclean: `Guarded creature. Hold slash (${this.k('attack')}) to charge a Deep Clean, then let go: it cracks guards.`,
       stuck: 'Exits glow and show where they lead. Hold Up or Down for a moment to look around.',
     };
     g.save.flags['tip-' + id] = true; g.ui.toast(text[id], 7000); this.cool = 14; return true;

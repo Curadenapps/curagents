@@ -113,12 +113,14 @@ export function wordmark(cls = 'wordmark') {
   p.setAttribute('d', WORDMARK.d); p.setAttribute('fill', 'currentColor'); svg.append(p); return svg;
 }
 
-/** Keyboard or gamepad glyph for an action, for hints. */
-export function keyName(g: GameCore, a: 'confirm' | 'back' | 'move' | 'jump' | 'attack' | 'spell' | 'dash' | 'interact' | 'focus' | 'size') {
-  const pad = g.input.usingPad;
-  const K: Record<string, [string, string]> = {
-    confirm: ['Enter', 'A'], back: ['Esc', 'B'], move: ['A / D', 'Left stick'], jump: ['Space', 'A'], attack: ['J', 'X'],
-    spell: ['L', 'Y'], dash: ['K', 'RB'], interact: ['E', 'Up'], focus: ['F', 'LB'], size: ['R', 'R3'],
-  };
-  return K[a][pad ? 1 : 0];
+export type KeyAction = 'confirm' | 'back' | 'move' | 'jump' | 'attack' | 'spell' | 'dash' | 'interact' | 'focus' | 'size' | 'up' | 'down' | 'rinse';
+export const KEY_NAMES: Record<'zxc' | 'qwer' | 'pad', Record<KeyAction, string>> = {
+  zxc: { confirm: 'Enter', back: 'Esc', move: '← →', jump: 'Z', attack: 'X', spell: 'V', dash: 'C', interact: 'S', focus: 'A', size: 'D', up: '↑', down: '↓', rinse: '↑ + V' },
+  qwer: { confirm: 'Enter', back: 'Esc', move: 'A / D', jump: 'Space', attack: 'Q', spell: 'E', dash: 'Shift', interact: 'G', focus: 'F', size: 'T', up: 'W', down: 'S', rinse: 'R' },
+  pad: { confirm: 'A', back: 'B', move: 'Left stick', jump: 'A', attack: 'X', spell: 'Y', dash: 'RB', interact: 'Up', focus: 'LB', size: 'R3', up: 'Up', down: 'Down', rinse: 'Up + Y' },
+};
+/** Keyboard (for the chosen layout) or gamepad name for an action, for hints and cards. */
+export function keyName(g: GameCore, a: KeyAction) {
+  const set = g.input.usingPad ? 'pad' : ((g.save.settings as any).layout === 'qwer' ? 'qwer' : 'zxc');
+  return KEY_NAMES[set][a];
 }

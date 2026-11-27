@@ -5,7 +5,8 @@
 //    shortens the Inflamed status (level 2) and ends it (level 4).
 import type { GameCore } from '../game';
 import type { Entity, Faction, ProgressApi } from '../types';
-import { PERKS, BRANCHES, FACTIONS } from './perks';
+import { PERKS, BRANCHES, FACTIONS, cardText } from './perks';
+import { keyName } from '../../ui/kit';
 import { brandText as BT } from '../../design/tokens';
 import { applyOrder, currentOrder, ART } from '../orders';
 import { brush, idbHolder, idbRefill, foamCluster } from '../../design/kit';
@@ -24,14 +25,20 @@ export const masteryXp = (lvl: number) => lvl * lvl * 20;
 export class Progress implements ProgressApi {
   g: GameCore; el: HTMLElement | null = null; sel = 0; t = 0;
   constructor(g: GameCore) { this.g = g; }
-  get p() { return this.g.save.progress; }
+  get p() {
+    const p = this.g.save.progress;
+    // saves from before the combo cards: refund points spent on retired cards so they can be picked again
+    const old = p.perks.filter((id) => !PERKS.some((k) => k.id === id)); if (old.length) { p.perks = p.perks.filter((id) => !old.includes(id)); p.points += old.length; }
+    return p;
+  }
   has(id: string) { return this.p.perks.includes(id); }
   masteryLevel(f: Faction) { return masteryOf(this.p.mastery[f] || 0); }
   damageMult(f: Faction) { return 1 + 0.1 * this.masteryLevel(f); }
   onKill(e: Entity & { faction?: Faction; maxHp?: number; type?: string }) {
     const f: Faction = e.faction && e.faction !== 'plaque' ? e.faction : (GUESS.find(([re]) => re.test(e.type || ''))?.[1] ?? e.faction ?? 'plaque');
-    const xp = Math.round((5 + ((e as any).__baseMaxHp ?? e.maxHp ?? 15) / 3) * ((this.g as any).diff?.xp ?? 1)); this.gain(xp, f);
-    this.g.float(e.x, e.y - (e.hh ?? 10) - 6, '+' + xp + ' XP', '#8BB8E8');
+    const chain = (this.g.player as any)?.combo ?? 0, bonus = chain >= 6 ? 1.5 : chain >= 3 ? 1.25 : 1;
+    const xp = Math.round((5 + ((e as any).__baseMaxHp ?? e.maxHp ?? 15) / 3) * ((this.g as any).diff?.xp ?? 1) * bonus); this.gain(xp, f);
+    this.g.float(e.x, e.y - (e.hh ?? 10) - 6, '+' + xp + ' XP' + (bonus > 1 ? ' · combo' : ''), '#8BB8E8');
   }
   gain(xp: number, f?: Faction) {
     const p = this.p, g = this.g;
@@ -59,7 +66,8 @@ export class Progress implements ProgressApi {
   buy(id: string) {
     if (!this.canBuy(id)) { this.g.audio.sfx('ui-back'); return; }
     const g = this.g; this.p.points--; this.p.perks.push(id); g.audio.sfx('buy');
-    if (id === 'c4') { g.save.maxHp++; g.player.maxHp = g.save.maxHp; applyOrder(g as any); g.player.heal(99); }
+    if (id === 'k-enamel1' || id === 'k-enamel2') { g.save.maxHp++; applyOrder(g as any); g.player.heal(99); }
+    const k = PERKS.find((x) => x.id === id); if (k?.combo) g.ui.toast(`New combo: ${k.name}. ${cardText(k.text, (a) => keyName(g as any, a))}`, 5600);
     g.persist(); this.render();
   }
 
@@ -119,8 +127,8 @@ export class Progress implements ProgressApi {
     return `<button type="button" class="dcard b-${k.branch}${!small && i === this.sel ? ' on' : ''}${small ? ' small' : ''}" ${small ? '' : `data-card="${i}"`}>
       <canvas data-art="${k.branch}" width="360" height="220"></canvas>
       <span class="dchip">${ord.name} · ${br.name}</span>
-      <b>${k.name}</b><span class="dtext">${k.text}</span>
-      <i class="dtier">${[1, 2, 3, 4].map((t) => `<em class="${t <= tier ? 'on' : ''}"></em>`).join('')}</i></button>`;
+      <b>${k.name}${k.combo ? ' <em class="dcombo">Combo</em>' : ''}</b><span class="dtext">${cardText(k.text, (a) => keyName(this.g as any, a))}</span>
+      <i class="dtier">${PERKS.filter((x) => x.branch === k.branch).map((_x, t0) => t0 + 1).map((t) => `<em class="${t <= tier ? 'on' : ''}"></em>`).join('')}</i></button>`;
   }
   render() {
     if (!this.el) return; const p = this.p, picking = p.points > 0;

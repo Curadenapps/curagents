@@ -27,7 +27,7 @@ export function freshSave(): SaveData {
   return {
     v: 1, room: START_ROOM, door: '@', maxHp: 5, hp: 5, fluor: 0, shine: 0,
     abilities: { dash: false, grip: false, rinse: false, pulse: false }, flags: {}, killed: {}, visited: {},
-    settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, difficulty: 1, brightness: 0.85 }, playTime: 0,
+    settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, layout: 'zxc', difficulty: 1, brightness: 0.85 }, playTime: 0,
     progress: { xp: 0, level: 1, points: 0, mastery: { plaque: 0, sugar: 0, tartar: 0, gum: 0 }, perks: [] },
   };
 }
