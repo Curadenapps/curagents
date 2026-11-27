@@ -10,6 +10,9 @@ Read this first when you pick BRISTLE up in a new session. Sean asked: do not bu
   session uses (published 26 Nov). Build with `node build.mjs --fragment` and publish `dist/fragment.html` to that URL;
   it declares the `sample` capability for Claude-voiced NPCs. The older artifact
   https://claude.ai/artifact/7RrzdiT1yUeCX34PiECaJD lives in Sean's other Claude account and is out of date.
+  Design system (artifact, private): https://claude.ai/artifact/MXMb9wjtNjNVXW4P4H471E. Build with
+  `node styleguide.mjs --fragment` and publish `dist/styleguide-fragment.html` to that URL. Its brand picker remembers
+  the choice in the browser (`bristle-brand`), because artifact links cannot pass `?brand=`.
 - Brand guardrails: the brand pack's palette and type; no violence (plaque is loosened and rinsed away, never hurt;
   say "cleaning power", not "damage"); no clinical or efficacy claims; real product names and IDB sizes/colours are
   placeholders until the brand team verifies them.

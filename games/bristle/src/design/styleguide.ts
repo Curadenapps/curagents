@@ -1007,7 +1007,10 @@ async function boot() {
   const nav = `<nav class="side"><div class="mark">BRISTLE<small>Design system v0.1</small></div><ol>${SECTIONS.map(([id, n], i) => `<li><a href="#${id}"><span>${String(i + 1).padStart(2, '0')}</span>${n}</a></li>`).join('')}</ol><label class="brandpick">Brand pack<select id="brandpick">${Object.values(packs).map((p) => `<option value="${p.id}"${p.id === P.id ? ' selected' : ''}>${p.name}</option>`).join('')}</select></label><div class="foot">Living style guide, drawn by the game's own code.<br>Build: node styleguide.mjs</div></nav>`;
   const main = `<main>${cover()}${principles()}${colour()}${typeSection()}${components()}${materials()}${kitSection()}${heroSection()}${heroOptions()}${ordersSection()}${idbSection()}${lightSection()}${particleSection()}${motionSection()}${doDont()}<footer><span>BRISTLE: Knight of the Crown &middot; ${P.legal}</span><span>tokens.ts &middot; kit.ts &middot; ART-BIBLE.md &middot; BACKLOG.md</span></footer></main>`;
   document.body.innerHTML = `<div class="layout">${nav}${main}</div>`;
-  document.getElementById('brandpick')?.addEventListener('change', (ev) => { const u = new URL(location.href); u.searchParams.set('brand', (ev.target as HTMLSelectElement).value); location.href = u.toString(); });
+  document.getElementById('brandpick')?.addEventListener('change', (ev) => { // remembered in this browser, so it also works where ?brand= cannot be passed
+    const v = (ev.target as HTMLSelectElement).value; try { localStorage.setItem('bristle-brand', v); } catch { /* storage blocked */ }
+    const u = new URL(location.href); if (u.searchParams.has('brand')) { u.searchParams.delete('brand'); location.href = u.toString(); } else location.reload();
+  });
   await new Promise((r) => requestAnimationFrame(() => r(null)));
   const liveTicks: { tick: (dt: number) => void }[] = [];
   for (const el of Array.from(document.querySelectorAll<HTMLElement>('[data-art]'))) {
