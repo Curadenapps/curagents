@@ -15,7 +15,7 @@ import { drawRig, staticPose } from '../../design/hero';
 import { EARNED_ORDERS } from '../../design/hero';
 
 const GUESS: [RegExp, Faction][] = [[/leech|flare|swell|gum|inflam/, 'gum'], [/imp|sugar/, 'sugar'], [/tartar|spit|brute|calculus|matriarch/, 'tartar']];
-export const nextXp = (level: number) => 12 + level * 14;
+export const nextXp = (level: number) => 20 + level * 22;
 /** Seconds the card pick ignores input after it opens, so a button mashed in a fight cannot take or close it. */
 const LOCK = 0.7;
 export const masteryOf = (xp: number) => Math.min(5, Math.floor(Math.sqrt(xp / 20)));

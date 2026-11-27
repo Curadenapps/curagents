@@ -17,9 +17,9 @@ import { rewardOnce, XP } from './xp';
 const SAVE_KEY = 'bristle-save-v1';
 /** Difficulty tuning. Gentle forgives, Veteran punishes. */
 export const DIFFICULTY = [
-  { name: 'Gentle', enemyHp: 0.7, extraDamage: 0, invuln: 1.8, fluor: 1.3, focus: 0.75, xp: 1.0 },
-  { name: 'Knight', enemyHp: 1.0, extraDamage: 0, invuln: 1.3, fluor: 1.0, focus: 1.0, xp: 1.0 },
-  { name: 'Veteran', enemyHp: 1.35, extraDamage: 1, invuln: 1.0, fluor: 0.85, focus: 1.25, xp: 1.25 },
+  { name: 'Gentle', hp: 2, enemyHp: 0.7, extraDamage: 0, invuln: 1.8, fluor: 1.3, focus: 0.75, xp: 1.0 },
+  { name: 'Knight', hp: 0, enemyHp: 1.0, extraDamage: 0, invuln: 1.3, fluor: 1.0, focus: 1.0, xp: 1.0 },
+  { name: 'Veteran', hp: 0, enemyHp: 1.35, extraDamage: 1, invuln: 1.0, fluor: 0.85, focus: 1.25, xp: 1.25 },
 ];
 export const START_ROOM = 'crown-gate';
 
