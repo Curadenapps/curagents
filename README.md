@@ -1,214 +1,277 @@
 # Curadenapps Agents
 
-Automated agents and invokable skills for Curaden's BOB App and cross-tool workflows.
-Works with Claude Code and any model that reads markdown agent definitions.
+Claude agents and skills that run the day-to-day around Curaden's apps: **BOB** (the
+clinician app and BOB Admin) first, the **Curaprox app** next. They keep Notion,
+Asana, Jira, Confluence, GitHub and Webex in step, answer app support requests, approve
+practice sign-ups, keep the roadmap honest and draft the team's updates.
+
+Every agent is a markdown spec in this repo. Claude reads the spec from `main` at the
+start of each run, so a merged PR is live on the next run. No servers to deploy.
+
+> Snapshot of 27 Nov 2026. **Who runs what right now** lives in the Notion
+> **Agent registry**, not here: [`RUNTIME.md`](RUNTIME.md) explains it.
 
 ---
 
-## System Architecture
+## How it works
 
+```mermaid
+flowchart LR
+    repo["curagents main<br/>specs, skills, scripts"]
+    cloud["Claude Routines (cloud)<br/>Curaden + Fabian accounts"]
+    pc["PC tasks<br/>Webex courier, practice approvals,<br/>support sweep"]
+    tools[("Notion, Asana, Jira,<br/>Confluence, GitHub")]
+    outbox["Notion: Webex outbox"]
+    webex["Webex"]
+    admin["BOB Admin"]
+    log["Notion: Agent run log"]
+    maint["Maintenance session"]
+
+    repo --> cloud
+    repo --> pc
+    cloud -- connectors --> tools
+    cloud -- "posts to send" --> outbox
+    outbox --> pc
+    pc -- "Webex web" --> webex
+    pc -- "bob-admin CLI" --> admin
+    cloud --> log
+    pc --> log
+    log --> maint
+    maint -- "fixes by PR" --> repo
 ```
-README.md          ← You are here. System overview and entry point.
-CLAUDE.md          ← Claude Code instructions (auto-loaded by Claude)
-SCOPE.md           ← Hard boundaries: what this system can and cannot do
-RUNTIME.md         ← Where each agent runs (PC vs cloud), schedules, run log, monitoring
-│
-├── skills/        ← SKILL & SCOPE — invokable on demand by any session
-│   └── curaden-communications/
-│       ├── SKILL.md            ← Main entry point (3 procedures)
-│       └── references/         ← Procedure-level config (JQL, templates, repo details)
-│
-├── agents/        ← Agent specs (single source of truth, incl. model tier)
-├── .claude/agents/← Thin Claude Code subagent wrappers → agents/*.md (for parallel swarming)
-│
-├── src/           ← API integrations (Notion sync, Asana read/write, Figma poll)
-├── scripts/       ← gate.ts (cheap pre-run change checks), run-agent.sh (headless CI runner),
-│                    render-pdf.ps1 (team update PDF); webex-post.js, webex-read.js,
-│                    webex-meetings.js (all Webex work via the browser, see skills/webex-web)
-├── templates/     ← team-update.html: Curaprox-styled PDF report for the announcements agent
-├── .github/       ← GitHub Actions: sync-and-scan, figma-diff
-└── .planning/     ← GSD project planning docs (roadmap, requirements, state)
-```
+
+| Layer | Lives in | Owned by |
+|-------|----------|----------|
+| **What** an agent does | This repo (`agents/`, `skills/`, `scripts/`, `tools/`) | The maintenance session; every change is a PR |
+| **When** it runs | Claude Routines in the cloud for connector-only work; Claude desktop scheduled tasks on a PC for anything that needs a browser or a sign-in | Set up once per account ([`docs/curaden-routines.md`](docs/curaden-routines.md)) |
+| **Who** runs it | The Notion **Agent registry**: one row per run, with the account (`Curaden`, `Personal`, `Fabian`, `Paused`) | Sean flips one field |
+| **Did it work** | The Notion **Agent run log**: every run writes one row, even on failure | Checked every weekday at 10:15; fixes go in by PR |
+
+Why the split: Webex has no connector we may use, and IT blocks browser automation on
+the Curaden account. So the cloud does all the thinking, writes Webex posts to the
+**Webex outbox** in Notion, and one PC task (the **Webex courier**) posts them through
+Webex web on Sean's own sign-in. No bot tokens.
 
 ---
 
-## Skill & Scope
+## What runs when
 
-Skills are invokable by any Claude session. Trigger by phrase — no manual setup.
+Times are Zurich, weekdays unless noted. The Agent registry is the live list.
 
-### `curaden-communications` → [`skills/curaden-communications/SKILL.md`](skills/curaden-communications/SKILL.md)
+| Run | When | Where | What it does |
+|-----|------|-------|--------------|
+| Orchestrator daily | 07:45 | Cloud (Fabian) | Board moves by fixed rules; the rest go on "Orchestrator: board moves to decide" |
+| Truth Catcher scan | 07:58, 13:58 | Cloud (Curaden) | Asana BOB App and the App Tasks intake board vs the Notion Product Roadmap |
+| Webex courier + Webex Sweep | 08:02, 09:02, 12:02, 17:02 | PC (Sean, Personal) | Posts the Webex outbox, then logs new Webex messages and meetings in the Inbox and Asana |
+| Boom Boom Derek | 08:20 (posted 09:02) | Cloud (Curaden) + courier | What Phinamic owes, checked against the roadmap; a ping in the common chat |
+| Practice approvals | 08:50, 12:50, 16:50 | PC (Fabian and Sean) | `bob-admin practices auto-approve` on prod; exceptions and duplicate sign-ups to Asana |
+| App Support | Hourly, Mon–Thu | Cloud (Fabian) | Writes the answer to every "App Requests & Feedback" submission |
+| App Support (cover) | Hourly, Fri | Cloud (Curaden) | Same, on Sean's cover day |
+| App Support invites | 09:10, 13:10, 16:10, Mon–Thu | PC (Fabian) | Adds requesters once their reply is approved |
+| bob-support sweep | Hourly 07:30–19:30, Mon–Thu | PC (Fabian) | Read-only Admin Console facts on every open support request |
+| Agent run log check | 10:15 | Cloud (Curaden) | Missed or failed runs → fix by PR or one Inbox row for Sean |
+| Roadmap watch | Mon 07:40 | Cloud (Curaden) + courier | Drift report: Notion roadmap vs Asana and Jira; summary to App Team |
+| Roadmap pack | Mon 08:40 | Cloud (Curaden) + courier | Weekly roadmap picture and PDF; the post waits for Sean's OK |
+| Roadmap ← Jira sync | Thu 07:30 | Cloud (Curaden) | The only automation that writes roadmap rows from Jira |
+| Team update draft | Thu 14:00 | Cloud (Curaden) + courier | Notion draft; posted to Webex after Sean ticks Approved |
+| Feedback QA report | Fri 10:10 | Cloud (Curaden) + courier | PDF report from the feedback inbox to the Webex QA space |
+| Figma diff | 07:00 UTC | GitHub Actions | `figma-diff.yml`, gated on the file's last change |
 
-| Trigger phrase | Procedure | What it does |
-|----------------|-----------|-------------|
-| "sync revolvenote" | RevolveNote Weekly Sync | Stage + push latest RevolveNote app to `github.com/Curadenapps/revolvenote` |
-| "sync BOB to Notion" | Jira-Notion BOB Sync | Mirror all open BOB Jira issues into Notion pages (create or update) |
-| "run BOB broadcast" | Moved to the announcements agent | The BOB weekly is part of the Thursday team update |
-
-Config details for each procedure: [`skills/curaden-communications/references/`](skills/curaden-communications/references/)
-
-### `growth` → [`skills/growth/SKILL.md`](skills/growth/SKILL.md)
-
-User acquisition for BOB since marketing stopped supporting it (25 Nov 2026), used by the
-`growth` agent. Notion home: BOB Growth (Growth experiments + Content calendar), under the
-BOB App hub. Phrases: "growth plan {market}", "content calendar", "draft post {topic}",
-"partner kit {market}", "event prep {event}", "website check", "store listing check",
-"new experiment {idea}", "growth pulse", "growth review".
-
-### `market-rollout` → [`skills/market-rollout/SKILL.md`](skills/market-rollout/SKILL.md)
-
-Rollout support for the 2027 markets: UAE (Apr 2027) and Switzerland, the main market (May, waiting on Higi); then Slovenia and South Africa (Aug, on hold), USA and Japan (Sep); Germany self-service, Italy and Brazil parked. Calendar and stages live on the Notion Market rollout system page; to-dos on the Asana board BOB Market Rollouts. Used by the
-`market-rollout` agent; Notion home is the BOB Academy, where partners and staff learn
-BOB (training modules with their How-to guides, the onboarding tracker, the FAQs, and the
-"Partner onboarding: BOB setup and training" page, one flow for every partner and internal
-team). The reusable onboarding email is "Template — Partner onboarding email" under
-Curaden App Hub → Templates.
-
-| Trigger phrase | What it does |
-|----------------|-------------|
-| "rollout status [market]" | Gate, people, training, partner rhythm; writes the market page's Rollout status |
-| "onboard {person} for {market}" / "super user for {market}" | Onboarding plan, tracker row, Admin Console access request draft for Phinamic |
-| "build module {topic}" / "training plan for {market}" | Module draft from the catalogue (M0–M9, C1–C2); market training plan |
-| "partner prep {market}" / "partner follow-up {market}" | Agenda and pre-read; decisions, actions, follow-up draft, proposed Asana tasks |
-| "what can Blanca take" | Marketing-side items Sean could hand to Blanca |
-
-### `webex-web` → [`skills/webex-web/SKILL.md`](skills/webex-web/SKILL.md)
-
-The one way every agent works in Webex, through Webex web on Sean's own sign-in
-(the desktop app's built-in browser, Claude in Chrome as fallback; no bot tokens).
-
-| Need | Script | Recipe |
-|------|--------|--------|
-| Post a message (with @mention), or a message + PDF | `scripts/webex-post.js` | 1, 2 |
-| Read a space, check a post landed once | `scripts/webex-read.js` | 3 |
-| Meeting recaps: AI summary, action items, full transcript, recording frames | `scripts/webex-meetings.js` | 4 |
+Everything else runs on request, by trigger phrase, in any Claude Code session on this
+folder.
 
 ---
 
-## Agent Roster
+## Agents
 
-Agents share a common YAML frontmatter schema (trigger, memory, idempotency_key,
-dry_run, output schema) and are invokable by the orchestrator, GitHub Actions,
-or Claude Code subagents (`.claude/agents/`). Each has a strictly fenced domain.
+Each spec in [`agents/`](agents/) has the same frontmatter (trigger, memory,
+idempotency key, dry run, output schema, `model:`) and a fenced domain. The same agents
+are registered as Claude Code subagents in [`.claude/agents/`](.claude/agents/) for
+parallel work ([`agents/orchestrator.md`](agents/orchestrator.md) §3a).
 
-### Orchestration
+### Orchestration and governance
 
-| Agent | File | Role | Trigger |
-|-------|------|------|---------|
-| Orchestrator | [`agents/orchestrator.md`](agents/orchestrator.md) | Master router for interactive runs: dispatches to the right agent, answers "agent status" and "inbox check-up" from Notion, files escalations in the Inbox | Manual, webhooks (schedules call agents directly) |
+| Agent | What it does | Started by |
+|-------|--------------|------------|
+| [Orchestrator](agents/orchestrator.md) | Routes requests to the right agent, answers "agent status" and "inbox check-up", files escalations in the Inbox, does the daily board moves | Daily 07:45, "board moves", any request |
+| [Truth Catcher](agents/truth-catcher.md) | Asana vs the Notion Product Roadmap (not on roadmap, too early, status drift); watches the support intake board for untriaged or stuck requests. Comments in Sean's voice | Twice a day, "truth catcher" |
+| [Boom Boom Derek](agents/boom-boom-derek.md) | Truth Catcher for the Phinamic dev team: a ledger of what they owe across Webex, Jira, Confluence, the WBS and Asana; funny-but-clear pings | Daily 08:20, "boom boom" |
+| [Brand Asset](agents/brand-asset.md) | RACI approval gates, taxonomy, audit trail for brand assets | Asana section change, manual |
+| [Asana Maintenance](agents/asana-maintenance.md) | Kanban routing, update snippets, audit trail writes | Called by other agents, manual |
 
-### Core Governance
+### Support and operations
 
-| Agent | File | Role | Trigger |
-|-------|------|------|---------|
-| Truth Catcher | [`agents/truth-catcher.md`](agents/truth-catcher.md) | Notion vs Asana alignment on BOB App, plus intake tracking on App Tasks, Requests & Feedback (untriaged, unanswered, stuck; live since 12 Oct) | Claude Routine, weekdays 07:58 + 13:58 Zurich |
-| Boom Boom Derek | [`agents/boom-boom-derek.md`](agents/boom-boom-derek.md) | Truth Catcher for the Phinamic team (Derek La and Khanh): ledger of what they owe across Webex, Jira, Confluence, recaps and Asana, checked against the roadmap; pings the team in the Webex common chat (QA space) or "Curaden / Phinamic" | Scheduled task on Sean's computer, weekdays 08:45 Zurich (Mon rundown, Tue–Fri nudges) + manual "boom boom"; live, posts through Webex web in the desktop app's built-in browser (no token) |
-| Brand Asset | [`agents/brand-asset.md`](agents/brand-asset.md) | RACI approval gates, taxonomy enforcement, audit trail | Asana section_changed webhook |
-| Asana Maintenance | [`agents/asana-maintenance.md`](agents/asana-maintenance.md) | Kanban routing, update snippets, directive parsing, audit trail writes | Asana comment webhook / 5-min poll |
+| Agent | What it does | Started by |
+|-------|--------------|------------|
+| [App Support](agents/app-support.md) | Answers every app support form submission from the FAQs, board history, Jira and Notion; the owner checks each reply; bugs and gaps go to Jira. Learns into [`docs/app-support-faq.md`](docs/app-support-faq.md). Setup for Fabian: [`docs/app-support-quickstart.md`](docs/app-support-quickstart.md) | Hourly, "app support" |
+| [Webex Sweep](agents/webex-sweep.md) | Reads the watched Webex spaces and new meetings; one Inbox row per item, triage tasks in BOB App › Webex inbox, update comments on Asana tasks | Inside the Webex courier, "check webex" |
+| [Meeting Notes](agents/meeting-notes.md) | A Webex meeting (summary, action items, transcript, recording frames) into a Notion recap. Calls without a Webex recap come from [Yogurt](docs/yogurt.md), the local recorder | "meeting notes" |
+| [Feedback QA](agents/feedback-qa.md) | Notion feedback inbox → checks against scope and recent changes → PDF report to the Webex QA space; Confluence for full UATs | Fri 10:10, "send QA report" |
+| [Announcements](agents/announcements.md) | Weekly, two-week or monthly team update from every tool; Notion draft, Webex after approval | Thu 14:00, "team update", "post it" |
 
-### Data & Integrations
+### Roadmap and release
 
-| Agent | File | Role | Trigger |
-|-------|------|------|---------|
-| Notion Sync | [`agents/notion-sync.md`](agents/notion-sync.md) | Owns `.truth-cache/` — fetches Notion requirements, roadmap, brand guidelines | Weekdays every 4h, before truth-catcher (gated on Notion edits) |
-| Figma | [`agents/figma.md`](agents/figma.md) | Library monitor, export validator, design diff detection | Weekday CRON (gated) + Figma webhook |
-| Webflow | [`agents/webflow.md`](agents/webflow.md) | Publishing gate, brand compliance, clinical claims check, asset sync | brand-asset approval event + manual |
-| GitHub | [`agents/github.md`](agents/github.md) | PR/commit linkage to Jira and Asana (Curadenapps org) | GitHub PR + push webhooks |
-| Release | [`agents/release.md`](agents/release.md) | Release notes, Notion changelog, GitHub tag, Webflow update | Manual only — "cut release v*" |
-| Roadmap Watch | [`agents/roadmap-watch.md`](agents/roadmap-watch.md) | Weekly drift report: Notion BOB + Curated Treatment Plan roadmaps vs Asana and Jira | PC task Mon 08:00 (report + App Team summary in Webex) + manual "roadmap watch" |
-| Market Rollout | [`agents/market-rollout.md`](agents/market-rollout.md) | Rollout partner for BOB (then the Curaprox app) in UAE, CH, Slovenia, South Africa, USA, Japan (Italy parked): audiences, onboarding tracker, Admin Console super users, training modules, partner prep and follow-ups. Drafts only; Sean sends, approves and grants | Manual only — "rollout status", "onboard … for …", "build module …" |
-| Growth | [`agents/growth.md`](agents/growth.md) | BOB user acquisition: 90-day plans per market, content calendar and posts in Sean's voice, partner kits, event packs, website and store checks, experiments, funnel G1–G4 against the Launch KPIs. Drafts only; Sean or the partner publishes | Manual + Claude Routine Mon 09:10 "Growth pulse (Curaden)" once created |
-| App Support | [`agents/app-support.md`](agents/app-support.md) | Writes the answer to every "App Requests & Feedback" form submission (signed as automated) from the product FAQs and what it has learned; the owner checks it and adds the submitter to send it (since 13 Nov), hands Fabian (owner of every request since 18 Nov; Sean covers) the exact change and anything it can't answer, closes on their confirm; bugs and product gaps to Jira via In Development. Fabian can run it too ([`docs/app-support-quickstart.md`](docs/app-support-quickstart.md)). Mailboxes support@ / info@bobscore.com planned, pending IT | Claude Routine hourly 07:20–19:20 weekdays (Curaden) + manual "app support" |
-| Announcements | [`agents/announcements.md`](agents/announcements.md) | Weekly / two-week / monthly team update from meetings, Asana, Notion, Jira, GitHub and agent reports; Notion draft → Webex after approval | Claude Routine Thu 14:00 Zurich (draft) + manual "team update", "post it" |
+| Agent | What it does | Started by |
+|-------|--------------|------------|
+| [Roadmap Watch](agents/roadmap-watch.md) | Weekly drift report: Notion roadmap vs Asana and Jira. Read-only except its report | Mon 07:40, "roadmap watch" |
+| [Roadmap Pack](agents/roadmap-pack.md) | One picture and a PDF of the BOB roadmap for the App Team (build in [`tools/roadmap-pack`](tools/roadmap-pack/)) | Mon 08:40, "roadmap pack" |
+| [Release](agents/release.md) | Release notes, Notion changelog, GitHub tag for BOB and RevolveNote | Manual only: "cut release" |
 
-### Model tiers and swarming
+### Markets and growth
 
-Each agent's `model:` frontmatter is the single source for its tier. Workflows, `package.json`
-scripts and `.claude/agents/` wrappers all use the same tier.
+| Agent | What it does | Started by |
+|-------|--------------|------------|
+| [Market Rollout](agents/market-rollout.md) | Rollout partner for BOB, then the Curaprox app: UAE (Apr 2027) and Switzerland, the main market (May 2027), then Slovenia, South Africa, USA, Japan; Italy parked. Onboarding, super users, training modules, partner prep. Drafts only | "rollout status", "onboard … for …" |
+| [Growth](agents/growth.md) | BOB user acquisition since marketing stopped supporting it (25 Nov 2026): plans per market, content calendar, partner kits, experiments, funnel G1–G4. Drafts only | "growth plan …", "content calendar" |
+
+### Data and integrations
+
+| Agent | What it does | Started by |
+|-------|--------------|------------|
+| [Notion Sync](agents/notion-sync.md) | Owns `.truth-cache/`: requirements, roadmap, brand guidelines from Notion | Before Truth Catcher, "sync notion" |
+| [Figma](agents/figma.md) | BOB library monitor, export checks, design diffs | GitHub Actions, "check figma" |
+| [Webflow](agents/webflow.md) | Publishing gate: brand and clinical-claim checks, asset sync | Brand Asset approval, manual |
+| [GitHub](agents/github.md) | Links Curadenapps PRs and commits to Jira and Asana; read-only on GitHub | "github status", PR events |
+
+### Model tiers
+
+Each spec's `model:` field is the single source; workflows, `package.json` and the
+subagent wrappers follow it.
 
 | Tier | Agents | Why |
 |------|--------|-----|
-| Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical work: poll, diff, link, route |
-| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, roadmap-watch, webflow, meeting-notes, feedback-qa, announcements, market-rollout, app-support, growth | Judgement on structured data |
+| Haiku 4.5 | notion-sync, figma, github, asana-maintenance | Mechanical: poll, diff, link, route |
+| Sonnet 5.5 | orchestrator, truth-catcher, boom-boom-derek, webex-sweep, app-support, meeting-notes, feedback-qa, announcements, roadmap-watch, roadmap-pack, market-rollout, growth, webflow | Judgement on structured data |
 | Opus 5.5 | brand-asset, release | Approval gates, clinical claims, releases |
 
-Parallel fan-out rules are in [`agents/orchestrator.md`](agents/orchestrator.md) §3a.
+---
 
-### Scheduled runs and token budget
+## Skills
 
-| Workflow | Schedule (UTC) | Change check (no LLM) | Claude run |
-|----------|----------------|-----------------------|------------|
-| `sync-and-scan.yml` | Manual (scheduled scan moved to the Claude Routine) | Notion edits since last sync → Asana events since last token | notion-sync (Haiku) → truth-catcher: `scripts/truth-scan.ts` does the checks and posting, Sonnet only judges unlinked tasks |
-| `figma-diff.yml` | Weekdays 07:00 | Figma file `lastModified` | figma (Haiku) |
+Skills load by trigger phrase in any Claude session on this folder. Phrases are in
+each `SKILL.md`.
 
-`.truth-cache/` is saved between runs with `actions/cache`. Every run writes model, turns
-and cost to the job summary. Dispatch with `force: true` to skip the change checks.
+| Skill | What it covers |
+|-------|----------------|
+| [`webex-web`](skills/webex-web/SKILL.md) | The only way to work in Webex: post (with @mentions and files), read spaces, read meetings. Webex web on Sean's sign-in; no bot tokens |
+| [`bob-admin`](skills/bob-admin/SKILL.md) | BOB Admin through the `bob-admin` CLI: reports, users and Super Users, roles, practice approvals, products, news, partner API tokens, and every API endpoint through `call`. PC only, own sign-in |
+| [`bob-support`](skills/bob-support/SKILL.md) | App Support requests against the Admin Console: `inbox`, `check <task>`, `do <task>` (rename, address, delete, temporary password, email) on the owner's yes |
+| [`bob-qa`](skills/bob-qa/SKILL.md) | QA of the BOB web app: `qa run smoke`, `qa run coach-loop`, pass / fail report. Writes on test only |
+| [`feedback-qa`](skills/feedback-qa/SKILL.md) | Feedback triage and the QA report |
+| [`uat`](skills/uat/SKILL.md) | Full UAT for a new build or a large feature: Asana tasks, Confluence UAT page, UAT log |
+| [`market-rollout`](skills/market-rollout/SKILL.md) | Rollout status, onboarding, super users, training modules, partner prep and follow-ups |
+| [`growth`](skills/growth/SKILL.md) | Acquisition plans, posts in Sean's voice, partner kits, event packs, website and store checks, experiments |
+| [`curaden-communications`](skills/curaden-communications/SKILL.md) | RevolveNote → GitHub sync, Jira → Notion BOB sync. The BOB weekly moved to the Announcements agent |
 
 ---
 
-## Core Philosophy
+## Tools
 
-| Layer | Tool | Role |
-|-------|------|------|
-| **The Constitution** | Notion | Immutable strategic requirements and brand guidelines. Source of truth. |
-| **The Frontier** | Asana | Execution layer — feedback, comments, tasks, moving parts. |
-| **The Engine** | This repo | Bridges the two. Enforces Notion's truth onto Asana's chaos. Stays self-documented. |
-
-The Truth Catcher exists because the gap between strategy (Notion) and execution (Asana) is where scope creep lives.
-Skills exist because recurring sync/broadcast workflows should not require human context-switching.
+| Tool | What it is |
+|------|------------|
+| [`tools/bob-admin`](tools/bob-admin/) | `bob-admin`, `bob-support` and `bob-qa`: Python CLIs ([CLI-Anything](https://github.com/HKUDS/CLI-Anything) format) built from the BOB platform's OpenAPI spec. `--json` on every command, test and prod, prod writes locked by default. Install with `tools/bob-admin/install.ps1` |
+| [`tools/roadmap-pack`](tools/roadmap-pack/) | The weekly roadmap picture and PDF build (Python standard library + headless Chromium) |
+| [`scripts/`](scripts/) | `webex-post.js`, `webex-read.js`, `webex-meetings.js` (Webex web), `sync-checkout.sh` (SessionStart hook), `gate.ts` (cheap change checks before a run), `truth-scan.ts`, `qa-report.mjs`, `render-pdf.ps1`, Yogurt setup |
 
 ---
 
-## Governance
+## Repository map
 
-See [`SCOPE.md`](SCOPE.md) for hard boundaries — what this system can and cannot do.
-
-Key rules:
-- Clinical/medical claims require Legal gate before any asset ships
-- Truth Catcher cannot take destructive Asana actions: it comments, and marks a task complete only when it is obviously done (it tells Sean each time)
-- `.truth-cache/` is auto-synced from Notion — never edit manually
-- Brand assets need `[Agent Audit: Approved by {Name} on {Date}]` before Done transition
+```
+README.md          ← You are here
+CLAUDE.md          ← Claude Code instructions (loaded automatically)
+dream.md           ← Shared context every agent reads first (§2–3)
+RUNTIME.md         ← Where and when each agent runs, the switch, run-log rules, monitoring
+SCOPE.md           ← Hard boundaries: what the system may and may not do
+│
+├── agents/        ← Agent specs (single source of truth, incl. model tier)
+├── .claude/       ← Subagent wrappers → agents/*.md; settings with the SessionStart hook
+├── skills/        ← Invokable skills (SKILL.md + references/)
+├── tools/         ← bob-admin / bob-support / bob-qa CLIs, roadmap-pack build
+├── scripts/       ← Webex web scripts, checkout sync, change gates, PDF rendering
+├── docs/          ← handoff.md (open work), App Support FAQ / playbook / voices,
+│                    Curaden Routine prompts, migration runbook, Yogurt
+├── templates/     ← Curaprox-styled HTML for the team update PDF
+├── src/           ← TypeScript API helpers (Notion, Asana, Figma, Webflow) for the GitHub Actions
+├── .github/       ← GitHub Actions: figma-diff (scheduled), sync-and-scan (manual)
+├── pc-tasks/      ← Archived copies of the old PC scheduled tasks (Oct 2026)
+├── games/         ← Prototypes: Plaque Hunter (brushing game), BRISTLE
+├── .planning/     ← Early GSD planning docs (Mar–Oct 2026), kept for history
+└── .truth-cache/  ← Written only by notion-sync; never edit by hand
+```
 
 ---
 
-## Setup
+## Rules every run follows
+
+From [`RUNTIME.md`](RUNTIME.md) and [`SCOPE.md`](SCOPE.md):
+
+- **Notion is the source of truth.** Asana is where work moves; the agents anchor it to
+  Notion. On timing, the Phinamic WBS beats the roadmap.
+- **Check the switch first.** A scheduled run reads its Agent registry row and stops if
+  it isn't its account's turn.
+- **Latest specs, never edited by a run.** Each run fetches `origin/main`. Fixes go
+  through a PR from the maintenance session.
+- **One run-log row per run**, even on failure. A run with no row counts as missed.
+- **Never type credentials.** A sign-in prompt is a failed run.
+- **Read Notion in view mode only.** SQL and rows mode share a small hourly allowance
+  across the workspace.
+- **People decide.** Sends, approvals, access grants and prod writes need a yes,
+  except a standing yes written into a spec (automatic practice approval).
+  Clinical or medical claims go through the Legal gate.
+- **Keep requester data anonymised.** This repo is public.
+
+---
+
+## Getting started
+
+**Working on the specs (Claude Code).** Clone the repo and open it in Claude Code. The
+SessionStart hook keeps the checkout on an up-to-date `main`. Read [`CLAUDE.md`](CLAUDE.md),
+then [`dream.md`](dream.md), then pick up open work in [`docs/handoff.md`](docs/handoff.md).
 
 ```bash
 git clone https://github.com/Curadenapps/curagents.git
 cd curagents
-npm install
-cp .env.example .env   # populate credentials
 ```
 
-Required environment variables:
+**Setting up a scheduled run.** Use the paste-once prompt in [`RUNTIME.md`](RUNTIME.md)
+("Scheduled task prompts") or the Routine prompts in
+[`docs/curaden-routines.md`](docs/curaden-routines.md), then add or flip its row in the
+Agent registry.
 
-| Variable | Purpose | Agent |
-|----------|---------|-------|
-| `ANTHROPIC_API_KEY` | Claude model access | All |
-| `NOTION_API_KEY` | Notion REST API (`ntn_...` internal integration token) | notion-sync |
-| `NOTION_ROOT_DATABASE_ID` | `86b68fc172dd43ff8ee3219a3a5435f6` | notion-sync |
-| `ASANA_ACCESS_TOKEN` | Asana API | truth-catcher, brand-asset, asana-maintenance |
-| `ASANA_PROJECT_GID` | BOB App project GID — App Requests is a section within this project | truth-catcher, asana-maintenance |
-| `ASANA_WEBHOOK_SECRET` | HMAC secret for webhook verification | asana-maintenance |
-| `FIGMA_API_TOKEN` | Figma REST API token | figma |
-| `FIGMA_FILE_KEY` | BOB design system Figma file key | figma |
-| `WEBFLOW_API_TOKEN` | Webflow REST API v2 token | webflow |
-| `WEBFLOW_SITE_ID` | Curaden Webflow site ID | webflow |
+**Fabian's side** (App Support, practice approvals, the orchestrator):
+[`docs/app-support-quickstart.md`](docs/app-support-quickstart.md).
 
-For Claude Code setup: see [`CLAUDE.md`](CLAUDE.md).
+**The BOB CLIs** (PC only): run `tools/bob-admin/install.ps1`, then sign in with your
+own BOB Admin account. See [`tools/bob-admin/README.md`](tools/bob-admin/README.md).
+
+**GitHub Actions and the TypeScript helpers** need a `.env`
+(`cp .env.example .env`, then `npm install`). The cloud Routines don't: they use
+Claude's connectors.
+
+| Variable | Used by |
+|----------|---------|
+| `ANTHROPIC_API_KEY` | GitHub Actions runs |
+| `NOTION_API_KEY`, `NOTION_ROOT_DATABASE_ID` | notion-sync; run-log rows from the bob-support sweep and practice approvals |
+| `ASANA_ACCESS_TOKEN`, `ASANA_PROJECT_GID`, `ASANA_WEBHOOK_SECRET` | `truth-scan.ts`, `gate.ts`, the Asana webhook handler |
+| `FIGMA_API_TOKEN`, `FIGMA_FILE_KEY`, `FIGMA_TEAM_ID` | figma |
+| `WEBFLOW_API_TOKEN`, `WEBFLOW_SITE_ID`, `WEBFLOW_*_COLLECTION_ID` | webflow |
+| `FIREFLIES_API_KEY` | meeting-notes fallback (Webex summaries come first) |
+| `CHROME_PATH` | PDF rendering (optional, auto-detects Chrome or Edge) |
+| `DRY_RUN` | `true` by default for the TypeScript helpers; the agents themselves run live |
 
 ---
 
-## Known Gaps
+## Known gaps
 
-| Gap | Impact |
+| Gap | Effect |
 |-----|--------|
-| Figma file key / Webflow site ID not set | figma and webflow agents run in config-error state |
-| Asana webhook not registered | asana-maintenance and brand-asset webhooks don't fire; scheduled scan uses the Asana events gate |
-| `DRY_RUN=true` everywhere | No live writes to any system |
-| roadmap-watch has no CI workflow | Weekly report runs only when triggered manually |
-| `NOTION_MEETING_NOTES_DB_ID` not set | meeting-notes writes recaps as child pages of Decision Log & Meeting Recaps; Fireflies is only a fallback (Webex summaries + transcripts come first) |
-| Notion AI meeting notes need a Business plan | announcements reads meetings from Decision Log & Meeting Recaps instead |
-| Webex bot tokens get culled after a few days | every agent posts and reads through Webex web on Sean's sign-in (`skills/webex-web`); Webex steps need his machine |
-| Webex web allows one live tab per browser | with Sean's own Webex tab open, ours is online ~15–20 s per load; `webex-post.js` posts in one call and retries safely with a marker |
-| Webex meeting summaries need Sean signed in to Webex in the desktop app's browser | the Thursday Routine can't read them; the "post it" session adds them. Recording playback also needs his `curaden.webex.com` site sign-in |
-| Webex needs Sean's PC (IT blocks browser automation on the Curaden account) | cloud Routines on Curaden write Webex posts to the Notion Webex outbox; the one PC task, the Webex courier on the Personal desktop app, posts them 4 times a weekday. PC off or Webex signed out: posts wait (Boom Boom pings expire at 18:00) |
+| IT blocks browser automation on the Curaden account | All Webex work runs on Sean's PC (the courier). PC off or Webex signed out: posts wait in the outbox; Boom Boom pings expire at 18:00 |
+| Webex web allows one live tab per browser | With Sean's own Webex tab open, ours is online ~15–20 s per load; `webex-post.js` posts in one call and retries safely with a marker |
+| No Notion Business plan | Notion SQL and rows-mode reads share a small hourly allowance, so agents read in view mode only; no Notion AI meeting notes |
+| Support mailboxes (info@ / support@bobscore.com) | Waiting for IT to approve a mail connector; App Support works from the Asana form only |
+| Asana webhook not registered | brand-asset and asana-maintenance don't fire on Asana events; they run when called |
+| Figma file key and Webflow site ID not set | figma and webflow stay in a config-error state until they are |
+| Run log has no `orchestrator` or `practice-approvals` agent option | Those runs log as `other` |
+
+Open work and decisions waiting on Sean: [`docs/handoff.md`](docs/handoff.md).

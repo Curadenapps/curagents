@@ -1,7 +1,7 @@
 {
   "name": "curagents",
   "version": "0.1.0",
-  "description": "Autonomous agent system for Curaden — bridges Notion, Asana, Figma, Webflow, Jira, and GitHub",
+  "description": "Claude agents and skills for Curaden's apps (BOB, Curaprox app): Notion, Asana, Jira, Confluence, GitHub and Webex in step, app support, practice approvals, roadmap and team updates",
   "private": true,
   "type": "module",
   "scripts": {
