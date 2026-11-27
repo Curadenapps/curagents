@@ -21,8 +21,8 @@ model: claude-sonnet-5-5
 tools: Read, AsanaAPI, NotionAPI, JiraAPI
 trigger:
   - type: schedule
-    cron: "CRON_TZ=Europe/Zurich 20 7-19 * * 1-5"
-    label: Claude Routine "App Support (Curaden)" on Sean's account, hourly Mon-Fri; covers Fabian's requests on Fridays or when his Routine is down, otherwise no-op (see "What runs where")
+    cron: "CRON_TZ=Europe/Zurich 50 7-19 * * 5"
+    label: Claude Routine "App Support (Curaden)" on Sean's account, hourly on Fridays only (Sean's cover day); never runs on Fabian's days, so the two never answer the same request (see "What runs where")
   - type: schedule
     cron: "CRON_TZ=Europe/Zurich 20 7-19 * * 1-4"
     label: Claude Routine "App Support (Fabian)" on Fabian's account, hourly Mon-Thu; every request (BOB included since 18 Nov 2026)
@@ -140,7 +140,7 @@ and Sean has no PC task for it ("I cannot handle this many agents").
 | Owner | Requests | Asana gid | Gets the Review, change and held subtasks | Working days |
 |-------|----------|-----------|-------------------------------------------|--------------|
 | **Fabian Jöhl** | All of them: BOB (app, web, BOB Admin, accounts, practices), Curaprox app, iTOP, Admin Panel, HubSpot, vouchers, general | `1196321462158324` | Fabian | Mon–Thu |
-| **Sean Dunne** (cover) | Fabian's, on Fridays and while Fabian's Routine is off or down | `1207214370347608` | Sean, only for what a cover run writes | Fri, or when covering |
+| **Sean Dunne** (cover) | Fabian's, on Fridays (and by hand if Fabian's row is Paused) | `1207214370347608` | Sean, only for what a cover run writes | Fri |
 
 - **BOB Admin changes** go to Fabian too ("Fabian: change in BOB Admin"). If he can't
   open BOB Admin yet, he reassigns that subtask to Sean (open point in
@@ -160,25 +160,25 @@ and Sean has no PC task for it ("I cannot handle this many agents").
 |-----|---------|---------------|------|
 | **App Support (Fabian)**: cloud Routine | Fabian's | Hourly 07:20–19:20, Mon–Thu | Everything in "Scheduled run", for every request |
 | **App Support invites (Fabian)**: desktop-app scheduled task on Fabian's PC | Fabian's | 09:10, 13:10 and 16:10, Mon–Thu | Adds the submitters whose Review subtask was ticked ("Invite run") |
-| **App Support (Curaden)**: cloud Routine | Sean's Curaden account | Hourly 07:20–19:20, Mon–Fri | Covers only (below); otherwise logs `no-op` and stops |
+| **App Support (Curaden)**: cloud Routine | Sean's Curaden account | Hourly 07:50–19:50, **Fridays only** | Sean's Friday cover (below) |
 | **Support sweep (Fabian)**: Windows scheduled task on Fabian's PC, `bob-support sweep --all --post --close-solved --scheduled` (`skills/bob-support`) | Fabian's Admin Console sign-in and Asana token | Hourly 07:30–19:30, Mon–Thu | Looks every open request on the board up in the Admin Console (`--all`, Fabian owns them all), **read-only**, and leaves the facts in Asana: a comment on the "Fabian: change in BOB Admin" subtask, or an "Admin Console check" subtask on the form task (no email addresses), only when they changed. Closes an **Awaiting Feedback** ticket on its own when the requester has signed in to BOB **after** sending it (registration, activation and login requests; account active, temporary password replaced, practice active; Fabian, 25 Nov), with the reason in the check note. Never changes the Admin Console and never writes to a requester |
 
 Setup for Fabian: [`docs/app-support-quickstart.md`](../docs/app-support-quickstart.md).
 
-**Sean's Routine covers** when any of these is true at the start of its run:
+**One request, one Routine** (Sean, 26 Nov 2026, after both Routines answered the
+same request on the same morning). The two Routines never run on the same day:
 
-- it's **Friday** (Fabian works Monday to Thursday);
-- Fabian's registry row "App Support (Fabian)" is missing, or its **Account** is
-  `Paused`;
-- Fabian's last run is missing or more than 2 hours old during his hours (his
-  Routine isn't set up yet, is off, or is failing). **Not at the 07:20 run**: Fabian's
-  Routine starts a minute later, so his newest run is always the evening before and
-  both would answer the same form task (double reply on 26 Nov). The 08:20 run is the
-  first that can cover on this ground. Read it from the run-log view,
-  newest first (`RUNTIME.md` "Reading Notion"): the newest row with Agent
-  `app-support` and Account `Fabian`. The registry's **Last run** rollup can't be read
-  through the connector, and never use SQL for this. It says so in its run-log row
-  ("covering for Fabian: {reason}").
+- Fabian's runs Monday to Thursday at :20; Sean's runs **only on Fridays**, at :50.
+- Sean's Routine has no "Fabian's last run looks old" rule any more: at the first run
+  of each day his last run is always from the evening before, so that rule made both
+  Routines answer. If Fabian's Routine is really down, Sean sets Fabian's registry
+  row to `Paused` and runs his own by hand ("app support"). Any run of Sean's on
+  Mon–Thu, scheduled or by hand, with Fabian's row there and not Paused logs `no-op`
+  ("Fabian's day") and stops. This also covers the 07:20 double reply of 26 Nov
+  (#114) while Sean's Routine is still scheduled Mon–Fri.
+- **Never answer on top of someone.** Before posting anything on a form task, every
+  run reads its latest comments. If anyone from the team or either support assistant
+  has commented since the submitter's last message, it posts nothing and moves on.
 
 On a cover run, Review subtasks go to Sean. There's no invite run on Sean's side, so
 Sean adds an approved submitter himself (the + next to the avatars) or leaves the
@@ -249,27 +249,61 @@ System`, `Area`, `Describe your request`. The custom fields `App Country`,
 `Application(s)`, `Request Type` and `🚦 Priority` hold the same data and win when they
 differ (someone may have corrected them).
 
-**Reach the submitter: the owner validates, then invites.** Since 13 Nov 2026
-(Sean: "we need to validate"), App Support writes the reply but **nothing it writes
-reaches a requester until the owner has checked it**. The owner then decides whether
-to invite the requester to read it. This keeps runs cheap (no browser, no invite
-logic) and every answer is checked by a person while the agent is still being
-validated. A comment only emails the people following the task, and the form doesn't
-add the submitter as a follower, so:
+**Standard answers go straight out; only the rest waits for the owner** (Sean,
+26 Nov 2026: "standard answers go straight out. No question about it… creating a
+subtask every time is incorrect"). From 13 to 26 Nov every reply waited in a Review
+subtask, which left people without an answer for days and gave the owner subtasks that
+read like logs.
+
+- **Standard** = the reply is one of the replies on the Notion Support replies page
+  (or the learned FAQ) with nothing changed in BOB and nothing claimed about the
+  person's account: how to register, country not in the list, download and devices,
+  free or training, phone version, waiting for approval, what BOB is, no login email
+  (asks which email they registered with), first login, old app → new app, the old
+  app's end date, brushes, what the patient gets, demo session, progress, BPE,
+  language and settings, more than one practice, a reminder, the "All done" line.
+  **Post it on the form task straight away** and make sure the submitter gets it (the
+  pointer below). No Review subtask.
+- **Not standard** = everything else: a change in BOB Admin (email, practice name or
+  address, roles, adding or removing someone), anything that says an account exists,
+  was changed or that a password or email is on its way, a bug, `no-source`, patient
+  data, a local-team request, anything unsure. Post nothing; make **one** subtask on
+  the owner's "App Support: needs you" task, named as an instruction the owner can
+  act on without opening anything else, for example "Check in BOB Admin whether
+  {first name} has an account, then tick to send the reply" or "Change the practice
+  name in BOB Admin to the one in the reply, then tick". Notes: one line on what's
+  needed, the form task link, the submitter's email, and the reply above `---`. No
+  run logs, sources or reasoning in the subtask: those go in the run log.
+
+**Never claim something about an account you haven't seen** (26 Nov 2026: a reply
+said "your account is already set up, a temporary password is on its way" to someone
+with no account). Whether a person has an account, which email it uses, whether it's
+active or has signed in, can only be read with the bob-admin CLI (`users list
+--search {email}`, `users get`), which the cloud Routines don't have. So a reply that
+depends on it is never standard: it goes to the owner as a "Check in BOB Admin…"
+subtask, and the owner (or a PC session) checks with the CLI before ticking. The
+Support sweep's "Admin Console check" note on the form task (Fabian's PC, hourly)
+counts as checked when it's from the last 24 hours. A completed "change in BOB Admin"
+subtask is not proof the account exists.
+
+**Getting the reply to the submitter.** A comment only emails the people following
+the task, and the form doesn't add the submitter as a follower, so:
 
 1. **The submitter doesn't follow the task** (the usual case for a new submission).
    - **Post the reply on the form task now** (step 3), greeting by first name with
      no @mention and no email address. Only the team sees it: the submitter can't
      until they're added.
-   - **Hold a `Review: {form task title}` subtask** for the owner ("Scheduled run"
-     step 5). Notes: the form task link, the submitter's email (it stays on this
-     private task, never in a comment), what the reply was based on, and:
-     "Read the reply on the task. Wrong? Edit or delete the comment (it's posted from
-     your account). **To send it: tick this subtask**; the invite run adds them
-     within a few hours. In a hurry: the + next to the member avatars (top right) →
-     type the email → **untick 'Also invite to App Tasks, Requests & Feedback
-     project'** → Send invitation. **Not sending**: comment 'skip'." Unticking matters: otherwise they'd see the whole
-     board, with other people's requests.
+   - **Standard reply**: make an `Invite: {form task title}` subtask on the owner's
+     "App Support: needs you" task and **complete it straight away**, so it never
+     shows up as work. Notes: `Route: Asana`, the form task link and the
+     submitter's email (it stays on this private task, never in a comment). The
+     invite run picks it up within a few hours and invites them.
+   - **Not standard**: the subtask above ("Not standard"), open, for the owner.
+     Ticking it is the yes: the next run posts the reply and the invite run adds
+     the submitter. Adding them by hand: the + next to the member avatars (top
+     right) → type the email → **untick 'Also invite to App Tasks, Requests &
+     Feedback project'** → Send invitation (otherwise they'd see the whole board).
+     Not sending: comment 'skip'.
    - **Next runs**: as soon as a follower matches the form email (case-insensitive,
      `followers.email`) and nobody has @mentioned them yet (the invite run usually
      already has), post one short line in the voice: "Hi @{first name}, I've answered your request just above.
@@ -712,15 +746,15 @@ for 6 months is listed for Sean, not deleted.
 
 ## Scheduled run
 
-Two Claude Routines, **hourly from 07:20 to 19:20 Zurich** (Cloud, Asana + Notion
-connectors): Fabian's, plus Sean's as cover ("What runs where"). A request that lands at
-10:05 gets its answer at 10:20. Each run:
+Two Claude Routines on different days (Cloud, Asana + Notion connectors): Fabian's
+hourly 07:20–19:20 Monday to Thursday, Sean's hourly 07:50–19:50 on Fridays ("What runs
+where"). A request that lands at 10:05 on a Tuesday gets its answer at 10:20. Each run:
 
 1. **Check the switch** and fetch `origin/main`. If `agents/app-support.md` isn't on
    `main` yet, log `no-op` ("spec not merged") and stop. Fabian's Routine handles
-   every request. Sean's Routine handles them only when it's covering (Friday,
-   Fabian's row paused or missing, or his last run more than 2 hours old); otherwise
-   it logs `no-op` and stops.
+   every request Monday to Thursday. Sean's Routine runs on Fridays only; started
+   by hand on another day, it covers only when Fabian's row is Paused or missing,
+   otherwise it logs `no-op` ("Fabian's day") and stops ("One request, one Routine").
    Read Notion in view mode only (`RUNTIME.md` "Reading Notion"); Fabian's Routine and invite run reach Notion through the REST API instead (`docs/app-support-quickstart.md`, "Notion through the API"): this Routine runs
    every hour, so SQL here would use up the workspace's query allowance.
 2. **Pick up and classify** new form submissions and new stories (steps 1–2), plus
@@ -734,12 +768,14 @@ connectors): Fabian's, plus Sean's as cover ("What runs where"). A request that 
    close tasks the owner confirmed. If the owner already replied by hand on a form
    task, don't reply on top of it: learn from it (step 6).
 4. **Post the held replies the owner ticked** (below).
-5. **Hold for the owner**: every reply (step 1), plus what App Support can't do or
-   mustn't answer alone. A reply is still written in every case except spam and
+5. **Hold for the owner**: only what isn't standard (step 1), plus what App Support
+   can't do or mustn't answer alone. A reply is still written in every case except spam and
    patient data:
-   - `review`: every reply waits for the owner's check (step 1). Subtask
-     "Review: {title}", starting with `Route: email` or `Route: Asana`. When another reason applies too, it goes in the same
-     subtask's notes, not a second subtask;
+   - not standard (step 1): the owner's check comes first. The subtask is named as
+     the instruction ("Check in BOB Admin whether…, then tick to send the reply"),
+     with `Route: email` or `Route: Asana` on the first line of its notes. When
+     another reason applies too, it goes in the same subtask's notes, not a second
+     subtask. Standard replies are posted, not held;
    - `no-source`: nothing in any source answered it (step 3);
    - patient data in the request, spam, a dev request outside Phinamic's apps, a
      request for the local team ("Local contact": the subtask names the contact), or
@@ -790,10 +826,11 @@ in to Asana. Each run:
    `https://app.asana.com`. On a sign-in page: never type credentials. Tell Fabian
    once (`PushNotification`: "Asana is signed out in Chrome. Sign in, and the next
    invite run catches up."), log `partial` ("Asana signed out") and stop.
-3. **Find the approved ones** with the connector: `search_tasks` with `text`
-   "Review:", `is_subtask` true, `completed` true, completed in the last 14 days. Keep
-   those whose parent is an "App Support: needs you" task, whose notes say
-   `Route: Asana`, and that have no comment starting "Done". For each, read the form
+3. **Find the approved ones** with the connector: the subtasks of each "App Support:
+   needs you" task (search it as in "Scheduled run" step 5), completed in the last 14
+   days. An `Invite:` subtask is a standard reply the hourly run already posted and
+   completed itself; any other ticked subtask is one the owner approved. Keep those
+   whose notes say `Route: Asana` and that have no comment starting "Done". For each, read the form
    task link and the email from the subtask notes, and check the form task's
    `followers.email`: already a follower → skip (the hourly run finishes it).
    **Also** (Fabian, 26 Nov 2026): open form tasks on the board (not in Done) with a
@@ -833,14 +870,49 @@ subtask the owner ticked or a comment a team member wrote by hand, only that one
 sign-in, never more than 10 a run. The browser steps are the ones tested by hand on
 13 Nov 2026.
 
+## Stuck first logins: a new temporary password after 6 days
+
+Sean, 26 Nov 2026: "If there's nothing inside the CLI on BOB Admin and they haven't
+responded on Asana, then you can do it." This is Sean's standing yes for one prod write,
+`bob-admin --env prod users temp-password {user id}`, only when **all** of these hold:
+
+- the form task has an App Support or owner reply about signing in that is **6 days or
+  older**, and the submitter hasn't commented since;
+- the bob-admin CLI shows the account (searched by the email from the form) as
+  **active and never signed in** (or no sign-in since the account was created or
+  moved to the new app);
+- no temporary password was sent for this account in the last 6 days (the task's
+  comments and the run log say).
+
+It runs only where the CLI is: a PC session or Fabian's invite run, on the signed-in
+person's own sign-in, with prod writes unlocked by them (`skills/bob-admin/SKILL.md`).
+The cloud Routines can't run it: they leave a "Check in BOB Admin…" subtask (step 1)
+saying the 6 days are up. If the CLI finds **no account**, nothing is sent: the owner
+gets a subtask and the reply is the registration one (step 2 of the form is the main
+contact, who gets access; step 3 only adds colleagues). After sending, post one line
+on the form task: "We've sent you a new temporary password by email from
+support@bobscore.com (please check your spam folder too). Sign in at
+https://bobscore.app and choose your own password." Log it in the run log without the
+person's name or email.
+
+## One-off corrections for Fabian's next run
+
+Each item is done once by Fabian's Routine (or by Fabian), then removed from this list
+by PR. Task gids only, no names.
+
+None open. (The 26 Nov item for form task `1220684969810477` was dropped on 27 Nov:
+BOB Admin prod does have an active account for that submitter and a temporary
+password went out on 25 Nov, so the 26 Nov reply was right and needs no correction.)
+
 ## What it posts on its own
 
-Since 13 Nov 2026 (Sean: "we need to validate"), **nothing App Support writes
-reaches a requester until the owner has checked it** (step 1). On its own it:
+Since 26 Nov 2026 (Sean: "standard answers go straight out"), App Support posts the
+standard replies (step 1) on its own; everything else waits for the owner. On its own
+it:
 
-- writes every reply, with a Review subtask for the owner: on the Asana route as a
-  comment on a form task the submitter doesn't follow yet (only the team sees it), on
-  the email route as a ready email in the subtask that the owner sends from Outlook;
+- posts every standard reply on the form task and queues the submitter for the invite
+  run (a completed `Invite:` subtask);
+- holds every other reply in one subtask for the owner, named as the instruction;
 - posts the @mention pointer line once the owner has added the submitter;
 - posts a held draft the owner ticked, and the "All done" line after the owner's
   "done";
@@ -849,16 +921,17 @@ reaches a requester until the owner has checked it** (step 1). On its own it:
 The cloud runs never add a follower or invite anyone; the invite run on Fabian's PC
 adds a submitter only after the owner ticked their Review subtask, or after a team
 member answered them by hand on the task, and then assigns them the task. From 10 to 13 Nov 2026 replies went out
-unchecked ("everything auto"); Sean brings that back for a request type by listing it
-below by PR once its answers have proven right.
+unchecked ("everything auto"); from 13 to 26 Nov every reply waited for the owner.
 
 The hard rules still apply to every post, automated or not: never a password, code or
 login link, never patient data, never an email address, never a date or feature
-promise, never a clinical claim, always the voice file's "(automated)" sign-off.
+promise, never a clinical claim, never an offer of a call or meeting (Sean, 25 and
+26 Nov 2026), never a claim about an account nobody checked in BOB Admin, always the
+voice file's "(automated)" sign-off.
 
 | Sent without the owner's check | Since |
 |--------------------------------|-------|
-| (none) | |
+| The standard replies in step 1 (the Notion Support replies page, nothing about the person's account) | 26 Nov 2026 |
 
 ## Mailboxes: support@ and info@bobscore.com (planned, not active)
 
