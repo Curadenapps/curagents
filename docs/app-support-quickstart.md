@@ -198,7 +198,7 @@ connector on his account can only open the Curaden workspace. His runs use Sean'
 internal integration **"App Support (Fabian)"** instead: read and insert only, shared
 with the Agent control room (registry and run log), the product FAQs, the Support
 replies page (📋 Support, `3287e8aabbb480b79f16f460a1c35a00`), BOB Kit and its
-how-tos, the Product Roadmap, the Market Rollout Academy and the Education Hub
+how-tos, the Product Roadmap, the BOB Academy and the Education Hub
 markets pages. Nothing else in the workspace is visible to it.
 
 **The key.** Sean sends it to Fabian privately. It lives only in:

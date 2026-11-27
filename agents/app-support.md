@@ -66,8 +66,8 @@ memory:
     - "asana: App Tasks, Requests & Feedback 1200298616652229 (tasks, notes, custom fields, followers with email, stories), including completed and archived tasks: the board's history is where past answers live"
     - "asana: BOB App 1204489225205419, read-only, for open tickets on the same problem"
     - "jira: BA project (curaden-apps.atlassian.net), read-only: how a feature works today and what Phinamic said about it"
-    - "notion: workspace search (How-To Documents, BOB Kit, Market Rollout Academy, Product Roadmap, 🚩 Inbox WX rows), read-only"
-    - "notion: Market Rollout Academy 4087e8aabbb481df9fa3c1662efbbe6a, Training modules (collection://ac2f0425-bc31-4bc9-8826-3b01736035c6) and their linked How-To pages, read-only"
+    - "notion: workspace search (How-To Documents, BOB Kit, BOB Academy, Product Roadmap, 🚩 Inbox WX rows), read-only"
+    - "notion: BOB Academy 4087e8aabbb481df9fa3c1662efbbe6a, Training modules (collection://ac2f0425-bc31-4bc9-8826-3b01736035c6) and their linked How-To pages, read-only"
     - "notion: Product Roadmap 751b6071283e43e8b1a91054319e0db6, read-only (to answer 'is it planned' without promising dates)"
     - "notion: Curaden Education Hub Markets (collection://ede9f856-c953-4f1b-9eea-caaaa3aee9ce, view mode on view://4157e8aa-bbb4-81a8-ac7d-000ccdcaaf8a) and the Commercial Manager and Local Partners pages it links, read-only, to find the local contact for a requester's country"
   write:
@@ -538,8 +538,9 @@ and getting smarter"):
    tickets.
 5. **Jira BA**, read-only: `searchJiraIssuesUsingJql` with `project = BA AND text ~
    "{keyword}"`, newest first, for how a feature works today and what's being fixed.
-6. **Notion search** across the workspace (How-To Documents, BOB Kit, the Market
-   Rollout Academy and its Training modules, "Partner onboarding: BOB setup and
+6. **Notion search** across the workspace (How-To Documents, BOB Kit, the BOB
+   Academy (where partners and staff learn BOB) and its Training modules, which link
+   each module's How-To pages through `How-to guides`, "Partner onboarding: BOB setup and
    training" `4107e8aabbb481c9a15fe680c321efd2`, Product Roadmap, the 🚩 Inbox WX
    rows from Webex). Read-only, view mode or fetch; no SQL (`RUNTIME.md` "Reading
    Notion").
