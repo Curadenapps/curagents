@@ -8,7 +8,7 @@ export const rooms: RoomDef[] = [
     biome: "sugar",
     title: "Sugar Wastes",
     subtitle: "Where Sweetness Settles",
-    doors: { '1': { to: "narrows-slits", door: "2" }, '2': { to: "sugar-spires", door: "1" } },
+    doors: { '1': { to: "narrows-den", door: "2" }, '2': { to: "sugar-spires", door: "1" } },
     objects: [
       { type: "lore", x: 24, y: 16, text: "Do not lick the spires. Yes, even that one." },
     ],

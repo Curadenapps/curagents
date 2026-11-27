@@ -102,7 +102,7 @@ export const rooms: RoomDef[] = [
     id: "narrows-slits",
     biome: "narrows",
     dark: 0.1,
-    doors: { '1': { to: "narrows-relic", door: "2" }, '2': { to: "sugar-1", door: "1" } },
+    doors: { '1': { to: "narrows-relic", door: "2" }, '2': { to: "narrows-den", door: "1" } },
     objects: [],
     map: [
       '################################################################',
