@@ -6,7 +6,7 @@
 // Rules of the file:
 // - Pure data. Real product names, sizes and colours are placeholders until that brand verifies them.
 // - Never add a pack for a real company without that company's own assets and OK.
-// - Pick a pack with ?brand=<id> (style guide today; the game once it reads tokens.ts).
+// - Pick a pack with ?brand=<id>, or the style guide's picker (remembered in this browser as bristle-brand).
 
 export interface IdbSize { name: string; col: string; /** gap width in world units the size fits (gaps.ts channel) */ channel: number }
 export interface BrandPack {
@@ -88,4 +88,6 @@ export const packs: Record<string, BrandPack> = { curaprox, demo };
 
 const query = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('brand') : null;
 /** The pack in use. Defaults to CURAPROX. */
-export const pack: BrandPack = (query && packs[query]) || curaprox;
+/** A choice remembered in this browser (the style guide's picker), for hosts that cannot pass ?brand= (artifacts). */
+const stored = (() => { try { return typeof localStorage !== 'undefined' ? localStorage.getItem('bristle-brand') : null; } catch { return null; } })();
+export const pack: BrandPack = (query && packs[query]) || (stored && packs[stored]) || curaprox;

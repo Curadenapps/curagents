@@ -2,6 +2,7 @@
 // JS and CSS inlined, fonts copied to dist/fonts/ like build.mjs). Open it straight from file://.
 //   node styleguide.mjs          minified
 //   node styleguide.mjs --dev    readable output
+//   node styleguide.mjs --fragment   also writes dist/styleguide-fragment.html (no page shell, for the design system artifact)
 import * as esbuild from 'esbuild';
 import { readFileSync, writeFileSync, mkdirSync, readdirSync, copyFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -10,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = join(here, 'dist');
 
-export async function buildStyleguide({ minify = true } = {}) {
+export async function buildStyleguide({ minify = true, fragment = false } = {}) {
   const res = await esbuild.build({
     entryPoints: [join(here, 'src/design/styleguide.ts')],
     bundle: true, format: 'iife', target: 'es2022', minify, sourcemap: false, write: false, legalComments: 'none',
@@ -36,12 +37,20 @@ ${js}
 `;
   mkdirSync(join(dist, 'fonts'), { recursive: true });
   writeFileSync(join(dist, 'styleguide.html'), html);
+  if (fragment) writeFileSync(join(dist, 'styleguide-fragment.html'), `<title>BRISTLE Design System</title>
+<style>
+${css}
+</style>
+<script>
+${js}
+</script>
+`);
   if (existsSync(join(here, 'fonts'))) for (const f of readdirSync(join(here, 'fonts'))) if (/\.(otf|woff2?|ttf)$/.test(f)) copyFileSync(join(here, 'fonts', f), join(dist, 'fonts', f));
   return { bytes: html.length };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const t = Date.now();
-  const { bytes } = await buildStyleguide({ minify: !process.argv.includes('--dev') });
+  const { bytes } = await buildStyleguide({ minify: !process.argv.includes('--dev'), fragment: process.argv.includes('--fragment') });
   console.log(`built dist/styleguide.html (${Math.round(bytes / 1024)} KB) in ${Date.now() - t} ms`);
 }
