@@ -900,16 +900,9 @@ person's name or email.
 Each item is done once by Fabian's Routine (or by Fabian), then removed from this list
 by PR. Task gids only, no names.
 
-- **Form task `1220684969810477`**: a comment on 26 Nov 2026 (posted from Sean's
-  account) wrongly said the account was set up and a temporary password was on its
-  way. BOB Admin has no account for this person. Reopen the task, move it to Awaiting
-  Feedback, and post a short correction in Fabian's voice: sorry, the earlier message
-  was wrong, there's no account yet and no password email is coming; please register
-  at https://curaprox-apps.com/contact-form, where step 2 is you (the main contact,
-  who gets access) and step 3 only adds colleagues; Brazil not listed → "Other
-  countries". The submitter already follows the task, so the comment reaches them.
-  Then complete the open "Admin Console check" subtask with a comment "No account in
-  BOB Admin (checked 26 Nov)".
+None open. (The 26 Nov item for form task `1220684969810477` was dropped on 27 Nov:
+BOB Admin prod does have an active account for that submitter and a temporary
+password went out on 25 Nov, so the 26 Nov reply was right and needs no correction.)
 
 ## What it posts on its own
 
