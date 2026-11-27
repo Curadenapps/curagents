@@ -5,5 +5,5 @@ description: Checks around Webex (watched spaces + new meetings: summary, action
 model: claude-sonnet-5-5
 ---
 
-Read `dream.md` §2–3 and `skills/webex-web/SKILL.md`, then follow `agents/webex-sweep.md` exactly. It is live: write the log rows, triage tasks, Asana comments and the "New in Jira" note without asking.
+Read `dream.md` §2–3, `skills/webex-web/SKILL.md` and `skills/yogurt/SKILL.md`, then follow `agents/webex-sweep.md` exactly. It is live: write the log rows, triage tasks, Asana comments and the "New in Jira" note without asking.
 Return only the result JSON from the spec.

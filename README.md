@@ -79,6 +79,13 @@ The one way every agent works in Webex, through Webex web on Sean's own sign-in
 | Read a space, check a post landed once | `scripts/webex-read.js` | 3 |
 | Meeting recaps: AI summary, action items, full transcript, recording frames | `scripts/webex-meetings.js` | 4 |
 
+### `yogurt` → [`skills/yogurt/SKILL.md`](skills/yogurt/SKILL.md)
+
+Every Webex call Webex itself doesn't record or summarize (space and 1:1 calls, video
+chats, partner meetings) is recorded on the PC with [Yogurt](https://github.com/FrigadeHQ/yogurt)
+(local, no bot in the call) and read by `meeting-notes` and `webex-sweep` through
+Yogurt's local MCP server. Setup once per PC: `scripts/setup-yogurt.ps1`. Read-only, PC only.
+
 ---
 
 ## Agent Roster
