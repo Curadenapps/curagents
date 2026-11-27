@@ -39,7 +39,7 @@ export function currentOrder(g: Game): OrderId {
 /** Max health follows the set worn. Call after anything that changes save.maxHp. */
 export function applyOrder(g: Game) {
   const p = g.player; if (!p) return;
-  p.maxHp = Math.max(1, g.save.maxHp + ORDER_STATS[currentOrder(g)].hp);
+  p.maxHp = Math.max(1, g.save.maxHp + ORDER_STATS[currentOrder(g)].hp + ((g as any).diff?.hp ?? 0)); // Gentle adds health
   if (p.hp > p.maxHp) p.hp = p.maxHp;
 }
 export function setOrder(g: Game, id: OrderId) {

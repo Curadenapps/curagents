@@ -5,13 +5,13 @@ import type { Game } from '../types';
 import { Creature, PAL, canSee, drawAlert, eyeGlow, eyeScene, glint, playerAlive } from './common';
 
 type State = 'idle' | 'stalk' | 'tell' | 'swoop' | 'retreat';
-const TELL = 0.45, SWOOP = 0.62;
+const TELL = 0.7, SWOOP = 0.8;
 
 export class SugarImp extends Creature {
   state: State = 'idle'; st = 0; hx: number; hy: number; flap = 0; next = 1.6;
   p0 = { x: 0, y: 0 }; c1 = { x: 0, y: 0 }; p2 = { x: 0, y: 0 }; side = 1;
   constructor(x: number, y: number) {
-    super('sugar-imp', x, y, 13, 12, 18, 'sugar');
+    super('sugar-imp', x, y, 13, 12, 12, 'sugar');
     this.hx = x; this.hy = y; this.shine = 4; this.glowColor = PAL.cerise; this.knockResist = 0.2;
   }
   hoverTo(g: Game, tx: number, ty: number, dt: number, accel = 5) {
@@ -27,12 +27,12 @@ export class SugarImp extends Creature {
       case 'idle':
         this.hoverTo(g, this.hx, this.hy, dt, 3);
         this.lookX = Math.sin(this.age * 0.7) * 0.6; this.lookY = 0.2;
-        if (sees) { this.notice(g, false); this.state = 'stalk'; this.st = 0; this.next = 0.9 + Math.random() * 0.6; }
+        if (sees) { this.notice(g, false); this.state = 'stalk'; this.st = 0; this.next = 1.4 + Math.random() * 0.8; }
         break;
       case 'stalk': {
         // keep a perch up and to one side of the player, re-pick the side now and then
         if (this.st > 2.4 || Math.random() < dt * 0.25) { this.side = Math.random() < 0.5 ? -1 : 1; }
-        const tx = p.x + this.side * 150, ty = p.y - 120;
+        const tx = p.x + this.side * 150, ty = p.y - 95;
         this.hoverTo(g, tx, ty, dt, 4);
         this.facing = (sign(p.x - this.x) || 1) as 1 | -1; this.lookX = this.facing * 0.8; this.lookY = 0.6;
         this.next -= dt;
@@ -68,9 +68,9 @@ export class SugarImp extends Creature {
       }
       case 'retreat':
         // tired flutter up and away: the opening
-        this.hoverTo(g, this.x + this.facing * 40, p.y - 190, dt, 2.5);
+        this.hoverTo(g, this.x + this.facing * 40, p.y - 110, dt, 2.5);
         this.lookX = 0; this.lookY = -0.3;
-        if (this.st > 1.15) { this.state = 'stalk'; this.st = 0; this.next = 0.8 + Math.random() * 0.9; }
+        if (this.st > 1.7) { this.state = 'stalk'; this.st = 0; this.next = 1.3 + Math.random() * 1.0; }
         break;
     }
   }

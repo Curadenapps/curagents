@@ -1,7 +1,6 @@
 // What the NPCs say and sell. Written lines depend on game state and never repeat twice in a row;
 // the conversation scripts drive the dialogue box through the TalkHost the UI provides.
 import type { GameCore } from '../game';
-import { PERSONAS, type VoiceState } from '../../../server/personas.mjs';
 import { brand as BR, brandText as BT } from '../../design/tokens';
 import { applyOrder } from '../orders';
 
@@ -149,19 +148,6 @@ export function pick(g: GameCore, npc: string, pool: Line[] | string[]): string 
   last[npc] = text; return text;
 }
 
-// ---------------------------------------------------------------- voice state
-const FOE_NAME = (id: string) => id.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-export function voiceState(g: GameCore, npc: string): VoiceState {
-  const top = Object.entries(g.save.killed).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => FOE_NAME(k));
-  return {
-    area: g.room?.def.title || g.biome?.name || 'Ivoria',
-    abilities: RELICS.filter((r) => g.save.abilities[r.id]).map((r) => r.name),
-    kills: kills(g), foes: top, boss: boss(g), maxHp: g.save.maxHp,
-    blade: Number(g.flag('blade')) || 0, paste: !!g.flag('paste'), brush: String(g.flag('brush-colour') ?? 'blue'),
-    met: !!g.flag('met-' + npc),
-  };
-}
-
 // ---------------------------------------------------------------- conversation
 export interface Choice { id: string; label: string; hint?: string }
 /** What the dialogue box offers a conversation script. Every method resolves false/null once the player closes it. */
@@ -171,19 +157,8 @@ export interface TalkHost {
   readonly closed: boolean;
   say(text: string): Promise<boolean>;
   choose(options: Choice[]): Promise<string | null>;
-  /** An AI greeting for this visit, or null (no voice, already greeted, or too slow). */
-  greeting(): Promise<string | null>;
-  /** Runs the Ask flow (presets, typing, the AI reply). Hidden when there is no voice. */
-  canAsk(): boolean;
-  ask(): Promise<boolean>;
   shop(): Promise<boolean>;
 }
-
-export const ASK_PRESETS: Record<string, string[]> = {
-  derek: ['What is the Film?', 'Where should I go next?', 'Tell me about the Order.'],
-  pip: ['Where do you come from?', 'Heard any rumours?', 'What is your best ware?'],
-  warden: ['Who is Mother Calculus?', 'How long have you stood guard?', 'Any advice before the gates?'],
-};
 
 export async function converse(h: TalkHost) {
   const { g, npc } = h, s = SCRIPTS[npc]; if (!s) return;
@@ -192,8 +167,7 @@ export async function converse(h: TalkHost) {
     for (const line of s.first) if (!(await h.say(line))) { if (s.first.indexOf(line) >= 2) g.setFlag(metKey, true); return; }
     g.setFlag(metKey, true); g.persist();
   } else {
-    const ai = await h.greeting(); if (h.closed) return;
-    if (!(await h.say(ai ?? pick(g, npc, s.greet)))) return;
+    if (!(await h.say(pick(g, npc, s.greet)))) return;
   }
   const usedTopics = new Set<string>();
   for (;;) {
@@ -201,14 +175,12 @@ export async function converse(h: TalkHost) {
     if (npc === 'pip') opts.push({ id: 'shop', label: 'Browse wares' });
     opts.push({ id: 'talk', label: 'Talk' });
     for (const tp of s.topics) if (tp.lines.some((l) => !l.when || l.when(g))) opts.push({ id: 'topic:' + tp.id, label: tp.label, hint: usedTopics.has(tp.id) ? 'heard' : undefined });
-    if (h.canAsk()) opts.push({ id: 'ask', label: 'Ask…', hint: 'Claude' });
     opts.push({ id: 'bye', label: 'Farewell' });
     const c = await h.choose(opts); if (c === null) return;
     if (c === 'bye') { await h.say(pick(g, npc + ':bye', s.bye)); return; }
     let ok = true;
     if (c === 'talk') ok = await h.say(pick(g, npc, s.idle));
     else if (c === 'shop') ok = await h.shop();
-    else if (c === 'ask') ok = await h.ask();
     else if (c.startsWith('topic:')) { const tp = s.topics.find((x) => 'topic:' + x.id === c)!; usedTopics.add(tp.id); ok = await h.say(pick(g, npc + ':' + tp.id, tp.lines)); }
     if (!ok) return;
   }
@@ -220,7 +192,6 @@ export function allLines(npc: string): string[] {
   for (const l of [...s.greet, ...s.idle, ...s.topics.flatMap((t) => t.lines)]) if (typeof l.text === 'string') out.push(l.text);
   return out;
 }
-export const fallbackLine = (npc: string) => { const f = PERSONAS[npc]?.fallback ?? ['...']; return f[Math.floor(Math.random() * f.length)]; };
 
 // ---------------------------------------------------------------- Pip's wares
 export interface Ware {

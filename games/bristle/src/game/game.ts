@@ -17,9 +17,9 @@ import { rewardOnce, XP } from './xp';
 const SAVE_KEY = 'bristle-save-v1';
 /** Difficulty tuning. Gentle forgives, Veteran punishes. */
 export const DIFFICULTY = [
-  { name: 'Gentle', enemyHp: 0.7, extraDamage: 0, invuln: 1.8, fluor: 1.3, focus: 0.75, xp: 1.0 },
-  { name: 'Knight', enemyHp: 1.0, extraDamage: 0, invuln: 1.3, fluor: 1.0, focus: 1.0, xp: 1.0 },
-  { name: 'Veteran', enemyHp: 1.35, extraDamage: 1, invuln: 1.0, fluor: 0.85, focus: 1.25, xp: 1.25 },
+  { name: 'Gentle', hp: 2, enemyHp: 0.7, extraDamage: 0, invuln: 1.8, fluor: 1.3, focus: 0.75, xp: 1.0 },
+  { name: 'Knight', hp: 0, enemyHp: 1.0, extraDamage: 0, invuln: 1.3, fluor: 1.0, focus: 1.0, xp: 1.0 },
+  { name: 'Veteran', hp: 0, enemyHp: 1.35, extraDamage: 1, invuln: 1.0, fluor: 0.85, focus: 1.25, xp: 1.25 },
 ];
 export const START_ROOM = 'crown-gate';
 
@@ -27,7 +27,7 @@ export function freshSave(): SaveData {
   return {
     v: 1, room: START_ROOM, door: '@', maxHp: 5, hp: 5, fluor: 0, shine: 0,
     abilities: { dash: false, grip: false, rinse: false, pulse: false }, flags: {}, killed: {}, visited: {},
-    settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, aiVoices: true, difficulty: 1, brightness: 0.85 }, playTime: 0,
+    settings: { master: 0.8, music: 0.6, sfx: 0.9, shake: 1, quality: 1, difficulty: 1, brightness: 0.85 }, playTime: 0,
     progress: { xp: 0, level: 1, points: 0, mastery: { plaque: 0, sugar: 0, tartar: 0, gum: 0 }, perks: [] },
   };
 }
